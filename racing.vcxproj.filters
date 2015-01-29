@@ -1,0 +1,112 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="headers">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="shaders">
+      <UniqueIdentifier>{7d868029-a1b2-4947-845c-0cc9c5965503}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="headers\math">
+      <UniqueIdentifier>{a593109b-a6bc-4c84-bca7-dbc21385bef9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="headers\render">
+      <UniqueIdentifier>{5c4afc79-56ec-412c-a69a-a42d6642968a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="headers\physics">
+      <UniqueIdentifier>{967b7297-0683-49eb-83c7-b8fe2adb282f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="headers\objects">
+      <UniqueIdentifier>{7d5cd4d4-9397-4d20-80d1-6d6ea2464be6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\objects">
+      <UniqueIdentifier>{71c06bf6-cdf2-47ad-acd1-266d58ff09b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\render">
+      <UniqueIdentifier>{c0390752-da19-4f33-8ee2-17247010b60b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\physics">
+      <UniqueIdentifier>{31ddf7a2-5726-4466-a12d-53e88545b723}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\game.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\objects\track.cpp">
+      <Filter>src\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\shader.cpp">
+      <Filter>src\render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\render.cpp">
+      <Filter>src\render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\physics\physics.cpp">
+      <Filter>src\physics</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\debug.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\error.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mem.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\math\mat4f.h">
+      <Filter>headers\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\math\vec3f.h">
+      <Filter>headers\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\render.h">
+      <Filter>headers\render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\shader.h">
+      <Filter>headers\render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\window.h">
+      <Filter>headers\render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\physics\physics.h">
+      <Filter>headers\physics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\objects\track.h">
+      <Filter>headers\objects</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\solid.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\solid.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\textured.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\textured.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\wiref.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\wiref.vert">
+      <Filter>shaders</Filter>
+    </None>
+  </ItemGroup>
+</Project>
