@@ -12,7 +12,7 @@
 */
 static inline void debug_printvec3f(vec3f v)
 {
-	printf("X:%f, Y:%f, Z:%f\n", v[X], v[Y], v[Z]);
+	printf("X:%f, Y:%f, Z:%f\n", v[VX], v[VY], v[VZ]);
 }
 
 /*	print a matrix to console

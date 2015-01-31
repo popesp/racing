@@ -5,9 +5,9 @@
 #include	<math.h>						// sqrtf
 
 
-#define	X	0
-#define	Y	1
-#define	Z	2
+#define	VX	0
+#define	VY	1
+#define	VZ	2
 
 
 typedef float vec3f[3];
@@ -21,9 +21,9 @@ typedef float vec3f[3];
 */
 static void vec3f_set(vec3f v, float x, float y, float z)
 {
-	v[X] = x;
-	v[Y] = y;
-	v[Z] = z;
+	v[VX] = x;
+	v[VY] = y;
+	v[VZ] = z;
 }
 
 /*	copy vector
@@ -32,9 +32,9 @@ static void vec3f_set(vec3f v, float x, float y, float z)
 */
 static void vec3f_copy(vec3f dst, vec3f src)
 {
-	dst[X] = src[X];
-	dst[Y] = src[Y];
-	dst[Z] = src[Z];
+	dst[VX] = src[VX];
+	dst[VY] = src[VY];
+	dst[VZ] = src[VZ];
 }
 
 
@@ -45,9 +45,9 @@ static void vec3f_copy(vec3f dst, vec3f src)
 */
 static void vec3f_addn(vec3f res, vec3f v0, vec3f v1)
 {
-	res[X] = v0[X] + v1[X];
-	res[Y] = v0[Y] + v1[Y];
-	res[Z] = v0[Z] + v1[Z];
+	res[VX] = v0[VX] + v1[VX];
+	res[VY] = v0[VY] + v1[VY];
+	res[VZ] = v0[VZ] + v1[VZ];
 }
 
 /*	add vector to other vector
@@ -66,9 +66,9 @@ static void vec3f_add(vec3f v0, vec3f v1)
 */
 static void vec3f_subtractn(vec3f res, vec3f v0, vec3f v1)
 {
-	res[X] = v0[X] - v1[X];
-	res[Y] = v0[Y] - v1[Y];
-	res[Z] = v0[Z] - v1[Z];
+	res[VX] = v0[VX] - v1[VX];
+	res[VY] = v0[VY] - v1[VY];
+	res[VZ] = v0[VZ] - v1[VZ];
 }
 
 /*	subtract vector from other vector
@@ -88,7 +88,7 @@ static void vec3f_subtract(vec3f v0, vec3f v1)
 */
 static float vec3f_dot(vec3f v0, vec3f v1)
 {
-	return v0[X] * v1[X] + v0[Y] * v1[Y] + v0[Z] * v1[Z];
+	return v0[VX] * v1[VX] + v0[VY] * v1[VY] + v0[VZ] * v1[VZ];
 }
 
 /*	find squared length of vector
@@ -117,9 +117,9 @@ static float vec3f_length(vec3f v)
 */
 static void vec3f_scalen(vec3f res, vec3f v, float s)
 {
-	res[X] = v[X] * s;
-	res[Y] = v[Y] * s;
-	res[Z] = v[Z] * s;
+	res[VX] = v[VX] * s;
+	res[VY] = v[VY] * s;
+	res[VZ] = v[VZ] * s;
 }
 
 /*	scale vector by a scalar
@@ -156,9 +156,9 @@ static void vec3f_normalize(vec3f v)
 */
 static void vec3f_negaten(vec3f res, vec3f v)
 {
-	res[X] = -v[X];
-	res[Y] = -v[Y];
-	res[Z] = -v[Z];
+	res[VX] = -v[VX];
+	res[VY] = -v[VY];
+	res[VZ] = -v[VZ];
 }
 
 /*	negate vector
@@ -177,9 +177,9 @@ static void vec3f_negate(vec3f v)
 */
 static void vec3f_cross(vec3f res, vec3f v0, vec3f v1)
 {
-	res[X] = v0[Y] * v1[Z] - v0[Z] * v1[Y];
-	res[Y] = v0[Z] * v1[X] - v0[X] * v1[Z];
-	res[Z] = v0[X] * v1[Y] - v0[Y] * v1[X];
+	res[VX] = v0[VY] * v1[VZ] - v0[VZ] * v1[VY];
+	res[VY] = v0[VZ] * v1[VX] - v0[VX] * v1[VZ];
+	res[VZ] = v0[VX] * v1[VY] - v0[VY] * v1[VX];
 }
 
 
@@ -212,9 +212,9 @@ static void vec3f_reflectn(vec3f res, vec3f v0, vec3f v1)
 {
 	float a = 2.f*vec3f_dot(v0, v1);
 
-	res[X] = v1[X] * a - v0[X];
-	res[Y] = v1[Y] * a - v0[Y];
-	res[Z] = v1[Z] * a - v0[Z];
+	res[VX] = v1[VX] * a - v0[VX];
+	res[VY] = v1[VY] * a - v0[VY];
+	res[VZ] = v1[VZ] * a - v0[VZ];
 }
 
 /*	reflect vector around unit vector

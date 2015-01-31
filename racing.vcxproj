@@ -75,6 +75,7 @@
   <ItemGroup>
     <ClCompile Include="src\game.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\objects\cart.cpp" />
     <ClCompile Include="src\objects\track.cpp" />
     <ClCompile Include="src\physics\physics.cpp" />
     <ClCompile Include="src\render\render.cpp" />
@@ -87,6 +88,7 @@
     <ClInclude Include="src\math\mat4f.h" />
     <ClInclude Include="src\math\vec3f.h" />
     <ClInclude Include="src\mem.h" />
+    <ClInclude Include="src\objects\cart.h" />
     <ClInclude Include="src\objects\track.h" />
     <ClInclude Include="src\physics\physics.h" />
     <ClInclude Include="src\render\render.h" />

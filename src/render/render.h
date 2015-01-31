@@ -137,7 +137,7 @@ struct renderer
 };
 
 
-void renderable_init(struct renderable*, unsigned, unsigned char, unsigned char);
+void renderable_init(struct renderable*, unsigned char, unsigned char, unsigned char);
 void renderable_allocate(struct renderer*, struct renderable*, unsigned);
 void renderable_deallocate(struct renderable*);
 

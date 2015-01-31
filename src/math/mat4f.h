@@ -561,9 +561,9 @@ static void mat4f_invert(mat4f m)
 */
 static void mat4f_fulltransformvec3fn(vec3f res, vec3f v, mat4f m)
 {
-	res[X] = m[R0 + C0] * v[X] + m[R0 + C1] * v[Y] + m[R0 + C2] * v[Z] + m[R0 + C3];
-	res[Y] = m[R1 + C0] * v[X] + m[R1 + C1] * v[Y] + m[R1 + C2] * v[Z] + m[R1 + C3];
-	res[Z] = m[R2 + C0] * v[X] + m[R2 + C1] * v[Y] + m[R2 + C2] * v[Z] + m[R2 + C3];
+	res[VX] = m[R0 + C0] * v[VX] + m[R0 + C1] * v[VY] + m[R0 + C2] * v[VZ] + m[R0 + C3];
+	res[VY] = m[R1 + C0] * v[VX] + m[R1 + C1] * v[VY] + m[R1 + C2] * v[VZ] + m[R1 + C3];
+	res[VZ] = m[R2 + C0] * v[VX] + m[R2 + C1] * v[VY] + m[R2 + C2] * v[VZ] + m[R2 + C3];
 }
 
 /*	transform a vector by a matrix with translation
@@ -585,9 +585,9 @@ static void mat4f_fulltransformvec3f(vec3f v, mat4f m)
 */
 static void mat4f_transformvec3fn(vec3f res, vec3f v, mat4f m)
 {
-	res[X] = m[R0 + C0] * v[X] + m[R0 + C1] * v[Y] + m[R0 + C2] * v[Z];
-	res[Y] = m[R1 + C0] * v[X] + m[R1 + C1] * v[Y] + m[R1 + C2] * v[Z];
-	res[Z] = m[R2 + C0] * v[X] + m[R2 + C1] * v[Y] + m[R2 + C2] * v[Z];
+	res[VX] = m[R0 + C0] * v[VX] + m[R0 + C1] * v[VY] + m[R0 + C2] * v[VZ];
+	res[VY] = m[R1 + C0] * v[VX] + m[R1 + C1] * v[VY] + m[R1 + C2] * v[VZ];
+	res[VZ] = m[R2 + C0] * v[VX] + m[R2 + C1] * v[VY] + m[R2 + C2] * v[VZ];
 }
 
 /*	transform a vector by a matrix without translation

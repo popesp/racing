@@ -4,6 +4,7 @@
 #include	"../math/mat4f.h"		// identity
 #include	"../math/vec3f.h"		// set, normalize
 #include	"../mem.h"				// free
+#include	"../physics/physics.h"
 #include	"../render/render.h"	// renderable: init, allocate, deallocate
 
 
@@ -12,7 +13,7 @@ static vec3f segment_pos[TRACK_SEGMENT_VERTCOUNT] = {
 	{ 0.5f, 1.f, 0.f },
 	{ 1.f, 1.f, 0.f },
 	{ 1.f, -2.f, 0.f },
-	{ -5.f, -2.f, 0.f } };
+	{ -2.5f, -2.f, 0.f } };
 
 static vec3f segment_nor[TRACK_SEGMENT_VERTCOUNT] = {
 	{ 0.f, 1.f, 0.f },
@@ -76,9 +77,9 @@ static void curvepoint(struct track* t, unsigned index, float d, struct track_po
 	dt1 = (d3 - d2)*p1->weight;
 
 	// solve curve for position
-	res->pos[X] = dp0*p0->pos[X] + dp1*p1->pos[X] + dt0*p0->tan[X] + dt1*p1->tan[X];
-	res->pos[Y] = dp0*p0->pos[Y] + dp1*p1->pos[Y] + dt0*p0->tan[Y] + dt1*p1->tan[Y];
-	res->pos[Z] = dp0*p0->pos[Z] + dp1*p1->pos[Z] + dt0*p0->tan[Z] + dt1*p1->tan[Z];
+	res->pos[VX] = dp0*p0->pos[VX] + dp1*p1->pos[VX] + dt0*p0->tan[VX] + dt1*p1->tan[VX];
+	res->pos[VY] = dp0*p0->pos[VY] + dp1*p1->pos[VY] + dt0*p0->tan[VY] + dt1*p1->tan[VY];
+	res->pos[VZ] = dp0*p0->pos[VZ] + dp1*p1->pos[VZ] + dt0*p0->tan[VZ] + dt1*p1->tan[VZ];
 
 	// cubic interpolation for angle and width attributes
 	res->angle = dp0*p0->angle + dp1*p1->angle;
@@ -91,9 +92,9 @@ static void curvepoint(struct track* t, unsigned index, float d, struct track_po
 	dt1 = (3.f*d2 - 2.f*d)*p1->weight;
 
 	// solve curve for tangent
-	res->tan[X] = dp0*p0->pos[X] + dp1*p1->pos[X] + dt0*p0->tan[X] + dt1*p1->tan[X];
-	res->tan[Y] = dp0*p0->pos[Y] + dp1*p1->pos[Y] + dt0*p0->tan[Y] + dt1*p1->tan[Y];
-	res->tan[Z] = dp0*p0->pos[Z] + dp1*p1->pos[Z] + dt0*p0->tan[Z] + dt1*p1->tan[Z];
+	res->tan[VX] = dp0*p0->pos[VX] + dp1*p1->pos[VX] + dt0*p0->tan[VX] + dt1*p1->tan[VX];
+	res->tan[VY] = dp0*p0->pos[VY] + dp1*p1->pos[VY] + dt0*p0->tan[VY] + dt1*p1->tan[VY];
+	res->tan[VZ] = dp0*p0->pos[VZ] + dp1*p1->pos[VZ] + dt0*p0->tan[VZ] + dt1*p1->tan[VZ];
 
 	// normalize tangent vector
 	res->weight = vec3f_length(res->tan);
@@ -147,9 +148,9 @@ static float* addverts(struct track* t, struct track_point* p, float* vptr)
 	{
 		// positions
 		vec3f_copy(p0, segment_pos[i]);
-		p0[X] = p0[X] + p->width*0.5f;
+		p0[VX] = p0[VX] + p->width*0.5f;
 		vec3f_copy(p1, segment_pos[i - 1]);
-		p1[X] = p1[X] + p->width*0.5f;
+		p1[VX] = p1[VX] + p->width*0.5f;
 
 		// fill buffer
 		vptr = fillbuffer(vptr, basis, p0, p1, segment_nor[i], segment_nor[i]);
@@ -159,14 +160,14 @@ static float* addverts(struct track* t, struct track_point* p, float* vptr)
 
 	// positions
 	vec3f_copy(p0, segment_pos[0]);
-	p0[X] = p0[X] + p->width*0.5f;
+	p0[VX] = p0[VX] + p->width*0.5f;
 	vec3f_copy(p1, segment_pos[0]);
-	p1[X] = -1.f*(p1[X] + p->width*0.5f);
+	p1[VX] = -1.f*(p1[VX] + p->width*0.5f);
 
 	// normals
 	vec3f_copy(n0, segment_nor[0]);
 	vec3f_copy(n1, segment_nor[0]);
-	n1[X] *= -1.f;
+	n1[VX] *= -1.f;
 
 	vptr = fillbuffer(vptr, basis, p0, p1, n0, n1);
 
@@ -175,13 +176,13 @@ static float* addverts(struct track* t, struct track_point* p, float* vptr)
 	{
 		// positions
 		vec3f_copy(p0, segment_pos[i]);
-		p0[X] = -1.f*(p0[X] + p->width*0.5f);
+		p0[VX] = -1.f*(p0[VX] + p->width*0.5f);
 		vec3f_copy(p1, segment_pos[i + 1]);
-		p1[X] = -1.f*(p1[X] + p->width*0.5f);
+		p1[VX] = -1.f*(p1[VX] + p->width*0.5f);
 
 		// normals
 		vec3f_copy(n0, segment_nor[i + 1]);
-		n0[X] *= -1.f;
+		n0[VX] *= -1.f;
 
 		// fill buffer
 		vptr = fillbuffer(vptr, basis, p0, p1, n0, n0);

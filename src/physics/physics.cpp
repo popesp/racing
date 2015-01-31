@@ -1,6 +1,7 @@
 #include	"physics.h"
 
 #include	<PxPhysicsAPI.h>
+#include	"../math/vec3f.h"
 #include	"../mem.h"
 #include	"../render/render.h"
 
@@ -41,10 +42,25 @@ void physics_update(struct physicsmanager* pm, float dt)
 
 void physics_shutdown(struct physicsmanager* pm)
 {
+	pm->scene->release();
+	pm->default_material->release();
+
+	pm->cooking->release();
+
 	pm->sdk->release();
 	pm->foundation->release();
 }
 
+
+PxRigidDynamic* physics_adddynamic_box(struct physicsmanager* pm, vec3f pos, vec3f dim)
+{
+	PxRigidDynamic* actor;
+
+	actor = PxCreateDynamic(*pm->sdk, PxTransform(pos[VX], pos[VY], pos[VZ]), PxBoxGeometry(dim[VX], dim[VY], dim[VZ]), *pm->default_material, 1.f);
+	pm->scene->addActor(*actor);
+
+	return actor;
+}
 
 void physics_addstatic_trianglestrip(struct physicsmanager* pm, unsigned num_verts, unsigned stride, float* buf_verts)
 {

@@ -7,7 +7,8 @@
 #include	"error.h"				// PRINT_ERROR
 #include	"math/mat4f.h"			// identity TEMPORARY
 #include	"math/vec3f.h"			// set TEMPORARY
-#include	"objects/track.h"		// init
+#include	"objects/cart.h"		// init, generatemesh
+#include	"objects/track.h"		// init, generatemesh
 #include	"physics/physics.h"		// startup, shutdown
 #include	"render/render.h"		// renderer: init
 #include	"render/window.h"		// init, resize
@@ -141,7 +142,11 @@ static void update(struct game* game)
 	// check for callback events
 	glfwPollEvents();
 
-	physics_update(&game->physics, 1.f/60.f);
+	physics_update(&game->physics, 1.f/600.f);
+
+	physx::PxTransform playerT = game->player.p_cart->getGlobalPose();
+
+	printf("Player position: %f, %f, %f\n", playerT.p.x, playerT.p.y, playerT.p.z);
 
 	// check for window close messages
 	if (glfwWindowShouldClose(game->window.w))
@@ -150,7 +155,8 @@ static void update(struct game* game)
 
 static void render(struct game* game)
 {
-	mat4f modelview;
+	mat4f modelview, player;
+	physx::PxMat44 player_world(game->player.p_cart->getGlobalPose());
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -161,6 +167,10 @@ static void render(struct game* game)
 
 	// render track
 	renderable_render(&game->renderer, &game->track.r_track, modelview, 0);
+
+	// render player
+	mat4f_multiplyn(player, modelview, (float*)&player_world.column0);
+	renderable_render(&game->renderer, &game->player.r_cart, player, 0);
 
 	// render control points
 	glClear(GL_DEPTH_BUFFER_BIT);
@@ -316,17 +326,26 @@ int game_startup(struct game* game)
 	renderable_sendbuffer(&game->renderer, &game->track.r_controlpoints);
 	renderable_sendbuffer(&game->renderer, &game->track.r_curve);
 
+	vec3f_set(pos, -12.5f, 2.f, 5.f);
+	cart_init(&game->player, &game->physics, pos);
+
+	cart_generatemesh(&game->renderer, &game->player);
+	renderable_sendbuffer(&game->renderer, &game->player.r_cart);
+
 	// light position in model space
 	vec3f_set(game->track_lights[0].pos, 0.f, 10.f, 0.f);
 	vec3f_set(game->track_lights[0].dif, 2.f, 2.f, 2.f);
 	vec3f_set(game->track_lights[0].spc, 2.f, 2.f, 2.f);
 
-	vec3f_set(game->track_lights[1].pos, 0.f, 5.f, -5.f);
+	vec3f_set(game->track_lights[1].pos, -15.f, 5.f, -5.f);
 	vec3f_set(game->track_lights[1].dif, 1.f, 2.f, 1.2f);
 	vec3f_set(game->track_lights[1].spc, 1.f, 2.f, 1.2f);
 
 	game->track.r_track.lights[0] = game->track_lights + 0;
 	game->track.r_track.lights[1] = game->track_lights + 1;
+
+	game->player.r_cart.lights[0] = game->track_lights + 0;
+	game->player.r_cart.lights[1] = game->track_lights + 1;
 
 	game->rotx = 20.f;
 	game->roty = 0.f;

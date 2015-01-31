@@ -2,16 +2,17 @@
 #define	GAME
 
 
-#include	"physics/physics.h"
 #include	"objects/track.h"
+#include	"objects/cart.h"
+#include	"physics/physics.h"
 #include	"render/window.h"
 #include	"render/render.h"
 
 
 #define	GAME_DEFAULT_WIDTH		600
 #define	GAME_DEFAULT_HEIGHT		400
-#define	GAME_DEFAULT_X			100
-#define	GAME_DEFAULT_Y			100
+#define	GAME_DEFAULT_X			400
+#define	GAME_DEFAULT_Y			400
 
 #define	GAME_TITLE				"Racing Game"
 
@@ -45,6 +46,8 @@ struct game
 	struct physicsmanager physics;
 
 	struct track track;
+
+	struct cart player;
 
 	struct light track_lights[2];
 

@@ -3,9 +3,10 @@
 
 
 #include	<PxPhysicsAPI.h>
+#include	"../math/vec3f.h"
 
 
-#define	PHYSICS_DEFAULT_GRAVITY	0.f, -1.f, 0.f
+#define	PHYSICS_DEFAULT_GRAVITY	0.f, -10.f, 0.f
 
 
 struct physicsmanager
@@ -27,6 +28,7 @@ void physics_startup(struct physicsmanager*);
 void physics_update(struct physicsmanager*, float);
 void physics_shutdown(struct physicsmanager*);
 
+physx::PxRigidDynamic* physics_adddynamic_box(struct physicsmanager*, vec3f, vec3f);
 void physics_addstatic_trianglestrip(struct physicsmanager*, unsigned, unsigned, float*);
 
 

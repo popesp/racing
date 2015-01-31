@@ -25,7 +25,7 @@ static inline void attrib(unsigned index, int size, int vsize, int offs)
 	param:	type			type of renderable object
 	param:	flags			flags for the renderable object
 */
-void renderable_init(struct renderable* obj, unsigned mode, unsigned char type, unsigned char flags)
+void renderable_init(struct renderable* obj, unsigned char mode, unsigned char type, unsigned char flags)
 {
 	int i;
 

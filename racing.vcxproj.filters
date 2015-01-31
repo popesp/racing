@@ -53,6 +53,9 @@
     <ClCompile Include="src\physics\physics.cpp">
       <Filter>src\physics</Filter>
     </ClCompile>
+    <ClCompile Include="src\objects\cart.cpp">
+      <Filter>src\objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\debug.h">
@@ -86,6 +89,9 @@
       <Filter>headers\physics</Filter>
     </ClInclude>
     <ClInclude Include="src\objects\track.h">
+      <Filter>headers\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\objects\cart.h">
       <Filter>headers\objects</Filter>
     </ClInclude>
   </ItemGroup>
