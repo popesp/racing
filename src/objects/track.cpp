@@ -35,10 +35,10 @@ void track_init(struct track* t, vec3f up, struct physicsmanager* pm, unsigned c
 	renderable_init(&t->r_curve, RENDER_MODE_LINESTRIP, RENDER_TYPE_WIREF, RENDER_FLAG_NONE);
 
 	// initialize material properties
-	vec3f_set(t->r_track.material.amb, 0.1f, 0.15f, 0.2f);
-	vec3f_set(t->r_track.material.dif, 0.1f, 0.15f, 0.2f);
-	vec3f_set(t->r_track.material.spc, 0.2f, 0.2f, 0.2f);
-	t->r_track.material.shn = 100.f;
+	vec3f_set(t->r_track.material.amb, 0.5f, 0.6f, 0.7f);
+	vec3f_set(t->r_track.material.dif, 0.4f, 0.5f, 0.6f);
+	vec3f_set(t->r_track.material.spc, 0.8f, 0.8f, 0.8f);
+	t->r_track.material.shn = 1000.f;
 
 	vec3f_copy(t->up, up);
 

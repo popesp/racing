@@ -3,6 +3,7 @@
 #include	<PxPhysicsAPI.h>
 #include	"../math/vec3f.h"
 #include	"../mem.h"
+#include	"../objects/cart.h"
 #include	"../render/render.h"
 
 
@@ -11,14 +12,24 @@ using namespace physx;
 
 void physics_startup(struct physicsmanager* pm)
 {
+	PxTolerancesScale scale;
+
 	// initialize foundation object
 	pm->foundation = PxCreateFoundation(PX_PHYSICS_VERSION, pm->default_alloc, pm->default_error);
 	
 	// initialize the top-level physics object
-	pm->sdk = PxCreateBasePhysics(PX_PHYSICS_VERSION, *pm->foundation, PxTolerancesScale(), false);
+	pm->sdk = PxCreateBasePhysics(PX_PHYSICS_VERSION, *pm->foundation, scale, false);
 
 	// initialize mesh cooking object
-	pm->cooking = PxCreateCooking(PX_PHYSICS_VERSION, *pm->foundation, PxCookingParams(pm->sdk->getTolerancesScale()));
+	PxCookingParams params(scale);
+	params.meshWeldTolerance = 0.01f;
+	params.meshPreprocessParams = PxMeshPreprocessingFlags(PxMeshPreprocessingFlag::eWELD_VERTICES | PxMeshPreprocessingFlag::eREMOVE_UNREFERENCED_VERTICES | PxMeshPreprocessingFlag::eREMOVE_DUPLICATED_TRIANGLES);
+	pm->cooking = PxCreateCooking(PX_PHYSICS_VERSION, *pm->foundation, params);
+
+	// setup vehicle sdk
+	PxInitVehicleSDK(*pm->sdk);
+	PxVehicleSetBasisVectors(PxVec3(CART_UP), PxVec3(CART_FORWARD));
+	PxVehicleSetUpdateMode(PxVehicleUpdateMode::eVELOCITY_CHANGE);
 
 	// for particle effects
 	//PxRegisterParticles(*pm->sdk);
@@ -27,7 +38,7 @@ void physics_startup(struct physicsmanager* pm)
 	pm->default_material = pm->sdk->createMaterial(0.5f, 0.5f, 0.1f);
 
 	// create the scene for simulation
-	PxSceneDesc scenedesc(pm->sdk->getTolerancesScale());
+	PxSceneDesc scenedesc(scale);
 	scenedesc.gravity = PxVec3(PHYSICS_DEFAULT_GRAVITY);
 	scenedesc.cpuDispatcher = PxDefaultCpuDispatcherCreate(1);
 	scenedesc.filterShader = PxDefaultSimulationFilterShader;
@@ -45,12 +56,23 @@ void physics_shutdown(struct physicsmanager* pm)
 	pm->scene->release();
 	pm->default_material->release();
 
+	PxCloseVehicleSDK();
+
 	pm->cooking->release();
 
 	pm->sdk->release();
 	pm->foundation->release();
 }
 
+
+//static void create_cart_data(float chassis_mass, PxConvexMesh* chassis_mesh
+
+PxRigidDynamic* physics_addcart(struct physicsmanager* pm, vec3f pos)
+{
+	PxRigidDynamic* cart;
+
+	return cart;
+}
 
 PxRigidDynamic* physics_adddynamic_box(struct physicsmanager* pm, vec3f pos, vec3f dim)
 {
@@ -79,8 +101,15 @@ void physics_addstatic_trianglestrip(struct physicsmanager* pm, unsigned num_ver
 	for (i = 0; i < num_verts-2; i++)
 	{
 		*(ptr++) = i;
-		*(ptr++) = i+1;
-		*(ptr++) = i+2;
+		if (i&1)
+		{
+			*(ptr++) = i+2;
+			*(ptr++) = i+1;
+		} else
+		{
+			*(ptr++) = i+1;
+			*(ptr++) = i+2;
+		}
 	}
 
 	// initialize mesh description
@@ -90,6 +119,8 @@ void physics_addstatic_trianglestrip(struct physicsmanager* pm, unsigned num_ver
 	meshdesc.triangles.count = num_verts - 2;
 	meshdesc.triangles.stride = 3 * sizeof(int);
 	meshdesc.triangles.data = indices;
+
+	bool test = pm->cooking->validateTriangleMesh(meshdesc);
 
 	// cook mesh
 	pm->cooking->cookTriangleMesh(meshdesc, writebuf);

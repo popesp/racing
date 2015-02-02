@@ -72,10 +72,11 @@ void renderable_init(struct renderable* obj, unsigned char mode, unsigned char t
 		attrib(RENDER_ATTRIB_NOR, RENDER_ATTRIBSIZE_NOR, RENDER_VERTSIZE_SOLID, RENDER_ATTRIBSIZE_POS);
 		break;
 
-	case RENDER_TYPE_TXTRD:
-		attrib(RENDER_ATTRIB_POS, RENDER_ATTRIBSIZE_POS, RENDER_VERTSIZE_TXTRD, 0);
-		attrib(RENDER_ATTRIB_NOR, RENDER_ATTRIBSIZE_NOR, RENDER_VERTSIZE_TXTRD, RENDER_ATTRIBSIZE_POS);
-		attrib(RENDER_ATTRIB_TEX, RENDER_ATTRIBSIZE_TEX, RENDER_VERTSIZE_TXTRD, RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_NOR);
+	case RENDER_TYPE_BUMPM:
+		attrib(RENDER_ATTRIB_POS, RENDER_ATTRIBSIZE_POS, RENDER_VERTSIZE_BUMPM, 0);
+		attrib(RENDER_ATTRIB_NOR, RENDER_ATTRIBSIZE_NOR, RENDER_VERTSIZE_BUMPM, RENDER_ATTRIBSIZE_POS);
+		attrib(RENDER_ATTRIB_TAN, RENDER_ATTRIBSIZE_TAN, RENDER_VERTSIZE_BUMPM, RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_NOR);
+		attrib(RENDER_ATTRIB_TEX, RENDER_ATTRIBSIZE_TEX, RENDER_VERTSIZE_BUMPM, RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_NOR + RENDER_ATTRIBSIZE_TAN);
 		break;
 
 	default:
@@ -94,6 +95,17 @@ void renderable_init(struct renderable* obj, unsigned char mode, unsigned char t
 	obj->material.shn = RENDER_DEFAULT_MATERIAL_SHN;
 
 	obj->ambient = NULL;
+
+	glGenTextures(RENDER_TEXTURE_TYPES, obj->id_gl_textures);
+
+	for ( i = 0; i < RENDER_TEXTURE_TYPES; i++)
+	{
+		glBindTexture(GL_TEXTURE_2D, obj->id_gl_textures[i]);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	}
 
 	obj->flags = flags;
 	obj->type = type;
@@ -126,6 +138,14 @@ void renderable_allocate(struct renderer* r, struct renderable* obj, unsigned nu
 void renderable_deallocate(struct renderable* obj)
 {
 	mem_free(obj->buf_verts);
+}
+
+
+void renderable_settexture(struct renderable* obj, unsigned char type)
+{
+	glBindTexture(GL_TEXTURE_2D, obj->id_gl_textures[type]);
+
+	// set texture data
 }
 
 
@@ -170,6 +190,14 @@ void renderable_render(struct renderer* r, struct renderable* obj, mat4f modelvi
 		glUniformMatrix4fv(r->uniforms_wiref.transform, 1, GL_FALSE, transform);
 		break;
 
+	// bump mapping uses all of the uniforms below as well
+	case RENDER_TYPE_BUMPM:
+		int zero = 0;
+		glUniform1iv(r->uniforms_bumpm.tex_normal, 1, &zero);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, obj->id_gl_textures[RENDER_TEXTURE_NORMAL]);
+
 	case RENDER_TYPE_SOLID:
 		// MVP matrix and eye position uniforms
 		glUniformMatrix4fv(r->uniforms_solid.transform, 1, GL_FALSE, transform);
@@ -211,9 +239,6 @@ void renderable_render(struct renderer* r, struct renderable* obj, mat4f modelvi
 		glUniform1fv(r->uniforms_solid.material[RENDER_MATERIAL_SHN], 1, &obj->material.shn);
 		break;
 
-	case RENDER_TYPE_TXTRD:
-		break;
-
 	default:
 		break;
 	}
@@ -233,7 +258,7 @@ unsigned renderer_init(struct renderer* r, struct window* window)
 {
 	unsigned wirefvert, wireffrag;
 	unsigned solidvert, solidfrag;
-	unsigned txtrdvert, txtrdfrag;
+	unsigned bumpmvert, bumpmfrag;
 	char uniform[16];
 	unsigned i, len;
 
@@ -246,15 +271,15 @@ unsigned renderer_init(struct renderer* r, struct window* window)
 		return 0;
 	if (!(solidfrag = shader_create(RENDER_SHADER_SOLIDFRAG, SHADER_FRAGMENT)))
 		return 0;
-	if (!(txtrdvert = shader_create(RENDER_SHADER_TXTRDVERT, SHADER_VERTEX)))
+	if (!(bumpmvert = shader_create(RENDER_SHADER_BUMPMVERT, SHADER_VERTEX)))
 		return 0;
-	if (!(txtrdfrag = shader_create(RENDER_SHADER_TXTRDFRAG, SHADER_FRAGMENT)))
+	if (!(bumpmfrag = shader_create(RENDER_SHADER_BUMPMFRAG, SHADER_FRAGMENT)))
 		return 0;
 
 	// create shader programs
 	r->id_gl_wiref = shader_program(wirefvert, wireffrag);
 	r->id_gl_solid = shader_program(solidvert, solidfrag);
-	r->id_gl_txtrd = shader_program(txtrdvert, txtrdfrag);
+	r->id_gl_bumpm = shader_program(bumpmvert, bumpmfrag);
 
 	// bind attribute locations
 	glBindAttribLocation(r->id_gl_wiref, RENDER_ATTRIB_POS, "vertpos");
@@ -263,33 +288,36 @@ unsigned renderer_init(struct renderer* r, struct window* window)
 	glBindAttribLocation(r->id_gl_solid, RENDER_ATTRIB_POS, "vertpos");
 	glBindAttribLocation(r->id_gl_solid, RENDER_ATTRIB_NOR, "vertnor");
 
-	glBindAttribLocation(r->id_gl_txtrd, RENDER_ATTRIB_POS, "vertpos");
-	glBindAttribLocation(r->id_gl_txtrd, RENDER_ATTRIB_NOR, "vertnor");
-	glBindAttribLocation(r->id_gl_txtrd, RENDER_ATTRIB_TEX, "verttex");
+	glBindAttribLocation(r->id_gl_bumpm, RENDER_ATTRIB_POS, "vertpos");
+	glBindAttribLocation(r->id_gl_bumpm, RENDER_ATTRIB_NOR, "vertnor");
+	glBindAttribLocation(r->id_gl_bumpm, RENDER_ATTRIB_TAN, "verttan");
+	glBindAttribLocation(r->id_gl_bumpm, RENDER_ATTRIB_TEX, "verttex");
 
 	// link programs
 	if (!shader_link(r->id_gl_wiref))
 		return 0;
 	if (!shader_link(r->id_gl_solid))
 		return 0;
-	if (!shader_link(r->id_gl_txtrd))
+	if (!shader_link(r->id_gl_bumpm))
 		return 0;
 
 	// assign vertex sizes to each render type
 	r->vertsize[RENDER_TYPE_WIREF] = RENDER_VERTSIZE_WIREF;
 	r->vertsize[RENDER_TYPE_SOLID] = RENDER_VERTSIZE_SOLID;
-	r->vertsize[RENDER_TYPE_TXTRD] = RENDER_VERTSIZE_TXTRD;
+	r->vertsize[RENDER_TYPE_BUMPM] = RENDER_VERTSIZE_BUMPM;
 
 	// assign program ID's to render types
 	r->shader[RENDER_TYPE_WIREF] = r->id_gl_wiref;
 	r->shader[RENDER_TYPE_SOLID] = r->id_gl_solid;
-	r->shader[RENDER_TYPE_TXTRD] = r->id_gl_txtrd;
+	r->shader[RENDER_TYPE_BUMPM] = r->id_gl_bumpm;
 
 	// register window pointer
 	r->window = window;
 
+
 	// get wireframe uniform locations
 	r->uniforms_wiref.transform = glGetUniformLocation(r->id_gl_wiref, "transform");
+
 
 	// get solid uniform locations
 	r->uniforms_solid.transform = glGetUniformLocation(r->id_gl_solid, "transform");
@@ -315,13 +343,41 @@ unsigned renderer_init(struct renderer* r, struct window* window)
 	r->uniforms_solid.material[RENDER_MATERIAL_SPC] = glGetUniformLocation(r->id_gl_solid, "material.spc");
 	r->uniforms_solid.material[RENDER_MATERIAL_SHN] = glGetUniformLocation(r->id_gl_solid, "material.shn");
 
+
+	// get bump mapped uniform locations
+	r->uniforms_bumpm.transform = glGetUniformLocation(r->id_gl_bumpm, "transform");
+	r->uniforms_bumpm.eyepos = glGetUniformLocation(r->id_gl_bumpm, "eyepos");
+
+	for (i = 0; i < RENDER_MAX_LIGHTS; i++)
+	{
+		sprintf_s(uniform, 16, "lights[%d].", i);
+		len = strlen(uniform);
+
+		strcpy_s(uniform + len, 4, "pos");
+		r->uniforms_bumpm.lights[i][RENDER_LIGHT_POS] = glGetUniformLocation(r->id_gl_bumpm, uniform);
+		strcpy_s(uniform + len, 4, "dif");
+		r->uniforms_bumpm.lights[i][RENDER_LIGHT_DIF] = glGetUniformLocation(r->id_gl_bumpm, uniform);
+		strcpy_s(uniform + len, 4, "spc");
+		r->uniforms_bumpm.lights[i][RENDER_LIGHT_SPC] = glGetUniformLocation(r->id_gl_bumpm, uniform);
+	}
+
+	r->uniforms_bumpm.ambient = glGetUniformLocation(r->id_gl_bumpm, "ambient");
+
+	r->uniforms_bumpm.tex_normal = glGetUniformLocation(r->id_gl_bumpm, "tex_normal");
+
+	r->uniforms_bumpm.material[RENDER_MATERIAL_AMB] = glGetUniformLocation(r->id_gl_bumpm, "material.amb");
+	r->uniforms_bumpm.material[RENDER_MATERIAL_DIF] = glGetUniformLocation(r->id_gl_bumpm, "material.dif");
+	r->uniforms_bumpm.material[RENDER_MATERIAL_SPC] = glGetUniformLocation(r->id_gl_bumpm, "material.spc");
+	r->uniforms_bumpm.material[RENDER_MATERIAL_SHN] = glGetUniformLocation(r->id_gl_bumpm, "material.shn");
+
+
 	// flag shaders for deletion
 	shader_delete(wirefvert);
 	shader_delete(wireffrag);
 	shader_delete(solidvert);
 	shader_delete(solidfrag);
-	shader_delete(txtrdvert);
-	shader_delete(txtrdfrag);
+	shader_delete(bumpmvert);
+	shader_delete(bumpmfrag);
 
 	return 1;
 }

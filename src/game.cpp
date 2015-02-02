@@ -146,8 +146,6 @@ static void update(struct game* game)
 
 	physx::PxTransform playerT = game->player.p_cart->getGlobalPose();
 
-	printf("Player position: %f, %f, %f\n", playerT.p.x, playerT.p.y, playerT.p.z);
-
 	// check for window close messages
 	if (glfwWindowShouldClose(game->window.w))
 		game->flags |= GAME_FLAG_TERMINATED;
@@ -326,20 +324,20 @@ int game_startup(struct game* game)
 	renderable_sendbuffer(&game->renderer, &game->track.r_controlpoints);
 	renderable_sendbuffer(&game->renderer, &game->track.r_curve);
 
-	vec3f_set(pos, -12.5f, 2.f, 5.f);
+	vec3f_set(pos, 10.f, 10.f, -40.f);
 	cart_init(&game->player, &game->physics, pos);
 
 	cart_generatemesh(&game->renderer, &game->player);
 	renderable_sendbuffer(&game->renderer, &game->player.r_cart);
 
 	// light position in model space
-	vec3f_set(game->track_lights[0].pos, 0.f, 10.f, 0.f);
-	vec3f_set(game->track_lights[0].dif, 2.f, 2.f, 2.f);
-	vec3f_set(game->track_lights[0].spc, 2.f, 2.f, 2.f);
+	vec3f_set(game->track_lights[0].pos, 0.f, 100.f, 0.f);
+	vec3f_set(game->track_lights[0].dif, 1.f, 1.f, 1.f);
+	vec3f_set(game->track_lights[0].spc, 1.f, 1.f, 1.f);
 
-	vec3f_set(game->track_lights[1].pos, -15.f, 5.f, -5.f);
-	vec3f_set(game->track_lights[1].dif, 1.f, 2.f, 1.2f);
-	vec3f_set(game->track_lights[1].spc, 1.f, 2.f, 1.2f);
+	vec3f_set(game->track_lights[1].pos, 0.f, 0.f, 0.f);
+	vec3f_set(game->track_lights[1].dif, 1.f, 1.f, 1.f);
+	vec3f_set(game->track_lights[1].spc, 1.f, 1.f, 1.f);
 
 	game->track.r_track.lights[0] = game->track_lights + 0;
 	game->track.r_track.lights[1] = game->track_lights + 1;

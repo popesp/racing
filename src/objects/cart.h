@@ -7,9 +7,13 @@
 #include	"../render/render.h"
 
 
-#define	CART_WIDTH	1.f
-#define	CART_HEIGHT	1.f
-#define	CART_LENGTH	2.f
+#define	CART_WIDTH		1.f
+#define	CART_HEIGHT		1.f
+#define	CART_LENGTH		2.f
+
+
+#define	CART_UP			0.f, 1.f, 0.f
+#define	CART_FORWARD	0.f, 0.f, -1.f
 
 
 struct physicsmanager;

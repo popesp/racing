@@ -8,17 +8,15 @@
 
 #define	RENDER_ATTRIB_POS			0
 #define	RENDER_ATTRIB_NOR			1
-#define	RENDER_ATTRIB_TEX			2
-#define	RENDER_ATTRIB_COL			3
+#define	RENDER_ATTRIB_TAN			2
+#define	RENDER_ATTRIB_TEX			3
+#define	RENDER_ATTRIB_COL			4
 
 #define	RENDER_ATTRIBSIZE_POS		3
 #define	RENDER_ATTRIBSIZE_NOR		3
+#define	RENDER_ATTRIBSIZE_TAN		3
 #define	RENDER_ATTRIBSIZE_TEX		2
 #define	RENDER_ATTRIBSIZE_COL		3
-
-#define	RENDER_VERTSIZE_WIREF		(RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_COL)
-#define	RENDER_VERTSIZE_SOLID		(RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_NOR)
-#define	RENDER_VERTSIZE_TXTRD		(RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_NOR + RENDER_ATTRIBSIZE_TEX)
 
 #define	RENDER_MODE_POINTS			0
 #define	RENDER_MODE_LINESTRIP		1
@@ -28,7 +26,11 @@
 #define	RENDER_TYPE_COUNT			3
 #define	RENDER_TYPE_WIREF			0
 #define	RENDER_TYPE_SOLID			1
-#define	RENDER_TYPE_TXTRD			2
+#define	RENDER_TYPE_BUMPM			2
+
+#define	RENDER_VERTSIZE_WIREF		(RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_COL)
+#define	RENDER_VERTSIZE_SOLID		(RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_NOR)
+#define	RENDER_VERTSIZE_BUMPM		(RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_NOR + RENDER_ATTRIBSIZE_TAN + RENDER_ATTRIBSIZE_TEX)
 
 #define	RENDER_LIGHT_UNIFORMS		3
 #define	RENDER_LIGHT_POS			0
@@ -40,6 +42,9 @@
 #define	RENDER_MATERIAL_DIF			1
 #define	RENDER_MATERIAL_SPC			2
 #define	RENDER_MATERIAL_SHN			3
+
+#define	RENDER_TEXTURE_TYPES		1
+#define	RENDER_TEXTURE_NORMAL		0
 
 #define	RENDER_MAX_LIGHTS			2
 
@@ -58,8 +63,8 @@
 #define	RENDER_SHADER_WIREFFRAG		"shaders/wiref.frag"
 #define	RENDER_SHADER_SOLIDVERT		"shaders/solid.vert"
 #define	RENDER_SHADER_SOLIDFRAG		"shaders/solid.frag"
-#define	RENDER_SHADER_TXTRDVERT		"shaders/textured.vert"
-#define	RENDER_SHADER_TXTRDFRAG		"shaders/textured.frag"
+#define	RENDER_SHADER_BUMPMVERT		"shaders/bump.vert"
+#define	RENDER_SHADER_BUMPMFRAG		"shaders/bump.frag"
 
 #define	RENDER_FLAG_NONE			0x00
 #define	RENDER_FLAG_DYNAMIC			0x01
@@ -97,6 +102,8 @@ struct renderable
 	struct material material;
 	float* ambient;
 
+	unsigned id_gl_textures[RENDER_TEXTURE_TYPES];
+
 	unsigned char flags;
 	unsigned char type;
 
@@ -108,7 +115,7 @@ struct renderer
 {
 	unsigned id_gl_wiref;
 	unsigned id_gl_solid;
-	unsigned id_gl_txtrd;
+	unsigned id_gl_bumpm;
 
 	unsigned vertsize[RENDER_TYPE_COUNT];
 	unsigned shader[RENDER_TYPE_COUNT];
@@ -131,15 +138,21 @@ struct renderer
 
 	struct
 	{
-	} uniforms_txtrd;
-
-	char PADDING[3];
+		int transform;
+		int eyepos;
+		int lights[RENDER_MAX_LIGHTS][RENDER_LIGHT_UNIFORMS];
+		int ambient;
+		int tex_normal;
+		int material[RENDER_MATERIAL_UNIFORMS];
+	} uniforms_bumpm;
 };
 
 
 void renderable_init(struct renderable*, unsigned char, unsigned char, unsigned char);
 void renderable_allocate(struct renderer*, struct renderable*, unsigned);
 void renderable_deallocate(struct renderable*);
+
+void renderable_settexture(struct renderable*, unsigned char, 
 
 void renderable_sendbuffer(struct renderer*, struct renderable*);
 void renderable_render(struct renderer*, struct renderable*, mat4f, unsigned);

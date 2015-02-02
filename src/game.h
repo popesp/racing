@@ -19,7 +19,7 @@
 #define	GAME_UPS				60.f
 #define	GAME_SPU				1.f/GAME_UPS
 
-#define	GAME_CLEARCOLOR			0.f, 0.05f, 0.1f
+#define	GAME_CLEARCOLOR			0.85f, 0.9f, 1.f
 
 #define	GAME_POINTSIZE			10.f
 
