@@ -56,6 +56,9 @@
     <ClCompile Include="src\objects\cart.cpp">
       <Filter>src\objects</Filter>
     </ClCompile>
+    <ClCompile Include="src\input.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\debug.h">
@@ -93,6 +96,9 @@
     </ClInclude>
     <ClInclude Include="src\objects\cart.h">
       <Filter>headers\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\input.h">
+      <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

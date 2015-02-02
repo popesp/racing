@@ -2,6 +2,7 @@
 #define	GAME
 
 
+#include	"input.h"
 #include	"objects/track.h"
 #include	"objects/cart.h"
 #include	"physics/physics.h"
@@ -44,6 +45,7 @@ struct game
 	struct window window;
 	struct renderer renderer;
 	struct physicsmanager physics;
+	struct input input;
 
 	struct track track;
 

@@ -5,6 +5,7 @@
 #include	<stdlib.h>				// calloc, free TEMPORARY
 #include	"debug.h"				// printvec3f
 #include	"error.h"				// PRINT_ERROR
+#include	"input.h"
 #include	"math/mat4f.h"			// identity TEMPORARY
 #include	"math/vec3f.h"			// set TEMPORARY
 #include	"objects/cart.h"		// init, generatemesh
@@ -142,6 +143,24 @@ static void update(struct game* game)
 	// check for callback events
 	glfwPollEvents();
 
+	input_update(&game->input);
+
+	unsigned char* states;
+	int num_buttons = input_getcontrollerstate(&game->input, 0, &states);
+
+	if (states[0])
+	{
+		vec3f_set(game->player.r_cart.material.amb, 1.f, 1.f, 1.f);
+	} else
+	{
+		vec3f_set(game->player.r_cart.material.amb, 0.f, 0.f, 0.f);
+	}
+
+	for (int i = 0; i < num_buttons; i++)
+	{
+		printf("Button %d: %d\n", i, states[i]);
+	}
+
 	physics_update(&game->physics, 1.f/600.f);
 
 	physx::PxTransform playerT = game->player.p_cart->getGlobalPose();
@@ -256,6 +275,13 @@ int game_startup(struct game* game)
 
 	physics_startup(&game->physics);
 
+	input_init(&game->input);
+
+	for (int i = 0; i <= GLFW_JOYSTICK_LAST; i++)
+	{
+		printf("Joystick %d: %d\n", i, game->input.controllers[i].enabled);
+	}
+
 	// initialize track object
 	vec3f up;
 	vec3f_set(up, 0.f, 1.f, 0.f);
@@ -340,10 +366,10 @@ int game_startup(struct game* game)
 	vec3f_set(game->track_lights[1].spc, 1.f, 1.f, 1.f);
 
 	game->track.r_track.lights[0] = game->track_lights + 0;
-	game->track.r_track.lights[1] = game->track_lights + 1;
+	//game->track.r_track.lights[1] = game->track_lights + 1;
 
 	game->player.r_cart.lights[0] = game->track_lights + 0;
-	game->player.r_cart.lights[1] = game->track_lights + 1;
+	//game->player.r_cart.lights[1] = game->track_lights + 1;
 
 	game->rotx = 20.f;
 	game->roty = 0.f;
