@@ -146,20 +146,15 @@ static void update(struct game* game)
 	input_update(&game->input);
 
 	unsigned char* states;
-	int num_buttons = input_getcontrollerstate(&game->input, 0, &states);
-
-	if (states[0])
-	{
-		vec3f_set(game->player.r_cart.material.amb, 1.f, 1.f, 1.f);
-	} else
-	{
-		vec3f_set(game->player.r_cart.material.amb, 0.f, 0.f, 0.f);
-	}
+	float* axis;
+	int num_buttons = input_getcontrollerbuttons(&game->input, 1, &states);
+	int num_axis = input_getcontrolleraxis(&game->input, 1, &axis);
 
 	for (int i = 0; i < num_buttons; i++)
-	{
 		printf("Button %d: %d\n", i, states[i]);
-	}
+
+	for (int i = 0; i < num_axis; i++)
+		printf("Axis %d: %f\n", i, axis[i]);
 
 	physics_update(&game->physics, 1.f/600.f);
 
