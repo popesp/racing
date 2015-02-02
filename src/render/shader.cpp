@@ -28,7 +28,7 @@ unsigned shader_create(const char* filename, unsigned char type)
 
 	if (fopen_s(&file, filename, "rb"))
 	{
-		PRINT_ERROR("shader.c", "Couldn't open %s.\n", filename);
+		PRINT_ERROR("Couldn't open %s.\n", filename);
 		return 0u;
 	}
 
@@ -40,7 +40,7 @@ unsigned shader_create(const char* filename, unsigned char type)
 	if (fread(text, 1, len, file) != len)
 	{
 		mem_free(text);
-		PRINT_ERROR("shader.c", "Couldn't read from %s.\n", filename);
+		PRINT_ERROR("Couldn't read from %s.\n", filename);
 		return 0u;
 	}
 	fclose(file);
@@ -56,7 +56,7 @@ unsigned shader_create(const char* filename, unsigned char type)
 		info = (char*)mem_calloc((size_t)result, sizeof(char));
 		glGetShaderInfoLog(id, result, NULL, info);
 
-		PRINT_ERROR("shader.c", "%s failed to compile:\n%s\n", filename, info);
+		PRINT_ERROR("%s failed to compile:\n%s\n", filename, info);
 		mem_free(info);
 		return 0u;
 	}
@@ -98,7 +98,7 @@ unsigned shader_link(unsigned id)
 		info = (char*)mem_calloc((size_t)result, sizeof(char));
 		glGetProgramInfoLog(id, result, NULL, info);
 
-		PRINT_ERROR("shader.c", "Failed to link shader program (ID: %d):\n%s\n", id, info);
+		PRINT_ERROR("Failed to link shader program (ID: %d):\n%s\n", id, info);
 		mem_free(info);
 		return 0u;
 	}

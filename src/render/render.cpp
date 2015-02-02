@@ -169,7 +169,7 @@ void renderable_render(struct renderer* r, struct renderable* obj, mat4f modelvi
 {
 	mat4f transform, inverse;
 	vec3f eyepos, temp;
-	int i;
+	int i, zero;
 
 	glUseProgram(r->shader[obj->type]);
 	glBindVertexArray(obj->id_gl_vao);
@@ -192,7 +192,7 @@ void renderable_render(struct renderer* r, struct renderable* obj, mat4f modelvi
 
 	// bump mapping uses all of the uniforms below as well
 	case RENDER_TYPE_BUMPM:
-		int zero = 0;
+		zero = 0;
 		glUniform1iv(r->uniforms_bumpm.tex_normal, 1, &zero);
 
 		glActiveTexture(GL_TEXTURE0);

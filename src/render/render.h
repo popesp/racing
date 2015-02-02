@@ -59,12 +59,12 @@
 
 #define	RENDER_DEFAULT_AMBIENT		0.2f, 0.2f, 0.2f
 
-#define	RENDER_SHADER_WIREFVERT		"shaders/wiref.vert"
-#define	RENDER_SHADER_WIREFFRAG		"shaders/wiref.frag"
-#define	RENDER_SHADER_SOLIDVERT		"shaders/solid.vert"
-#define	RENDER_SHADER_SOLIDFRAG		"shaders/solid.frag"
-#define	RENDER_SHADER_BUMPMVERT		"shaders/bump.vert"
-#define	RENDER_SHADER_BUMPMFRAG		"shaders/bump.frag"
+#define	RENDER_SHADER_WIREFVERT		"shaders\\wiref.vert"
+#define	RENDER_SHADER_WIREFFRAG		"shaders\\wiref.frag"
+#define	RENDER_SHADER_SOLIDVERT		"shaders\\solid.vert"
+#define	RENDER_SHADER_SOLIDFRAG		"shaders\\solid.frag"
+#define	RENDER_SHADER_BUMPMVERT		"shaders\\bump.vert"
+#define	RENDER_SHADER_BUMPMFRAG		"shaders\\bump.frag"
 
 #define	RENDER_FLAG_NONE			0x00
 #define	RENDER_FLAG_DYNAMIC			0x01
@@ -152,7 +152,7 @@ void renderable_init(struct renderable*, unsigned char, unsigned char, unsigned 
 void renderable_allocate(struct renderer*, struct renderable*, unsigned);
 void renderable_deallocate(struct renderable*);
 
-void renderable_settexture(struct renderable*, unsigned char, 
+void renderable_settexture(struct renderable*, unsigned char);
 
 void renderable_sendbuffer(struct renderer*, struct renderable*);
 void renderable_render(struct renderer*, struct renderable*, mat4f, unsigned);

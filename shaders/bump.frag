@@ -51,7 +51,7 @@ void main()
 	tan_model[2] = n;
 
 	// find new normal vector modified by normal map
-	n = tan_model*(texture2D(tex_normal, pass_uv).rgb*2.f - 1.f)
+	n = tan_model*(texture2D(tex_normal, pass_uv).rgb*2.f - 1.f);
 
 	dif = vec3(0.f);
 	spc = vec3(0.f);
