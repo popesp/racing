@@ -40,7 +40,7 @@ void input_update(struct inputmanager* input)
 			input->controllers[i].axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1+i, &input->controllers[i].num_axes);
 		} else
 		{
-			if (input->controllers[i].flags * INPUT_FLAG_ENABLED)
+			if (input->controllers[i].flags & INPUT_FLAG_ENABLED)
 			{} // controller was disconnected
 
 			input->controllers[i].flags &= ~INPUT_FLAG_ENABLED;
