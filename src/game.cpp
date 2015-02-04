@@ -140,21 +140,27 @@ static void scroll(GLFWwindow* window, double xoffset, double yoffset)
 
 static void update(struct game* game)
 {
+	int i;
+
 	// check for callback events
 	glfwPollEvents();
 
 	input_update(&game->input);
 
-	unsigned char* states;
-	float* axis;
-	int num_buttons = input_getcontrollerbuttons(&game->input, 1, &states);
-	int num_axis = input_getcontrolleraxis(&game->input, 1, &axis);
+	for (i = 0; i < game->input.controllers[GLFW_JOYSTICK_1].num_axes; i++)
+		printf("Axis %d: %f\n", i, game->input.controllers[GLFW_JOYSTICK_1].axes[i]);
 
-	for (int i = 0; i < num_buttons; i++)
-		printf("Button %d: %d\n", i, states[i]);
-
-	for (int i = 0; i < num_axis; i++)
-		printf("Axis %d: %f\n", i, axis[i]);
+	if (game->input.controllers[GLFW_JOYSTICK_1].buttons[INPUT_BUTTON_A])
+	{
+		vec3f_set(game->player.r_cart.material.amb, 1.f, 1.f, 1.f);
+		vec3f_set(game->player.r_cart.material.dif, 1.f, 1.f, 1.f);
+		vec3f_set(game->player.r_cart.material.spc, 1.f, 1.f, 1.f);
+	} else
+	{
+		vec3f_set(game->player.r_cart.material.amb, 0.2f, 0.15f, 0.1f);
+		vec3f_set(game->player.r_cart.material.dif, 0.2f, 0.15f, 0.1f);
+		vec3f_set(game->player.r_cart.material.spc, 0.2f, 0.15f, 0.1f);
+	}
 
 	physics_update(&game->physics, 1.f/600.f);
 
@@ -274,7 +280,8 @@ int game_startup(struct game* game)
 
 	for (int i = 0; i <= GLFW_JOYSTICK_LAST; i++)
 	{
-		printf("Joystick %d: %d\n", i, game->input.controllers[i].enabled);
+		if (game->input.controllers[GLFW_JOYSTICK_1+i].flags & INPUT_FLAG_ENABLED)
+			printf("Joystick %d enabled. Name: %s\n", i+1, input_joystickname(i));
 	}
 
 	// initialize track object

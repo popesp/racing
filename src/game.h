@@ -45,7 +45,7 @@ struct game
 	struct window window;
 	struct renderer renderer;
 	struct physicsmanager physics;
-	struct input input;
+	struct inputmanager input;
 
 	struct track track;
 

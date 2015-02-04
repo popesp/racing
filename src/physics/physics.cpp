@@ -71,6 +71,9 @@ PxRigidDynamic* physics_addcart(struct physicsmanager* pm, vec3f pos)
 {
 	PxRigidDynamic* cart;
 
+	(void)pm;
+	(void)pos;
+
 	return cart;
 }
 
@@ -119,8 +122,6 @@ void physics_addstatic_trianglestrip(struct physicsmanager* pm, unsigned num_ver
 	meshdesc.triangles.count = num_verts - 2;
 	meshdesc.triangles.stride = 3 * sizeof(int);
 	meshdesc.triangles.data = indices;
-
-	bool test = pm->cooking->validateTriangleMesh(meshdesc);
 
 	// cook mesh
 	pm->cooking->cookTriangleMesh(meshdesc, writebuf);
