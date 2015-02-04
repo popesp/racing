@@ -8,6 +8,7 @@
 #include	"input.h"
 #include	"math/mat4f.h"			// identity TEMPORARY
 #include	"math/vec3f.h"			// set TEMPORARY
+#include	"objects/camera.h"
 #include	"objects/cart.h"		// init, generatemesh
 #include	"objects/track.h"		// init, generatemesh
 #include	"physics/physics.h"		// startup, shutdown
@@ -78,6 +79,7 @@ static void cursor(GLFWwindow* window, double x, double y)
 
 	game = (struct game*)glfwGetWindowUserPointer(window);
 
+	/*
 	if (game->flags & GAME_FLAG_ROTATING)
 	{
 		dx = x - game->mx;
@@ -100,6 +102,7 @@ static void cursor(GLFWwindow* window, double x, double y)
 
 	game->mx = x;
 	game->my = y;
+	*/
 }
 
 static void mouse(GLFWwindow* window, int button, int action, int mods)
@@ -130,16 +133,19 @@ static void scroll(GLFWwindow* window, double xoffset, double yoffset)
 
 	game = (struct game*)glfwGetWindowUserPointer(window);
 
+	/*
 	game->zoom += (float)yoffset*GAME_ZOOMSPEED;
 
 	if (game->zoom > GAME_ZOOMMAX)
 		game->zoom = GAME_ZOOMMAX;
 	else if (game->zoom < GAME_ZOOMMIN)
 		game->zoom = GAME_ZOOMMIN;
+	*/
 }
 
 static void update(struct game* game)
 {
+	vec3f move;
 	int i;
 
 	// check for callback events
@@ -150,17 +156,8 @@ static void update(struct game* game)
 	for (i = 0; i < game->input.controllers[GLFW_JOYSTICK_1].num_axes; i++)
 		printf("Axis %d: %f\n", i, game->input.controllers[GLFW_JOYSTICK_1].axes[i]);
 
-	if (game->input.controllers[GLFW_JOYSTICK_1].buttons[INPUT_BUTTON_A])
-	{
-		vec3f_set(game->player.r_cart.material.amb, 1.f, 1.f, 1.f);
-		vec3f_set(game->player.r_cart.material.dif, 1.f, 1.f, 1.f);
-		vec3f_set(game->player.r_cart.material.spc, 1.f, 1.f, 1.f);
-	} else
-	{
-		vec3f_set(game->player.r_cart.material.amb, 0.2f, 0.15f, 0.1f);
-		vec3f_set(game->player.r_cart.material.dif, 0.2f, 0.15f, 0.1f);
-		vec3f_set(game->player.r_cart.material.spc, 0.2f, 0.15f, 0.1f);
-	}
+	vec3f_set(move, game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_LR], 0.f, 0.f);
+	vec3f_add(game->player_camera.pos, move);
 
 	physics_update(&game->physics, 1.f/600.f);
 
@@ -173,27 +170,25 @@ static void update(struct game* game)
 
 static void render(struct game* game)
 {
-	mat4f modelview, player;
+	mat4f world_camera, player;
 	physx::PxMat44 player_world(game->player.p_cart->getGlobalPose());
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	mat4f_identity(modelview);
-	mat4f_translatemul(modelview, 0.f, 0.f, -GAME_ZOOMSCALE / game->zoom);
-	mat4f_rotatexmul(modelview, game->rotx);
-	mat4f_rotateymul(modelview, game->roty);
+	debug_printvec3f(game->player_camera.pos);
+	lookcamera_gettransform(&game->player_camera, world_camera);
 
 	// render track
-	renderable_render(&game->renderer, &game->track.r_track, modelview, 0);
+	renderable_render(&game->renderer, &game->track.r_track, world_camera, 0);
 
 	// render player
-	mat4f_multiplyn(player, modelview, (float*)&player_world.column0);
+	mat4f_multiplyn(player, world_camera, (float*)&player_world.column0);
 	renderable_render(&game->renderer, &game->player.r_cart, player, 0);
 
 	// render control points
 	glClear(GL_DEPTH_BUFFER_BIT);
-	renderable_render(&game->renderer, &game->track.r_curve, modelview, 0);
-	renderable_render(&game->renderer, &game->track.r_controlpoints, modelview, 0);
+	renderable_render(&game->renderer, &game->track.r_curve, world_camera, 0);
+	renderable_render(&game->renderer, &game->track.r_controlpoints, world_camera, 0);
 
 	glfwSwapBuffers(game->window.w);
 }
@@ -312,11 +307,11 @@ int game_startup(struct game* game)
 
 	vec3f_set(pos, 10.f, 0.f, -40.f);
 	vec3f_set(tan, 1.f, 0.f, 0.f);
-	trackpoint(game->track.points + 4, pos, tan, 20.f, 20.f, 5.f, 10);
+	trackpoint(game->track.points + 4, pos, tan, 0.34907f, 20.f, 5.f, 10);
 
 	vec3f_set(pos, 15.f, -2.f, -25.f);
 	vec3f_set(tan, -4.f, -1.f, 4.f);
-	trackpoint(game->track.points + 5, pos, tan, 20.f, 20.f, 5.f, 10);
+	trackpoint(game->track.points + 5, pos, tan, 0.34907f, 20.f, 5.f, 10);
 
 	vec3f_set(pos, -5.f, -15.f, -5.f);
 	vec3f_set(tan, -4.f, -1.f, 4.f);
@@ -358,6 +353,11 @@ int game_startup(struct game* game)
 	cart_generatemesh(&game->renderer, &game->player);
 	renderable_sendbuffer(&game->renderer, &game->player.r_cart);
 
+	vec3f look;
+	vec3f_set(pos, 0.f, 0.f, 10.f);
+	vec3f_set(look, 0.f, 0.f, 0.f);
+	lookcamera_init(&game->player_camera, pos, look, up);
+
 	// light position in model space
 	vec3f_set(game->track_lights[0].pos, 0.f, 100.f, 0.f);
 	vec3f_set(game->track_lights[0].dif, 1.f, 1.f, 1.f);
@@ -372,10 +372,6 @@ int game_startup(struct game* game)
 
 	game->player.r_cart.lights[0] = game->track_lights + 0;
 	//game->player.r_cart.lights[1] = game->track_lights + 1;
-
-	game->rotx = 20.f;
-	game->roty = 0.f;
-	game->zoom = 1.;
 
 	game->flags = GAME_FLAG_INIT;
 

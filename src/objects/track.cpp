@@ -101,7 +101,7 @@ static void curvepoint(struct track* t, unsigned index, float d, struct track_po
 	vec3f_normalize(res->tan);
 }
 
-static inline float* fillbuffer(float* vptr, float* basis, float* p0, float* p1, float* n0, float* n1)
+static inline float* fillbuffer(float* vptr, mat4f basis, vec3f p0, vec3f p1, vec3f n0, vec3f n1)
 {
 	mat4f_fulltransformvec3fn(vptr, p0, basis);
 	vptr += RENDER_ATTRIBSIZE_POS;

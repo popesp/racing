@@ -3,8 +3,9 @@
 
 
 #include	"input.h"
-#include	"objects/track.h"
+#include	"objects/camera.h"
 #include	"objects/cart.h"
+#include	"objects/track.h"
 #include	"physics/physics.h"
 #include	"render/window.h"
 #include	"render/render.h"
@@ -48,14 +49,10 @@ struct game
 	struct inputmanager input;
 
 	struct track track;
-
 	struct cart player;
+	struct lookcamera player_camera;
 
 	struct light track_lights[2];
-
-	double mx, my;		// TEMP
-	float rotx, roty;	// TEMP
-	float zoom;			// TEMP
 
 	unsigned char flags;
 

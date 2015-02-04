@@ -2,7 +2,6 @@
 #define	MAT4F
 
 
-#define	_USE_MATH_DEFINES	//	M_PI
 #include	<math.h>		//	cosf, sinf
 #include	"vec3f.h"
 
@@ -274,12 +273,10 @@ static void mat4f_scalemul(mat4f m, float x, float y, float z)
 
 /*	set matrix to rotation around x-axis
 	param:	m			matrix to be set (modified)
-	param:	angle		angle of rotation in degrees
+	param:	angle		angle of rotation in radians
 */
 static void mat4f_rotatex(mat4f m, float angle)
 {
-	angle *= (float)M_PI / 180.f;
-
 	mat4f_identity(m);
 
 	m[R1 + C1] = cosf(angle);
@@ -291,7 +288,7 @@ static void mat4f_rotatex(mat4f m, float angle)
 /*	multiply matrix by rotation around x-axis (new)
 	param:	res			resultant matrix (modified)
 	param:	m			original matrix
-	param:	angle		angle of rotation in degrees
+	param:	angle		angle of rotation in radians
 */
 static void mat4f_rotatexmuln(mat4f res, mat4f m, float angle)
 {
@@ -303,7 +300,7 @@ static void mat4f_rotatexmuln(mat4f res, mat4f m, float angle)
 
 /*	multiply matrix by rotation around x-axis
 	param:	m			original matrix (modified)
-	param:	angle		angle of rotation in degrees
+	param:	angle		angle of rotation in radians
 */
 static void mat4f_rotatexmul(mat4f m, float angle)
 {
@@ -316,12 +313,10 @@ static void mat4f_rotatexmul(mat4f m, float angle)
 
 /*	set matrix to rotation around y-axis
 	param:	m			matrix to be set (modified)
-	param:	angle		angle of rotation in degrees
+	param:	angle		angle of rotation in radians
 */
 static void mat4f_rotatey(mat4f m, float angle)
 {
-	angle *= (float)M_PI / 180.f;
-
 	mat4f_identity(m);
 
 	m[R0 + C0] = cosf(angle);
@@ -333,7 +328,7 @@ static void mat4f_rotatey(mat4f m, float angle)
 /*	multiply matrix by rotation around y-axis (new)
 	param:	res			resultant matrix (modified)
 	param:	m			original matrix
-	param:	angle		angle of rotation in degrees
+	param:	angle		angle of rotation in radians
 */
 static void mat4f_rotateymuln(mat4f res, mat4f m, float angle)
 {
@@ -345,7 +340,7 @@ static void mat4f_rotateymuln(mat4f res, mat4f m, float angle)
 
 /*	multiply matrix by rotation around y-axis
 	param:	m			original matrix (modified)
-	param:	angle		angle of rotation in degrees
+	param:	angle		angle of rotation in radians
 */
 static void mat4f_rotateymul(mat4f m, float angle)
 {
@@ -358,12 +353,10 @@ static void mat4f_rotateymul(mat4f m, float angle)
 
 /*	set matrix to rotation around z-axis
 	param:	m			matrix to be set (modified)
-	param:	angle		angle of rotation in degrees
+	param:	angle		angle of rotation in radians
 */
 static void mat4f_rotatez(mat4f m, float angle)
 {
-	angle *= (float)M_PI / 180.f;
-
 	mat4f_identity(m);
 
 	m[R0 + C0] = cosf(angle);
@@ -375,7 +368,7 @@ static void mat4f_rotatez(mat4f m, float angle)
 /*	multiply matrix by rotation around z-axis (new)
 	param:	res			resultant matrix (modified)
 	param:	m			original matrix
-	param:	angle		angle of rotation in degrees
+	param:	angle		angle of rotation in radians
 */
 static void mat4f_rotatezmuln(mat4f res, mat4f m, float angle)
 {
@@ -387,7 +380,7 @@ static void mat4f_rotatezmuln(mat4f res, mat4f m, float angle)
 
 /*	multiply matrix by rotation around z-axis
 	param:	m			original matrix (modified)
-	param:	angle		angle of rotation in degrees
+	param:	angle		angle of rotation in radians
 */
 static void mat4f_rotatezmul(mat4f m, float angle)
 {
