@@ -12,7 +12,8 @@
 struct lookcamera
 {
 	vec3f pos;
-	vec3f look;
+
+	vec3f lookat;
 	vec3f up;
 };
 
@@ -22,22 +23,21 @@ struct freecamera
 
 	vec3f dir;
 	vec3f up;
-	vec3f binormal;
+	vec3f right;
 };
 
 
 void lookcamera_init(struct lookcamera* cam, vec3f pos, vec3f look, vec3f up);
-void freecamera_init(struct freecamera* cam, vec3f pos, vec3f dir);
-void freecamera_initdir(struct freecamera* cam, vec3f pos, vec3f dir, vec3f up);
-void freecamera_initlook(struct freecamera* cam, vec3f pos, vec3f look, vec3f up);
+void freecamera_init(struct freecamera* cam, vec3f pos, vec3f dir, vec3f up);
 
-void lookcamera_update(struct lookcamera* cam);
-void freecamera_update(struct freecamera* cam);
+void freecamera_forward(struct freecamera* cam, float d);
+void freecamera_vertical(struct freecamera* cam, float d);
+void freecamera_strafe(struct freecamera* cam, float d);
+
+void freecamera_rotate(struct freecamera* cam, vec3f axis, float a);
 
 void lookcamera_gettransform(struct lookcamera* cam, mat4f transform);
 void freecamera_gettransform(struct freecamera* cam, mat4f transform);
-
-void freecamera_lookat(struct freecamera* cam, vec3f look);
 
 
 #endif

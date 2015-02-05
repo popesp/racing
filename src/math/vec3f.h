@@ -227,4 +227,44 @@ static void vec3f_reflect(vec3f v0, vec3f v1)
 }
 
 
+/*	rotate a vector around another vector (new)
+	param:	res			resultant vector (modified)
+	param:	v			vector to rotate (assumed to be not parallel to axis)
+	param:	axis		vector to rotate around (assumed to be unit length and not parallel to v)
+	param:	a			angle of rotation in radians
+*/
+static void vec3f_rotaten(vec3f res, vec3f v, vec3f axis, float a)
+{
+	vec3f temp;
+	float c;
+
+	c = cosf(a);
+
+	// res = (axis . v) * (1 - cos(a)) * axis
+	vec3f_scalen(res, axis, vec3f_dot(axis, v) * (1.f - c));
+
+	// res += sin(a) * (axis x v)
+	vec3f_cross(temp, axis, v);
+	vec3f_scale(temp, sinf(a));
+	vec3f_add(res, temp);
+
+	// res += cos(a) * v
+	vec3f_scalen(temp, v, c);
+	vec3f_add(res, temp);
+}
+
+/*	rotate a vector around another vector
+	param:	v			vector to rotate (modified) (assumed to be not parallel to axis)
+	param:	axis		vector to rotate around (assumed to be unit length and not parallel to v)
+	param:	a			angle of rotation in radians
+*/
+static void vec3f_rotate(vec3f v, vec3f axis, float a)
+{
+	vec3f n;
+
+	vec3f_copy(n, v);
+	vec3f_rotaten(v, n, axis, a);
+}
+
+
 #endif

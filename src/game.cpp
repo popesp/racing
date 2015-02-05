@@ -145,7 +145,7 @@ static void scroll(GLFWwindow* window, double xoffset, double yoffset)
 
 static void update(struct game* game)
 {
-	vec3f move;
+	vec3f up, move;
 	int i;
 
 	// check for callback events
@@ -153,11 +153,18 @@ static void update(struct game* game)
 
 	input_update(&game->input);
 
-	for (i = 0; i < game->input.controllers[GLFW_JOYSTICK_1].num_axes; i++)
-		printf("Axis %d: %f\n", i, game->input.controllers[GLFW_JOYSTICK_1].axes[i]);
-
-	vec3f_set(move, game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_LR], 0.f, game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_UD]);
+	vec3f_copy(move, game->player_camera.dir);
+	move[VY] = 0.f;
+	vec3f_normalize(move);
+	vec3f_scale(move, -0.2f * game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_UD]);
+	move[VY] = - 0.1f * game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_TRIGGERS];
 	vec3f_add(game->player_camera.pos, move);
+
+	freecamera_strafe(&game->player_camera, 0.2f * game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_LR]);
+
+	vec3f_set(up, 0.f, 1.f, 0.f);
+	freecamera_rotate(&game->player_camera, up, -0.03f * game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_LR]);
+	freecamera_rotate(&game->player_camera, game->player_camera.right, -0.03f * game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_UD]);
 
 	physics_update(&game->physics, 1.f/600.f);
 
@@ -175,7 +182,7 @@ static void render(struct game* game)
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	debug_printvec3f(game->player_camera.pos);
+	// get camera transform
 	freecamera_gettransform(&game->player_camera, world_camera);
 
 	// render track
@@ -208,6 +215,7 @@ static void trackpoint(struct track_point* p, vec3f pos, vec3f tan, float angle,
 
 int game_startup(struct game* game)
 {
+	vec3f up, dir, pos, tan;
 	GLenum err;
 
 	// initialize GLFW
@@ -280,14 +288,11 @@ int game_startup(struct game* game)
 	}
 
 	// initialize track object
-	vec3f up;
 	vec3f_set(up, 0.f, 1.f, 0.f);
 	track_init(&game->track, up, &game->physics, TRACK_FLAG_LOOPED);
 
 	game->track.num_points = 13;
 	game->track.points = (struct track_point*)calloc(game->track.num_points, sizeof(struct track_point));
-
-	vec3f pos, tan;
 
 	vec3f_set(pos, -5.f, 0.f, 25.f);
 	vec3f_set(tan, -1.f, 0.f, 0.f);
@@ -353,10 +358,9 @@ int game_startup(struct game* game)
 	cart_generatemesh(&game->renderer, &game->player);
 	renderable_sendbuffer(&game->renderer, &game->player.r_cart);
 
-	vec3f look;
 	vec3f_set(pos, 0.f, 0.f, 10.f);
-	vec3f_set(look, 0.f, 0.f, -1.f);
-	freecamera_init(&game->player_camera, pos, look);
+	vec3f_set(dir, 0.f, 0.f, -1.f);
+	freecamera_init(&game->player_camera, pos, dir, up);
 
 	// light position in model space
 	vec3f_set(game->track_lights[0].pos, 0.f, 100.f, 0.f);
