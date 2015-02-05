@@ -19,16 +19,15 @@ struct lookcamera
 struct freecamera
 {
 	vec3f pos;
+
 	vec3f dir;
 	vec3f up;
-
-	float xrot;
-	float yrot;
+	vec3f binormal;
 };
 
 
 void lookcamera_init(struct lookcamera* cam, vec3f pos, vec3f look, vec3f up);
-void freecamera_init(struct freecamera* cam, vec3f pos, float xrot, float yrot, vec3f up);
+void freecamera_init(struct freecamera* cam, vec3f pos, vec3f dir);
 void freecamera_initdir(struct freecamera* cam, vec3f pos, vec3f dir, vec3f up);
 void freecamera_initlook(struct freecamera* cam, vec3f pos, vec3f look, vec3f up);
 

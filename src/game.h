@@ -50,7 +50,7 @@ struct game
 
 	struct track track;
 	struct cart player;
-	struct lookcamera player_camera;
+	struct freecamera player_camera;
 
 	struct light track_lights[2];
 

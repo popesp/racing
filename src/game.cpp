@@ -156,7 +156,7 @@ static void update(struct game* game)
 	for (i = 0; i < game->input.controllers[GLFW_JOYSTICK_1].num_axes; i++)
 		printf("Axis %d: %f\n", i, game->input.controllers[GLFW_JOYSTICK_1].axes[i]);
 
-	vec3f_set(move, game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_LR], 0.f, 0.f);
+	vec3f_set(move, game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_LR], 0.f, game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_UD]);
 	vec3f_add(game->player_camera.pos, move);
 
 	physics_update(&game->physics, 1.f/600.f);
@@ -176,7 +176,7 @@ static void render(struct game* game)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	debug_printvec3f(game->player_camera.pos);
-	lookcamera_gettransform(&game->player_camera, world_camera);
+	freecamera_gettransform(&game->player_camera, world_camera);
 
 	// render track
 	renderable_render(&game->renderer, &game->track.r_track, world_camera, 0);
@@ -355,8 +355,8 @@ int game_startup(struct game* game)
 
 	vec3f look;
 	vec3f_set(pos, 0.f, 0.f, 10.f);
-	vec3f_set(look, 0.f, 0.f, 0.f);
-	lookcamera_init(&game->player_camera, pos, look, up);
+	vec3f_set(look, 0.f, 0.f, -1.f);
+	freecamera_init(&game->player_camera, pos, look);
 
 	// light position in model space
 	vec3f_set(game->track_lights[0].pos, 0.f, 100.f, 0.f);

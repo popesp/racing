@@ -13,24 +13,10 @@ void lookcamera_init(struct lookcamera* cam, vec3f pos, vec3f look, vec3f up)
 	vec3f_copy(cam->up, up);
 }
 
-/*	Initialize a free moving camera (dir and up assumed to be orthogonal and unit length)
-*/
-void freecamera_init(struct freecamera* cam, vec3f pos, vec3f dir, float xrot, float yrot, vec3f up)
+void freecamera_init(struct freecamera* cam, vec3f pos, vec3f dir)
 {
 	vec3f_copy(cam->pos, pos);
 	vec3f_copy(cam->dir, dir);
-
-	vec3f_copy(cam->up, up);
-
-	cam->xrot = xrot;
-	cam->yrot = yrot;
-}
-
-void freecamera_initdir(struct freecamera* cam, vec3f pos, vec3f dir, vec3f up)
-{
-	vec3f_copy(cam->pos, pos);
-	vec3f_copy(cam->dir, dir);
-	vec3f_copy(cam->up, up);
 }
 
 void freecamera_initlook(struct freecamera* cam, vec3f pos, vec3f look, vec3f up)
@@ -49,7 +35,7 @@ void lookcamera_update(struct lookcamera* cam)
 {
 
 }
-
+/*
 void freecamera_update(struct freecamera* cam)
 {
 	if (cam->xrot > CAMERA_XROT_MAX)
@@ -62,7 +48,7 @@ void freecamera_update(struct freecamera* cam)
 	while (cam->yrot < 0.f)
 		cam->yrot += M_PI;
 }
-
+*/
 
 void lookcamera_gettransform(struct lookcamera* cam, mat4f transform)
 {
@@ -75,19 +61,19 @@ void lookcamera_gettransform(struct lookcamera* cam, mat4f transform)
 	vec3f_subtractn(dir, cam->pos, cam->look);
 	vec3f_normalize(dir);
 
-	vec3f_cross(
+	//vec3f_cross(
 
 
 	// calculate rotation angles for camera direction vector
-	xrot = asinf(dir[VY]);
-	yrot = atan2f(dir[VX], -dir[VZ]);
+	//xrot = asinf(dir[VY]);
+	//yrot = atan2f(dir[VX], -dir[VZ]);
 
 	// z-axis translation (distance from look-at position)
-	mat4f_translate(transform, 0.f, 0.f, -len);
+	//mat4f_translate(transform, 0.f, 0.f, -len);
 	
 	// camera rotation
-	mat4f_rotatexmul(transform, xrot);
-	mat4f_rotateymul(transform, yrot);
+	//mat4f_rotatexmul(transform, xrot);
+	//mat4f_rotateymul(transform, yrot);
 
 	// initial translation (to look-at position)
 	mat4f_translatemul(transform, -cam->look[VX], -cam->look[VY], -cam->look[VZ]);
@@ -95,15 +81,23 @@ void lookcamera_gettransform(struct lookcamera* cam, mat4f transform)
 
 void freecamera_gettransform(struct freecamera* cam, mat4f transform)
 {
-	// calculate rotation angles for camera direction vector
-	xrot = asinf(cam->dir[VY]);
-	yrot = atan2f(cam->dir[VX], -cam->dir[VZ]);
+	vec3f global_up;
 
-	// camera rotation
-	mat4f_rotatexmul(transform, xrot);
-	mat4f_rotateymul(transform, yrot);
+	mat4f_identity(transform);
 
-	// translate to camera pos
+	vec3f_set(global_up, 0.f, 1.f, 0.f);
+	vec3f_cross(cam->binormal, cam->dir, global_up);
+	vec3f_normalize(cam->binormal);
+
+	vec3f_cross(cam->up, cam->binormal, cam->dir);
+
+	vec3f_copy(transform + C0, cam->binormal);
+	vec3f_copy(transform + C1, cam->up);
+	vec3f_copy(transform + C2, cam->dir);
+	vec3f_negate(transform + C2);
+
+	mat4f_transpose(transform);
+
 	mat4f_translatemul(transform, -cam->pos[VX], -cam->pos[VY], -cam->pos[VZ]);
 }
 
