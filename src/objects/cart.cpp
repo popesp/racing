@@ -57,9 +57,9 @@ void cart_init(struct cart* c, physicsmanager* pm, vec3f pos)
 
 	renderable_init(&c->r_cart, RENDER_MODE_TRIANGLES, RENDER_TYPE_SOLID, RENDER_FLAG_NONE);
 
-	vec3f_set(c->r_cart.material.amb, 0.2f, 0.15f, 0.1f);
-	vec3f_set(c->r_cart.material.dif, 0.2f, 0.15f, 0.1f);
-	vec3f_set(c->r_cart.material.spc, 0.2f, 0.2f, 0.2f);
+	vec3f_set(c->r_cart.material.amb, 0.8f, 0.15f, 0.1f);
+	vec3f_set(c->r_cart.material.dif, 0.8f, 0.15f, 0.1f);
+	vec3f_set(c->r_cart.material.spc, 0.8f, 0.2f, 0.2f);
 	c->r_cart.material.shn = 100.f;
 }
 
