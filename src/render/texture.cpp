@@ -7,7 +7,20 @@
 
 void texture_startup(struct texturemanager* tm)
 {
+	int i;
 
+	tm->num_textures = 0;
+
+	for (i = 0; i < TEXTURE_MAX; i++)
+		tm->textures[i].data = NULL;
+}
+
+void texture_shutdown(struct texturemanager* tm)
+{
+	int i;
+
+	for (i = 0; i < tm->num_textures; i++)
+		mem_free(tm->textures[i].data);
 }
 
 const char* texture_getversion(struct texturemanager* tm)
@@ -17,15 +30,16 @@ const char* texture_getversion(struct texturemanager* tm)
 }
 
 
-void texture_init(struct texture* t)
+int texture_new(struct texturemanager* tm)
 {
-	t->data = NULL;
+	int i;
+
+	for (i = 0; i < TEXTURE_MAX; i++)
+	{
+		// TODO
+	}
 }
 
-void texture_delete(struct texture* t)
-{
-	mem_free(t->data);
-}
 
 
 void texture_defaultdiffuse(struct texture* t)
@@ -52,8 +66,5 @@ void texture_defaultnormal(struct texture* t)
 
 unsigned texture_loadPNG(struct texture* t, char* filename)
 {
-	(void)t;
-	(void)filename;
-
 	return 1;
 }
