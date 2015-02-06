@@ -37,6 +37,7 @@ int texture_new(struct texturemanager* tm)
 	for (i = 0; i < TEXTURE_MAX; i++)
 	{
 		// TODO
+		return 0;
 	}
 
 	return 0;
