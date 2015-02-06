@@ -6,43 +6,25 @@
 #include	"../math/vec3f.h"
 
 
-/*	initialize a "look" camera object
-	param:	cam			"look" camera to initialize (modified)
+/*	initialize a camera object
+	param:	cam			camera to initialize (modified)
 	param:	pos			initial camera position
-	param:	up			up vector (assumed unit length)
-	param:	lookat		vector to 
+	param:	lookat		position to look at
+	param:	up			up vector (assumed to be unit length and non-parallel to the look direction)
 */
-void lookcamera_init(struct lookcamera* cam, vec3f pos, vec3f lookat, vec3f up)
+void camera_init(struct camera* cam, vec3f pos, vec3f lookat, vec3f up)
 {
 	vec3f_copy(cam->pos, pos);
 
-	vec3f_copy(cam->lookat, lookat);
-	vec3f_copy(cam->up, up);
-
-	// TODO
-}
-
-/*	initialize a "free" camera object
-	param:	cam			"free" camera to initialize (modified)
-	param:	pos			initial camera position
-	param:	dir			direction vector (assumed unit-length and orthogonal to up)
-	param:	up			up vector (assumed unit length and orthogonal to dir)
-*/
-void freecamera_init(struct freecamera* cam, vec3f pos, vec3f dir, vec3f up)
-{
-	vec3f_copy(cam->pos, pos);
-
-	vec3f_copy(cam->dir, dir);
-	vec3f_copy(cam->up, up);
-	vec3f_cross(cam->right, dir, up);
+	camera_lookat(cam, lookat, up);
 }
 
 
-/*	move a "free" camera along its dir vector
-	param:	cam			"free" camera to move (modified)
+/*	move a camera along its dir vector
+	param:	cam			camera to move (modified)
 	param:	d			distance to move
 */
-void freecamera_forward(struct freecamera* cam, float d)
+void camera_forward(struct camera* cam, float d)
 {
 	vec3f dv;
 
@@ -50,11 +32,11 @@ void freecamera_forward(struct freecamera* cam, float d)
 	vec3f_add(cam->pos, dv);
 }
 
-/*	move a "free" camera along its up vector
-	param:	cam			"free" camera to move (modified)
+/*	move a camera along its up vector
+	param:	cam			camera to move (modified)
 	param:	d			distance to move
 */
-void freecamera_vertical(struct freecamera* cam, float d)
+void camera_vertical(struct camera* cam, float d)
 {
 	vec3f dv;
 
@@ -62,11 +44,11 @@ void freecamera_vertical(struct freecamera* cam, float d)
 	vec3f_add(cam->pos, dv);
 }
 
-/*	move a "free" camera along its right vector
-	param:	cam			"free" camera to move (modified)
+/*	move a camera along its right vector
+	param:	cam			camera to move (modified)
 	param:	d			distance to move
 */
-void freecamera_strafe(struct freecamera* cam, float d)
+void camera_strafe(struct camera* cam, float d)
 {
 	vec3f dv;
 
@@ -75,12 +57,12 @@ void freecamera_strafe(struct freecamera* cam, float d)
 }
 
 
-/*	rotate the orientation of a "free" camera around an axis
-	param:	cam			"free" camera to rotate (modified)
-	param:	axis		axis of rotation (assumed to be unequal to all camera basis vectors, unless it is in fact one of the basis vectors eg. freecamera_rotate(cam, cam->dir, 0.2f))
+/*	rotate the orientation of a camera around an axis
+	param:	cam			camera to rotate (modified)
+	param:	axis		axis of rotation
 	param:	a			angle of rotation
 */
-void freecamera_rotate(struct freecamera* cam, vec3f axis, float a)
+void camera_rotate(struct camera* cam, vec3f axis, float a)
 {
 	if (axis != cam->dir)
 		vec3f_rotate(cam->dir, axis, a);
@@ -90,23 +72,28 @@ void freecamera_rotate(struct freecamera* cam, vec3f axis, float a)
 		vec3f_rotate(cam->right, axis, a);
 }
 
-
-/*	get the world->camera space transformation matrix for a "look" camera
-	param:	cam			"look" camera to get transformation for
-	param:	transform	matrix to fill (modified)
+/*	change a camera's orientation to look at a specific position
+	param:	cam			camera whose orientation to change (modified)
+	param:	lookat		position to look at
+	param:	up			up vector
 */
-void lookcamera_gettransform(struct lookcamera* cam, mat4f transform)
+void camera_lookat(struct camera* cam, vec3f lookat, vec3f up)
 {
-	// TODO
-	(void)cam;
-	(void)transform;
+	vec3f_subtractn(cam->dir, lookat, cam->pos);
+	vec3f_normalize(cam->dir);
+
+	vec3f_cross(cam->right, cam->dir, up);
+	vec3f_normalize(cam->right);
+
+	vec3f_cross(cam->up, cam->right, cam->dir);
 }
 
-/*	get the world->camera space transformation matrix for a "free" camera
-	param:	cam			"free" camera to get transformation for
+
+/*	get the world->camera space transformation matrix for a camera
+	param:	cam			camera to get transformation for
 	param:	transform	matrix to fill (modified)
 */
-void freecamera_gettransform(struct freecamera* cam, mat4f transform)
+void camera_gettransform(struct camera* cam, mat4f transform)
 {
 	// construct change of basis for world space into camera space
 	transform[R0 + C0] = cam->right[VX];	transform[R0 + C1] = cam->right[VY];	transform[R0 + C2] = cam->right[VZ];	transform[R0 + C3] = 0.f;

@@ -38,6 +38,8 @@ int texture_new(struct texturemanager* tm)
 	{
 		// TODO
 	}
+
+	return 0;
 }
 
 

@@ -5,19 +5,7 @@
 #include	"../math/vec3f.h"
 
 
-#define	CAMERA_XROT_MAX	(M_PI * 0.9f)
-#define	CAMERA_XROT_MIN	-(M_PI * 0.9f)
-
-
-struct lookcamera
-{
-	vec3f pos;
-
-	vec3f lookat;
-	vec3f up;
-};
-
-struct freecamera
+struct camera
 {
 	vec3f pos;
 
@@ -27,17 +15,16 @@ struct freecamera
 };
 
 
-void lookcamera_init(struct lookcamera* cam, vec3f pos, vec3f look, vec3f up);
-void freecamera_init(struct freecamera* cam, vec3f pos, vec3f dir, vec3f up);
+void camera_init(struct camera* cam, vec3f pos, vec3f look, vec3f up);
 
-void freecamera_forward(struct freecamera* cam, float d);
-void freecamera_vertical(struct freecamera* cam, float d);
-void freecamera_strafe(struct freecamera* cam, float d);
+void camera_forward(struct camera* cam, float d);
+void camera_vertical(struct camera* cam, float d);
+void camera_strafe(struct camera* cam, float d);
 
-void freecamera_rotate(struct freecamera* cam, vec3f axis, float a);
+void camera_rotate(struct camera* cam, vec3f axis, float a);
+void camera_lookat(struct camera* cam, vec3f lookat, vec3f up);
 
-void lookcamera_gettransform(struct lookcamera* cam, mat4f transform);
-void freecamera_gettransform(struct freecamera* cam, mat4f transform);
+void camera_gettransform(struct camera* cam, mat4f transform);
 
 
 #endif

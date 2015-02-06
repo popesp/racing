@@ -168,11 +168,11 @@ static void update(struct game* game)
 	move[VY] = - 0.1f * game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_TRIGGERS];
 	vec3f_add(game->player_camera.pos, move);
 
-	freecamera_strafe(&game->player_camera, 0.2f * game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_LR]);
+	camera_strafe(&game->player_camera, 0.2f * game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_LR]);
 
 	vec3f_set(up, 0.f, 1.f, 0.f);
-	freecamera_rotate(&game->player_camera, up, -0.03f * game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_LR]);
-	freecamera_rotate(&game->player_camera, game->player_camera.right, -0.03f * game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_UD]);
+	camera_rotate(&game->player_camera, up, -0.03f * game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_LR]);
+	camera_rotate(&game->player_camera, game->player_camera.right, -0.03f * game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_UD]);
 
 	physics_update(&game->physics, 1.f/60.f);
 
@@ -191,7 +191,7 @@ static void render(struct game* game)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// get camera transform
-	freecamera_gettransform(&game->player_camera, world_view);
+	camera_gettransform(&game->player_camera, world_view);
 
 	// render track
 	mat4f_identity(model_world);
@@ -388,7 +388,7 @@ int game_startup(struct game* game)
 	// initialize camera object
 	vec3f_set(pos, 0.f, 0.f, 10.f);
 	vec3f_set(dir, 0.f, 0.f, -1.f);
-	freecamera_init(&game->player_camera, pos, dir, up);
+	camera_init(&game->player_camera, pos, dir, up);
 
 	// initialize lights
 	vec3f_set(game->track_lights[0].pos, 0.f, 10.f, 0.f);
