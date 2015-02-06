@@ -7,8 +7,9 @@
 #include	"objects/cart.h"
 #include	"objects/track.h"
 #include	"physics/physics.h"
-#include	"render/window.h"
 #include	"render/render.h"
+#include	"render/texture.h"
+#include	"render/window.h"
 
 
 #define	GAME_DEFAULT_WIDTH		600
@@ -47,6 +48,7 @@ struct game
 	struct renderer renderer;
 	struct physicsmanager physics;
 	struct inputmanager input;
+	struct texturemanager textures;
 
 	struct track track;
 	struct cart player;
@@ -55,8 +57,6 @@ struct game
 	struct light track_lights[2];
 
 	unsigned char flags;
-
-	char PADDING[3];
 };
 
 

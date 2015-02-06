@@ -28,8 +28,6 @@ struct window
 	mat4f projection;
 
 	unsigned char flags;
-
-	char PADDING[3];
 };
 
 

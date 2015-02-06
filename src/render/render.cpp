@@ -141,10 +141,11 @@ void renderable_deallocate(struct renderable* obj)
 }
 
 
-void renderable_settexture(struct renderable* obj, unsigned char type)
+void renderable_settexture(struct renderable* obj, struct texture* t, unsigned char type)
 {
 	glBindTexture(GL_TEXTURE_2D, obj->id_gl_textures[type]);
 
+	(void)t;
 	// set texture data
 }
 
@@ -162,32 +163,39 @@ void renderable_sendbuffer(struct renderer* r, struct renderable* obj)
 /*	render an object with OpenGL (assuming the object's buffer has been uploaded)
 	param:	r				renderer object used to render
 	param:	obj				renderable object to draw
-	param:	modelview		transformation matrix for the object from modelspace to viewspace
+	param:	modelworld		transformation matrix for the object from model-space to world-space
+	param:	worldview		transformation matrix for world-space to view-space
 	param:	num_draw		number of vertices to draw from the buffer; if 0, draw them all
 */
-void renderable_render(struct renderer* r, struct renderable* obj, mat4f modelview, unsigned num_draw)
+void renderable_render(struct renderer* r, struct renderable* obj, mat4f modelworld, mat4f worldview, unsigned num_draw)
 {
-	mat4f transform, inverse;
+	mat4f modelview, inverse_mw, inverse_mv, mvp;
 	vec3f eyepos, temp;
 	int i, zero;
 
 	glUseProgram(r->shader[obj->type]);
 	glBindVertexArray(obj->id_gl_vao);
 
-	// calculate inverse modelview
-	mat4f_invertn(inverse, modelview);
+	// calculate inverse model-world
+	mat4f_invertn(inverse_mw, modelworld);
 
-	// hack to extract eye position from inverse modelview
-	vec3f_scalen(eyepos, inverse + C3, inverse[R3 + C3]);
+	// multiply world-view transform by model-world transform to get final model-view matrix
+	mat4f_multiplyn(modelview, worldview, modelworld);
 
-	// calculate modelview-projection transform
-	mat4f_multiplyn(transform, r->window->projection, modelview);
+	// calculate inverse model-view
+	mat4f_invertn(inverse_mv, modelview);
+
+	// hack to extract eye position from inverse model-view
+	vec3f_scalen(eyepos, inverse_mv + C3, inverse_mv[R3 + C3]);
+
+	// calculate model-view-projection transform
+	mat4f_multiplyn(mvp, r->window->projection, modelview);
 
 	switch (obj->type)
 	{
 	case RENDER_TYPE_WIREF:
 		// MVP matrix
-		glUniformMatrix4fv(r->uniforms_wiref.transform, 1, GL_FALSE, transform);
+		glUniformMatrix4fv(r->uniforms_wiref.transform, 1, GL_FALSE, mvp);
 		break;
 
 	// bump mapping uses all of the uniforms below as well
@@ -200,7 +208,7 @@ void renderable_render(struct renderer* r, struct renderable* obj, mat4f modelvi
 
 	case RENDER_TYPE_SOLID:
 		// MVP matrix and eye position uniforms
-		glUniformMatrix4fv(r->uniforms_solid.transform, 1, GL_FALSE, transform);
+		glUniformMatrix4fv(r->uniforms_solid.transform, 1, GL_FALSE, mvp);
 		glUniform3fv(r->uniforms_solid.eyepos, 1, eyepos);
 
 		// light property uniforms
@@ -208,8 +216,11 @@ void renderable_render(struct renderer* r, struct renderable* obj, mat4f modelvi
 		{
 			if (!obj->lights[i])
 			{
+				// multiply light position by inverse model-world to get into model-space
 				vec3f_set(temp, RENDER_DEFAULT_LIGHT_POS);
+				mat4f_fulltransformvec3f(temp, inverse_mw);
 				glUniform3fv(r->uniforms_solid.lights[i][RENDER_LIGHT_POS], 1, temp);
+
 				vec3f_set(temp, RENDER_DEFAULT_LIGHT_DIF);
 				glUniform3fv(r->uniforms_solid.lights[i][RENDER_LIGHT_DIF], 1, temp);
 				vec3f_set(temp, RENDER_DEFAULT_LIGHT_SPC);
@@ -217,7 +228,11 @@ void renderable_render(struct renderer* r, struct renderable* obj, mat4f modelvi
 			}
 			else
 			{
-				glUniform3fv(r->uniforms_solid.lights[i][RENDER_LIGHT_POS], 1, obj->lights[i]->pos);
+				// multiply light position by inverse model-world to get into model-space
+				vec3f_copy(temp, obj->lights[i]->pos);
+				mat4f_fulltransformvec3f(temp, inverse_mw);
+				glUniform3fv(r->uniforms_solid.lights[i][RENDER_LIGHT_POS], 1, temp);
+
 				glUniform3fv(r->uniforms_solid.lights[i][RENDER_LIGHT_DIF], 1, obj->lights[i]->dif);
 				glUniform3fv(r->uniforms_solid.lights[i][RENDER_LIGHT_SPC], 1, obj->lights[i]->spc);
 			}

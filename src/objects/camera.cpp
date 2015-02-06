@@ -98,6 +98,8 @@ void freecamera_rotate(struct freecamera* cam, vec3f axis, float a)
 void lookcamera_gettransform(struct lookcamera* cam, mat4f transform)
 {
 	// TODO
+	(void)cam;
+	(void)transform;
 }
 
 /*	get the world->camera space transformation matrix for a "free" camera

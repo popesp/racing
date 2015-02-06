@@ -31,9 +31,6 @@ void physics_startup(struct physicsmanager* pm)
 	PxVehicleSetBasisVectors(PxVec3(CART_UP), PxVec3(CART_FORWARD));
 	PxVehicleSetUpdateMode(PxVehicleUpdateMode::eVELOCITY_CHANGE);
 
-	// for particle effects
-	//PxRegisterParticles(*pm->sdk);
-
 	// create default material
 	pm->default_material = pm->sdk->createMaterial(0.5f, 0.5f, 0.1f);
 

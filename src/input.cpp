@@ -4,7 +4,7 @@
 #include	<GLFW/glfw3.h>
 
 
-void input_init(struct inputmanager* input)
+void input_startup(struct inputmanager* input)
 {
 	int i;
 

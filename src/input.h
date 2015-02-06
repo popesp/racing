@@ -50,7 +50,7 @@ struct inputmanager
 };
 
 
-void input_init(struct inputmanager* input);
+void input_startup(struct inputmanager* input);
 
 void input_update(struct inputmanager* input);
 const char* input_joystickname(int joystick);

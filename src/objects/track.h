@@ -39,8 +39,6 @@ struct track
 	vec3f up;
 
 	unsigned char flags;
-
-	char PADDING[3];
 };
 
 

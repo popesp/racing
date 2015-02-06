@@ -2,6 +2,7 @@
 
 #include	<GL/glew.h>				// GL
 #include	<GLFW/glfw3.h>			// GL
+#include	<stdio.h>				// printf
 #include	<stdlib.h>				// calloc, free TEMPORARY
 #include	"debug.h"				// printvec3f
 #include	"error.h"				// PRINT_ERROR
@@ -13,6 +14,7 @@
 #include	"objects/track.h"		// init, generatemesh
 #include	"physics/physics.h"		// startup, shutdown
 #include	"render/render.h"		// renderer: init
+#include	"render/texture.h"
 #include	"render/window.h"		// init, resize
 
 
@@ -75,7 +77,9 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 static void cursor(GLFWwindow* window, double x, double y)
 {
 	struct game* game;
-	double dx, dy;
+
+	(void)x;
+	(void)y;
 
 	game = (struct game*)glfwGetWindowUserPointer(window);
 
@@ -109,10 +113,13 @@ static void mouse(GLFWwindow* window, int button, int action, int mods)
 {
 	struct game* game;
 
+	(void)button;
+	(void)action;
 	(void)mods;
 
 	game = (struct game*)glfwGetWindowUserPointer(window);
 
+	/*
 	if (action == GLFW_PRESS)
 	{
 		if (button == GLFW_MOUSE_BUTTON_RIGHT)
@@ -123,6 +130,7 @@ static void mouse(GLFWwindow* window, int button, int action, int mods)
 		if (button == GLFW_MOUSE_BUTTON_RIGHT)
 			game->flags &= ~GAME_FLAG_ROTATING;
 	}
+	*/
 }
 
 static void scroll(GLFWwindow* window, double xoffset, double yoffset)
@@ -130,6 +138,7 @@ static void scroll(GLFWwindow* window, double xoffset, double yoffset)
 	struct game* game;
 
 	(void)xoffset;
+	(void)yoffset;
 
 	game = (struct game*)glfwGetWindowUserPointer(window);
 
@@ -146,7 +155,6 @@ static void scroll(GLFWwindow* window, double xoffset, double yoffset)
 static void update(struct game* game)
 {
 	vec3f up, move;
-	int i;
 
 	// check for callback events
 	glfwPollEvents();
@@ -166,7 +174,7 @@ static void update(struct game* game)
 	freecamera_rotate(&game->player_camera, up, -0.03f * game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_LR]);
 	freecamera_rotate(&game->player_camera, game->player_camera.right, -0.03f * game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_UD]);
 
-	physics_update(&game->physics, 1.f/600.f);
+	physics_update(&game->physics, 1.f/60.f);
 
 	physx::PxTransform playerT = game->player.p_cart->getGlobalPose();
 
@@ -177,25 +185,25 @@ static void update(struct game* game)
 
 static void render(struct game* game)
 {
-	mat4f world_camera, player;
+	mat4f world_view, model_world;
 	physx::PxMat44 player_world(game->player.p_cart->getGlobalPose());
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// get camera transform
-	freecamera_gettransform(&game->player_camera, world_camera);
+	freecamera_gettransform(&game->player_camera, world_view);
 
 	// render track
-	renderable_render(&game->renderer, &game->track.r_track, world_camera, 0);
+	mat4f_identity(model_world);
+	renderable_render(&game->renderer, &game->track.r_track, model_world, world_view, 0);
 
 	// render player
-	mat4f_multiplyn(player, world_camera, (float*)&player_world.column0);
-	renderable_render(&game->renderer, &game->player.r_cart, player, 0);
+	renderable_render(&game->renderer, &game->player.r_cart, (float*)&player_world.column0, world_view, 0);
 
 	// render control points
 	glClear(GL_DEPTH_BUFFER_BIT);
-	renderable_render(&game->renderer, &game->track.r_curve, world_camera, 0);
-	renderable_render(&game->renderer, &game->track.r_controlpoints, world_camera, 0);
+	renderable_render(&game->renderer, &game->track.r_curve, model_world, world_view, 0);
+	renderable_render(&game->renderer, &game->track.r_controlpoints, model_world, world_view, 0);
 
 	glfwSwapBuffers(game->window.w);
 }
@@ -216,11 +224,14 @@ static void trackpoint(struct track_point* p, vec3f pos, vec3f tan, float angle,
 int game_startup(struct game* game)
 {
 	vec3f up, dir, pos, tan;
+	int major, minor, rev;
 	GLenum err;
 
 	// initialize GLFW
 	if (glfwInit() != GL_TRUE)
 		return 0;
+	glfwGetVersion(&major, &minor, &rev);
+	printf("GLFW initialized, using version %d.%d.%d\n", major, minor, rev);
 
 	// initialize window object
 	window_init(&game->window, GAME_DEFAULT_WIDTH, GAME_DEFAULT_HEIGHT, WINDOW_FLAG_NONE);
@@ -241,6 +252,12 @@ int game_startup(struct game* game)
 
 	// make window's opengl context current
 	glfwMakeContextCurrent(game->window.w);
+	glfwSwapInterval(1); // vertical sync
+
+	// print OpenGL version context
+	glGetIntegerv(GL_MAJOR_VERSION, &major);
+	glGetIntegerv(GL_MINOR_VERSION, &minor);
+	printf("OpenGL context initialized, using version %d.%d\n", major, minor);
 
 	// initialize GLEW
 	glewExperimental = GL_TRUE;
@@ -250,9 +267,7 @@ int game_startup(struct game* game)
 		PRINT_ERROR("game.c", "%s\n", glewGetErrorString(err));
 		return 0;
 	}
-
-	// vertical sync
-	glfwSwapInterval(1);
+	printf("GLEW initialized, using version %s\n", glewGetString(GLEW_VERSION));
 
 	// register game object as user pointer for callback functions
 	glfwSetWindowUserPointer(game->window.w, (void*)game);
@@ -277,15 +292,25 @@ int game_startup(struct game* game)
 	if (!renderer_init(&game->renderer, &game->window))
 		return 0;
 
+	// initialize physics manager
 	physics_startup(&game->physics);
+	printf("PhysX initialized, using version %d.%d.%d\n", PX_PHYSICS_VERSION_MAJOR, PX_PHYSICS_VERSION_MINOR, PX_PHYSICS_VERSION_BUGFIX);
 
-	input_init(&game->input);
+	// initialize input manager
+	input_startup(&game->input);
 
+	// initialize texture manager
+	texture_startup(&game->textures);
+	printf("FreeImage initialized, using version %s\n", texture_getversion(&game->textures));
+
+	// print connected joystick information
 	for (int i = 0; i <= GLFW_JOYSTICK_LAST; i++)
 	{
 		if (game->input.controllers[GLFW_JOYSTICK_1+i].flags & INPUT_FLAG_ENABLED)
 			printf("Joystick %d enabled. Name: %s\n", i+1, input_joystickname(i));
 	}
+
+	/* ----- BEGIN GAME STATE INITIALIZATION ----- */
 
 	// initialize track object
 	vec3f_set(up, 0.f, 1.f, 0.f);
@@ -352,18 +377,21 @@ int game_startup(struct game* game)
 	renderable_sendbuffer(&game->renderer, &game->track.r_controlpoints);
 	renderable_sendbuffer(&game->renderer, &game->track.r_curve);
 
+	//renderable_settexture(&game->track.r_track, &game->track_bump, RENDER_TEXTURE_NORMAL);
+
+	// initialize cart object
 	vec3f_set(pos, 10.f, 10.f, -40.f);
 	cart_init(&game->player, &game->physics, pos);
-
 	cart_generatemesh(&game->renderer, &game->player);
 	renderable_sendbuffer(&game->renderer, &game->player.r_cart);
 
+	// initialize camera object
 	vec3f_set(pos, 0.f, 0.f, 10.f);
 	vec3f_set(dir, 0.f, 0.f, -1.f);
 	freecamera_init(&game->player_camera, pos, dir, up);
 
-	// light position in model space
-	vec3f_set(game->track_lights[0].pos, 0.f, 100.f, 0.f);
+	// initialize lights
+	vec3f_set(game->track_lights[0].pos, 0.f, 10.f, 0.f);
 	vec3f_set(game->track_lights[0].dif, 1.f, 1.f, 1.f);
 	vec3f_set(game->track_lights[0].spc, 1.f, 1.f, 1.f);
 
@@ -371,11 +399,11 @@ int game_startup(struct game* game)
 	vec3f_set(game->track_lights[1].dif, 1.f, 1.f, 1.f);
 	vec3f_set(game->track_lights[1].spc, 1.f, 1.f, 1.f);
 
+	// give renderable objects references to the light objects
 	game->track.r_track.lights[0] = game->track_lights + 0;
-	//game->track.r_track.lights[1] = game->track_lights + 1;
-
+	game->track.r_track.lights[1] = game->track_lights + 1;
 	game->player.r_cart.lights[0] = game->track_lights + 0;
-	//game->player.r_cart.lights[1] = game->track_lights + 1;
+	game->player.r_cart.lights[1] = game->track_lights + 1;
 
 	game->flags = GAME_FLAG_INIT;
 

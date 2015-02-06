@@ -106,8 +106,6 @@ struct renderable
 
 	unsigned char flags;
 	unsigned char type;
-
-	char PADDING[2];
 };
 
 
@@ -152,10 +150,10 @@ void renderable_init(struct renderable*, unsigned char, unsigned char, unsigned 
 void renderable_allocate(struct renderer*, struct renderable*, unsigned);
 void renderable_deallocate(struct renderable*);
 
-void renderable_settexture(struct renderable*, unsigned char);
+void renderable_settexture(struct renderable*, struct texture*, unsigned char);
 
 void renderable_sendbuffer(struct renderer*, struct renderable*);
-void renderable_render(struct renderer*, struct renderable*, mat4f, unsigned);
+void renderable_render(struct renderer* r, struct renderable* obj, mat4f modelworld, mat4f worldview, unsigned num_draw);
 
 unsigned renderer_init(struct renderer*, struct window*);
 
