@@ -34,10 +34,11 @@ int texture_new(struct texturemanager* tm)
 {
 	int i;
 
+	(void)tm;
+
 	for (i = 0; i < TEXTURE_MAX; i++)
 	{
 		// TODO
-		return 0;
 	}
 
 	return 0;
@@ -69,5 +70,7 @@ void texture_defaultnormal(struct texture* t)
 
 unsigned texture_loadPNG(struct texture* t, char* filename)
 {
+	(void)t;
+	(void)filename;
 	return 1;
 }

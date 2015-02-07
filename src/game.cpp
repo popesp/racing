@@ -68,6 +68,13 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 			}
 			break;
 
+		case GLFW_KEY_C:
+			if (game->flags & GAME_FLAG_DEBUGCAM)
+				game->flags &= ~GAME_FLAG_DEBUGCAM;
+			else
+				game->flags |= GAME_FLAG_DEBUGCAM;
+			break;
+
 		default:
 			break;
 		}
@@ -161,22 +168,32 @@ static void update(struct game* game)
 
 	input_update(&game->input);
 
-	vec3f_copy(move, game->player_camera.dir);
-	move[VY] = 0.f;
-	vec3f_normalize(move);
-	vec3f_scale(move, -0.2f * game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_UD]);
-	move[VY] = - 0.1f * game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_TRIGGERS];
-	vec3f_add(game->player_camera.pos, move);
-
-	camera_strafe(&game->player_camera, 0.2f * game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_LR]);
-
-	vec3f_set(up, 0.f, 1.f, 0.f);
-	camera_rotate(&game->player_camera, up, -0.03f * game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_LR]);
-	camera_rotate(&game->player_camera, game->player_camera.right, -0.03f * game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_UD]);
-
+	// simulate
 	physics_update(&game->physics, 1.f/60.f);
 
-	physx::PxTransform playerT = game->player.p_cart->getGlobalPose();
+	vec3f_set(up, 0.f, 1.f, 0.f);
+
+	// update debug camera
+	if (game->flags & GAME_FLAG_DEBUGCAM)
+	{
+		vec3f_copy(move, game->cam_debug.dir);
+		move[VY] = 0.f;
+		vec3f_normalize(move);
+		vec3f_scale(move, -0.2f * game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_UD]);
+		move[VY] = - 0.1f * game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_TRIGGERS];
+		vec3f_add(game->cam_debug.pos, move);
+
+		camera_strafe(&game->cam_debug, 0.2f * game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_LR]);
+
+		camera_rotate(&game->cam_debug, up, -0.03f * game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_LR]);
+		camera_rotate(&game->cam_debug, game->cam_debug.right, -0.03f * game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_UD]);
+	}
+
+	// update player camera
+	physx::PxMat44 t_player(game->player.p_cart->getGlobalPose());
+	physx::PxVec3 campos = t_player.transform(physx::PxVec3(0.f, 1.f, 5.f));
+	vec3f_copy(game->cam_player.pos, (float*)&campos);
+	camera_lookat(&game->cam_player, (float*)&t_player.getPosition(), up);
 
 	// check for window close messages
 	if (glfwWindowShouldClose(game->window.w))
@@ -191,7 +208,10 @@ static void render(struct game* game)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// get camera transform
-	camera_gettransform(&game->player_camera, world_view);
+	if (game->flags & GAME_FLAG_DEBUGCAM)
+		camera_gettransform(&game->cam_debug, world_view);
+	else
+		camera_gettransform(&game->cam_player, world_view);
 
 	// render track
 	mat4f_identity(model_world);
@@ -385,10 +405,11 @@ int game_startup(struct game* game)
 	cart_generatemesh(&game->renderer, &game->player);
 	renderable_sendbuffer(&game->renderer, &game->player.r_cart);
 
-	// initialize camera object
-	vec3f_set(pos, 0.f, 0.f, 10.f);
-	vec3f_set(dir, 0.f, 0.f, -1.f);
-	camera_init(&game->player_camera, pos, dir, up);
+	// initialize camera objects
+	vec3f_set(pos, 0.f, 0.f, -30.f);
+	vec3f_set(dir, 0.f, 0.f, 0.f);
+	camera_init(&game->cam_debug, pos, dir, up);
+	camera_init(&game->cam_player, pos, dir, up);
 
 	// initialize lights
 	vec3f_set(game->track_lights[0].pos, 0.f, 10.f, 0.f);

@@ -26,20 +26,10 @@
 
 #define	GAME_POINTSIZE			10.f
 
-#define	GAME_ROTATEXSPEED		0.6		// TEMP
-#define	GAME_ROTATEYSPEED		0.6		// TEMP
-#define	GAME_ROTATEXMAX			80.f	// TEMP
-#define	GAME_ROTATEXMIN			-80.f	// TEMP
-
-#define	GAME_ZOOMSPEED			0.1f	// TEMP
-#define	GAME_ZOOMSCALE			20.f	// TEMP
-#define	GAME_ZOOMMAX			10.f	// TEMP
-#define	GAME_ZOOMMIN			0.1f	// TEMP
-
 #define	GAME_FLAG_INIT			0x00
 #define	GAME_FLAG_TERMINATED	0x01
 #define	GAME_FLAG_WIREFRAME		0x02	// TEMP
-#define	GAME_FLAG_ROTATING		0x04	// TEMP
+#define	GAME_FLAG_DEBUGCAM		0x04
 
 
 struct game
@@ -52,7 +42,8 @@ struct game
 
 	struct track track;
 	struct cart player;
-	struct camera player_camera;
+	struct camera cam_debug;
+	struct camera cam_player;
 
 	struct light track_lights[2];
 
