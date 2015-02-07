@@ -47,7 +47,6 @@ static int cart_norindex[36] =
 	5, 5, 5, 5, 5, 5
 };
 
-
 void cart_init(struct cart* c, physicsmanager* pm, vec3f pos)
 {
 	vec3f dim;

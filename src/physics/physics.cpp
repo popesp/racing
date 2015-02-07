@@ -243,7 +243,61 @@ static void createVehicle4WSimulationData
         driveData.setAckermannGeometryData(ackermann);
 }
 
-//static void create_cart_data(float chassis_mass, PxConvexMesh* chassis_mesh
+static PxConvexMesh* createConvexMesh(const PxVec3* verts, const PxU32 numVerts, PxPhysics& physics, PxCooking& cooking)
+{
+	// Create descriptor for convex mesh
+	PxConvexMeshDesc convexDesc;
+	convexDesc.points.count			= numVerts;
+	convexDesc.points.stride		= sizeof(PxVec3);
+	convexDesc.points.data			= verts;
+	convexDesc.flags				= PxConvexFlag::eCOMPUTE_CONVEX | PxConvexFlag::eINFLATE_CONVEX;
+
+	PxConvexMesh* convexMesh = NULL;
+	PxDefaultMemoryOutputStream buf;
+	if(cooking.cookConvexMesh(convexDesc, buf))
+	{
+		PxDefaultMemoryInputData id(buf.getData(), buf.getSize());
+		convexMesh = physics.createConvexMesh(id);
+	}
+
+	return convexMesh;
+}
+
+PxConvexMesh* createChassisMesh(const PxVec3 dims, PxPhysics& physics, PxCooking& cooking)
+{
+	const PxF32 x = dims.x*0.5f;
+	const PxF32 y = dims.y*0.5f;
+	const PxF32 z = dims.z*0.5f;
+	PxVec3 verts[8] =
+	{
+		PxVec3(x,y,-z), 
+		PxVec3(x,y,z),
+		PxVec3(x,-y,z),
+		PxVec3(x,-y,-z),
+		PxVec3(-x,y,-z), 
+		PxVec3(-x,y,z),
+		PxVec3(-x,-y,z),
+		PxVec3(-x,-y,-z)
+	};
+
+	return createConvexMesh(verts,8,physics,cooking);
+}
+
+PxConvexMesh* createWheelMesh(const PxF32 width, const PxF32 radius, PxPhysics& physics, PxCooking& cooking)
+{
+	PxVec3 points[2*16];
+	for(PxU32 i = 0; i < 16; i++)
+	{
+		const PxF32 cosTheta = PxCos(i*PxPi*2.0f/16.0f);
+		const PxF32 sinTheta = PxSin(i*PxPi*2.0f/16.0f);
+		const PxF32 y = radius*cosTheta;
+		const PxF32 z = radius*sinTheta;
+		points[2*i+0] = PxVec3(-width/2.0f, y, z);
+		points[2*i+1] = PxVec3(+width/2.0f, y, z);
+	}
+
+	return createConvexMesh(points,32,physics,cooking);
+}
 
 PxRigidDynamic* physics_addcart(struct physicsmanager* pm, vec3f pos)
 {
@@ -257,21 +311,51 @@ PxRigidDynamic* physics_addcart(struct physicsmanager* pm, vec3f pos)
 	wheelOffsets[2] = PxVec3(-CART_WIDTH / 2, -CART_HEIGHT / 2, CART_LENGTH / 2);
 	wheelOffsets[3] = PxVec3(CART_WIDTH / 2, -CART_HEIGHT / 2,  CART_LENGTH / 2);
 
-	PxRigidDynamic* cart;
-
 	createVehicle4WSimulationData (1500.0, 20.0, .4, .5, wheelOffsets, *wheelsSimData, driveSimData, chassisData);
 
-	/*static void createVehicle4WSimulationData
-(const PxF32 chassisMass, const PxF32 wheelMass, float wheelWidth, float wheelRadius, const PxVec3* wheelCentreOffsets,
- PxVehicleWheelsSimData& wheelsData, PxVehicleDriveSimData4W& driveData, PxVehicleChassisData& chassisData)*/
+	PxConvexMesh* wheelConvexMeshes4[4];
 
-	//cart = 
+	for (int i = 0; i < 4; i++) {
+		
+		wheelConvexMeshes4[i] = createWheelMesh(.4, .5, *pm->sdk, *pm->cooking);
+
+	}
+
+	/*
+	Need to get chassisConvexMesh, to get that I need the verts*, ask shawn how to get
+	*/
+
+	PxVec3* verts;	//Needs to be created
+	PxU32 numVerts = 36;
+	PxConvexMesh* chassisConvexMesh = createConvexMesh(verts, numVerts, *pm->sdk, *pm->cooking);
+
+	//createVehicleActor4W must be created
+	/*PxRigidDynamic* vehActor=createVehicleActor4W(chassisData,wheelConvexMeshes4,chassisConvexMesh,scene,*pm->sdk,material);
+	PxVehicleDrive4W* car = PxVehicleDrive4W::allocate(4);
+	car->setup(pm->sdk,vehActor,*wheelsSimData,driveSimData,0);
+	car->mWheelsSimData.setWheelShapeMapping(0,0);
+	car->mWheelsSimData.setWheelShapeMapping(1,1);
+	car->mWheelsSimData.setWheelShapeMapping(2,2);
+	car->mWheelsSimData.setWheelShapeMapping(3,3);
+
+	//Set up the scene query filter data for each suspension line.
+	PxFilterData vehQryFilterData;
+	//NO IDEA ON THIS NEXT LINE
+	//SampleVehicleSetupVehicleShapeQueryFilterData(&vehQryFilterData);
+	car->mWheelsSimData.setSceneQueryFilterData(0, vehQryFilterData);
+	car->mWheelsSimData.setSceneQueryFilterData(1, vehQryFilterData);
+	car->mWheelsSimData.setSceneQueryFilterData(2, vehQryFilterData);
+	car->mWheelsSimData.setSceneQueryFilterData(3, vehQryFilterData);*/
+
+	PxRigidDynamic* carty;
+
 
 	(void)pm;
 	(void)pos;
 
-	return cart;
+	return carty;
 }
+
 
 PxRigidDynamic* physics_adddynamic_box(struct physicsmanager* pm, vec3f pos, vec3f dim)
 {
