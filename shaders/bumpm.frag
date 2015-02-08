@@ -43,15 +43,15 @@ void main()
 	t = normalize(pass_tangent);
 	e = normalize(pass_toeye);
 	
-	b = cross(n, t);
+	b = cross(t, n);
 
 	// matrix conversion from tangent-space to model-space
-	tan_model[0] = t;
-	tan_model[1] = b;
+	tan_model[0] = b;
+	tan_model[1] = t;
 	tan_model[2] = n;
 
 	// find new normal vector modified by normal map
-	n = tan_model*(texture2D(tex_normal, pass_uv).rgb*2.f - 1.f);
+	n =  tan_model * (texture2D(tex_normal, pass_uv).rgb*2. - 1.);
 
 	dif = vec3(0.f);
 	spc = vec3(0.f);

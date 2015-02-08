@@ -166,27 +166,27 @@ static void update(struct game* game)
 	// check for callback events
 	glfwPollEvents();
 
-	input_update(&game->input);
+	inputmanager_update(&game->inputmanager);
 
 	// simulate
-	physics_update(&game->physics, 1.f/60.f);
+	physicsmanager_update(&game->physicsmanager, 1.f/60.f);
 
 	vec3f_set(up, 0.f, 1.f, 0.f);
 
-	// update debug camera
+	// update debug camera; NOTE: a lot of this is temporarily hard-coded
 	if (game->flags & GAME_FLAG_DEBUGCAM)
 	{
 		vec3f_copy(move, game->cam_debug.dir);
 		move[VY] = 0.f;
 		vec3f_normalize(move);
-		vec3f_scale(move, -0.2f * game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_UD]);
-		move[VY] = - 0.1f * game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_TRIGGERS];
+		vec3f_scale(move, -0.2f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_UD]);
+		move[VY] = - 0.1f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_TRIGGERS];
 		vec3f_add(game->cam_debug.pos, move);
 
-		camera_strafe(&game->cam_debug, 0.2f * game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_LR]);
+		camera_strafe(&game->cam_debug, 0.2f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_LR]);
 
-		camera_rotate(&game->cam_debug, up, -0.03f * game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_LR]);
-		camera_rotate(&game->cam_debug, game->cam_debug.right, -0.03f * game->input.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_UD]);
+		camera_rotate(&game->cam_debug, up, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_LR]);
+		camera_rotate(&game->cam_debug, game->cam_debug.right, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_UD]);
 	}
 
 	// update player camera
@@ -219,11 +219,6 @@ static void render(struct game* game)
 
 	// render player
 	renderable_render(&game->renderer, &game->player.r_cart, (float*)&player_world.column0, world_view, 0);
-
-	// render control points
-	glClear(GL_DEPTH_BUFFER_BIT);
-	renderable_render(&game->renderer, &game->track.r_curve, model_world, world_view, 0);
-	renderable_render(&game->renderer, &game->track.r_controlpoints, model_world, world_view, 0);
 
 	glfwSwapBuffers(game->window.w);
 }
@@ -308,33 +303,33 @@ int game_startup(struct game* game)
 	glfwSetMouseButtonCallback(game->window.w, &mouse);
 	glfwSetScrollCallback(game->window.w, &scroll);
 
+	// initialize texture manager
+	texturemanager_startup(&game->texturemanager);
+	printf("FreeImage initialized, using version %s\n", texturemanager_getlibversion(&game->texturemanager));
+
 	// initialize renderer
-	if (!renderer_init(&game->renderer, &game->window))
+	if (!renderer_init(&game->renderer, &game->texturemanager, &game->window))
 		return 0;
 
 	// initialize physics manager
-	physics_startup(&game->physics);
+	physicsmanager_startup(&game->physicsmanager);
 	printf("PhysX initialized, using version %d.%d.%d\n", PX_PHYSICS_VERSION_MAJOR, PX_PHYSICS_VERSION_MINOR, PX_PHYSICS_VERSION_BUGFIX);
 
 	// initialize input manager
-	input_startup(&game->input);
-
-	// initialize texture manager
-	texture_startup(&game->textures);
-	printf("FreeImage initialized, using version %s\n", texture_getversion(&game->textures));
+	inputmanager_startup(&game->inputmanager);
 
 	// print connected joystick information
 	for (int i = 0; i <= GLFW_JOYSTICK_LAST; i++)
 	{
-		if (game->input.controllers[GLFW_JOYSTICK_1+i].flags & INPUT_FLAG_ENABLED)
-			printf("Joystick %d enabled. Name: %s\n", i+1, input_joystickname(i));
+		if (game->inputmanager.controllers[GLFW_JOYSTICK_1+i].flags & INPUT_FLAG_ENABLED)
+			printf("Joystick %d enabled. Name: %s\n", i+1, inputmanager_joystickname(&game->inputmanager, i));
 	}
 
 	/* ----- BEGIN GAME STATE INITIALIZATION ----- */
 
 	// initialize track object
 	vec3f_set(up, 0.f, 1.f, 0.f);
-	track_init(&game->track, up, &game->physics, TRACK_FLAG_LOOPED);
+	track_init(&game->track, up, &game->physicsmanager, TRACK_FLAG_LOOPED);
 
 	game->track.num_points = 13;
 	game->track.points = (struct track_point*)calloc(game->track.num_points, sizeof(struct track_point));
@@ -392,16 +387,13 @@ int game_startup(struct game* game)
 	trackpoint(game->track.points + 12, pos, tan, 0.f, 20.f, 5.f, 10);
 	
 	track_generatemesh(&game->renderer, &game->track);
-	physics_addstatic_trianglestrip(&game->physics, game->track.r_track.num_verts, sizeof(float)*RENDER_VERTSIZE_SOLID, game->track.r_track.buf_verts);
-	renderable_sendbuffer(&game->renderer, &game->track.r_track);
-	renderable_sendbuffer(&game->renderer, &game->track.r_controlpoints);
-	renderable_sendbuffer(&game->renderer, &game->track.r_curve);
 
-	//renderable_settexture(&game->track.r_track, &game->track_bump, RENDER_TEXTURE_NORMAL);
+	physicsmanager_addstatic_trianglestrip(&game->physicsmanager, game->track.r_track.num_verts, sizeof(float)*RENDER_VERTSIZE_BUMPM, game->track.r_track.buf_verts);
+	renderable_sendbuffer(&game->renderer, &game->track.r_track);
 
 	// initialize cart object
 	vec3f_set(pos, 10.f, 10.f, -40.f);
-	cart_init(&game->player, &game->physics, pos);
+	cart_init(&game->player, &game->physicsmanager, pos);
 	cart_generatemesh(&game->renderer, &game->player);
 	renderable_sendbuffer(&game->renderer, &game->player.r_cart);
 
@@ -422,9 +414,14 @@ int game_startup(struct game* game)
 
 	// give renderable objects references to the light objects
 	game->track.r_track.lights[0] = game->track_lights + 0;
-	game->track.r_track.lights[1] = game->track_lights + 1;
+	//game->track.r_track.lights[1] = game->track_lights + 1;
 	game->player.r_cart.lights[0] = game->track_lights + 0;
-	game->player.r_cart.lights[1] = game->track_lights + 1;
+	//game->player.r_cart.lights[1] = game->track_lights + 1;
+
+	game->tex_trackbump = texturemanager_newtexture(&game->texturemanager);
+	texture_loadfile(&game->texturemanager, game->tex_trackbump, "res/rock.jpg");
+	texture_upload(&game->texturemanager, game->tex_trackbump, RENDER_TEXTURE_NORMAL);
+	game->track.r_track.texture_ids[RENDER_TEXTURE_NORMAL] = game->tex_trackbump;
 
 	game->flags = GAME_FLAG_INIT;
 
@@ -475,9 +472,12 @@ void game_mainloop(struct game* game)
 
 void game_shutdown(struct game* game)
 {
-	physics_shutdown(&game->physics);
-
 	track_delete(&game->track);
+
+	// shut down all the game subsytems
+	physicsmanager_shutdown(&game->physicsmanager);
+	inputmanager_shutdown(&game->inputmanager);
+	texturemanager_shutdown(&game->texturemanager);
 
 	glfwDestroyWindow(game->window.w);
 	glfwTerminate();

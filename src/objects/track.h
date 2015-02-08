@@ -2,6 +2,7 @@
 #define	TRACK
 
 
+#include	<PxRigidStatic.h>
 #include	"../math/vec3f.h"
 #include	"../render/render.h"
 
@@ -32,9 +33,9 @@ struct track
 	unsigned num_points;
 	struct track_point* points;
 
+	physx::PxRigidStatic* p_track;
+
 	struct renderable r_track;
-	struct renderable r_controlpoints;
-	struct renderable r_curve;
 
 	vec3f up;
 

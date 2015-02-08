@@ -33,6 +33,9 @@
     <Filter Include="src\physics">
       <UniqueIdentifier>{31ddf7a2-5726-4466-a12d-53e88545b723}</UniqueIdentifier>
     </Filter>
+    <Filter Include="res">
+      <UniqueIdentifier>{655f4704-52cb-41ae-ab1e-a0697b125bdd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\game.cpp">
@@ -132,10 +135,10 @@
     <None Include="shaders\wiref.vert">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\bump.frag">
+    <None Include="shaders\bumpm.frag">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\bump.vert">
+    <None Include="shaders\bumpm.vert">
       <Filter>shaders</Filter>
     </None>
   </ItemGroup>

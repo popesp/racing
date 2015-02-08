@@ -110,8 +110,8 @@
     <ClInclude Include="src\render\window.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\bump.frag" />
-    <None Include="shaders\bump.vert" />
+    <None Include="shaders\bumpm.frag" />
+    <None Include="shaders\bumpm.vert" />
     <None Include="shaders\solid.frag" />
     <None Include="shaders\solid.vert" />
     <None Include="shaders\textured.frag" />
