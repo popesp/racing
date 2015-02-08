@@ -18,6 +18,7 @@
 #include	"render/window.h"		// init, resize
 
 
+
 static void resize(GLFWwindow*, int, int);
 static void keyboard(GLFWwindow*, int, int, int, int);
 static void cursor(GLFWwindow*, double, double);
@@ -330,6 +331,24 @@ int game_startup(struct game* game)
 	// initialize track object
 	vec3f_set(up, 0.f, 1.f, 0.f);
 	track_init(&game->track, up, &game->physicsmanager, TRACK_FLAG_LOOPED);
+/*
+	std::ifstream trackfile;
+	trackfile.open("track1.txt");
+
+	trackfile >> game->track.num_points;
+	game->track.points = (struct track_point*)calloc(game->track.num_points, sizeof(struct track_point));
+
+	{
+	float px, py, pz, tx, ty, tz, angle, weight, width;
+	unsigned subdiv, ind;
+
+	for(int i = 0; i<game->track.num_points; i++){
+		trackfile >> ind>> px >> py >> pz >> tx >>ty >> tz >>angle >> weight >> width >> subdiv;
+		vec3f_set(pos, px, py, pz);
+		vec3f_set(tan, tx, ty, tz);
+		trackpoint(game->track.points + ind, pos, tan, angle, weight, width, subdiv);
+	}
+	}*/
 
 	game->track.num_points = 13;
 	game->track.points = (struct track_point*)calloc(game->track.num_points, sizeof(struct track_point));
