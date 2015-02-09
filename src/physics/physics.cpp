@@ -7,8 +7,6 @@
 #include	"../render/render.h"
 
 
-using namespace physx;
-
 #define eFRONT_LEFT_WHEEL	0
 #define eFRONT_RIGHT_WHEEL	1
 #define eREAR_LEFT_WHEEL	2
@@ -17,7 +15,14 @@ using namespace physx;
 #define TIRE_TYPE_WETS		0
 #define	TIRE_TYPE_SLICKS	1
 
-void physics_startup(struct physicsmanager* pm)
+
+using namespace physx;
+
+
+/*	start up the physics manager
+	param:	pm				physics manager (modified)
+*/
+void physicsmanager_startup(struct physicsmanager* pm)
 {
 	PxTolerancesScale scale;
 
@@ -49,13 +54,10 @@ void physics_startup(struct physicsmanager* pm)
 	pm->scene = pm->sdk->createScene(scenedesc);
 }
 
-void physics_update(struct physicsmanager* pm, float dt)
-{
-	pm->scene->simulate(dt);
-	pm->scene->fetchResults(true);
-}
-
-void physics_shutdown(struct physicsmanager* pm)
+/*	shut down the physics manager
+	param:	pm				physics manager (modified)
+*/
+void physicsmanager_shutdown(struct physicsmanager* pm)
 {
 	pm->scene->release();
 	pm->default_material->release();
@@ -63,9 +65,19 @@ void physics_shutdown(struct physicsmanager* pm)
 	PxCloseVehicleSDK();
 
 	pm->cooking->release();
-
 	pm->sdk->release();
 	pm->foundation->release();
+}
+
+
+/*	update the physics simulation
+	param:	pm				physics manager
+	param:	dt				delta time
+*/
+void physicsmanager_update(struct physicsmanager* pm, float dt)
+{
+	pm->scene->simulate(dt);
+	pm->scene->fetchResults(true);
 }
 
 
@@ -367,7 +379,13 @@ PxRigidDynamic* physics_adddynamic_box(struct physicsmanager* pm, vec3f pos, vec
 	return actor;
 }
 
-void physics_addstatic_trianglestrip(struct physicsmanager* pm, unsigned num_verts, unsigned stride, float* buf_verts)
+/*	add a static triangle mesh stored in a triangle strip vertex buffer
+	param:	pm				physics manager
+	param:	num_verts		number of vertices in the buffer
+	param:	stride			stride between vertices in the buffer
+	param:	buf_verts		vertex buffer
+*/
+void physicsmanager_addstatic_trianglestrip(struct physicsmanager* pm, unsigned num_verts, unsigned stride, float* buf_verts)
 {
 	PxDefaultMemoryOutputStream writebuf;
 	PxTriangleMeshDesc meshdesc;

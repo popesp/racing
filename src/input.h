@@ -50,10 +50,30 @@ struct inputmanager
 };
 
 
-void input_startup(struct inputmanager* input);
+/*	start up the texture manager
+	param:	im				input manager (modified)
+*/
+void inputmanager_startup(struct inputmanager* im);
 
-void input_update(struct inputmanager* input);
-const char* input_joystickname(int joystick);
+
+/*	shut down the input manager
+	param:	im				input manager (modified)
+*/
+void inputmanager_shutdown(struct inputmanager* im);
+
+
+/*	update the input
+	param:	im				input manager (modified)
+*/
+void inputmanager_update(struct inputmanager* im);
+
+
+/*	get the name of a given joystick
+	param:	im				input manager
+	param:	id_joyst		id of the joystick to query
+	return:	const char*		name of the joystick
+*/
+const char* inputmanager_joystickname(struct inputmanager* im, int id_joyst);
 
 
 #endif

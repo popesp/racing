@@ -4,27 +4,41 @@
 #include	<GLFW/glfw3.h>
 
 
-void input_startup(struct inputmanager* input)
+/*	start up the texture manager
+	param:	im				input manager (modified)
+*/
+void inputmanager_startup(struct inputmanager* im)
 {
 	int i;
 
 	// clear all controller flags and initialize attributes
 	for (i = 0; i < INPUT_MAX_JOYSTICKS; i++)
 	{
-		input->controllers[i].flags = INPUT_FLAG_NONE;
+		im->controllers[i].flags = INPUT_FLAG_NONE;
 
-		input->controllers[i].num_buttons = 0;
-		input->controllers[i].buttons = NULL;
+		im->controllers[i].num_buttons = 0;
+		im->controllers[i].buttons = NULL;
 
-		input->controllers[i].num_axes = 0;
-		input->controllers[i].axes = NULL;
+		im->controllers[i].num_axes = 0;
+		im->controllers[i].axes = NULL;
 	}
 
-	input_update(input);
+	inputmanager_update(im);
+}
+
+/*	shut down the input manager
+	param:	im				input manager (modified)
+*/
+void inputmanager_shutdown(struct inputmanager* im)
+{
+	(void)im;
 }
 
 
-void input_update(struct inputmanager* input)
+/*	update the input
+	param:	im				input manager (modified)
+*/
+void inputmanager_update(struct inputmanager* im)
 {
 	int i;
 
@@ -32,23 +46,30 @@ void input_update(struct inputmanager* input)
 	{
 		if (glfwJoystickPresent(GLFW_JOYSTICK_1+i))
 		{
-			if (!(input->controllers[i].flags & INPUT_FLAG_ENABLED))
+			if (!(im->controllers[i].flags & INPUT_FLAG_ENABLED))
 			{} // controller was connected
 
-			input->controllers[i].flags |= INPUT_FLAG_ENABLED;
-			input->controllers[i].buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1+i, &input->controllers[i].num_buttons);
-			input->controllers[i].axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1+i, &input->controllers[i].num_axes);
+			im->controllers[i].flags |= INPUT_FLAG_ENABLED;
+			im->controllers[i].buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1+i, &im->controllers[i].num_buttons);
+			im->controllers[i].axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1+i, &im->controllers[i].num_axes);
 		} else
 		{
-			if (input->controllers[i].flags & INPUT_FLAG_ENABLED)
+			if (im->controllers[i].flags & INPUT_FLAG_ENABLED)
 			{} // controller was disconnected
 
-			input->controllers[i].flags &= ~INPUT_FLAG_ENABLED;
+			im->controllers[i].flags &= ~INPUT_FLAG_ENABLED;
 		}
 	}
 }
 
-const char* input_joystickname(int joystick)
+
+/*	get the name of a given joystick
+	param:	im				input manager
+	param:	id_joyst		id of the joystick to query
+	return:	const char*		name of the joystick
+*/
+const char* inputmanager_joystickname(struct inputmanager* im, int id_joyst)
 {
-	return glfwGetJoystickName(GLFW_JOYSTICK_1+joystick);
+	(void)im;
+	return glfwGetJoystickName(GLFW_JOYSTICK_1 + id_joyst);
 }

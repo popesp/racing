@@ -8,6 +8,7 @@
 #include	"../math/vec3f.h"	// set, scalen
 #include	"../mem.h"			// calloc, free
 #include	"shader.h"			// create, program, link, delete
+#include	"texture.h"
 #include	"window.h"			// window.projection
 
 
@@ -96,17 +97,6 @@ void renderable_init(struct renderable* obj, unsigned char mode, unsigned char t
 
 	obj->ambient = NULL;
 
-	glGenTextures(RENDER_TEXTURE_TYPES, obj->id_gl_textures);
-
-	for ( i = 0; i < RENDER_TEXTURE_TYPES; i++)
-	{
-		glBindTexture(GL_TEXTURE_2D, obj->id_gl_textures[i]);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	}
-
 	obj->flags = flags;
 	obj->type = type;
 }
@@ -141,15 +131,6 @@ void renderable_deallocate(struct renderable* obj)
 }
 
 
-void renderable_settexture(struct renderable* obj, struct texture* t, unsigned char type)
-{
-	glBindTexture(GL_TEXTURE_2D, obj->id_gl_textures[type]);
-
-	(void)t;
-	// set texture data
-}
-
-
 /*	send buffer data from client side to OpenGL
 	param:	r				renderer object used to render
 	param:	obj				renderable object for which to upload buffer
@@ -171,7 +152,7 @@ void renderable_render(struct renderer* r, struct renderable* obj, mat4f modelwo
 {
 	mat4f modelview, inverse_mw, inverse_mv, mvp;
 	vec3f eyepos, temp;
-	int i, zero;
+	int i, unit;
 
 	glUseProgram(r->shader[obj->type]);
 	glBindVertexArray(obj->id_gl_vao);
@@ -198,13 +179,60 @@ void renderable_render(struct renderer* r, struct renderable* obj, mat4f modelwo
 		glUniformMatrix4fv(r->uniforms_wiref.transform, 1, GL_FALSE, mvp);
 		break;
 
-	// bump mapping uses all of the uniforms below as well
 	case RENDER_TYPE_BUMPM:
-		zero = 0;
-		glUniform1iv(r->uniforms_bumpm.tex_normal, 1, &zero);
+		// MVP matrix and eye position uniforms
+		glUniformMatrix4fv(r->uniforms_bumpm.transform, 1, GL_FALSE, mvp);
+		glUniform3fv(r->uniforms_bumpm.eyepos, 1, eyepos);
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, obj->id_gl_textures[RENDER_TEXTURE_NORMAL]);
+		// light property uniforms
+		for (i = 0; i < RENDER_MAX_LIGHTS; i++)
+		{
+			if (!obj->lights[i])
+			{
+				// multiply light position by inverse model-world to get into model-space
+				vec3f_set(temp, RENDER_DEFAULT_LIGHT_POS);
+				mat4f_fulltransformvec3f(temp, inverse_mw);
+				glUniform3fv(r->uniforms_bumpm.lights[i][RENDER_LIGHT_POS], 1, temp);
+
+				vec3f_set(temp, RENDER_DEFAULT_LIGHT_DIF);
+				glUniform3fv(r->uniforms_bumpm.lights[i][RENDER_LIGHT_DIF], 1, temp);
+				vec3f_set(temp, RENDER_DEFAULT_LIGHT_SPC);
+				glUniform3fv(r->uniforms_bumpm.lights[i][RENDER_LIGHT_SPC], 1, temp);
+			}
+			else
+			{
+				// multiply light position by inverse model-world to get into model-space
+				vec3f_copy(temp, obj->lights[i]->pos);
+				mat4f_fulltransformvec3f(temp, inverse_mw);
+				glUniform3fv(r->uniforms_bumpm.lights[i][RENDER_LIGHT_POS], 1, temp);
+
+				glUniform3fv(r->uniforms_bumpm.lights[i][RENDER_LIGHT_DIF], 1, obj->lights[i]->dif);
+				glUniform3fv(r->uniforms_bumpm.lights[i][RENDER_LIGHT_SPC], 1, obj->lights[i]->spc);
+			}
+		}
+
+		// ambient uniform
+		if (!obj->ambient)
+		{
+			vec3f_set(temp, RENDER_DEFAULT_AMBIENT);
+			glUniform3fv(r->uniforms_bumpm.ambient, 1, temp);
+		}
+		else
+			glUniform3fv(r->uniforms_bumpm.ambient, 1, obj->ambient);
+
+		// texture uniforms
+		unit = RENDER_TEXTURE_NORMAL;
+		glUniform1iv(r->uniforms_bumpm.tex_normal, 1, &unit);
+
+		glActiveTexture(GL_TEXTURE0 + RENDER_TEXTURE_NORMAL);
+		glBindTexture(GL_TEXTURE_2D, r->tm->textures[obj->texture_ids[RENDER_TEXTURE_NORMAL]].gl_id);
+
+		// material uniforms
+		glUniform3fv(r->uniforms_bumpm.material[RENDER_MATERIAL_AMB], 1, obj->material.amb);
+		glUniform3fv(r->uniforms_bumpm.material[RENDER_MATERIAL_DIF], 1, obj->material.dif);
+		glUniform3fv(r->uniforms_bumpm.material[RENDER_MATERIAL_SPC], 1, obj->material.spc);
+		glUniform1fv(r->uniforms_bumpm.material[RENDER_MATERIAL_SHN], 1, &obj->material.shn);
+		break;
 
 	case RENDER_TYPE_SOLID:
 		// MVP matrix and eye position uniforms
@@ -267,9 +295,10 @@ void renderable_render(struct renderer* r, struct renderable* obj, mat4f modelwo
 
 /*	initialize renderer, including shader objects
 	param:	r				renderer struct to initialize (modified)
+	param:	tm				texture manager
 	param:	window			window to render to
 */
-unsigned renderer_init(struct renderer* r, struct window* window)
+unsigned renderer_init(struct renderer* r, struct texturemanager* tm, struct window* window)
 {
 	unsigned wirefvert, wireffrag;
 	unsigned solidvert, solidfrag;
@@ -328,6 +357,7 @@ unsigned renderer_init(struct renderer* r, struct window* window)
 
 	// register window pointer
 	r->window = window;
+	r->tm = tm;
 
 
 	// get wireframe uniform locations

@@ -36,9 +36,9 @@ struct game
 {
 	struct window window;
 	struct renderer renderer;
-	struct physicsmanager physics;
-	struct inputmanager input;
-	struct texturemanager textures;
+	struct physicsmanager physicsmanager;
+	struct inputmanager inputmanager;
+	struct texturemanager texturemanager;
 
 	struct track track;
 	struct cart player;
@@ -46,6 +46,8 @@ struct game
 	struct camera cam_player;
 
 	struct light track_lights[2];
+
+	int tex_trackbump;
 
 	unsigned char flags;
 };

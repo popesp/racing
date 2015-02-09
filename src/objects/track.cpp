@@ -30,15 +30,13 @@ void track_init(struct track* t, vec3f up, struct physicsmanager* pm, unsigned c
 	t->num_points = 0;
 	t->points = NULL;
 
-	renderable_init(&t->r_track, RENDER_MODE_TRIANGLESTRIP, RENDER_TYPE_SOLID, RENDER_FLAG_NONE);
-	renderable_init(&t->r_controlpoints, RENDER_MODE_POINTS, RENDER_TYPE_WIREF, RENDER_FLAG_NONE);
-	renderable_init(&t->r_curve, RENDER_MODE_LINESTRIP, RENDER_TYPE_WIREF, RENDER_FLAG_NONE);
+	renderable_init(&t->r_track, RENDER_MODE_TRIANGLESTRIP, RENDER_TYPE_BUMPM, RENDER_FLAG_NONE);
 
 	// initialize material properties
-	vec3f_set(t->r_track.material.amb, 0.5f, 0.6f, 0.7f);
-	vec3f_set(t->r_track.material.dif, 0.4f, 0.5f, 0.6f);
+	vec3f_set(t->r_track.material.amb, 0.6f, 0.7f, 0.7f);
+	vec3f_set(t->r_track.material.dif, 0.6f, 0.7f, 0.7f);
 	vec3f_set(t->r_track.material.spc, 0.8f, 0.8f, 0.8f);
-	t->r_track.material.shn = 1000.f;
+	t->r_track.material.shn = 100.f;
 
 	vec3f_copy(t->up, up);
 
@@ -50,8 +48,6 @@ void track_delete(struct track* t)
 	mem_free(t->points);
 
 	renderable_deallocate(&t->r_track);
-	renderable_deallocate(&t->r_controlpoints);
-	renderable_deallocate(&t->r_curve);
 }
 
 
@@ -103,17 +99,42 @@ static void curvepoint(struct track* t, unsigned index, float d, struct track_po
 
 static inline float* fillbuffer(float* vptr, mat4f basis, vec3f p0, vec3f p1, vec3f n0, vec3f n1)
 {
-	mat4f_fulltransformvec3fn(vptr, p0, basis);
+	vec3f bitan; // temp
+	vec3f pos;
+
+	vec3f_set(bitan, 1.f, 0.f, 0.f); // temp
+
+	mat4f_fulltransformvec3fn(pos, p0, basis);
+	vec3f_copy(vptr, pos);
 	vptr += RENDER_ATTRIBSIZE_POS;
 
 	mat4f_transformvec3fn(vptr, n0, basis);
 	vptr += RENDER_ATTRIBSIZE_NOR;
 
-	mat4f_fulltransformvec3fn(vptr, p1, basis);
+	//vec3f_copy(vptr, basis + C2);
+	vec3f_cross(vptr, vptr - RENDER_ATTRIBSIZE_NOR, bitan); // temp
+	vec3f_normalize(vptr); // temp
+	vptr += RENDER_ATTRIBSIZE_TAN;
+
+	vptr[0] = (pos[VX] + pos[VY])/3.f;
+	vptr[1] = (pos[VZ] + pos[VY])/3.f;
+	vptr += RENDER_ATTRIBSIZE_TEX;
+
+	mat4f_fulltransformvec3fn(pos, p1, basis);
+	vec3f_copy(vptr, pos);
 	vptr += RENDER_ATTRIBSIZE_POS;
 
 	mat4f_transformvec3fn(vptr, n1, basis);
 	vptr += RENDER_ATTRIBSIZE_NOR;
+
+	//vec3f_copy(vptr, basis + C2);
+	vec3f_cross(vptr, vptr - RENDER_ATTRIBSIZE_NOR, bitan); // temp
+	vec3f_normalize(vptr); // temp
+	vptr += RENDER_ATTRIBSIZE_TAN;
+
+	vptr[0] = (pos[VX] + pos[VY])/3.f;
+	vptr[1] = (pos[VZ] + pos[VY])/3.f;
+	vptr += RENDER_ATTRIBSIZE_TEX;
 
 	return vptr;
 }
@@ -191,12 +212,25 @@ static float* addverts(struct track* t, struct track_point* p, float* vptr)
 	return vptr;
 }
 
+static float* copyvert(float* vptr, float* srcptr)
+{
+	vec3f_copy(vptr, srcptr);
+	vptr += RENDER_ATTRIBSIZE_POS;
+	vec3f_copy(vptr, srcptr + RENDER_ATTRIBSIZE_POS);
+	vptr += RENDER_ATTRIBSIZE_NOR;
+	vec3f_copy(vptr, srcptr + RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_NOR);
+	vptr += RENDER_ATTRIBSIZE_TAN;
+	vec3f_copy(vptr, srcptr + RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_NOR + RENDER_ATTRIBSIZE_TAN);
+	vptr += RENDER_ATTRIBSIZE_TEX;
+
+	return vptr;
+}
+
 void track_generatemesh(struct renderer* r, struct track* t)
 {
 	struct track_point p;
 	unsigned i, j, n, s, ps;
 	float* verts;
-	float* cptr;
 	float* ptr;
 	int offs;
 	float d;
@@ -210,21 +244,15 @@ void track_generatemesh(struct renderer* r, struct track* t)
 	for (i = 0; i < n; i++)
 		s += t->points[i].subdivisions + 1;
 
-	/*---- MESH AND CURVE VERTEX BUFFER ----*/
-
 	// re-allocate mesh renderable vertex buffer
 	// the second parameter here looks complicated but is just calculating the required number of vertices to triangle strip the track
 	renderable_allocate(r, &t->r_track, 2u * ((2u * TRACK_SEGMENT_VERTCOUNT - 1u)*s + 2u * (TRACK_SEGMENT_VERTCOUNT - 1u)));
 
-	// re-allocate curve renderable vertex buffer
-	renderable_allocate(r, &t->r_curve, s);
-
 	// temporary vertex buffer
-	verts = (float*)mem_calloc(2 * (2 * TRACK_SEGMENT_VERTCOUNT - 1)*s, RENDER_VERTSIZE_SOLID * sizeof(float));
+	verts = (float*)mem_calloc(2 * (2 * TRACK_SEGMENT_VERTCOUNT - 1)*s, RENDER_VERTSIZE_BUMPM * sizeof(float));
 
 	// place vertex attributes into buffer
 	ptr = verts;
-	cptr = t->r_curve.buf_verts;
 	for (i = 0; i < n; i++)
 	{
 		d = 0.f;
@@ -236,12 +264,6 @@ void track_generatemesh(struct renderer* r, struct track* t)
 			curvepoint(t, i, d, &p);
 			ptr = addverts(t, &p, ptr);
 
-			// copy point into curve buffer
-			vec3f_copy(cptr, p.pos);
-			cptr += RENDER_ATTRIBSIZE_POS;
-			vec3f_set(cptr, 0.f, 0.f, 1.f);
-			cptr += RENDER_ATTRIBSIZE_COL;
-
 			d += 1.f / (float)ps;
 		}
 	}
@@ -249,12 +271,6 @@ void track_generatemesh(struct renderer* r, struct track* t)
 	// generate the last point on the track
 	curvepoint(t, n - 1, 1.f, &p);
 	ptr = addverts(t, &p, ptr);
-
-	// copy the last curve point
-	vec3f_copy(cptr, p.pos);
-	cptr += RENDER_ATTRIBSIZE_POS;
-	vec3f_set(cptr, 0.f, 0.f, 1.f);
-	cptr += RENDER_ATTRIBSIZE_COL;
 
 	// copy vector attributes into renderable buffer
 	ptr = t->r_track.buf_verts;
@@ -264,54 +280,19 @@ void track_generatemesh(struct renderer* r, struct track* t)
 
 		if (i)
 		{
-			// repeat point at end of track
-			vec3f_copy(ptr, ptr - RENDER_VERTSIZE_SOLID);
-			ptr += RENDER_ATTRIBSIZE_POS;
-			vec3f_copy(ptr, ptr - RENDER_VERTSIZE_SOLID);
-			ptr += RENDER_ATTRIBSIZE_NOR;
-
-			// repeat point at start of track
-			vec3f_copy(ptr, verts + offs*RENDER_VERTSIZE_SOLID);
-			ptr += RENDER_ATTRIBSIZE_POS;
-			vec3f_copy(ptr, verts + offs*RENDER_VERTSIZE_SOLID + RENDER_ATTRIBSIZE_POS);
-			ptr += RENDER_ATTRIBSIZE_NOR;
+			// repeat points at start and end of track
+			ptr = copyvert(ptr, ptr - RENDER_VERTSIZE_BUMPM);
+			ptr = copyvert(ptr, verts + offs*RENDER_VERTSIZE_BUMPM);
 		}
 
 		// loop through each segment
 		for (j = 0; j < s; j++)
 		{
-			// first point
-			vec3f_copy(ptr, verts + offs*RENDER_VERTSIZE_SOLID);
-			ptr += RENDER_ATTRIBSIZE_POS;
-			vec3f_copy(ptr, verts + offs*RENDER_VERTSIZE_SOLID + RENDER_ATTRIBSIZE_POS);
-			ptr += RENDER_ATTRIBSIZE_NOR;
-
-			// second point
-			vec3f_copy(ptr, verts + (offs + 1)*RENDER_VERTSIZE_SOLID);
-			ptr += RENDER_ATTRIBSIZE_POS;
-			vec3f_copy(ptr, verts + (offs + 1)*RENDER_VERTSIZE_SOLID + RENDER_ATTRIBSIZE_POS);
-			ptr += RENDER_ATTRIBSIZE_NOR;
+			// copy points
+			ptr = copyvert(ptr, verts + offs*RENDER_VERTSIZE_BUMPM);
+			ptr = copyvert(ptr, verts + (offs + 1)*RENDER_VERTSIZE_BUMPM);
 
 			offs += 2 * (2 * TRACK_SEGMENT_VERTCOUNT - 1);
 		}
-	}
-
-	/*----- END MESH AND CURVE VERTEX BUFFER ----*/
-
-	/*----- CONTROL POINT VERTEX BUFFER -----*/
-
-	// re-allocate control point renderable vertex buffer
-	renderable_allocate(r, &t->r_controlpoints, t->num_points);
-
-	ptr = t->r_controlpoints.buf_verts;
-	for (i = 0; i < t->num_points; i++)
-	{
-		vec3f_copy(ptr, t->points[i].pos);
-		ptr += RENDER_ATTRIBSIZE_POS;
-
-		vec3f_set(ptr, 1.f, 0.f, 0.f);
-		ptr += RENDER_ATTRIBSIZE_COL;
-	}
-
-	/*----- END CONTROL POINT VERTEX BUFFER ----*/									
+	}								
 }
