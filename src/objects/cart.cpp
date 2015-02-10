@@ -5,7 +5,7 @@
 #include	"../render/render.h"
 
 
-static float cart_pos[8][3] =
+/*static float cart_pos[8][3] =
 {
 	{-CART_WIDTH/2.f, -CART_HEIGHT/2.f, -CART_LENGTH/2.f},
 	{-CART_WIDTH/2.f, CART_HEIGHT/2.f, -CART_LENGTH/2.f},
@@ -15,7 +15,7 @@ static float cart_pos[8][3] =
 	{-CART_WIDTH/2.f, CART_HEIGHT/2.f, CART_LENGTH/2.f},
 	{-CART_WIDTH/2.f, -CART_HEIGHT/2.f, CART_LENGTH/2.f},
 	{CART_WIDTH/2.f, -CART_HEIGHT/2.f, CART_LENGTH/2.f}
-};
+};*/
 
 static float cart_nor[6][3] =
 {
@@ -27,7 +27,7 @@ static float cart_nor[6][3] =
 	{0.f, 0.f, 1.f}
 };
 
-static int cart_posindex[36] =
+/*static int cart_posindex[36] =
 {
 	0, 6, 5, 0, 5, 1,
 	0, 3, 7, 0, 7, 6,
@@ -35,7 +35,7 @@ static int cart_posindex[36] =
 	4, 7, 3, 4, 3, 2,
 	4, 2, 1, 4, 1, 5,
 	4, 5, 6, 4, 6, 7
-};
+};*/
 
 static int cart_norindex[36] =
 {
@@ -47,13 +47,12 @@ static int cart_norindex[36] =
 	5, 5, 5, 5, 5, 5
 };
 
-
 void cart_init(struct cart* c, physicsmanager* pm, vec3f pos)
 {
 	vec3f dim;
 
 	vec3f_set(dim, CART_WIDTH/2.f, CART_HEIGHT/2.f, CART_LENGTH/2.f);
-	c->p_cart = physics_adddynamic_box(pm, pos, dim);
+	c->p_cart = physics_addcart(pm, pos);
 
 	renderable_init(&c->r_cart, RENDER_MODE_TRIANGLES, RENDER_TYPE_SOLID, RENDER_FLAG_NONE);
 

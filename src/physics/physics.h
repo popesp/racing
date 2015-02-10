@@ -8,7 +8,6 @@
 
 #define	PHYSICS_DEFAULT_GRAVITY	0.f, -10.f, 0.f
 
-
 struct physicsmanager
 {
 	physx::PxDefaultAllocator default_alloc;
@@ -22,7 +21,6 @@ struct physicsmanager
 
 	physx::PxScene* scene;
 };
-
 
 /*	start up the physics manager
 	param:	pm				physics manager (modified)
@@ -42,6 +40,7 @@ void physicsmanager_shutdown(struct physicsmanager* pm);
 void physicsmanager_update(struct physicsmanager* pm, float dt);
 
 
+physx::PxRigidDynamic* physics_addcart(struct physicsmanager* pm, vec3f pos);
 physx::PxRigidDynamic* physics_adddynamic_box(struct physicsmanager*, vec3f, vec3f);
 
 /*	add a static triangle mesh stored in a triangle strip vertex buffer
