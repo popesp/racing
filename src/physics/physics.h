@@ -22,7 +22,6 @@ struct physicsmanager
 	physx::PxScene* scene;
 };
 
-
 /*	start up the physics manager
 	param:	pm				physics manager (modified)
 */
