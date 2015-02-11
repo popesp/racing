@@ -376,7 +376,8 @@ void createVehicle4WSimulationData
         //Ackermann steer accuracy
         PxVehicleAckermannGeometryData ackermann;
         ackermann.mAccuracy=1.0f;
-        ackermann.mAxleSeparation=wheelCentreOffsets[eFRONT_LEFT_WHEEL].z-wheelCentreOffsets[eREAR_LEFT_WHEEL].z;
+        ackermann.mAxleSeparation=CART_LENGTH;
+        //ackermann.mAxleSeparation=wheelCentreOffsets[eFRONT_LEFT_WHEEL].z-wheelCentreOffsets[eREAR_LEFT_WHEEL].z;
         ackermann.mFrontWidth=wheelCentreOffsets[eFRONT_RIGHT_WHEEL].x-wheelCentreOffsets[eFRONT_LEFT_WHEEL].x;
         ackermann.mRearWidth=wheelCentreOffsets[eREAR_RIGHT_WHEEL].x-wheelCentreOffsets[eREAR_LEFT_WHEEL].x;
         driveData.setAckermannGeometryData(ackermann);
@@ -410,8 +411,9 @@ void setupActor
 
 	vehActor->setMass(chassisData.mMass);
 	vehActor->setMassSpaceInertiaTensor(chassisData.mMOI);
-	//vehActor->setCMassLocalPose(PxTransform(chassisData.mCMOffset, PxQuat::createIdentity()));
-	vehActor->setCMassLocalPose(PxTransform(pos[VX], pos[VY], pos[VZ]));
+
+	vehActor->setCMassLocalPose(PxTransform(chassisData.mCMOffset, PxQuat::createIdentity()));
+	//vehActor->setCMassLocalPose(PxTransform(pos[VX], pos[VY], pos[VZ]));
 }
 
 PxRigidDynamic* createVehicleActor4W
@@ -421,7 +423,7 @@ PxRigidDynamic* createVehicleActor4W
 {
 	//We need a rigid body actor for the vehicle.
 	//Don't forget to add the actor the scene after setting up the associated vehicle.
-	PxRigidDynamic* vehActor=physics.createRigidDynamic(PxTransform::createIdentity());
+	PxRigidDynamic* vehActor=physics.createRigidDynamic(PxTransform(pos[VX], pos[VY], pos[VZ]));
 
 	//We need to add wheel collision shapes, their local poses, a material for the wheels, and a simulation filter for the wheels.
 	PxConvexMeshGeometry frontLeftWheelGeom(wheelConvexMeshes[0]);
@@ -429,6 +431,7 @@ PxRigidDynamic* createVehicleActor4W
 	PxConvexMeshGeometry rearLeftWheelGeom(wheelConvexMeshes[2]);
 	PxConvexMeshGeometry rearRightWheelGeom(wheelConvexMeshes[3]);
 	const PxGeometry* wheelGeometries[4]={&frontLeftWheelGeom,&frontRightWheelGeom,&rearLeftWheelGeom,&rearRightWheelGeom};
+	//const PxTransform wheelLocalPoses[4]={PxTransform(pos[VX] - CART_WIDTH* 0.5, pos[VY], pos[VZ]+ CART_LENGTH*0.5),PxTransform(pos[VX] + CART_WIDTH*0.5, pos[VY], pos[VZ] + CART_LENGTH*0.5),PxTransform(pos[VX] - CART_WIDTH *0.5, pos[VY], pos[VZ]- CART_LENGTH *0.5),PxTransform(pos[VX]+ CART_WIDTH *0.5, pos[VY], pos[VZ] - CART_LENGTH*0.5)};
 	const PxTransform wheelLocalPoses[4]={PxTransform(pos[VX], pos[VY], pos[VZ]),PxTransform(pos[VX], pos[VY], pos[VZ]),PxTransform(pos[VX], pos[VY], pos[VZ]),PxTransform(pos[VX], pos[VY], pos[VZ])};
 	const PxMaterial& wheelMaterial=material;
 	PxFilterData wheelCollFilterData;
