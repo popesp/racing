@@ -51,7 +51,21 @@ void inputmanager_update(struct inputmanager* im)
 
 			im->controllers[i].flags |= INPUT_FLAG_ENABLED;
 			im->controllers[i].buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1+i, &im->controllers[i].num_buttons);
-			im->controllers[i].axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1+i, &im->controllers[i].num_axes);
+			im->controllers[i].axes = (float*)glfwGetJoystickAxes(GLFW_JOYSTICK_1+i, &im->controllers[i].num_axes);
+
+			// left stick deadzone
+			if ((im->controllers[i].axes[INPUT_AXIS_LEFT_LR]*im->controllers[i].axes[INPUT_AXIS_LEFT_LR] + im->controllers[i].axes[INPUT_AXIS_LEFT_UD]*im->controllers[i].axes[INPUT_AXIS_LEFT_UD]) < INPUT_ANALOG_DEADZONE)
+			{
+				im->controllers[i].axes[INPUT_AXIS_LEFT_LR] = 0.f;
+				im->controllers[i].axes[INPUT_AXIS_LEFT_UD] = 0.f;
+			}
+
+			// right stick deadzone
+			if ((im->controllers[i].axes[INPUT_AXIS_RIGHT_LR]*im->controllers[i].axes[INPUT_AXIS_RIGHT_LR] + im->controllers[i].axes[INPUT_AXIS_RIGHT_UD]*im->controllers[i].axes[INPUT_AXIS_RIGHT_UD]) < INPUT_ANALOG_DEADZONE)
+			{
+				im->controllers[i].axes[INPUT_AXIS_RIGHT_LR] = 0.f;
+				im->controllers[i].axes[INPUT_AXIS_RIGHT_UD] = 0.f;
+			}
 		} else
 		{
 			if (im->controllers[i].flags & INPUT_FLAG_ENABLED)
