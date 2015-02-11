@@ -411,7 +411,6 @@ void setupActor
 
 	vehActor->setMass(chassisData.mMass);
 	vehActor->setMassSpaceInertiaTensor(chassisData.mMOI);
-
 	vehActor->setCMassLocalPose(PxTransform(chassisData.mCMOffset, PxQuat::createIdentity()));
 	//vehActor->setCMassLocalPose(PxTransform(pos[VX], pos[VY], pos[VZ]));
 }
