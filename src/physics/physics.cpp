@@ -418,7 +418,7 @@ void setupActor
 PxRigidDynamic* createVehicleActor4W
 (const PxVehicleChassisData& chassisData,
  PxConvexMesh** wheelConvexMeshes, PxConvexMesh* chassisConvexMesh, 
- PxScene& scene, PxPhysics& physics, const PxMaterial& material, vec3f pos)
+ PxScene& scene, PxPhysics& physics, const PxMaterial& material, vec3f pos, PxVec3 * wheeloffsets)
 {
 	//We need a rigid body actor for the vehicle.
 	//Don't forget to add the actor the scene after setting up the associated vehicle.
@@ -431,7 +431,7 @@ PxRigidDynamic* createVehicleActor4W
 	PxConvexMeshGeometry rearRightWheelGeom(wheelConvexMeshes[3]);
 	const PxGeometry* wheelGeometries[4]={&frontLeftWheelGeom,&frontRightWheelGeom,&rearLeftWheelGeom,&rearRightWheelGeom};
 	//const PxTransform wheelLocalPoses[4]={PxTransform(pos[VX] - CART_WIDTH* 0.5, pos[VY], pos[VZ]+ CART_LENGTH*0.5),PxTransform(pos[VX] + CART_WIDTH*0.5, pos[VY], pos[VZ] + CART_LENGTH*0.5),PxTransform(pos[VX] - CART_WIDTH *0.5, pos[VY], pos[VZ]- CART_LENGTH *0.5),PxTransform(pos[VX]+ CART_WIDTH *0.5, pos[VY], pos[VZ] - CART_LENGTH*0.5)};
-	const PxTransform wheelLocalPoses[4]={PxTransform(pos[VX], pos[VY], pos[VZ]),PxTransform(pos[VX], pos[VY], pos[VZ]),PxTransform(pos[VX], pos[VY], pos[VZ]),PxTransform(pos[VX], pos[VY], pos[VZ])};
+	const PxTransform wheelLocalPoses[4]={PxTransform(wheeloffsets[0]),PxTransform(wheeloffsets[1]),PxTransform(wheeloffsets[2]), PxTransform(wheeloffsets[3])};
 	const PxMaterial& wheelMaterial=material;
 	PxFilterData wheelCollFilterData;
 	wheelCollFilterData.word0=COLLISION_FLAG_WHEEL;
@@ -440,7 +440,7 @@ PxRigidDynamic* createVehicleActor4W
 	//We need to add chassis collision shapes, their local poses, a material for the chassis, and a simulation filter for the chassis.
 	PxConvexMeshGeometry chassisConvexGeom(chassisConvexMesh);
 	const PxGeometry* chassisGeoms[1]={&chassisConvexGeom};
-	const PxTransform chassisLocalPoses[1]={PxTransform(pos[VX], pos[VY], pos[VZ])};
+	const PxTransform chassisLocalPoses[1]={PxTransform::createIdentity()};
 	const PxMaterial& chassisMaterial=material;
 	PxFilterData chassisCollFilterData;
 	chassisCollFilterData.word0=COLLISION_FLAG_CHASSIS;
@@ -494,7 +494,7 @@ PxRigidDynamic* physics_addcart(struct physicsmanager* pm, vec3f pos)
 
 	createVehicle4WSimulationData(vehicleDesc.chassisMass, vehicleDesc, vehicleDesc.wheelMass, wheelConvexMeshes4, wheelCentreOffsets4, *wheelsSimData, driveSimData, chassisData);
 
-	PxRigidDynamic* vehActor=createVehicleActor4W(chassisData,wheelConvexMeshes4,chassisConvexMesh,*pm->scene,*pm->sdk,*gMaterial, pos);
+	PxRigidDynamic* vehActor=createVehicleActor4W(chassisData,wheelConvexMeshes4,chassisConvexMesh,*pm->scene,*pm->sdk,*gMaterial, pos, wheelCentreOffsets4);
 
 	pm->scene->addActor(*vehActor);
 
