@@ -35,6 +35,8 @@ enum
 	SAMPLEVEHICLE_UNDRIVABLE_SURFACE = 0x0000ffff
 };
 
+
+
 struct physicsmanager
 {
 	physx::PxDefaultAllocator default_alloc;

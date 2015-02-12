@@ -44,6 +44,20 @@ static PxF32 gTireFrictionMultipliers[MAX_NUM_SURFACE_TYPES][MAX_NUM_TIRE_TYPES]
         {0.80f, 0.80f,  0.80f,  0.80f}          //GRASS
 };
 
+static PxSceneQueryHitType::Enum VehicleWheelRaycastPreFilter(	
+	PxFilterData filterData0, 
+	PxFilterData filterData1,
+	const void* constantBlock, PxU32 constantBlockSize,
+	PxSceneQueryFlags& queryFlags)
+{
+	//filterData0 is the vehicle suspension raycast.
+	//filterData1 is the shape potentially hit by the raycast.
+	PX_UNUSED(queryFlags);
+	PX_UNUSED(constantBlockSize);
+	PX_UNUSED(constantBlock);
+	PX_UNUSED(filterData0);
+	return ((0 == (filterData1.word3 & SAMPLEVEHICLE_DRIVABLE_SURFACE)) ? PxSceneQueryHitType::eNONE : PxSceneQueryHitType::eBLOCK);
+}
 /*	start up the physics manager
 	param:	pm				physics manager (modified)
 */
