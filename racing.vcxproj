@@ -46,6 +46,7 @@
       <AdditionalIncludeDirectories>..\glew\include;..\glfw\include;..\physx\Include;..\freeimage\include</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4514;4505;4706;4711;4820</DisableSpecificWarnings>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
