@@ -35,20 +35,7 @@ enum
 	SAMPLEVEHICLE_UNDRIVABLE_SURFACE = 0x0000ffff
 };
 
-static PxSceneQueryHitType::Enum VehicleWheelRaycastPreFilter(	
-	PxFilterData filterData0, 
-	PxFilterData filterData1,
-	const void* constantBlock, PxU32 constantBlockSize,
-	PxSceneQueryFlags& queryFlags)
-{
-	//filterData0 is the vehicle suspension raycast.
-	//filterData1 is the shape potentially hit by the raycast.
-	PX_UNUSED(queryFlags);
-	PX_UNUSED(constantBlockSize);
-	PX_UNUSED(constantBlock);
-	PX_UNUSED(filterData0);
-	return ((0 == (filterData1.word3 & SAMPLEVEHICLE_DRIVABLE_SURFACE)) ? PxSceneQueryHitType::eNONE : PxSceneQueryHitType::eBLOCK);
-}
+
 
 struct physicsmanager
 {
