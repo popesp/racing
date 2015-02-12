@@ -8,6 +8,33 @@
 
 #define	PHYSICS_DEFAULT_GRAVITY	0.f, -10.f, 0.f
 
+
+
+#define TIRE_TYPE_WETS		0
+#define	TIRE_TYPE_SLICKS	1
+
+
+#define eFRONT_LEFT_WHEEL	0
+#define eFRONT_RIGHT_WHEEL	1
+#define eREAR_LEFT_WHEEL	2
+#define eREAR_RIGHT_WHEEL	3
+
+#define MAX_NUM_SURFACE_TYPES 4
+#define MAX_NUM_TIRE_TYPES 4
+
+enum
+	{
+		MAX_NUM_INDEX_BUFFERS = 16
+	};
+	
+
+//Make sure that suspension raycasts only consider shapes flagged as drivable that don't belong to the owner vehicle.
+enum
+{
+	SAMPLEVEHICLE_DRIVABLE_SURFACE = 0xffff0000,
+	SAMPLEVEHICLE_UNDRIVABLE_SURFACE = 0x0000ffff
+};
+
 struct physicsmanager
 {
 	physx::PxDefaultAllocator default_alloc;
@@ -20,6 +47,9 @@ struct physicsmanager
 	physx::PxMaterial* default_material;
 
 	physx::PxScene* scene;
+	physx::PxVehicleDrivableSurfaceToTireFrictionPairs* mSurfaceTirePairs;
+
+
 };
 
 /*	start up the physics manager

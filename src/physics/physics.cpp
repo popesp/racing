@@ -6,13 +6,7 @@
 #include	"../objects/cart.h"
 #include	"../render/render.h"
 
-#define eFRONT_LEFT_WHEEL	0
-#define eFRONT_RIGHT_WHEEL	1
-#define eREAR_LEFT_WHEEL	2
-#define eREAR_RIGHT_WHEEL	3
 
-#define TIRE_TYPE_WETS		0
-#define	TIRE_TYPE_SLICKS	1
 
 //Collision types and flags describing collision interactions of each collision type.
 enum
@@ -35,6 +29,20 @@ using namespace physx;
 PxVehicleDrive4W*		gVehicle4W		= NULL;
 
 PxMaterial*				gMaterial	= NULL;
+
+PxVehicleDrivableSurfaceType	mVehicleDrivableSurfaceTypes[MAX_NUM_INDEX_BUFFERS];
+const PxMaterial*						mStandardMaterials[MAX_NUM_INDEX_BUFFERS];
+
+
+//Tire model friction for each combination of drivable surface type and tire type.
+static PxF32 gTireFrictionMultipliers[MAX_NUM_SURFACE_TYPES][MAX_NUM_TIRE_TYPES]=
+{
+        //WETS  SLICKS  ICE             MUD
+        {0.95f, 0.95f,  0.95f,  0.95f},         //MUD
+        {1.10f, 1.15f,  1.10f,  1.10f},         //TARMAC
+        {0.70f, 0.70f,  0.70f,  0.70f},         //ICE
+        {0.80f, 0.80f,  0.80f,  0.80f}          //GRASS
+};
 
 /*	start up the physics manager
 	param:	pm				physics manager (modified)
@@ -91,6 +99,78 @@ VehicleDesc initVehicleDesc()
 	return vehicleDesc;
 }
 
+void createStandardMaterials(struct physicsmanager* pm)
+{
+	const PxF32 restitutions[MAX_NUM_SURFACE_TYPES] = {0.2f, 0.2f, 0.2f, 0.2f};
+	const PxF32 staticFrictions[MAX_NUM_SURFACE_TYPES] = {0.5f, 0.5f, 0.5f, 0.5f};
+	const PxF32 dynamicFrictions[MAX_NUM_SURFACE_TYPES] = {0.5f, 0.5f, 0.5f, 0.5f};
+
+	for(PxU32 i=0;i<MAX_NUM_SURFACE_TYPES;i++) 
+	{
+		////Create a new material.
+		mStandardMaterials[i] = pm->sdk->createMaterial(staticFrictions[i], dynamicFrictions[i], restitutions[i]);
+		//if(!mStandardMaterials[i])
+		//{
+		//	getSampleErrorCallback().reportError(PxErrorCode::eINTERNAL_ERROR, "createMaterial failed", __FILE__, __LINE__);
+		//}
+
+		//Set up the drivable surface type that will be used for the new material.
+		mVehicleDrivableSurfaceTypes[i].mType = i;
+	}
+
+	/*mChassisMaterialDrivable = getPhysics().createMaterial(0.0f, 0.0f, 0.0f);
+	if(!mChassisMaterialDrivable)
+	{
+		getSampleErrorCallback().reportError(PxErrorCode::eINTERNAL_ERROR, "createMaterial failed", __FILE__, __LINE__);
+	}
+
+	mChassisMaterialNonDrivable = getPhysics().createMaterial(1.0f, 1.0f, 0.0f);
+	if(!mChassisMaterialNonDrivable)
+	{
+		getSampleErrorCallback().reportError(PxErrorCode::eINTERNAL_ERROR, "createMaterial failed", __FILE__, __LINE__);
+	}*/
+}
+PxFilterFlags VehicleFilterShader(	
+	PxFilterObjectAttributes attributes0, PxFilterData filterData0, 
+	PxFilterObjectAttributes attributes1, PxFilterData filterData1,
+	PxPairFlags& pairFlags, const void* constantBlock, PxU32 constantBlockSize)
+{
+	PX_UNUSED(constantBlock);
+	PX_UNUSED(constantBlockSize);
+
+	// let triggers through
+	if(PxFilterObjectIsTrigger(attributes0) || PxFilterObjectIsTrigger(attributes1))
+	{
+		pairFlags = PxPairFlag::eTRIGGER_DEFAULT;
+		return PxFilterFlags();
+	}
+
+
+
+	// use a group-based mechanism for all other pairs:
+	// - Objects within the default group (mask 0) always collide
+	// - By default, objects of the default group do not collide
+	//   with any other group. If they should collide with another
+	//   group then this can only be specified through the filter
+	//   data of the default group objects (objects of a different
+	//   group can not choose to do so)
+	// - For objects that are not in the default group, a bitmask
+	//   is used to define the groups they should collide with
+	if ((filterData0.word0 != 0 || filterData1.word0 != 0) &&
+		!(filterData0.word0&filterData1.word1 || filterData1.word0&filterData0.word1))
+		return PxFilterFlag::eSUPPRESS;
+
+	pairFlags = PxPairFlag::eCONTACT_DEFAULT;
+
+	// The pairFlags for each object are stored in word2 of the filter data. Combine them.
+	pairFlags |= PxPairFlags(PxU16(filterData0.word2 | filterData1.word2));
+	return PxFilterFlags();
+}
+void customizeSceneDesc(PxSceneDesc& sceneDesc)
+{
+	sceneDesc.filterShader	= VehicleFilterShader;
+	//sceneDesc.flags			|= PxSceneFlag::eREQUIRE_RW_LOCK;
+}
 void physicsmanager_startup(struct physicsmanager* pm)
 {
 	PxTolerancesScale scale;
@@ -120,9 +200,31 @@ void physicsmanager_startup(struct physicsmanager* pm)
 	scenedesc.gravity = PxVec3(PHYSICS_DEFAULT_GRAVITY);
 	scenedesc.cpuDispatcher = PxDefaultCpuDispatcherCreate(1);
 	scenedesc.filterShader = PxDefaultSimulationFilterShader;
+	customizeSceneDesc(scenedesc);
 	pm->scene = pm->sdk->createScene(scenedesc);
 
 	gMaterial = pm->sdk->createMaterial(0.5f, 0.5f, 0.6f);
+
+	pm->mSurfaceTirePairs=PxVehicleDrivableSurfaceToTireFrictionPairs::allocate(MAX_NUM_TIRE_TYPES,MAX_NUM_SURFACE_TYPES);
+	pm->mSurfaceTirePairs->setup(MAX_NUM_TIRE_TYPES,MAX_NUM_SURFACE_TYPES,mStandardMaterials,mVehicleDrivableSurfaceTypes);
+
+	for(PxU32 i=0;i<MAX_NUM_SURFACE_TYPES;i++)
+	{
+        for(PxU32 j=0;j<MAX_NUM_TIRE_TYPES;j++)
+        {
+                pm->mSurfaceTirePairs->setTypePairFriction(i,j,gTireFrictionMultipliers[i][j]);
+        }
+	}
+
+
+}
+void VehicleSetupDrivableShapeQueryFilterData(PxFilterData* qryFilterData)
+{
+	qryFilterData->word3 = (PxU32)SAMPLEVEHICLE_DRIVABLE_SURFACE;
+}
+void VehicleSetupNonDrivableShapeQueryFilterData(PxFilterData* qryFilterData)
+{
+	qryFilterData->word3 = (PxU32)SAMPLEVEHICLE_UNDRIVABLE_SURFACE;
 }
 
 /*	shut down the physics manager
@@ -140,6 +242,9 @@ void physicsmanager_shutdown(struct physicsmanager* pm)
 	pm->sdk->release();
 	pm->foundation->release();
 }
+
+
+
 
 
 /*	update the physics simulation
@@ -449,7 +554,7 @@ PxRigidDynamic* createVehicleActor4W
 	//Create a query filter data for the car to ensure that cars
 	//do not attempt to drive on themselves.
 	PxFilterData vehQryFilterData;
-	//SampleVehicleSetupVehicleShapeQueryFilterData(&vehQryFilterData);
+	VehicleSetupNonDrivableShapeQueryFilterData(&vehQryFilterData);
 
 	//Set up the physx rigid body actor with shapes, local poses, and filters.
 	setupActor
@@ -525,6 +630,14 @@ void physicsmanager_addstatic_trianglestrip(struct physicsmanager* pm, unsigned 
 	PxTriangleMeshDesc meshdesc;
 	PxTriangleMesh* mesh;
 	PxRigidStatic* obj;
+	PxFilterData simFilterData;
+	PxFilterData qryFilterData;
+
+	simFilterData.word0=COLLISION_FLAG_GROUND;
+	simFilterData.word1=COLLISION_FLAG_GROUND_AGAINST;
+	
+	VehicleSetupDrivableShapeQueryFilterData(&qryFilterData);
+
 	unsigned* indices, * ptr;
 	unsigned i;
 
@@ -560,8 +673,13 @@ void physicsmanager_addstatic_trianglestrip(struct physicsmanager* pm, unsigned 
 
 	PxDefaultMemoryInputData readbuf(writebuf.getData(), writebuf.getSize());
 	mesh = pm->sdk->createTriangleMesh(readbuf);
-
-	obj = PxCreateStatic(*pm->sdk, PxTransform(0.f, 0.f, 0.f), PxTriangleMeshGeometry(mesh), *pm->default_material);
+	
+	obj=pm->sdk->createRigidStatic(PxTransform(0.f, 0.f, 0.f));
+	//obj = PxCreateStatic(*pm->sdk, PxTransform(0.f, 0.f, 0.f), PxTriangleMeshGeometry(mesh), *pm->default_material);
+	PxShape* shape=obj->createShape(PxTriangleMeshGeometry(mesh), *pm->default_material);
+	
+	shape->setQueryFilterData(qryFilterData);
+	shape->setSimulationFilterData(simFilterData);
 	pm->scene->addActor(*obj);
 
 	mem_free(indices);
