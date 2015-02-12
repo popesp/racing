@@ -239,7 +239,7 @@ static void trackpoint(struct track_point* p, vec3f pos, vec3f tan, float angle,
 
 int game_startup(struct game* game)
 {
-	vec3f up, dir, pos, tan;
+	vec3f up, dir, pos;
 	int major, minor, rev;
 	GLenum err;
 
@@ -330,81 +330,8 @@ int game_startup(struct game* game)
 
 	// initialize track object
 	vec3f_set(up, 0.f, 1.f, 0.f);
-	track_init(&game->track, up, &game->physicsmanager, TRACK_FLAG_LOOPED);
-/*
-	std::ifstream trackfile;
-	trackfile.open("track1.txt");
-
-	trackfile >> game->track.num_points;
-	game->track.points = (struct track_point*)calloc(game->track.num_points, sizeof(struct track_point));
-
-	{
-	float px, py, pz, tx, ty, tz, angle, weight, width;
-	unsigned subdiv, ind;
-
-	for(int i = 0; i<game->track.num_points; i++){
-		trackfile >> ind>> px >> py >> pz >> tx >>ty >> tz >>angle >> weight >> width >> subdiv;
-		vec3f_set(pos, px, py, pz);
-		vec3f_set(tan, tx, ty, tz);
-		trackpoint(game->track.points + ind, pos, tan, angle, weight, width, subdiv);
-	}
-	}*/
-
-	game->track.num_points = 13;
-	game->track.points = (struct track_point*)calloc(game->track.num_points, sizeof(struct track_point));
-
-	vec3f_set(pos, -5.f, 0.f, 25.f);
-	vec3f_set(tan, -1.f, 0.f, 0.f);
-	trackpoint(game->track.points + 0, pos, tan, 0.f, 20.f, 5.f, 10);
-
-	vec3f_set(pos, -15.f, 0.f, 15.f);
-	vec3f_set(tan, 0.f, 0.f, -1.f);
-	trackpoint(game->track.points + 1, pos, tan, 0.f, 20.f, 5.f, 10);
-
-	vec3f_set(pos, -15.f, 0.f, -30.f);
-	vec3f_set(tan, 0.f, 0.f, -1.f);
-	trackpoint(game->track.points + 2, pos, tan, 0.f, 20.f, 5.f, 10);
-
-	vec3f_set(pos, -5.f, 0.f, -40.f);
-	vec3f_set(tan, 1.f, 0.f, 0.f);
-	trackpoint(game->track.points + 3, pos, tan, 0.f, 20.f, 5.f, 10);
-
-	vec3f_set(pos, 10.f, 0.f, -40.f);
-	vec3f_set(tan, 1.f, 0.f, 0.f);
-	trackpoint(game->track.points + 4, pos, tan, 0.34907f, 20.f, 5.f, 10);
-
-	vec3f_set(pos, 15.f, -2.f, -25.f);
-	vec3f_set(tan, -4.f, -1.f, 4.f);
-	trackpoint(game->track.points + 5, pos, tan, 0.34907f, 20.f, 5.f, 10);
-
-	vec3f_set(pos, -5.f, -15.f, -5.f);
-	vec3f_set(tan, -4.f, -1.f, 4.f);
-	trackpoint(game->track.points + 6, pos, tan, 0.f, 20.f, 5.f, 10);
-
-	vec3f_set(pos, -5.f, -16.f, 10.f);
-	vec3f_set(tan, 1.f, 0.f, 1.f);
-	trackpoint(game->track.points + 7, pos, tan, 0.f, 20.f, 5.f, 10);
-
-	vec3f_set(pos, 10.f, -15.f, 10.f);
-	vec3f_set(tan, 4.f, 1.f, -4.f);
-	trackpoint(game->track.points + 8, pos, tan, 0.f, 20.f, 5.f, 10);
-
-	vec3f_set(pos, 30.f, -2.f, -10.f);
-	vec3f_set(tan, 4.f, 1.f, -4.f);
-	trackpoint(game->track.points + 9, pos, tan, 0.f, 20.f, 5.f, 10);
-
-	vec3f_set(pos, 45.f, 0.f, -5.f);
-	vec3f_set(tan, 0.f, 0.f, 1.f);
-	trackpoint(game->track.points + 10, pos, tan, 0.f, 20.f, 5.f, 10);
-
-	vec3f_set(pos, 45.f, 0.f, 15.f);
-	vec3f_set(tan, 0.f, 0.f, 1.f);
-	trackpoint(game->track.points + 11, pos, tan, 0.f, 20.f, 5.f, 10);
-
-	vec3f_set(pos, 35.f, 0.f, 25.f);
-	vec3f_set(tan, -1.f, 0.f, 0.f);
-	trackpoint(game->track.points + 12, pos, tan, 0.f, 20.f, 5.f, 10);
-	
+	track_init(&game->track, up, &game->physicsmanager);
+	track_loadpointsfile(&game->track, "test.track");
 	track_generatemesh(&game->renderer, &game->track);
 
 	physicsmanager_addstatic_trianglestrip(&game->physicsmanager, game->track.r_track.num_verts, sizeof(float)*RENDER_VERTSIZE_BUMPM, game->track.r_track.buf_verts);

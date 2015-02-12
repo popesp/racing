@@ -9,7 +9,7 @@
 
 #define	TRACK_SEGMENT_VERTCOUNT	5
 
-#define	TRACK_FLAG_NONE			0x00
+#define	TRACK_FLAG_INIT			0x00
 #define	TRACK_FLAG_LOOPED		0x01
 
 
@@ -43,8 +43,10 @@ struct track
 };
 
 
-void track_init(struct track*, vec3f, struct physicsmanager*, unsigned char);
+void track_init(struct track*, vec3f, struct physicsmanager*);
 void track_delete(struct track*);
+
+void track_loadpointsfile(struct track* t, const char* filename);
 
 void track_generatemesh(struct renderer*, struct track*);
 

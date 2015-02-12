@@ -1,6 +1,7 @@
 #include	"track.h"
 
 #include	<math.h>				// cosf, sinf
+#include	"../error.h"
 #include	"../math/mat4f.h"		// identity
 #include	"../math/vec3f.h"		// set, normalize
 #include	"../mem.h"				// free
@@ -23,7 +24,7 @@ static vec3f segment_nor[TRACK_SEGMENT_VERTCOUNT] = {
 	{0.f, -1.f, 0.f} };
 
 
-void track_init(struct track* t, vec3f up, struct physicsmanager* pm, unsigned char flags)
+void track_init(struct track* t, vec3f up, struct physicsmanager* pm)
 {
 	(void)pm;
 
@@ -40,7 +41,7 @@ void track_init(struct track* t, vec3f up, struct physicsmanager* pm, unsigned c
 
 	vec3f_copy(t->up, up);
 
-	t->flags = flags;
+	t->flags = TRACK_FLAG_INIT;
 }
 
 void track_delete(struct track* t)
@@ -48,6 +49,69 @@ void track_delete(struct track* t)
 	mem_free(t->points);
 
 	renderable_deallocate(&t->r_track);
+}
+
+
+void track_loadpointsfile(struct track* t, const char* filename)
+{
+	FILE* file;
+	char s[64];
+	int p;
+
+	if (fopen_s(&file, filename, "rb"))
+	{
+		PRINT_ERROR("Could not open track file %s\n", filename);
+		return;
+	}
+
+	while (fscanf(file, "%s = ", s) != EOF)
+	{
+		if (!strncmp(s, "npoints", 7))
+		{
+			if (fscanf(file, "%d;", &t->num_points) != 1)
+			{
+				PRINT_ERROR("Track file is malformed.\n");
+				fclose(file);
+				return;
+			}
+
+			// allocate space for points
+			t->points = (struct track_point*)mem_realloc(t->points, sizeof(struct track_point) * t->num_points);
+		} else if (!strncmp(s, "looped", 6))
+		{
+			if (fscanf(file, "%s;", s) != 1)
+			{
+				PRINT_ERROR("Track file is malformed.\n");
+				fclose(file);
+				return;
+			}
+
+			if (!strncmp(s, "true", 4))
+				t->flags |= TRACK_FLAG_LOOPED;
+			else if (!strncmp(s, "false", 5))
+				t->flags &= ~TRACK_FLAG_LOOPED;
+			else
+			{
+				PRINT_ERROR("Expected true or false for looped variable.\n");
+				fclose(file);
+				return;
+			}
+		} else if (!strncmp(s, "point", 5))
+		{
+			sscanf(s, "point%d", &p);
+
+			fscanf(file, "pos(%f, %f, %f), ", t->points[p].pos + VX, t->points[p].pos + VY, t->points[p].pos + VZ);
+			fscanf(file, "tan(%f, %f, %f), ", t->points[p].tan + VX, t->points[p].tan + VY, t->points[p].tan + VZ);
+			vec3f_normalize(t->points[p].tan);
+
+			fscanf(file, "angle(%f), ", &t->points[p].angle);
+			fscanf(file, "weight(%f), ", &t->points[p].weight);
+			fscanf(file, "width(%f), ", &t->points[p].width);
+			fscanf(file, "subdivisions(%d), ", &t->points[p].subdivisions);
+		}
+	}
+
+	fclose(file);
 }
 
 
