@@ -1,4 +1,6 @@
 #include	"physics.h"
+#include	"scene_query.h"
+#include	"wheel_query_results.h"
 
 #include	<PxPhysicsAPI.h>
 #include	"../math/vec3f.h"
@@ -7,22 +9,6 @@
 #include	"../render/render.h"
 
 
-
-//Collision types and flags describing collision interactions of each collision type.
-enum
-{
-	COLLISION_FLAG_GROUND			=	1 << 0,
-	COLLISION_FLAG_WHEEL			=	1 << 1,
-	COLLISION_FLAG_CHASSIS			=	1 << 2,
-	COLLISION_FLAG_OBSTACLE			=	1 << 3,
-	COLLISION_FLAG_DRIVABLE_OBSTACLE=	1 << 4,
-
-	COLLISION_FLAG_GROUND_AGAINST	=															COLLISION_FLAG_CHASSIS | COLLISION_FLAG_OBSTACLE | COLLISION_FLAG_DRIVABLE_OBSTACLE,
-	COLLISION_FLAG_WHEEL_AGAINST	=									COLLISION_FLAG_WHEEL |	COLLISION_FLAG_CHASSIS | COLLISION_FLAG_OBSTACLE,
-	COLLISION_FLAG_CHASSIS_AGAINST	=			COLLISION_FLAG_GROUND | COLLISION_FLAG_WHEEL |	COLLISION_FLAG_CHASSIS | COLLISION_FLAG_OBSTACLE | COLLISION_FLAG_DRIVABLE_OBSTACLE,
-	COLLISION_FLAG_OBSTACLE_AGAINST	=			COLLISION_FLAG_GROUND | COLLISION_FLAG_WHEEL |	COLLISION_FLAG_CHASSIS | COLLISION_FLAG_OBSTACLE | COLLISION_FLAG_DRIVABLE_OBSTACLE,
-	COLLISION_FLAG_DRIVABLE_OBSTACLE_AGAINST=	COLLISION_FLAG_GROUND 						 |	COLLISION_FLAG_CHASSIS | COLLISION_FLAG_OBSTACLE | COLLISION_FLAG_DRIVABLE_OBSTACLE,
-};
 
 using namespace physx;
 
@@ -44,20 +30,7 @@ static PxF32 gTireFrictionMultipliers[MAX_NUM_SURFACE_TYPES][MAX_NUM_TIRE_TYPES]
         {0.80f, 0.80f,  0.80f,  0.80f}          //GRASS
 };
 
-static PxSceneQueryHitType::Enum VehicleWheelRaycastPreFilter(	
-	PxFilterData filterData0, 
-	PxFilterData filterData1,
-	const void* constantBlock, PxU32 constantBlockSize,
-	PxSceneQueryFlags& queryFlags)
-{
-	//filterData0 is the vehicle suspension raycast.
-	//filterData1 is the shape potentially hit by the raycast.
-	PX_UNUSED(queryFlags);
-	PX_UNUSED(constantBlockSize);
-	PX_UNUSED(constantBlock);
-	PX_UNUSED(filterData0);
-	return ((0 == (filterData1.word3 & SAMPLEVEHICLE_DRIVABLE_SURFACE)) ? PxSceneQueryHitType::eNONE : PxSceneQueryHitType::eBLOCK);
-}
+
 /*	start up the physics manager
 	param:	pm				physics manager (modified)
 */
@@ -82,7 +55,7 @@ VehicleDesc initVehicleDesc()
 	//Set up the chassis mass, dimensions, moment of inertia, and center of mass offset.
 	//The moment of inertia is just the moment of inertia of a cuboid but modified for easier steering.
 	//Center of mass offset is 0.65m above the base of the chassis and 0.25m towards the front.
-	const PxF32 chassisMass = 1500.0f;
+	const PxF32 chassisMass = 15000.0f;
 	const PxVec3 chassisDims(2.5f,2.0f,5.0f);
 	const PxVec3 chassisMOI
 		((chassisDims.y*chassisDims.y + chassisDims.z*chassisDims.z)*chassisMass/12.0f,
@@ -144,6 +117,9 @@ void createStandardMaterials(struct physicsmanager* pm)
 		getSampleErrorCallback().reportError(PxErrorCode::eINTERNAL_ERROR, "createMaterial failed", __FILE__, __LINE__);
 	}*/
 }
+
+
+
 PxFilterFlags VehicleFilterShader(	
 	PxFilterObjectAttributes attributes0, PxFilterData filterData0, 
 	PxFilterObjectAttributes attributes1, PxFilterData filterData1,
@@ -185,6 +161,18 @@ void customizeSceneDesc(PxSceneDesc& sceneDesc)
 	sceneDesc.filterShader	= VehicleFilterShader;
 	//sceneDesc.flags			|= PxSceneFlag::eREQUIRE_RW_LOCK;
 }
+
+void suspensionRaycasts(PxScene* scene, struct physicsmanager* pm)
+{
+	//Create a scene query if we haven't already done so.
+	if(NULL==pm->mSqWheelRaycastBatchQuery)
+	{
+		pm->mSqWheelRaycastBatchQuery=pm->mSqData->setUpBatchedSceneQuery(scene);
+	}
+	//Raycasts.
+	//PxSceneReadLock scopedLock(*scene);
+	PxVehicleSuspensionRaycasts(pm->mSqWheelRaycastBatchQuery,pm->mNumVehicles,pm->mVehicles,pm->mSqData->getRaycastQueryResultBufferSize(),pm->mSqData->getRaycastQueryResultBuffer());
+}
 void physicsmanager_startup(struct physicsmanager* pm)
 {
 	PxTolerancesScale scale;
@@ -207,17 +195,25 @@ void physicsmanager_startup(struct physicsmanager* pm)
 	PxVehicleSetUpdateMode(PxVehicleUpdateMode::eVELOCITY_CHANGE);
 
 	// create default material
-	pm->default_material = pm->sdk->createMaterial(0.5f, 0.5f, 0.1f);
-
+	pm->default_material = pm->sdk->createMaterial(0.5f, 0.5f, 0.5f);
+	pm->gravity = PxVec3(0.f,-100.0f,0.f);
 	// create the scene for simulation
 	PxSceneDesc scenedesc(scale);
-	scenedesc.gravity = PxVec3(PHYSICS_DEFAULT_GRAVITY);
+	scenedesc.gravity = pm->gravity;
 	scenedesc.cpuDispatcher = PxDefaultCpuDispatcherCreate(1);
 	scenedesc.filterShader = PxDefaultSimulationFilterShader;
 	customizeSceneDesc(scenedesc);
 	pm->scene = pm->sdk->createScene(scenedesc);
 
 	gMaterial = pm->sdk->createMaterial(0.5f, 0.5f, 0.6f);
+
+	
+	//Scene query data for to allow raycasts for all suspensions of all vehicles.
+	pm->mSqData = VehicleSceneQueryData::allocate(MAX_NUM_4W_VEHICLES*4);
+
+	//Data to store reports for each wheel.
+	pm->mWheelQueryResults = VehicleWheelQueryResults::allocate(MAX_NUM_4W_VEHICLES*4);
+
 
 	pm->mSurfaceTirePairs=PxVehicleDrivableSurfaceToTireFrictionPairs::allocate(MAX_NUM_TIRE_TYPES,MAX_NUM_SURFACE_TYPES);
 	pm->mSurfaceTirePairs->setup(MAX_NUM_TIRE_TYPES,MAX_NUM_SURFACE_TYPES,mStandardMaterials,mVehicleDrivableSurfaceTypes);
@@ -229,16 +225,16 @@ void physicsmanager_startup(struct physicsmanager* pm)
                 pm->mSurfaceTirePairs->setTypePairFriction(i,j,gTireFrictionMultipliers[i][j]);
         }
 	}
+	
+	pm->mNumVehicles=0;
+	pm->mSqWheelRaycastBatchQuery=NULL;
+	//Initialise all vehicle ptrs to null.
+	for(PxU32 i=0;i<MAX_NUM_4W_VEHICLES;i++)
+	{
+		pm->mVehicles[i]=NULL;
+		
+	}
 
-
-}
-void VehicleSetupDrivableShapeQueryFilterData(PxFilterData* qryFilterData)
-{
-	qryFilterData->word3 = (PxU32)SAMPLEVEHICLE_DRIVABLE_SURFACE;
-}
-void VehicleSetupNonDrivableShapeQueryFilterData(PxFilterData* qryFilterData)
-{
-	qryFilterData->word3 = (PxU32)SAMPLEVEHICLE_UNDRIVABLE_SURFACE;
 }
 
 /*	shut down the physics manager
@@ -268,7 +264,10 @@ void physicsmanager_shutdown(struct physicsmanager* pm)
 void physicsmanager_update(struct physicsmanager* pm, float dt)
 {
 	pm->scene->simulate(dt);
+	suspensionRaycasts(pm->scene,pm);
+	PxVehicleUpdates(dt,pm->gravity,*(pm->mSurfaceTirePairs),pm->mNumVehicles,pm->mVehicles,pm->mVehicleWheelQueryResults);
 	pm->scene->fetchResults(true);
+	
 }
 
 static PxConvexMesh* createConvexMesh(const PxVec3* verts, const PxU32 numVerts, PxPhysics& physics, PxCooking& cooking)
@@ -332,6 +331,13 @@ void createVehicle4WSimulationData
  const PxF32 wheelMass, PxConvexMesh** wheelConvexMeshes, const PxVec3* wheelCentreOffsets,
  PxVehicleWheelsSimData& wheelsData, PxVehicleDriveSimData4W& driveData, PxVehicleChassisData& chassisData)
 {
+
+	PxVec3 wheelCentreOffsets4[4]; 
+	wheelCentreOffsets4[0] = wheelCentreOffsets[0];
+	wheelCentreOffsets4[1] = wheelCentreOffsets[1];
+	wheelCentreOffsets4[2] = wheelCentreOffsets[2];
+	wheelCentreOffsets4[3] = wheelCentreOffsets[3];
+
         //Extract the chassis AABB dimensions from the chassis convex mesh.
 	const PxVec3 chassisDims=vehicleDesc.chassisDims;
 
@@ -407,8 +413,8 @@ void createVehicle4WSimulationData
         {
                 susps[i].mMaxCompression=0.3f;
                 susps[i].mMaxDroop=0.1f;
-                susps[i].mSpringStrength=35000.0f;
-                susps[i].mSpringDamperRate=4500.0f;
+                susps[i].mSpringStrength=3500.0f;
+                susps[i].mSpringDamperRate=1200.0f;
         }
         susps[eFRONT_LEFT_WHEEL].mSprungMass=suspSprungMasses[eFRONT_LEFT_WHEEL];
         susps[eFRONT_RIGHT_WHEEL].mSprungMass=suspSprungMasses[eFRONT_RIGHT_WHEEL];
@@ -495,10 +501,10 @@ void createVehicle4WSimulationData
         //Ackermann steer accuracy
         PxVehicleAckermannGeometryData ackermann;
         ackermann.mAccuracy=1.0f;
-        ackermann.mAxleSeparation=CART_LENGTH;
-        //ackermann.mAxleSeparation=wheelCentreOffsets[eFRONT_LEFT_WHEEL].z-wheelCentreOffsets[eREAR_LEFT_WHEEL].z;
-        ackermann.mFrontWidth=wheelCentreOffsets[eFRONT_RIGHT_WHEEL].x-wheelCentreOffsets[eFRONT_LEFT_WHEEL].x;
-        ackermann.mRearWidth=wheelCentreOffsets[eREAR_RIGHT_WHEEL].x-wheelCentreOffsets[eREAR_LEFT_WHEEL].x;
+        //ackermann.mAxleSeparation=CART_LENGTH;
+        ackermann.mAxleSeparation=fabs(wheelCentreOffsets[eFRONT_LEFT_WHEEL].z-wheelCentreOffsets[eREAR_LEFT_WHEEL].z);
+        ackermann.mFrontWidth=fabs(wheelCentreOffsets[eFRONT_RIGHT_WHEEL].x-wheelCentreOffsets[eFRONT_LEFT_WHEEL].x);
+        ackermann.mRearWidth=fabs(wheelCentreOffsets[eREAR_RIGHT_WHEEL].x-wheelCentreOffsets[eREAR_LEFT_WHEEL].x);
         driveData.setAckermannGeometryData(ackermann);
 }
 
@@ -606,17 +612,42 @@ PxRigidDynamic* physics_addcart(struct physicsmanager* pm, vec3f pos)
 
 	//Create wheel offsets
 	PxVec3 wheelCentreOffsets4[4];
-	wheelCentreOffsets4[0] = PxVec3(-CART_WIDTH / 2, -CART_HEIGHT / 2, - CART_LENGTH / 2);
-	wheelCentreOffsets4[1] = PxVec3(CART_WIDTH / 2, -CART_HEIGHT / 2, - CART_LENGTH / 2);
-	wheelCentreOffsets4[2] = PxVec3(-CART_WIDTH / 2, -CART_HEIGHT / 2, CART_LENGTH / 2);
-	wheelCentreOffsets4[3] = PxVec3(CART_WIDTH / 2, -CART_HEIGHT / 2,  CART_LENGTH / 2);
+	wheelCentreOffsets4[eFRONT_LEFT_WHEEL] = PxVec3(-CART_WIDTH / 2, -CART_HEIGHT / 2, - CART_LENGTH / 2);
+	wheelCentreOffsets4[eFRONT_RIGHT_WHEEL] = PxVec3(CART_WIDTH / 2, -CART_HEIGHT / 2, - CART_LENGTH / 2);
+	wheelCentreOffsets4[eREAR_LEFT_WHEEL] = PxVec3(-CART_WIDTH / 2, -CART_HEIGHT / 2, CART_LENGTH / 2);
+	wheelCentreOffsets4[eREAR_RIGHT_WHEEL] = PxVec3(CART_WIDTH / 2, -CART_HEIGHT / 2,  CART_LENGTH / 2);
 
 	createVehicle4WSimulationData(vehicleDesc.chassisMass, vehicleDesc, vehicleDesc.wheelMass, wheelConvexMeshes4, wheelCentreOffsets4, *wheelsSimData, driveSimData, chassisData);
 
 	PxRigidDynamic* vehActor=createVehicleActor4W(chassisData,wheelConvexMeshes4,chassisConvexMesh,*pm->scene,*pm->sdk,*gMaterial, pos, wheelCentreOffsets4);
+	//Create a car.
+	PxVehicleDrive4W* car = PxVehicleDrive4W::allocate(4);
+	car->setup(pm->sdk,vehActor,*wheelsSimData,driveSimData,0);
+	
+	//Set up the mapping between wheel and actor shape.
+	car->mWheelsSimData.setWheelShapeMapping(0,0);
+	car->mWheelsSimData.setWheelShapeMapping(1,1);
+	car->mWheelsSimData.setWheelShapeMapping(2,2);
+	car->mWheelsSimData.setWheelShapeMapping(3,3);
+
+	//Set up the scene query filter data for each suspension line.
+	PxFilterData vehQryFilterData;
+	VehicleSetupVehicleShapeQueryFilterData(&vehQryFilterData);
+	car->mWheelsSimData.setSceneQueryFilterData(0, vehQryFilterData);
+	car->mWheelsSimData.setSceneQueryFilterData(1, vehQryFilterData);
+	car->mWheelsSimData.setSceneQueryFilterData(2, vehQryFilterData);
+	car->mWheelsSimData.setSceneQueryFilterData(3, vehQryFilterData);
+	//Set the autogear mode of the instantiate car.
+	car->mDriveDynData.setUseAutoGears(true);
+
+	//Increment the number of vehicles
+	pm->mVehicles[pm->mNumVehicles]=car;
+	pm->mVehicleWheelQueryResults[pm->mNumVehicles].nbWheelQueryResults=4;
+	pm->mVehicleWheelQueryResults[pm->mNumVehicles].wheelQueryResults=pm->mWheelQueryResults->addVehicle(4);
+	pm->mNumVehicles++;
 
 	pm->scene->addActor(*vehActor);
-
+	
 	return vehActor;
 
 }

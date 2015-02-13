@@ -170,7 +170,7 @@ static void update(struct game* game)
 	inputmanager_update(&game->inputmanager);
 
 	// simulate
-	physicsmanager_update(&game->physicsmanager, 1.f/60.f);
+	physicsmanager_update(&game->physicsmanager, GAME_SPU);
 
 	vec3f_set(up, 0.f, 1.f, 0.f);
 
@@ -412,7 +412,7 @@ int game_startup(struct game* game)
 
 	// initialize cart object
 	//vec3f_set(pos, 10.f, 10.f, -40.f);
-	vec3f_set(pos, 35.f, 5.f, 25.f);
+	vec3f_set(pos, 35.f, 2.f, 25.f);
 	cart_init(&game->player, &game->physicsmanager, pos);
 	cart_generatemesh(&game->renderer, &game->player);
 	renderable_sendbuffer(&game->renderer, &game->player.r_cart);
