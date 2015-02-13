@@ -64,6 +64,17 @@ void cart_init(struct cart* c, physicsmanager* pm, vec3f pos)
 }
 
 
+void cart_accelerate(struct cart* c, float d)
+{
+	vec3f force;
+
+	vec3f_set(force, CART_FORWARD);
+	vec3f_scale(force, d);
+
+	physx::PxRigidBodyExt::addLocalForceAtLocalPos(*c->vehicle->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, 0.f));
+}
+
+
 void cart_generatemesh(struct renderer* r, struct cart* c)
 {
 	float* ptr;

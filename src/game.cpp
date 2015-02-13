@@ -188,6 +188,9 @@ static void update(struct game* game)
 
 		camera_rotate(&game->cam_debug, up, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_LR]);
 		camera_rotate(&game->cam_debug, game->cam_debug.right, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_UD]);
+	} else
+	{
+		cart_accelerate(&game->player, -8.f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_TRIGGERS]);
 	}
 
 	// update player camera
@@ -339,7 +342,7 @@ int game_startup(struct game* game)
 
 	// initialize cart object
 	//vec3f_set(pos, 10.f, 10.f, -40.f);
-	vec3f_set(pos, -20.0f, 1.5f, 0.0f);
+	vec3f_set(pos, -20.0f, 0.8f, 0.0f);
 	cart_init(&game->player, &game->physicsmanager, pos);
 	cart_generatemesh(&game->renderer, &game->player);
 	renderable_sendbuffer(&game->renderer, &game->player.r_cart);

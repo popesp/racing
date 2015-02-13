@@ -28,6 +28,8 @@ struct cart
 
 void cart_init(struct cart*, struct physicsmanager*, vec3f);
 
+void cart_accelerate(struct cart* c, float d);
+
 void cart_generatemesh(struct renderer*, struct cart*);
 
 

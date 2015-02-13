@@ -10,7 +10,7 @@
 
 #define	PHYSICS_VEHICLE_RAYCAST_COUNT		4
 #define	PHYSICS_VEHICLE_RAYCAST_MAXDIST		1.f
-#define	PHYSICS_VEHICLE_RAYCAST_MAXFORCE	50.f
+#define	PHYSICS_VEHICLE_RAYCAST_MAXFORCE	10.f
 
 
 struct vehicle
@@ -56,9 +56,16 @@ void physicsmanager_shutdown(struct physicsmanager* pm);
 void physicsmanager_update(struct physicsmanager* pm, float dt);
 
 
+/*	add a vehicle to the simulation
+	param:	pm				physics manager
+	param:	pos				position of the vehicle
+	param:	dim				dimensions of the bounding box
+	return:	struct vehicle*	pointer to the vehicle physics object
+*/
 struct vehicle* physicsmanager_addvehicle(struct physicsmanager* pm, vec3f pos, vec3f dim);
 
 
+/*	probably temporary	*/
 physx::PxRigidDynamic* physics_adddynamic_box(struct physicsmanager*, vec3f, vec3f);
 
 /*	add a static triangle mesh stored in a triangle strip vertex buffer

@@ -124,6 +124,12 @@ void physicsmanager_update(struct physicsmanager* pm, float dt)
 }
 
 
+/*	add a vehicle to the simulation
+	param:	pm				physics manager
+	param:	pos				position of the vehicle
+	param:	dim				dimensions of the bounding box
+	return:	struct vehicle*	pointer to the vehicle physics object
+*/
 struct vehicle* physicsmanager_addvehicle(struct physicsmanager* pm, vec3f pos, vec3f dim)
 {
 	struct vehicle* v;
@@ -155,6 +161,7 @@ struct vehicle* physicsmanager_addvehicle(struct physicsmanager* pm, vec3f pos, 
 }
 
 
+/*	probably temporary	*/
 PxRigidDynamic* physics_adddynamic_box(struct physicsmanager* pm, vec3f pos, vec3f dim)
 {
 	PxRigidDynamic* actor;
