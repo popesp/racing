@@ -55,8 +55,8 @@ VehicleDesc initVehicleDesc()
 	//Set up the chassis mass, dimensions, moment of inertia, and center of mass offset.
 	//The moment of inertia is just the moment of inertia of a cuboid but modified for easier steering.
 	//Center of mass offset is 0.65m above the base of the chassis and 0.25m towards the front.
-	const PxF32 chassisMass = 15000.0f;
-	const PxVec3 chassisDims(2.5f,2.0f,5.0f);
+	const PxF32 chassisMass = 1000.0f;
+	const PxVec3 chassisDims(CART_WIDTH,CART_HEIGHT,CART_LENGTH);
 	const PxVec3 chassisMOI
 		((chassisDims.y*chassisDims.y + chassisDims.z*chassisDims.z)*chassisMass/12.0f,
 		 (chassisDims.x*chassisDims.x + chassisDims.z*chassisDims.z)*0.8f*chassisMass/12.0f,
@@ -69,7 +69,7 @@ VehicleDesc initVehicleDesc()
 	const PxF32 wheelRadius = 0.5f;
 	const PxF32 wheelWidth = 0.4f;
 	const PxF32 wheelMOI = 0.5f*wheelMass*wheelRadius*wheelRadius;
-	const PxU32 nbWheels = 6;
+	const PxU32 nbWheels = 4;
 
 	VehicleDesc vehicleDesc;
 	vehicleDesc.chassisMass = chassisMass;
@@ -194,9 +194,16 @@ void physicsmanager_startup(struct physicsmanager* pm)
 	PxVehicleSetBasisVectors(PxVec3(CART_UP), PxVec3(CART_FORWARD));
 	PxVehicleSetUpdateMode(PxVehicleUpdateMode::eVELOCITY_CHANGE);
 
+	//Initialise all vehicle ptrs to null.
+	for(PxU32 i=0;i<MAX_NUM_4W_VEHICLES;i++)
+	{
+		pm->mVehicles[i]=NULL;
+		
+	}
+
 	// create default material
 	pm->default_material = pm->sdk->createMaterial(0.5f, 0.5f, 0.5f);
-	pm->gravity = PxVec3(0.f,-100.0f,0.f);
+	pm->gravity = PxVec3(0.f,-10.0f,0.f);
 	// create the scene for simulation
 	PxSceneDesc scenedesc(scale);
 	scenedesc.gravity = pm->gravity;
@@ -228,12 +235,7 @@ void physicsmanager_startup(struct physicsmanager* pm)
 	
 	pm->mNumVehicles=0;
 	pm->mSqWheelRaycastBatchQuery=NULL;
-	//Initialise all vehicle ptrs to null.
-	for(PxU32 i=0;i<MAX_NUM_4W_VEHICLES;i++)
-	{
-		pm->mVehicles[i]=NULL;
-		
-	}
+
 
 }
 
@@ -261,7 +263,7 @@ void physicsmanager_shutdown(struct physicsmanager* pm)
 	param:	pm				physics manager
 	param:	dt				delta time
 */
-void physicsmanager_update(struct physicsmanager* pm, float dt)
+void physicsmanager_update(struct physicsmanager* pm, PxReal dt)
 {
 	pm->scene->simulate(dt);
 	suspensionRaycasts(pm->scene,pm);
@@ -332,12 +334,6 @@ void createVehicle4WSimulationData
  PxVehicleWheelsSimData& wheelsData, PxVehicleDriveSimData4W& driveData, PxVehicleChassisData& chassisData)
 {
 
-	PxVec3 wheelCentreOffsets4[4]; 
-	wheelCentreOffsets4[0] = wheelCentreOffsets[0];
-	wheelCentreOffsets4[1] = wheelCentreOffsets[1];
-	wheelCentreOffsets4[2] = wheelCentreOffsets[2];
-	wheelCentreOffsets4[3] = wheelCentreOffsets[3];
-
         //Extract the chassis AABB dimensions from the chassis convex mesh.
 	const PxVec3 chassisDims=vehicleDesc.chassisDims;
 
@@ -404,8 +400,8 @@ void createVehicle4WSimulationData
         PxVehicleTireData tires[4];
         tires[eFRONT_LEFT_WHEEL].mType=TIRE_TYPE_SLICKS;
         tires[eFRONT_RIGHT_WHEEL].mType=TIRE_TYPE_SLICKS;
-        tires[eREAR_LEFT_WHEEL].mType=TIRE_TYPE_WETS;
-        tires[eREAR_RIGHT_WHEEL].mType=TIRE_TYPE_WETS;
+        tires[eREAR_LEFT_WHEEL].mType=TIRE_TYPE_SLICKS;
+        tires[eREAR_RIGHT_WHEEL].mType=TIRE_TYPE_SLICKS;
 
         //Let's set up the suspension data structures now.
         PxVehicleSuspensionData susps[4];
@@ -612,10 +608,10 @@ PxRigidDynamic* physics_addcart(struct physicsmanager* pm, vec3f pos)
 
 	//Create wheel offsets
 	PxVec3 wheelCentreOffsets4[4];
-	wheelCentreOffsets4[eFRONT_LEFT_WHEEL] = PxVec3(-CART_WIDTH / 2, -CART_HEIGHT / 2, - CART_LENGTH / 2);
-	wheelCentreOffsets4[eFRONT_RIGHT_WHEEL] = PxVec3(CART_WIDTH / 2, -CART_HEIGHT / 2, - CART_LENGTH / 2);
-	wheelCentreOffsets4[eREAR_LEFT_WHEEL] = PxVec3(-CART_WIDTH / 2, -CART_HEIGHT / 2, CART_LENGTH / 2);
-	wheelCentreOffsets4[eREAR_RIGHT_WHEEL] = PxVec3(CART_WIDTH / 2, -CART_HEIGHT / 2,  CART_LENGTH / 2);
+	wheelCentreOffsets4[eFRONT_LEFT_WHEEL] = PxVec3(-CART_WIDTH / 2, (-CART_HEIGHT / 2) + vehicleDesc.wheelRadius*1.1, - CART_LENGTH / 2);
+	wheelCentreOffsets4[eFRONT_RIGHT_WHEEL] = PxVec3(CART_WIDTH / 2, (-CART_HEIGHT / 2) + vehicleDesc.wheelRadius*1.1, - CART_LENGTH / 2);
+	wheelCentreOffsets4[eREAR_LEFT_WHEEL] = PxVec3(-CART_WIDTH / 2,(-CART_HEIGHT / 2) + vehicleDesc.wheelRadius*1.1, CART_LENGTH / 2);
+	wheelCentreOffsets4[eREAR_RIGHT_WHEEL] = PxVec3(CART_WIDTH / 2,(-CART_HEIGHT / 2) + vehicleDesc.wheelRadius*1.1,  CART_LENGTH / 2);
 
 	createVehicle4WSimulationData(vehicleDesc.chassisMass, vehicleDesc, vehicleDesc.wheelMass, wheelConvexMeshes4, wheelCentreOffsets4, *wheelsSimData, driveSimData, chassisData);
 
