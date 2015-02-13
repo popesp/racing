@@ -149,6 +149,7 @@ struct vehicle* physicsmanager_addvehicle(struct physicsmanager* pm, vec3f pos, 
 	vec3f_set(v->dir[3], 0.f, -1.f, 0.f);
 
 	v->body->setLinearDamping(0.9f);
+	v->body->setAngularDamping(0.9f);
 
 	return v;
 }
