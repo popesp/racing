@@ -170,7 +170,7 @@ static void update(struct game* game)
 	inputmanager_update(&game->inputmanager);
 
 	// simulate
-	physicsmanager_update(&game->physicsmanager, (PxReal)GAME_SPU);
+	physicsmanager_update(&game->physicsmanager, GAME_SPU);
 
 	vec3f_set(up, 0.f, 1.f, 0.f);
 
@@ -191,7 +191,7 @@ static void update(struct game* game)
 	}
 
 	// update player camera
-	physx::PxMat44 t_player(game->player.p_cart->getGlobalPose());
+	physx::PxMat44 t_player(game->player.vehicle->body->getGlobalPose());
 	physx::PxVec3 campos = t_player.transform(physx::PxVec3(0.f, 1.f, 5.f));
 	vec3f_copy(game->cam_player.pos, (float*)&campos);
 	camera_lookat(&game->cam_player, (float*)&t_player.getPosition(), up);
@@ -204,7 +204,7 @@ static void update(struct game* game)
 static void render(struct game* game)
 {
 	mat4f world_view, model_world;
-	physx::PxMat44 player_world(game->player.p_cart->getGlobalPose());
+	physx::PxMat44 player_world(game->player.vehicle->body->getGlobalPose());
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -219,7 +219,7 @@ static void render(struct game* game)
 	renderable_render(&game->renderer, &game->track.r_track, model_world, world_view, 0);
 
 	// render player
-	renderable_render(&game->renderer, &game->player.r_cart, (float*)&player_world.column0, world_view, 0);
+	renderable_render(&game->renderer, &game->player.r_cart, (float*)&player_world, world_view, 0);
 
 	glfwSwapBuffers(game->window.w);
 }
