@@ -1,4 +1,6 @@
 #include	"physics.h"
+#include	"scene_query.h"
+#include	"wheel_query_results.h"
 
 #include	<PxPhysicsAPI.h>
 #include	"../math/vec3f.h"
@@ -7,22 +9,6 @@
 #include	"../render/render.h"
 
 
-
-//Collision types and flags describing collision interactions of each collision type.
-enum
-{
-	COLLISION_FLAG_GROUND			=	1 << 0,
-	COLLISION_FLAG_WHEEL			=	1 << 1,
-	COLLISION_FLAG_CHASSIS			=	1 << 2,
-	COLLISION_FLAG_OBSTACLE			=	1 << 3,
-	COLLISION_FLAG_DRIVABLE_OBSTACLE=	1 << 4,
-
-	COLLISION_FLAG_GROUND_AGAINST	=															COLLISION_FLAG_CHASSIS | COLLISION_FLAG_OBSTACLE | COLLISION_FLAG_DRIVABLE_OBSTACLE,
-	COLLISION_FLAG_WHEEL_AGAINST	=									COLLISION_FLAG_WHEEL |	COLLISION_FLAG_CHASSIS | COLLISION_FLAG_OBSTACLE,
-	COLLISION_FLAG_CHASSIS_AGAINST	=			COLLISION_FLAG_GROUND | COLLISION_FLAG_WHEEL |	COLLISION_FLAG_CHASSIS | COLLISION_FLAG_OBSTACLE | COLLISION_FLAG_DRIVABLE_OBSTACLE,
-	COLLISION_FLAG_OBSTACLE_AGAINST	=			COLLISION_FLAG_GROUND | COLLISION_FLAG_WHEEL |	COLLISION_FLAG_CHASSIS | COLLISION_FLAG_OBSTACLE | COLLISION_FLAG_DRIVABLE_OBSTACLE,
-	COLLISION_FLAG_DRIVABLE_OBSTACLE_AGAINST=	COLLISION_FLAG_GROUND 						 |	COLLISION_FLAG_CHASSIS | COLLISION_FLAG_OBSTACLE | COLLISION_FLAG_DRIVABLE_OBSTACLE,
-};
 
 using namespace physx;
 
@@ -44,20 +30,7 @@ static PxF32 gTireFrictionMultipliers[MAX_NUM_SURFACE_TYPES][MAX_NUM_TIRE_TYPES]
         {0.80f, 0.80f,  0.80f,  0.80f}          //GRASS
 };
 
-static PxSceneQueryHitType::Enum VehicleWheelRaycastPreFilter(	
-	PxFilterData filterData0, 
-	PxFilterData filterData1,
-	const void* constantBlock, PxU32 constantBlockSize,
-	PxSceneQueryFlags& queryFlags)
-{
-	//filterData0 is the vehicle suspension raycast.
-	//filterData1 is the shape potentially hit by the raycast.
-	PX_UNUSED(queryFlags);
-	PX_UNUSED(constantBlockSize);
-	PX_UNUSED(constantBlock);
-	PX_UNUSED(filterData0);
-	return ((0 == (filterData1.word3 & SAMPLEVEHICLE_DRIVABLE_SURFACE)) ? PxSceneQueryHitType::eNONE : PxSceneQueryHitType::eBLOCK);
-}
+
 /*	start up the physics manager
 	param:	pm				physics manager (modified)
 */
@@ -144,6 +117,9 @@ void createStandardMaterials(struct physicsmanager* pm)
 		getSampleErrorCallback().reportError(PxErrorCode::eINTERNAL_ERROR, "createMaterial failed", __FILE__, __LINE__);
 	}*/
 }
+
+
+
 PxFilterFlags VehicleFilterShader(	
 	PxFilterObjectAttributes attributes0, PxFilterData filterData0, 
 	PxFilterObjectAttributes attributes1, PxFilterData filterData1,
@@ -219,6 +195,14 @@ void physicsmanager_startup(struct physicsmanager* pm)
 
 	gMaterial = pm->sdk->createMaterial(0.5f, 0.5f, 0.6f);
 
+	
+	//Scene query data for to allow raycasts for all suspensions of all vehicles.
+	pm->mSqData = VehicleSceneQueryData::allocate(MAX_NUM_4W_VEHICLES*4);
+
+	//Data to store reports for each wheel.
+	pm->mWheelQueryResults = VehicleWheelQueryResults::allocate(MAX_NUM_4W_VEHICLES*4);
+
+
 	pm->mSurfaceTirePairs=PxVehicleDrivableSurfaceToTireFrictionPairs::allocate(MAX_NUM_TIRE_TYPES,MAX_NUM_SURFACE_TYPES);
 	pm->mSurfaceTirePairs->setup(MAX_NUM_TIRE_TYPES,MAX_NUM_SURFACE_TYPES,mStandardMaterials,mVehicleDrivableSurfaceTypes);
 
@@ -230,15 +214,21 @@ void physicsmanager_startup(struct physicsmanager* pm)
         }
 	}
 
+	
+	//Initialise all vehicle ptrs to null.
+	for(PxU32 i=0;i<Vehicle_VehicleManager::MAX_NUM_4W_VEHICLES;i++)
+	{
+		mVehicles[i]=NULL;
+	}
 
 }
 void VehicleSetupDrivableShapeQueryFilterData(PxFilterData* qryFilterData)
 {
-	qryFilterData->word3 = (PxU32)SAMPLEVEHICLE_DRIVABLE_SURFACE;
+	qryFilterData->word3 = (PxU32)Vehicle_DRIVABLE_SURFACE;
 }
 void VehicleSetupNonDrivableShapeQueryFilterData(PxFilterData* qryFilterData)
 {
-	qryFilterData->word3 = (PxU32)SAMPLEVEHICLE_UNDRIVABLE_SURFACE;
+	qryFilterData->word3 = (PxU32)Vehicle_UNDRIVABLE_SURFACE;
 }
 
 /*	shut down the physics manager

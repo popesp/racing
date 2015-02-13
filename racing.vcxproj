@@ -43,7 +43,7 @@
     <ClCompile>
       <WarningLevel>EnableAllWarnings</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\glew\include;..\glfw\include;..\physx\Include;..\freeimage\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\physx\Source\foundation\include;..\glew\include;..\glfw\include;..\physx\Include;..\freeimage\include</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4514;4505;4706;4711;4820</DisableSpecificWarnings>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -87,6 +87,8 @@
     <ClCompile Include="src\objects\cart.cpp" />
     <ClCompile Include="src\objects\track.cpp" />
     <ClCompile Include="src\physics\physics.cpp" />
+    <ClCompile Include="src\physics\scene_query.cpp" />
+    <ClCompile Include="src\physics\wheel_query_results.cpp" />
     <ClCompile Include="src\render\render.cpp" />
     <ClCompile Include="src\render\shader.cpp" />
     <ClCompile Include="src\render\texture.cpp" />
@@ -105,6 +107,8 @@
     <ClInclude Include="src\objects\cart.h" />
     <ClInclude Include="src\objects\track.h" />
     <ClInclude Include="src\physics\physics.h" />
+    <ClInclude Include="src\physics\scene_query.h" />
+    <ClInclude Include="src\physics\wheel_query_results.h" />
     <ClInclude Include="src\render\render.h" />
     <ClInclude Include="src\render\shader.h" />
     <ClInclude Include="src\render\texture.h" />

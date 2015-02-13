@@ -28,15 +28,12 @@ enum
 	};
 	
 
-//Make sure that suspension raycasts only consider shapes flagged as drivable that don't belong to the owner vehicle.
-enum
-{
-	SAMPLEVEHICLE_DRIVABLE_SURFACE = 0xffff0000,
-	SAMPLEVEHICLE_UNDRIVABLE_SURFACE = 0x0000ffff
-};
 
-
-
+	enum
+	{
+		MAX_NUM_4W_VEHICLES=8,
+		
+	};
 struct physicsmanager
 {
 	physx::PxDefaultAllocator default_alloc;
@@ -50,9 +47,22 @@ struct physicsmanager
 
 	physx::PxScene* scene;
 	physx::PxVehicleDrivableSurfaceToTireFrictionPairs* mSurfaceTirePairs;
+	//Array of all cars and report data for each car.
 
+
+	//sdk raycasts (for the suspension lines).
+	VehicleSceneQueryData* mSqData;
+	physx::PxBatchQuery* mSqWheelRaycastBatchQuery;
+
+	//Reports for each wheel.
+	VehicleWheelQueryResults* mWheelQueryResults;
+
+	physx::PxVehicleWheels* mVehicles[MAX_NUM_4W_VEHICLES];
+	physx::PxVehicleWheelQueryResult mVehicleWheelQueryResults[MAX_NUM_4W_VEHICLES];
+	physx::PxU32 mNumVehicles;
 
 };
+
 
 /*	start up the physics manager
 	param:	pm				physics manager (modified)

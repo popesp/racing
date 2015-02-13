@@ -1,5 +1,5 @@
 #include	"cart.h"
-
+#include	"../physics/scene_query.h"
 #include	"../math/vec3f.h"
 #include	"../physics/physics.h"
 #include	"../render/render.h"
@@ -17,6 +17,25 @@
 	{CART_WIDTH/2.f, -CART_HEIGHT/2.f, CART_LENGTH/2.f}
 };*/
 
+Vehicle_VehicleManager::Vehicle_VehicleManager() 
+:	mNumVehicles(0),
+	mSqWheelRaycastBatchQuery(NULL),
+	mIsIn3WMode(false),
+	mSerializationRegistry(NULL)
+{
+}
+
+void Vehicle_VehicleManager::suspensionRaycasts(PxScene* scene)
+{
+	//Create a scene query if we haven't already done so.
+	if(NULL==mSqWheelRaycastBatchQuery)
+	{
+		mSqWheelRaycastBatchQuery=mSqData->setUpBatchedSceneQuery(scene);
+	}
+	//Raycasts.
+	PxSceneReadLock scopedLock(*scene);
+	PxVehicleSuspensionRaycasts(mSqWheelRaycastBatchQuery,mNumVehicles,mVehicles,mSqData->getRaycastQueryResultBufferSize(),mSqData->getRaycastQueryResultBuffer());
+}
 static float cart_nor[6][3] =
 {
 	{-1.f, 0.f, 0.f},
@@ -80,3 +99,107 @@ void cart_generatemesh(struct renderer* r, struct cart* c)
 		ptr += RENDER_ATTRIBSIZE_NOR;
 	}
 }
+
+//
+//void Vehicle_VehicleManager::init(PxPhysics& physics, const PxMaterial** drivableSurfaceMaterials, const PxVehicleDrivableSurfaceType* drivableSurfaceTypes)
+//{
+//#if defined(SERIALIZE_VEHICLE_RPEX) || defined(SERIALIZE_VEHICLE_BINARY)
+//	mSerializationRegistry = PxSerialization::createSerializationRegistry(physics);
+//#endif
+//
+//	//Initialise the sdk.
+//	PxInitVehicleSDK(physics, mSerializationRegistry);
+//
+//	//Set the basis vectors.
+//	PxVec3 up(0,1,0);
+//	PxVec3 forward(0,0,1);
+//	PxVehicleSetBasisVectors(up,forward);
+//
+//	//Set the vehicle update mode to be immediate velocity changes.
+//	PxVehicleSetUpdateMode(PxVehicleUpdateMode::eVELOCITY_CHANGE);
+//	
+//	//Initialise all vehicle ptrs to null.
+//	for(PxU32 i=0;i<MAX_NUM_4W_VEHICLES;i++)
+//	{
+//		mVehicles[i]=NULL;
+//	}
+//
+//	//Allocate simulation data so we can switch from 3-wheeled to 4-wheeled cars by switching simulation data.
+//	mWheelsSimData4W = PxVehicleWheelsSimData::allocate(4);
+//
+//	//Scene query data for to allow raycasts for all suspensions of all vehicles.
+//	mSqData = VehicleSceneQueryData::allocate(MAX_NUM_4W_VEHICLES*4);
+//
+//	//Data to store reports for each wheel.
+//	mWheelQueryResults = VehicleWheelQueryResults::allocate(MAX_NUM_4W_VEHICLES*4);
+//
+//	//Set up the friction values arising from combinations of tire type and surface type.
+//	mSurfaceTirePairs=PxVehicleDrivableSurfaceToTireFrictionPairs::allocate(MAX_NUM_TIRE_TYPES,MAX_NUM_SURFACE_TYPES);
+//	mSurfaceTirePairs->setup(MAX_NUM_TIRE_TYPES,MAX_NUM_SURFACE_TYPES,drivableSurfaceMaterials,drivableSurfaceTypes);
+//	for(PxU32 i=0;i<MAX_NUM_SURFACE_TYPES;i++)
+//	{
+//		for(PxU32 j=0;j<MAX_NUM_TIRE_TYPES;j++)
+//		{
+//			mSurfaceTirePairs->setTypePairFriction(i,j,TireFrictionMultipliers::getValue(i, j));
+//		}
+//	}
+//
+//#ifdef PX_PS3 
+//	setSpuRaycastShader(mSqData);
+//#endif
+//}
+//
+//void Vehicle_VehicleManager::shutdown()
+//{
+//	//Remove the N-wheeled vehicles.
+//	for(PxU32 i=0;i<mNumVehicles;i++)
+//	{
+//		switch(mVehicles[i]->getVehicleType())
+//		{
+//		case PxVehicleTypes::eDRIVE4W:
+//			{
+//				PxVehicleDrive4W* veh=(PxVehicleDrive4W*)mVehicles[i];
+//				veh->free();
+//			}
+//			break;
+//		case PxVehicleTypes::eDRIVENW:
+//			{
+//				PxVehicleDriveNW* veh=(PxVehicleDriveNW*)mVehicles[i];
+//				veh->free();
+//			}
+//			break;
+//		case PxVehicleTypes::eDRIVETANK:
+//			{
+//				PxVehicleDriveTank* veh=(PxVehicleDriveTank*)mVehicles[i];
+//				veh->free();
+//			}
+//			break;
+//		default:
+//			PX_ASSERT(false);
+//			break;
+//		}
+//	}
+//
+//	//Deallocate simulation data that was used to switch from 3-wheeled to 4-wheeled cars by switching simulation data.
+//	mWheelsSimData4W->free();
+//
+//	//Deallocate scene query data that was used for suspension raycasts.
+//	mSqData->free();
+//
+//	//Deallocate buffers that store wheel reports.
+//	mWheelQueryResults->free();
+//
+//	//Release the  friction values used for combinations of tire type and surface type.
+//	mSurfaceTirePairs->release();
+//
+//	//Scene query.
+//	if(mSqWheelRaycastBatchQuery)
+//	{
+//		mSqWheelRaycastBatchQuery=NULL;
+//	}
+//
+//	PxCloseVehicleSDK(mSerializationRegistry);
+//
+//	if(mSerializationRegistry)
+//		mSerializationRegistry->release();
+//}
