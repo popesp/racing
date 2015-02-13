@@ -10,11 +10,11 @@
 
 
 static vec3f segment_pos[TRACK_SEGMENT_VERTCOUNT] = {
-	{ 0.f, 0.f, 0.f },
-	{ 0.5f, 1.f, 0.f },
-	{ 1.f, 1.f, 0.f },
-	{ 1.f, -2.f, 0.f },
-	{ -2.5f, -2.f, 0.f } };
+	{ 10.f, 0.f, 0.f },
+	{ 10.5f, 1.f, 0.f },
+	{ 11.f, 1.f, 0.f },
+	{ 11.f, -2.f, 0.f },
+	{ -12.5f, -2.f, 0.f } };
 
 static vec3f segment_nor[TRACK_SEGMENT_VERTCOUNT] = {
 	{ 0.f, 1.f, 0.f },

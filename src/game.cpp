@@ -190,9 +190,11 @@ static void update(struct game* game)
 		camera_rotate(&game->cam_debug, game->cam_debug.right, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_UD]);
 	} else
 	{
-		cart_accelerate(&game->player, -8.f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_TRIGGERS]);
+		cart_accelerate(&game->player, -18.f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_TRIGGERS]);
+		cart_turn(&game->player, -0.5f, game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_LR]);
+		//cart_shocks(&game->player, 10 , game->inputmanager.controllers[GLFW_JOYSTICK_1].buttons[0]);
 	}
-
+	
 	// update player camera
 	physx::PxMat44 t_player(game->player.vehicle->body->getGlobalPose());
 	physx::PxVec3 campos = t_player.transform(physx::PxVec3(0.f, 1.f, 5.f));
@@ -342,7 +344,7 @@ int game_startup(struct game* game)
 
 	// initialize cart object
 	//vec3f_set(pos, 10.f, 10.f, -40.f);
-	vec3f_set(pos, -20.0f, 0.8f, 0.0f);
+	vec3f_set(pos, -20.0f, 2.8f, 0.0f);
 	cart_init(&game->player, &game->physicsmanager, pos);
 	cart_generatemesh(&game->renderer, &game->player);
 	renderable_sendbuffer(&game->renderer, &game->player.r_cart);

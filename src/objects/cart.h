@@ -32,5 +32,7 @@ void cart_accelerate(struct cart* c, float d);
 
 void cart_generatemesh(struct renderer*, struct cart*);
 
+void cart_turn(struct cart* c, float d, float axis);
 
+void cart_shocks(struct cart *c, float d, unsigned bounce);
 #endif
