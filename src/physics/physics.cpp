@@ -106,7 +106,6 @@ static void updatevehicles(struct physicsmanager* pm, float dt)
 				PxRigidBodyExt::addForceAtLocalPos(*v->body, PxVec3(force[VX], force[VY], force[VZ]), PxVec3(v->origins[j][VX], v->origins[j][VY], v->origins[j][VZ]));
 			}
 		}
-		printf("\n");
 	}
 }
 

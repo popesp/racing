@@ -68,12 +68,6 @@
     <ClCompile Include="src\render\texture.cpp">
       <Filter>src\render</Filter>
     </ClCompile>
-    <ClCompile Include="src\physics\scene_query.cpp">
-      <Filter>src\physics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\physics\wheel_query_results.cpp">
-      <Filter>src\physics</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\debug.h">
@@ -120,12 +114,6 @@
     </ClInclude>
     <ClInclude Include="src\render\texture.h">
       <Filter>headers\render</Filter>
-    </ClInclude>
-    <ClInclude Include="src\physics\scene_query.h">
-      <Filter>headers\physics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\physics\wheel_query_results.h">
-      <Filter>headers\physics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
