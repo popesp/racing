@@ -387,7 +387,7 @@ int game_startup(struct game* game)
 	game->player.r_cart.lights[1] = game->track_lights + 1;
 
 	game->tex_trackbump = texturemanager_newtexture(&game->texturemanager);
-	texture_loadfile(&game->texturemanager, game->tex_trackbump, "res/rock.jpg");
+	texture_loadfile(&game->texturemanager, game->tex_trackbump, "res/slate.jpg");
 	texture_upload(&game->texturemanager, game->tex_trackbump, RENDER_TEXTURE_NORMAL);
 	game->track.r_track.texture_ids[RENDER_TEXTURE_NORMAL] = game->tex_trackbump;
 
