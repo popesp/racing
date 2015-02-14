@@ -84,6 +84,7 @@ void cart_turn(struct cart* c, float d)
 	physx::PxRigidBodyExt::addLocalForceAtLocalPos(*c->vehicle->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, -CART_LENGTH/2.f));
 }
 
+/*
 void cart_shocks(struct cart *c, float d, unsigned bounce){
 
 	vec3f force;
@@ -99,7 +100,7 @@ void cart_shocks(struct cart *c, float d, unsigned bounce){
 
 
 }
-
+*/
 
 void cart_generatemesh(struct renderer* r, struct cart* c)
 {

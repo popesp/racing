@@ -76,6 +76,13 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 				game->flags |= GAME_FLAG_DEBUGCAM;
 			break;
 
+		case GLFW_KEY_R:
+			// reset player position and speed
+			game->player.vehicle->body->setGlobalPose(physx::PxTransform(physx::PxVec3(GAME_STARTINGPOS)));
+			game->player.vehicle->body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+			game->player.vehicle->body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+			break;
+
 		default:
 			break;
 		}
@@ -192,18 +199,18 @@ static void update(struct game* game)
 	{
 		cart_accelerate(&game->player, -30.f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_TRIGGERS]);
 		cart_turn(&game->player, 4.f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_LR]);
-		//cart_shocks(&game->player, 10 , game->inputmanager.controllers[GLFW_JOYSTICK_1].buttons[0]);
 	}
 	
 	// update player camera
 	physx::PxMat44 t_player(game->player.vehicle->body->getGlobalPose());
 	physx::PxVec3 cam_targetpos = t_player.transform(physx::PxVec3(0.f, 1.f, 5.f));
-
 	vec3f_subtractn(diff, (float*)&cam_targetpos, game->cam_player.pos);
 	vec3f_scale(diff, 0.1f);
-
 	vec3f_add(game->cam_player.pos, diff);
 	camera_lookat(&game->cam_player, (float*)&t_player.getPosition(), up);
+
+	// update light to be at player position TEMPORARY
+	vec3f_copy(game->track_lights[1].pos, (float*)&t_player.getPosition());
 
 	// check for window close messages
 	if (glfwWindowShouldClose(game->window.w))
@@ -347,8 +354,7 @@ int game_startup(struct game* game)
 	renderable_sendbuffer(&game->renderer, &game->track.r_track);
 
 	// initialize cart object
-	//vec3f_set(pos, 10.f, 10.f, -40.f);
-	vec3f_set(pos, -20.0f, 2.8f, 0.0f);
+	vec3f_set(pos, GAME_STARTINGPOS);
 	cart_init(&game->player, &game->physicsmanager, pos);
 	cart_generatemesh(&game->renderer, &game->player);
 	renderable_sendbuffer(&game->renderer, &game->player.r_cart);
@@ -370,9 +376,9 @@ int game_startup(struct game* game)
 
 	// give renderable objects references to the light objects
 	game->track.r_track.lights[0] = game->track_lights + 0;
-	//game->track.r_track.lights[1] = game->track_lights + 1;
+	game->track.r_track.lights[1] = game->track_lights + 1;
 	game->player.r_cart.lights[0] = game->track_lights + 0;
-	//game->player.r_cart.lights[1] = game->track_lights + 1;
+	game->player.r_cart.lights[1] = game->track_lights + 1;
 
 	game->tex_trackbump = texturemanager_newtexture(&game->texturemanager);
 	texture_loadfile(&game->texturemanager, game->tex_trackbump, "res/rock.jpg");

@@ -31,7 +31,7 @@ void cart_init(struct cart*, struct physicsmanager*, vec3f);
 
 void cart_accelerate(struct cart* c, float d);
 void cart_turn(struct cart* c, float d);
-void cart_shocks(struct cart *c, float d, unsigned bounce);
+//void cart_shocks(struct cart *c, float d, unsigned bounce);
 
 void cart_generatemesh(struct renderer*, struct cart*);
 

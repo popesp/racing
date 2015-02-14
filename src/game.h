@@ -26,6 +26,8 @@
 
 #define	GAME_POINTSIZE			10.f
 
+#define	GAME_STARTINGPOS		-20.0f, 1.5f, 0.0f // TEMP
+
 #define	GAME_FLAG_INIT			0x00
 #define	GAME_FLAG_TERMINATED	0x01
 #define	GAME_FLAG_WIREFRAME		0x02	// TEMP
