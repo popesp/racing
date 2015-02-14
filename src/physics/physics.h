@@ -8,6 +8,8 @@
 
 #define	PHYSICS_DEFAULT_GRAVITY				0.f, -10.f, 0.f
 
+#define	PHYSICS_MAX_VEHICLES				16
+
 #define	PHYSICS_VEHICLE_RAYCAST_COUNT		4
 #define	PHYSICS_VEHICLE_RAYCAST_MAXDIST		0.5f
 #define	PHYSICS_VEHICLE_RAYCAST_MAXFORCE	20.f
@@ -22,6 +24,8 @@ struct vehicle
 
 	vec3f origins[PHYSICS_VEHICLE_RAYCAST_COUNT];
 	vec3f dir[PHYSICS_VEHICLE_RAYCAST_COUNT];
+
+	bool enabled;
 };
 
 struct physicsmanager
@@ -36,8 +40,7 @@ struct physicsmanager
 
 	physx::PxScene* scene;
 
-	int num_vehicles;
-	struct vehicle* vehicles;
+	struct vehicle vehicles[PHYSICS_MAX_VEHICLES];
 };
 
 
@@ -63,9 +66,15 @@ void physicsmanager_update(struct physicsmanager* pm, float dt);
 	param:	pm				physics manager
 	param:	pos				position of the vehicle
 	param:	dim				dimensions of the bounding box
-	return:	int				index for the vehicle object
+	return:	struct vehicle*	pointer to the new vehicle object
 */
-int physicsmanager_addvehicle(struct physicsmanager* pm, vec3f pos, vec3f dim);
+struct vehicle* physicsmanager_newvehicle(struct physicsmanager* pm, vec3f pos, vec3f dim);
+
+/*	remove a vehicle from the simulation
+	param:	pm				physics manager
+	param:	v				pointer to vehicle object to remove
+*/
+void physicsmanager_removevehicle(struct physicsmanager* pm, struct vehicle* v);
 
 
 /*	probably temporary	*/

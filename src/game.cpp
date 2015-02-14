@@ -78,9 +78,9 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 
 		case GLFW_KEY_R:
 			// reset player position and speed
-			game->physicsmanager.vehicles[game->player.index_vehicle].body->setGlobalPose(physx::PxTransform(physx::PxVec3(GAME_STARTINGPOS)));
-			game->physicsmanager.vehicles[game->player.index_vehicle].body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
-			game->physicsmanager.vehicles[game->player.index_vehicle].body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+			game->player.vehicle->body->setGlobalPose(physx::PxTransform(physx::PxVec3(GAME_STARTINGPOS)));
+			game->player.vehicle->body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+			game->player.vehicle->body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
 			break;
 
 		default:
@@ -208,7 +208,7 @@ static void update(struct game* game)
 	}
 	
 	// update player camera
-	physx::PxMat44 t_player(game->physicsmanager.vehicles[game->player.index_vehicle].body->getGlobalPose());
+	physx::PxMat44 t_player(game->player.vehicle->body->getGlobalPose());
 	physx::PxVec3 cam_targetpos = t_player.transform(physx::PxVec3(0.f, 1.f, 5.f));
 	vec3f_subtractn(diff, (float*)&cam_targetpos, game->cam_player.pos);
 	vec3f_scale(diff, 0.1f);
@@ -226,8 +226,8 @@ static void update(struct game* game)
 static void render(struct game* game)
 {
 	mat4f global_wv, skybox_wv, track_mw, skybox_mw;
-	physx::PxMat44 player_world(game->physicsmanager.vehicles[game->player.index_vehicle].body->getGlobalPose());
-	physx::PxMat44 otherguy_world(game->physicsmanager.vehicles[game->otherguy.index_vehicle].body->getGlobalPose());
+	physx::PxMat44 player_world(game->player.vehicle->body->getGlobalPose());
+	physx::PxMat44 otherguy_world(game->otherguy.vehicle->body->getGlobalPose());
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

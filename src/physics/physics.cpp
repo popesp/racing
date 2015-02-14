@@ -16,6 +16,7 @@ using namespace physx;
 void physicsmanager_startup(struct physicsmanager* pm)
 {
 	PxTolerancesScale scale;
+	int i;
 
 	// initialize foundation object
 	pm->foundation = PxCreateFoundation(PX_PHYSICS_VERSION, pm->default_alloc, pm->default_error);
@@ -44,8 +45,12 @@ void physicsmanager_startup(struct physicsmanager* pm)
 	scenedesc.filterShader = PxDefaultSimulationFilterShader;
 	pm->scene = pm->sdk->createScene(scenedesc);
 
-	pm->num_vehicles = 0;
-	pm->vehicles = NULL;
+	// initialize vehicle array
+	for (i = 0; i < PHYSICS_MAX_VEHICLES; i++)
+	{
+		pm->vehicles[i].body = NULL;
+		pm->vehicles[i].enabled = false;
+	}
 }
 
 /*	shut down the physics manager
@@ -53,7 +58,11 @@ void physicsmanager_startup(struct physicsmanager* pm)
 */
 void physicsmanager_shutdown(struct physicsmanager* pm)
 {
-	mem_free(pm->vehicles);
+	int i;
+
+	for (i = 0; i < PHYSICS_MAX_VEHICLES; i++)
+		if (pm->vehicles[i].enabled)
+			pm->vehicles[i].body->release();
 
 	pm->scene->release();
 	pm->default_material->release();
@@ -80,8 +89,11 @@ static void updatevehicles(struct physicsmanager* pm, float dt)
 	outflags = PxHitFlag::eDISTANCE;
 	PxQueryFilterData filterData(PxQueryFlag::eSTATIC);
 
-	for (i = 0; i < pm->num_vehicles; i++)
+	for (i = 0; i < PHYSICS_MAX_VEHICLES; i++)
 	{
+		if (!pm->vehicles[i].enabled)
+			continue;
+
 		v = pm->vehicles + i;
 		physx::PxMat44 vehicle_world(v->body->getGlobalPose());
 
@@ -129,16 +141,20 @@ void physicsmanager_update(struct physicsmanager* pm, float dt)
 	param:	pm				physics manager
 	param:	pos				position of the vehicle
 	param:	dim				dimensions of the bounding box
-	return:	int				index for the vehicle object
+	return:	struct vehicle*	pointer to the new vehicle object
 */
-int physicsmanager_addvehicle(struct physicsmanager* pm, vec3f pos, vec3f dim)
-{
+struct vehicle* physicsmanager_newvehicle(struct physicsmanager* pm, vec3f pos, vec3f dim){
 	struct vehicle* v;
+	int i;
 
-	pm->num_vehicles++;
-	pm->vehicles = (struct vehicle*)mem_realloc(pm->vehicles, sizeof(struct vehicle) * pm->num_vehicles);
+	for (i = 0; i < PHYSICS_MAX_VEHICLES; i++)
+		if (!pm->vehicles[i].enabled)
+			break;
 
-	v = pm->vehicles + pm->num_vehicles - 1;
+	if (i == PHYSICS_MAX_VEHICLES)
+		return NULL;
+
+	v = pm->vehicles + i;
 
 	v->body = PxCreateDynamic(*pm->sdk, PxTransform(pos[VX], pos[VY], pos[VZ]), PxBoxGeometry(dim[VX], dim[VY], dim[VZ]), *pm->default_material, 1.f);
 	pm->scene->addActor(*v->body);
@@ -158,7 +174,25 @@ int physicsmanager_addvehicle(struct physicsmanager* pm, vec3f pos, vec3f dim)
 	v->body->setLinearDamping(PHYSICS_VEHICLE_DAMP_LINEAR);
 	v->body->setAngularDamping(PHYSICS_VEHICLE_DAMP_ANGULAR);
 
-	return pm->num_vehicles - 1;
+	v->enabled = true;
+
+	return v;
+}
+
+/*	remove a vehicle from the simulation
+	param:	pm				physics manager
+	param:	v				pointer to vehicle object to remove
+*/
+void physicsmanager_removevehicle(struct physicsmanager* pm, struct vehicle* v)
+{
+	int i;
+
+	for (i = 0; i < PHYSICS_MAX_VEHICLES; i++)
+		if (v == pm->vehicles + i)
+		{
+			pm->vehicles[i].body->release();
+			pm->vehicles[i].enabled = false;
+		}
 }
 
 
