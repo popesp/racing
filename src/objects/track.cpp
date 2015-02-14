@@ -10,11 +10,11 @@
 
 
 static vec3f segment_pos[TRACK_SEGMENT_VERTCOUNT] = {
-	{ 10.f, 0.f, 0.f },
-	{ 10.5f, 1.f, 0.f },
-	{ 11.f, 1.f, 0.f },
-	{ 11.f, -2.f, 0.f },
-	{ -12.5f, -2.f, 0.f } };
+	{ 0.f, 0.f, 0.f },
+	{ 0.5f, 1.f, 0.f },
+	{ 1.f, 1.f, 0.f },
+	{ 1.f, -2.f, 0.f },
+	{ -2.5f, -2.f, 0.f } };
 
 static vec3f segment_nor[TRACK_SEGMENT_VERTCOUNT] = {
 	{ 0.f, 1.f, 0.f },
@@ -34,8 +34,8 @@ void track_init(struct track* t, vec3f up, struct physicsmanager* pm)
 	renderable_init(&t->r_track, RENDER_MODE_TRIANGLESTRIP, RENDER_TYPE_BUMPM, RENDER_FLAG_NONE);
 
 	// initialize material properties
-	vec3f_set(t->r_track.material.amb, 0.6f, 0.7f, 0.7f);
-	vec3f_set(t->r_track.material.dif, 0.6f, 0.7f, 0.7f);
+	vec3f_set(t->r_track.material.amb, 0.7f, 0.7f, 0.7f);
+	vec3f_set(t->r_track.material.dif, 0.7f, 0.7f, 0.7f);
 	vec3f_set(t->r_track.material.spc, 0.8f, 0.8f, 0.8f);
 	t->r_track.material.shn = 100.f;
 

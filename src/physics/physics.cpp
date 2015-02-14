@@ -144,10 +144,10 @@ struct vehicle* physicsmanager_addvehicle(struct physicsmanager* pm, vec3f pos, 
 	pm->scene->addActor(*v->body);
 
 	// create the raycast origins in "model" space
-	vec3f_set(v->origins[0], -dim[VX], -dim[VY], -dim[VZ]);
-	vec3f_set(v->origins[1], dim[VX], -dim[VY], -dim[VZ]);
-	vec3f_set(v->origins[2], -dim[VX], -dim[VY], dim[VZ]);
-	vec3f_set(v->origins[3], dim[VX], -dim[VY], dim[VZ]);
+	vec3f_set(v->origins[0], -dim[VX] + 0.2f, -dim[VY], -dim[VZ] + 0.2f);
+	vec3f_set(v->origins[1], dim[VX] - 0.2f, -dim[VY], -dim[VZ] + 0.2f);
+	vec3f_set(v->origins[2], -dim[VX] + 0.2f, -dim[VY], dim[VZ] - 0.2f);
+	vec3f_set(v->origins[3], dim[VX] - 0.2f, -dim[VY], dim[VZ] - 0.2f);
 
 	// create the raycast directions in "model" space
 	vec3f_set(v->dir[0], 0.f, -1.f, 0.f);

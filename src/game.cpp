@@ -162,7 +162,7 @@ static void scroll(GLFWwindow* window, double xoffset, double yoffset)
 
 static void update(struct game* game)
 {
-	vec3f up, move;
+	vec3f up, move, diff;
 
 	// check for callback events
 	glfwPollEvents();
@@ -191,14 +191,18 @@ static void update(struct game* game)
 	} else
 	{
 		cart_accelerate(&game->player, -30.f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_TRIGGERS]);
-		cart_turn(&game->player, 6.f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_LR]);
+		cart_turn(&game->player, 4.f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_LR]);
 		//cart_shocks(&game->player, 10 , game->inputmanager.controllers[GLFW_JOYSTICK_1].buttons[0]);
 	}
 	
 	// update player camera
 	physx::PxMat44 t_player(game->player.vehicle->body->getGlobalPose());
-	physx::PxVec3 campos = t_player.transform(physx::PxVec3(0.f, 1.f, 5.f));
-	vec3f_copy(game->cam_player.pos, (float*)&campos);
+	physx::PxVec3 cam_targetpos = t_player.transform(physx::PxVec3(0.f, 1.f, 5.f));
+
+	vec3f_subtractn(diff, (float*)&cam_targetpos, game->cam_player.pos);
+	vec3f_scale(diff, 0.1f);
+
+	vec3f_add(game->cam_player.pos, diff);
 	camera_lookat(&game->cam_player, (float*)&t_player.getPosition(), up);
 
 	// check for window close messages
