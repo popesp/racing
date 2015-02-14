@@ -56,7 +56,7 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 			game->flags |= GAME_FLAG_TERMINATED;
 			break;
 
-		case GLFW_KEY_W:
+		case GLFW_KEY_Q:
 			if (game->flags & GAME_FLAG_WIREFRAME)
 			{
 				game->flags &= ~GAME_FLAG_WIREFRAME;
@@ -174,7 +174,7 @@ static void update(struct game* game)
 	// check for callback events
 	glfwPollEvents();
 
-	inputmanager_update(&game->inputmanager);
+	inputmanager_update(&game->inputmanager, game->window.w, &game->player);
 
 	// simulate
 	physicsmanager_update(&game->physicsmanager, GAME_SPU);
@@ -187,18 +187,24 @@ static void update(struct game* game)
 		vec3f_copy(move, game->cam_debug.dir);
 		move[VY] = 0.f;
 		vec3f_normalize(move);
-		vec3f_scale(move, -0.2f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_UD]);
-		move[VY] = - 0.1f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_TRIGGERS];
-		vec3f_add(game->cam_debug.pos, move);
+		if (game->inputmanager.controllers[GLFW_JOYSTICK_1].flags & INPUT_FLAG_ENABLED){
+			vec3f_scale(move, -0.2f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_UD]);
+			move[VY] = - 0.1f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_TRIGGERS];
+			vec3f_add(game->cam_debug.pos, move);
 
-		camera_strafe(&game->cam_debug, 0.2f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_LR]);
+			camera_strafe(&game->cam_debug, 0.2f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_LR]);
 
-		camera_rotate(&game->cam_debug, up, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_LR]);
-		camera_rotate(&game->cam_debug, game->cam_debug.right, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_UD]);
+			camera_rotate(&game->cam_debug, up, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_LR]);
+			camera_rotate(&game->cam_debug, game->cam_debug.right, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_UD]);
+		}
 	} else
 	{
-		cart_accelerate(&game->player, -30.f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_TRIGGERS]);
-		cart_turn(&game->player, 4.f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_LR]);
+		//joystick
+		if (game->inputmanager.controllers[GLFW_JOYSTICK_1].flags & INPUT_FLAG_ENABLED){
+			cart_accelerate(&game->player, -30.f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_TRIGGERS]);
+			cart_turn(&game->player, 4.f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_LR]);
+		}
+		//keyboard
 	}
 	
 	// update player camera
@@ -333,7 +339,7 @@ int game_startup(struct game* game)
 	printf("PhysX initialized, using version %d.%d.%d\n", PX_PHYSICS_VERSION_MAJOR, PX_PHYSICS_VERSION_MINOR, PX_PHYSICS_VERSION_BUGFIX);
 
 	// initialize input manager
-	inputmanager_startup(&game->inputmanager);
+	inputmanager_startup(&game->inputmanager, game->window.w, &game->player);
 
 	// print connected joystick information
 	for (int i = 0; i <= GLFW_JOYSTICK_LAST; i++)

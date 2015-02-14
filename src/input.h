@@ -4,6 +4,7 @@
 
 #include	<GL/glew.h>
 #include	<GLFW/glfw3.h>
+#include	"objects/cart.h"		// init, generatemesh
 
 
 #define	INPUT_BUTTON_A			0
@@ -28,6 +29,7 @@
 #define	INPUT_AXIS_RIGHT_LR		4
 
 #define	INPUT_MAX_JOYSTICKS		(GLFW_JOYSTICK_LAST+1)
+#define INPUT_MAX_KEYBOARD		(GLFW_KEY_LAST+1)
 
 #define	INPUT_ANALOG_DEADZONE	0.1f
 
@@ -45,17 +47,28 @@ struct controller
 
 	unsigned char flags;
 };
+struct keyboard
+{
+	int knum_buttons;
+	const unsigned char* kbuttons;
+
+	int knum_axes;
+	float* kaxes;
+
+	unsigned char kflags;
+};
 
 struct inputmanager
 {
 	struct controller controllers[INPUT_MAX_JOYSTICKS];
+	struct keyboard keyboards[INPUT_MAX_KEYBOARD];
 };
 
 
 /*	start up the texture manager
 	param:	im				input manager (modified)
 */
-void inputmanager_startup(struct inputmanager* im);
+void inputmanager_startup(struct inputmanager* im, GLFWwindow* window, struct cart* c);
 
 
 /*	shut down the input manager
@@ -67,7 +80,7 @@ void inputmanager_shutdown(struct inputmanager* im);
 /*	update the input
 	param:	im				input manager (modified)
 */
-void inputmanager_update(struct inputmanager* im);
+void inputmanager_update(struct inputmanager* im, GLFWwindow* window, struct cart* c);
 
 
 /*	get the name of a given joystick

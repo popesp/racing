@@ -1,13 +1,16 @@
 #include	"input.h"
+#include	"objects/cart.h"		// init, generatemesh
+
+
 
 #include	<gl/glew.h>
 #include	<GLFW/glfw3.h>
-
+#include	<stdio.h>				// printf
 
 /*	start up the texture manager
 	param:	im				input manager (modified)
 */
-void inputmanager_startup(struct inputmanager* im)
+void inputmanager_startup(struct inputmanager* im, GLFWwindow* window, struct cart* c)
 {
 	int i;
 
@@ -23,7 +26,18 @@ void inputmanager_startup(struct inputmanager* im)
 		im->controllers[i].axes = NULL;
 	}
 
-	inputmanager_update(im);
+
+	// clear all keyboard flags and initialize attributes
+	for (i=0; i < INPUT_MAX_KEYBOARD; i++){
+		im->keyboards[i].kflags = INPUT_FLAG_NONE;
+
+		im->keyboards[i].knum_buttons = 0;
+		im->keyboards[i].kbuttons = NULL;
+		im->keyboards[i].knum_axes = 0;
+		im->keyboards[i].kaxes = NULL;
+	}
+
+	inputmanager_update(im, window, c);
 }
 
 /*	shut down the input manager
@@ -38,7 +52,7 @@ void inputmanager_shutdown(struct inputmanager* im)
 /*	update the input
 	param:	im				input manager (modified)
 */
-void inputmanager_update(struct inputmanager* im)
+void inputmanager_update(struct inputmanager* im, GLFWwindow* window, struct cart* c)
 {
 	int i;
 
@@ -72,6 +86,27 @@ void inputmanager_update(struct inputmanager* im)
 			{} // controller was disconnected
 
 			im->controllers[i].flags &= ~INPUT_FLAG_ENABLED;
+		}
+	}
+
+	for(i=0;i<INPUT_MAX_KEYBOARD;i++){
+		if(glfwGetKey(window, i)==GLFW_PRESS){
+			if(i==GLFW_KEY_W){
+				cart_accelerate(c, 30.f * 1);
+			}
+			else if(i==GLFW_KEY_S){
+				cart_accelerate(c, -30.f * 1);
+				
+			}
+			else if(i==GLFW_KEY_A){
+				cart_turn(c, -4.f * 1);
+			}
+			else if(i==GLFW_KEY_D){
+				cart_turn(c, 4.f * 1);
+			}
+			else{
+				//im->keyboards[i].kflags &= ~INPUT_FLAG_ENABLED;
+			}
 		}
 	}
 }
