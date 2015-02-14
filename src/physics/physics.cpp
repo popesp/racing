@@ -35,7 +35,7 @@ void physicsmanager_startup(struct physicsmanager* pm)
 	PxVehicleSetUpdateMode(PxVehicleUpdateMode::eVELOCITY_CHANGE);
 
 	// create default material
-	pm->default_material = pm->sdk->createMaterial(0.5f, 0.5f, 0.5f);
+	pm->default_material = pm->sdk->createMaterial(0.1f, 0.1f, 0.5f);
 
 	// create the scene for simulation
 	PxSceneDesc scenedesc(scale);
@@ -78,6 +78,7 @@ static void updatevehicles(struct physicsmanager* pm, float dt)
 	(void)dt;
 
 	outflags = PxHitFlag::eDISTANCE;
+	PxQueryFilterData filterData(PxQueryFlag::eSTATIC);
 
 	for (i = 0; i < pm->num_vehicles; i++)
 	{
@@ -91,7 +92,7 @@ static void updatevehicles(struct physicsmanager* pm, float dt)
 			mat4f_transformvec3fn(g_dir, v->dir[j], (float*)&vehicle_world);
 
 			// raycast
-			status = pm->scene->raycast(PxVec3(g_origin[VX], g_origin[VY], g_origin[VZ]), PxVec3(g_dir[VX], g_dir[VY], g_dir[VZ]), PHYSICS_VEHICLE_RAYCAST_MAXDIST, hit, outflags);
+			status = pm->scene->raycast(PxVec3(g_origin[VX], g_origin[VY], g_origin[VZ]), PxVec3(g_dir[VX], g_dir[VY], g_dir[VZ]), PHYSICS_VEHICLE_RAYCAST_MAXDIST, hit, outflags, filterData);
 
 			if (status)
 			{
@@ -103,7 +104,7 @@ static void updatevehicles(struct physicsmanager* pm, float dt)
 				// calculate raycast force (quadratic)
 				vec3f_scalen(force, v->dir[j], -PHYSICS_VEHICLE_RAYCAST_MAXFORCE * (d*d/(PHYSICS_VEHICLE_RAYCAST_MAXDIST * PHYSICS_VEHICLE_RAYCAST_MAXDIST) - 2.f*d/PHYSICS_VEHICLE_RAYCAST_MAXDIST + 1.f));
 
-				PxRigidBodyExt::addForceAtLocalPos(*v->body, PxVec3(force[VX], force[VY], force[VZ]), PxVec3(v->origins[j][VX], v->origins[j][VY], v->origins[j][VZ]));
+				PxRigidBodyExt::addLocalForceAtLocalPos(*v->body, PxVec3(force[VX], force[VY], force[VZ]), PxVec3(v->origins[j][VX], v->origins[j][VY], v->origins[j][VZ]));
 			}
 		}
 	}
@@ -143,10 +144,10 @@ struct vehicle* physicsmanager_addvehicle(struct physicsmanager* pm, vec3f pos, 
 	pm->scene->addActor(*v->body);
 
 	// create the raycast origins in "model" space
-	vec3f_set(v->origins[0], -dim[VX], -dim[VY] - 0.1f, -dim[VZ]);
-	vec3f_set(v->origins[1], dim[VX], -dim[VY] - 0.1f, -dim[VZ]);
-	vec3f_set(v->origins[2], -dim[VX], -dim[VY] - 0.1f, dim[VZ]);
-	vec3f_set(v->origins[3], dim[VX], -dim[VY] - 0.1f, dim[VZ]);
+	vec3f_set(v->origins[0], -dim[VX], -dim[VY], -dim[VZ]);
+	vec3f_set(v->origins[1], dim[VX], -dim[VY], -dim[VZ]);
+	vec3f_set(v->origins[2], -dim[VX], -dim[VY], dim[VZ]);
+	vec3f_set(v->origins[3], dim[VX], -dim[VY], dim[VZ]);
 
 	// create the raycast directions in "model" space
 	vec3f_set(v->dir[0], 0.f, -1.f, 0.f);
@@ -154,8 +155,8 @@ struct vehicle* physicsmanager_addvehicle(struct physicsmanager* pm, vec3f pos, 
 	vec3f_set(v->dir[2], 0.f, -1.f, 0.f);
 	vec3f_set(v->dir[3], 0.f, -1.f, 0.f);
 
-	v->body->setLinearDamping(0.9f);
-	v->body->setAngularDamping(0.9f);
+	v->body->setLinearDamping(PHYSICS_VEHICLE_DAMP_LINEAR);
+	v->body->setAngularDamping(PHYSICS_VEHICLE_DAMP_ANGULAR);
 
 	return v;
 }

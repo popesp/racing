@@ -190,8 +190,8 @@ static void update(struct game* game)
 		camera_rotate(&game->cam_debug, game->cam_debug.right, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_UD]);
 	} else
 	{
-		cart_accelerate(&game->player, -18.f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_TRIGGERS]);
-		cart_turn(&game->player, -0.5f, game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_LR]);
+		cart_accelerate(&game->player, -30.f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_TRIGGERS]);
+		cart_turn(&game->player, 6.f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_LR]);
 		//cart_shocks(&game->player, 10 , game->inputmanager.controllers[GLFW_JOYSTICK_1].buttons[0]);
 	}
 	

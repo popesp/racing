@@ -71,14 +71,17 @@ void cart_accelerate(struct cart* c, float d)
 	vec3f_set(force, CART_FORWARD);
 	vec3f_scale(force, d);
 
-	using namespace physx;
+	physx::PxRigidBodyExt::addLocalForceAtLocalPos(*c->vehicle->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, 0.f));
+}
 
-	const PxVec3 up(0,0,-1);
-	const PxVec3 bodyUpVector = c->vehicle->body->getGlobalPose().q.rotate(up);
-	const PxVec3 Force = bodyUpVector * d;
-	c->vehicle->body->addForce(Force);
+void cart_turn(struct cart* c, float d)
+{
+	vec3f force;
 
-	//physx::PxRigidBodyExt::addLocalForceAtLocalPos(*c->vehicle->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, 0.f));
+	vec3f_set(force, CART_RIGHT);
+	vec3f_scale(force, d);
+
+	physx::PxRigidBodyExt::addLocalForceAtLocalPos(*c->vehicle->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, -CART_LENGTH/2.f));
 }
 
 void cart_shocks(struct cart *c, float d, unsigned bounce){
@@ -95,16 +98,6 @@ void cart_shocks(struct cart *c, float d, unsigned bounce){
 	c->vehicle->body->addForce(Force); }
 
 
-}
-
-void cart_turn(struct cart* c, float d, float axis) {
-	
-	using namespace physx;
-
-	const PxVec3 up(0,1,0);
-	const PxVec3 bodyUpVector = c->vehicle->body->getGlobalPose().q.rotate(up);
-	const PxVec3 torque = bodyUpVector * d * axis;
-	c->vehicle->body->addTorque(torque);
 }
 
 
