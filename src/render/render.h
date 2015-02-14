@@ -23,14 +23,16 @@
 #define	RENDER_MODE_TRIANGLESTRIP	2
 #define	RENDER_MODE_TRIANGLES		3
 
-#define	RENDER_TYPE_COUNT			3
-#define	RENDER_TYPE_WIREF			0
-#define	RENDER_TYPE_SOLID			1
-#define	RENDER_TYPE_BUMPM			2
+#define	RENDER_TYPE_COUNT			4
+#define	RENDER_TYPE_WIRE_S			0
+#define	RENDER_TYPE_TXTR_S			1
+#define	RENDER_TYPE_MATS_L			2
+#define	RENDER_TYPE_BUMP_L			3
 
-#define	RENDER_VERTSIZE_WIREF		(RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_COL)
-#define	RENDER_VERTSIZE_SOLID		(RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_NOR)
-#define	RENDER_VERTSIZE_BUMPM		(RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_NOR + RENDER_ATTRIBSIZE_TAN + RENDER_ATTRIBSIZE_TEX)
+#define	RENDER_VERTSIZE_WIRE_S		(RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_COL)
+#define	RENDER_VERTSIZE_TXTR_S		(RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_TEX)
+#define	RENDER_VERTSIZE_MATS_L		(RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_NOR)
+#define	RENDER_VERTSIZE_BUMP_L		(RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_NOR + RENDER_ATTRIBSIZE_TAN + RENDER_ATTRIBSIZE_TEX)
 
 #define	RENDER_LIGHT_UNIFORMS		3
 #define	RENDER_LIGHT_POS			0
@@ -43,8 +45,9 @@
 #define	RENDER_MATERIAL_SPC			2
 #define	RENDER_MATERIAL_SHN			3
 
-#define	RENDER_TEXTURE_TYPES		1
-#define	RENDER_TEXTURE_NORMAL		0
+#define	RENDER_TEXTURE_TYPES		2
+#define	RENDER_TEXTURE_DIFFUSE		0
+#define	RENDER_TEXTURE_NORMAL		1
 
 #define	RENDER_MAX_LIGHTS			2
 
@@ -59,12 +62,14 @@
 
 #define	RENDER_DEFAULT_AMBIENT		0.2f, 0.2f, 0.2f
 
-#define	RENDER_SHADER_WIREFVERT		"shaders/wiref.vert"
-#define	RENDER_SHADER_WIREFFRAG		"shaders/wiref.frag"
-#define	RENDER_SHADER_SOLIDVERT		"shaders/solid.vert"
-#define	RENDER_SHADER_SOLIDFRAG		"shaders/solid.frag"
-#define	RENDER_SHADER_BUMPMVERT		"shaders/bumpm.vert"
-#define	RENDER_SHADER_BUMPMFRAG		"shaders/bumpm.frag"
+#define	RENDER_SHADER_VERT_WIRE_S	"shaders/wires.vert"
+#define	RENDER_SHADER_FRAG_WIRE_S	"shaders/wires.frag"
+#define	RENDER_SHADER_VERT_TXTR_S	"shaders/txtrs.vert"
+#define	RENDER_SHADER_FRAG_TXTR_S	"shaders/txtrs.frag"
+#define	RENDER_SHADER_VERT_MATS_L	"shaders/matsl.vert"
+#define	RENDER_SHADER_FRAG_MATS_L	"shaders/matsl.frag"
+#define	RENDER_SHADER_VERT_BUMP_L	"shaders/bumpl.vert"
+#define	RENDER_SHADER_FRAG_BUMP_L	"shaders/bumpl.frag"
 
 #define	RENDER_FLAG_NONE			0x00
 #define	RENDER_FLAG_DYNAMIC			0x01
@@ -112,9 +117,10 @@ struct renderable
 
 struct renderer
 {
-	unsigned id_gl_wiref;
-	unsigned id_gl_solid;
-	unsigned id_gl_bumpm;
+	unsigned id_gl_wire_s;
+	unsigned id_gl_txtr_s;
+	unsigned id_gl_mats_l;
+	unsigned id_gl_bump_l;
 
 	unsigned vertsize[RENDER_TYPE_COUNT];
 	unsigned shader[RENDER_TYPE_COUNT];
@@ -125,7 +131,13 @@ struct renderer
 	struct
 	{
 		int transform;
-	} uniforms_wiref;
+	} uniforms_wire_s;
+
+	struct
+	{
+		int transform;
+		int tex_diffuse;
+	} uniforms_txtr_s;
 
 	struct
 	{
@@ -134,7 +146,7 @@ struct renderer
 		int lights[RENDER_MAX_LIGHTS][RENDER_LIGHT_UNIFORMS];
 		int ambient;
 		int material[RENDER_MATERIAL_UNIFORMS];
-	} uniforms_solid;
+	} uniforms_mats_l;
 
 	struct
 	{
@@ -144,7 +156,7 @@ struct renderer
 		int ambient;
 		int tex_normal;
 		int material[RENDER_MATERIAL_UNIFORMS];
-	} uniforms_bumpm;
+	} uniforms_bump_l;
 };
 
 

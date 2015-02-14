@@ -68,6 +68,9 @@
     <ClCompile Include="src\render\texture.cpp">
       <Filter>src\render</Filter>
     </ClCompile>
+    <ClCompile Include="src\objects\skybox.cpp">
+      <Filter>src\objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\debug.h">
@@ -115,30 +118,33 @@
     <ClInclude Include="src\render\texture.h">
       <Filter>headers\render</Filter>
     </ClInclude>
+    <ClInclude Include="src\objects\skybox.h">
+      <Filter>headers\objects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\solid.frag">
+    <None Include="shaders\bumpl.frag">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\solid.vert">
+    <None Include="shaders\bumpl.vert">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\textured.frag">
+    <None Include="shaders\matsl.frag">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\textured.vert">
+    <None Include="shaders\matsl.vert">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\wiref.frag">
+    <None Include="shaders\txtrs.frag">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\wiref.vert">
+    <None Include="shaders\txtrs.vert">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\bumpm.frag">
+    <None Include="shaders\wires.frag">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\bumpm.vert">
+    <None Include="shaders\wires.vert">
       <Filter>shaders</Filter>
     </None>
   </ItemGroup>

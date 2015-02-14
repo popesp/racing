@@ -5,6 +5,7 @@
 #include	"input.h"
 #include	"objects/camera.h"
 #include	"objects/cart.h"
+#include	"objects/skybox.h"
 #include	"objects/track.h"
 #include	"physics/physics.h"
 #include	"render/render.h"
@@ -17,7 +18,7 @@
 #define	GAME_DEFAULT_X			400
 #define	GAME_DEFAULT_Y			400
 
-#define	GAME_TITLE				"Racing Game"
+#define	GAME_TITLE				"Twisted Steel"
 
 #define	GAME_UPS				60.f
 #define	GAME_SPU				1.f/GAME_UPS
@@ -42,6 +43,7 @@ struct game
 	struct inputmanager inputmanager;
 	struct texturemanager texturemanager;
 
+	struct skybox skybox;
 	struct track track;
 	struct cart player;
 	struct camera cam_debug;
@@ -50,6 +52,7 @@ struct game
 	struct light track_lights[2];
 
 	int tex_trackbump;
+	int tex_skybox;
 
 	unsigned char flags;
 };

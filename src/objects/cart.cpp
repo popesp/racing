@@ -55,12 +55,17 @@ void cart_init(struct cart* c, physicsmanager* pm, vec3f pos)
 	vec3f_set(dim, CART_WIDTH/2.f, CART_HEIGHT/2.f, CART_LENGTH/2.f);
 	c->vehicle = physicsmanager_addvehicle(pm, pos, dim);
 
-	renderable_init(&c->r_cart, RENDER_MODE_TRIANGLES, RENDER_TYPE_SOLID, RENDER_FLAG_NONE);
+	renderable_init(&c->r_cart, RENDER_MODE_TRIANGLES, RENDER_TYPE_MATS_L, RENDER_FLAG_NONE);
 
 	vec3f_set(c->r_cart.material.amb, 0.8f, 0.15f, 0.1f);
 	vec3f_set(c->r_cart.material.dif, 0.8f, 0.15f, 0.1f);
 	vec3f_set(c->r_cart.material.spc, 0.8f, 0.5f, 0.5f);
 	c->r_cart.material.shn = 100.f;
+}
+
+void cart_delete(struct cart* c)
+{
+	renderable_deallocate(&c->r_cart);
 }
 
 

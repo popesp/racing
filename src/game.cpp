@@ -225,23 +225,34 @@ static void update(struct game* game)
 
 static void render(struct game* game)
 {
-	mat4f world_view, model_world;
+	mat4f global_wv, skybox_wv, track_mw, skybox_mw;
 	physx::PxMat44 player_world(game->player.vehicle->body->getGlobalPose());
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// get camera transform
 	if (game->flags & GAME_FLAG_DEBUGCAM)
-		camera_gettransform(&game->cam_debug, world_view);
+		camera_gettransform(&game->cam_debug, global_wv);
 	else
-		camera_gettransform(&game->cam_player, world_view);
+		camera_gettransform(&game->cam_player, global_wv);
+
+	// remove translation from camera transform
+	mat4f_copy(skybox_wv, global_wv);
+	vec3f_set(skybox_wv + C3, 0.f, 0.f, 0.f);
+	skybox_wv[R3 + C3] = 1.f;
+
+	// render skybox
+	mat4f_identity(skybox_mw);
+	renderable_render(&game->renderer, &game->skybox.r_skybox, skybox_mw, skybox_wv, 0);
+
+	glClear(GL_DEPTH_BUFFER_BIT);
 
 	// render track
-	mat4f_identity(model_world);
-	renderable_render(&game->renderer, &game->track.r_track, model_world, world_view, 0);
+	mat4f_identity(track_mw);
+	renderable_render(&game->renderer, &game->track.r_track, track_mw, global_wv, 0);
 
 	// render player
-	renderable_render(&game->renderer, &game->player.r_cart, (float*)&player_world, world_view, 0);
+	renderable_render(&game->renderer, &game->player.r_cart, (float*)&player_world, global_wv, 0);
 
 	glfwSwapBuffers(game->window.w);
 }
@@ -350,19 +361,27 @@ int game_startup(struct game* game)
 
 	/* ----- BEGIN GAME STATE INITIALIZATION ----- */
 
+	// initialize skybox
+	skybox_init(&game->skybox, &game->texturemanager, "res/night.jpg");
+	skybox_generatemesh(&game->renderer, &game->skybox);
+
 	// initialize track object
 	vec3f_set(up, 0.f, 1.f, 0.f);
 	track_init(&game->track, up, &game->physicsmanager);
 	track_loadpointsfile(&game->track, "test.track");
 	track_generatemesh(&game->renderer, &game->track);
-
-	physicsmanager_addstatic_trianglestrip(&game->physicsmanager, game->track.r_track.num_verts, sizeof(float)*RENDER_VERTSIZE_BUMPM, game->track.r_track.buf_verts);
-	renderable_sendbuffer(&game->renderer, &game->track.r_track);
-
+	
+	// send track mesh to physX (NOTE: should be in track.cpp)
+	physicsmanager_addstatic_trianglestrip(&game->physicsmanager, game->track.r_track.num_verts, sizeof(float)*RENDER_VERTSIZE_BUMP_L, game->track.r_track.buf_verts);
+	
 	// initialize cart object
 	vec3f_set(pos, GAME_STARTINGPOS);
 	cart_init(&game->player, &game->physicsmanager, pos);
 	cart_generatemesh(&game->renderer, &game->player);
+	
+	// send vertex buffers to GPU
+	renderable_sendbuffer(&game->renderer, &game->skybox.r_skybox);
+	renderable_sendbuffer(&game->renderer, &game->track.r_track);
 	renderable_sendbuffer(&game->renderer, &game->player.r_cart);
 
 	// initialize camera objects
@@ -385,7 +404,8 @@ int game_startup(struct game* game)
 	game->track.r_track.lights[1] = game->track_lights + 1;
 	game->player.r_cart.lights[0] = game->track_lights + 0;
 	game->player.r_cart.lights[1] = game->track_lights + 1;
-
+	
+	// track normal map
 	game->tex_trackbump = texturemanager_newtexture(&game->texturemanager);
 	texture_loadfile(&game->texturemanager, game->tex_trackbump, "res/slate.jpg");
 	texture_upload(&game->texturemanager, game->tex_trackbump, RENDER_TEXTURE_NORMAL);
@@ -440,13 +460,15 @@ void game_mainloop(struct game* game)
 
 void game_shutdown(struct game* game)
 {
+	cart_delete(&game->player);
 	track_delete(&game->track);
+	skybox_delete(&game->skybox);
 
 	// shut down all the game subsytems
 	physicsmanager_shutdown(&game->physicsmanager);
 	inputmanager_shutdown(&game->inputmanager);
 	texturemanager_shutdown(&game->texturemanager);
-
+	
 	glfwDestroyWindow(game->window.w);
 	glfwTerminate();
 }

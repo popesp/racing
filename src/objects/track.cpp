@@ -31,7 +31,9 @@ void track_init(struct track* t, vec3f up, struct physicsmanager* pm)
 	t->num_points = 0;
 	t->points = NULL;
 
-	renderable_init(&t->r_track, RENDER_MODE_TRIANGLESTRIP, RENDER_TYPE_BUMPM, RENDER_FLAG_NONE);
+	t->p_track = NULL;
+
+	renderable_init(&t->r_track, RENDER_MODE_TRIANGLESTRIP, RENDER_TYPE_BUMP_L, RENDER_FLAG_NONE);
 
 	// initialize material properties
 	vec3f_set(t->r_track.material.amb, 0.4f, 0.4f, 0.4f);
@@ -310,10 +312,10 @@ void track_generatemesh(struct renderer* r, struct track* t)
 
 	// re-allocate mesh renderable vertex buffer
 	// the second parameter here looks complicated but is just calculating the required number of vertices to triangle strip the track
-	renderable_allocate(r, &t->r_track, 2u * ((2u * TRACK_SEGMENT_VERTCOUNT - 1u)*s + 2u * (TRACK_SEGMENT_VERTCOUNT - 1u)));
+	renderable_allocate(r, &t->r_track, 2 * ((2 * TRACK_SEGMENT_VERTCOUNT - 1)*s + 2 * (TRACK_SEGMENT_VERTCOUNT - 1)));
 
 	// temporary vertex buffer
-	verts = (float*)mem_calloc(2 * (2 * TRACK_SEGMENT_VERTCOUNT - 1)*s, RENDER_VERTSIZE_BUMPM * sizeof(float));
+	verts = (float*)mem_calloc(2 * (2 * TRACK_SEGMENT_VERTCOUNT - 1)*s, RENDER_VERTSIZE_BUMP_L * sizeof(float));
 
 	// place vertex attributes into buffer
 	ptr = verts;
@@ -345,18 +347,20 @@ void track_generatemesh(struct renderer* r, struct track* t)
 		if (i)
 		{
 			// repeat points at start and end of track
-			ptr = copyvert(ptr, ptr - RENDER_VERTSIZE_BUMPM);
-			ptr = copyvert(ptr, verts + offs*RENDER_VERTSIZE_BUMPM);
+			ptr = copyvert(ptr, ptr - RENDER_VERTSIZE_BUMP_L);
+			ptr = copyvert(ptr, verts + offs*RENDER_VERTSIZE_BUMP_L);
 		}
 
 		// loop through each segment
 		for (j = 0; j < s; j++)
 		{
 			// copy points
-			ptr = copyvert(ptr, verts + offs*RENDER_VERTSIZE_BUMPM);
-			ptr = copyvert(ptr, verts + (offs + 1)*RENDER_VERTSIZE_BUMPM);
+			ptr = copyvert(ptr, verts + offs*RENDER_VERTSIZE_BUMP_L);
+			ptr = copyvert(ptr, verts + (offs + 1)*RENDER_VERTSIZE_BUMP_L);
 
 			offs += 2 * (2 * TRACK_SEGMENT_VERTCOUNT - 1);
 		}
-	}								
+	}
+
+	mem_free(verts);
 }

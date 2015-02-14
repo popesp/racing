@@ -63,21 +63,26 @@ void renderable_init(struct renderable* obj, unsigned char mode, unsigned char t
 	// initialize attributes given the object type
 	switch (type)
 	{
-	case RENDER_TYPE_WIREF:
-		attrib(RENDER_ATTRIB_POS, RENDER_ATTRIBSIZE_POS, RENDER_VERTSIZE_WIREF, 0);
-		attrib(RENDER_ATTRIB_COL, RENDER_ATTRIBSIZE_COL, RENDER_VERTSIZE_WIREF, RENDER_ATTRIBSIZE_POS);
+	case RENDER_TYPE_WIRE_S:
+		attrib(RENDER_ATTRIB_POS, RENDER_ATTRIBSIZE_POS, RENDER_VERTSIZE_WIRE_S, 0);
+		attrib(RENDER_ATTRIB_COL, RENDER_ATTRIBSIZE_COL, RENDER_VERTSIZE_WIRE_S, RENDER_ATTRIBSIZE_POS);
 		break;
 
-	case RENDER_TYPE_SOLID:
-		attrib(RENDER_ATTRIB_POS, RENDER_ATTRIBSIZE_POS, RENDER_VERTSIZE_SOLID, 0);
-		attrib(RENDER_ATTRIB_NOR, RENDER_ATTRIBSIZE_NOR, RENDER_VERTSIZE_SOLID, RENDER_ATTRIBSIZE_POS);
+	case RENDER_TYPE_TXTR_S:
+		attrib(RENDER_ATTRIB_POS, RENDER_ATTRIBSIZE_POS, RENDER_VERTSIZE_TXTR_S, 0);
+		attrib(RENDER_ATTRIB_TEX, RENDER_ATTRIBSIZE_TEX, RENDER_VERTSIZE_TXTR_S, RENDER_ATTRIBSIZE_POS);
 		break;
 
-	case RENDER_TYPE_BUMPM:
-		attrib(RENDER_ATTRIB_POS, RENDER_ATTRIBSIZE_POS, RENDER_VERTSIZE_BUMPM, 0);
-		attrib(RENDER_ATTRIB_NOR, RENDER_ATTRIBSIZE_NOR, RENDER_VERTSIZE_BUMPM, RENDER_ATTRIBSIZE_POS);
-		attrib(RENDER_ATTRIB_TAN, RENDER_ATTRIBSIZE_TAN, RENDER_VERTSIZE_BUMPM, RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_NOR);
-		attrib(RENDER_ATTRIB_TEX, RENDER_ATTRIBSIZE_TEX, RENDER_VERTSIZE_BUMPM, RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_NOR + RENDER_ATTRIBSIZE_TAN);
+	case RENDER_TYPE_MATS_L:
+		attrib(RENDER_ATTRIB_POS, RENDER_ATTRIBSIZE_POS, RENDER_VERTSIZE_MATS_L, 0);
+		attrib(RENDER_ATTRIB_NOR, RENDER_ATTRIBSIZE_NOR, RENDER_VERTSIZE_MATS_L, RENDER_ATTRIBSIZE_POS);
+		break;
+
+	case RENDER_TYPE_BUMP_L:
+		attrib(RENDER_ATTRIB_POS, RENDER_ATTRIBSIZE_POS, RENDER_VERTSIZE_BUMP_L, 0);
+		attrib(RENDER_ATTRIB_NOR, RENDER_ATTRIBSIZE_NOR, RENDER_VERTSIZE_BUMP_L, RENDER_ATTRIBSIZE_POS);
+		attrib(RENDER_ATTRIB_TAN, RENDER_ATTRIBSIZE_TAN, RENDER_VERTSIZE_BUMP_L, RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_NOR);
+		attrib(RENDER_ATTRIB_TEX, RENDER_ATTRIBSIZE_TEX, RENDER_VERTSIZE_BUMP_L, RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_NOR + RENDER_ATTRIBSIZE_TAN);
 		break;
 
 	default:
@@ -96,6 +101,9 @@ void renderable_init(struct renderable* obj, unsigned char mode, unsigned char t
 	obj->material.shn = RENDER_DEFAULT_MATERIAL_SHN;
 
 	obj->ambient = NULL;
+
+	for (i = 0; i < RENDER_TEXTURE_TYPES; i++)
+		obj->texture_ids[i] = 0;
 
 	obj->flags = flags;
 	obj->type = type;
@@ -174,15 +182,28 @@ void renderable_render(struct renderer* r, struct renderable* obj, mat4f modelwo
 
 	switch (obj->type)
 	{
-	case RENDER_TYPE_WIREF:
+	case RENDER_TYPE_WIRE_S:
 		// MVP matrix
-		glUniformMatrix4fv(r->uniforms_wiref.transform, 1, GL_FALSE, mvp);
+		glUniformMatrix4fv(r->uniforms_wire_s.transform, 1, GL_FALSE, mvp);
 		break;
 
-	case RENDER_TYPE_BUMPM:
+	case RENDER_TYPE_TXTR_S:
+		// MVP matrix
+		glUniformMatrix4fv(r->uniforms_txtr_s.transform, 1, GL_FALSE, mvp);
+
+		// texture uniforms
+		unit = RENDER_TEXTURE_DIFFUSE;
+		glUniform1iv(r->uniforms_txtr_s.tex_diffuse, 1, &unit);
+
+		glActiveTexture(GL_TEXTURE0 + unit);
+		glBindTexture(GL_TEXTURE_2D, r->tm->textures[obj->texture_ids[RENDER_TEXTURE_DIFFUSE]].gl_id);
+
+		break;
+
+	case RENDER_TYPE_MATS_L:
 		// MVP matrix and eye position uniforms
-		glUniformMatrix4fv(r->uniforms_bumpm.transform, 1, GL_FALSE, mvp);
-		glUniform3fv(r->uniforms_bumpm.eyepos, 1, eyepos);
+		glUniformMatrix4fv(r->uniforms_mats_l.transform, 1, GL_FALSE, mvp);
+		glUniform3fv(r->uniforms_mats_l.eyepos, 1, eyepos);
 
 		// light property uniforms
 		for (i = 0; i < RENDER_MAX_LIGHTS; i++)
@@ -192,22 +213,22 @@ void renderable_render(struct renderer* r, struct renderable* obj, mat4f modelwo
 				// multiply light position by inverse model-world to get into model-space
 				vec3f_set(temp, RENDER_DEFAULT_LIGHT_POS);
 				mat4f_fulltransformvec3f(temp, inverse_mw);
-				glUniform3fv(r->uniforms_bumpm.lights[i][RENDER_LIGHT_POS], 1, temp);
+				glUniform3fv(r->uniforms_mats_l.lights[i][RENDER_LIGHT_POS], 1, temp);
 
 				vec3f_set(temp, RENDER_DEFAULT_LIGHT_DIF);
-				glUniform3fv(r->uniforms_bumpm.lights[i][RENDER_LIGHT_DIF], 1, temp);
+				glUniform3fv(r->uniforms_mats_l.lights[i][RENDER_LIGHT_DIF], 1, temp);
 				vec3f_set(temp, RENDER_DEFAULT_LIGHT_SPC);
-				glUniform3fv(r->uniforms_bumpm.lights[i][RENDER_LIGHT_SPC], 1, temp);
+				glUniform3fv(r->uniforms_mats_l.lights[i][RENDER_LIGHT_SPC], 1, temp);
 			}
 			else
 			{
 				// multiply light position by inverse model-world to get into model-space
 				vec3f_copy(temp, obj->lights[i]->pos);
 				mat4f_fulltransformvec3f(temp, inverse_mw);
-				glUniform3fv(r->uniforms_bumpm.lights[i][RENDER_LIGHT_POS], 1, temp);
+				glUniform3fv(r->uniforms_mats_l.lights[i][RENDER_LIGHT_POS], 1, temp);
 
-				glUniform3fv(r->uniforms_bumpm.lights[i][RENDER_LIGHT_DIF], 1, obj->lights[i]->dif);
-				glUniform3fv(r->uniforms_bumpm.lights[i][RENDER_LIGHT_SPC], 1, obj->lights[i]->spc);
+				glUniform3fv(r->uniforms_mats_l.lights[i][RENDER_LIGHT_DIF], 1, obj->lights[i]->dif);
+				glUniform3fv(r->uniforms_mats_l.lights[i][RENDER_LIGHT_SPC], 1, obj->lights[i]->spc);
 			}
 		}
 
@@ -215,71 +236,71 @@ void renderable_render(struct renderer* r, struct renderable* obj, mat4f modelwo
 		if (!obj->ambient)
 		{
 			vec3f_set(temp, RENDER_DEFAULT_AMBIENT);
-			glUniform3fv(r->uniforms_bumpm.ambient, 1, temp);
+			glUniform3fv(r->uniforms_mats_l.ambient, 1, temp);
 		}
 		else
-			glUniform3fv(r->uniforms_bumpm.ambient, 1, obj->ambient);
+			glUniform3fv(r->uniforms_mats_l.ambient, 1, obj->ambient);
+
+		// material uniforms
+		glUniform3fv(r->uniforms_mats_l.material[RENDER_MATERIAL_AMB], 1, obj->material.amb);
+		glUniform3fv(r->uniforms_mats_l.material[RENDER_MATERIAL_DIF], 1, obj->material.dif);
+		glUniform3fv(r->uniforms_mats_l.material[RENDER_MATERIAL_SPC], 1, obj->material.spc);
+		glUniform1fv(r->uniforms_mats_l.material[RENDER_MATERIAL_SHN], 1, &obj->material.shn);
+		break;
+
+	case RENDER_TYPE_BUMP_L:
+		// MVP matrix and eye position uniforms
+		glUniformMatrix4fv(r->uniforms_bump_l.transform, 1, GL_FALSE, mvp);
+		glUniform3fv(r->uniforms_bump_l.eyepos, 1, eyepos);
+
+		// light property uniforms
+		for (i = 0; i < RENDER_MAX_LIGHTS; i++)
+		{
+			if (!obj->lights[i])
+			{
+				// multiply light position by inverse model-world to get into model-space
+				vec3f_set(temp, RENDER_DEFAULT_LIGHT_POS);
+				mat4f_fulltransformvec3f(temp, inverse_mw);
+				glUniform3fv(r->uniforms_bump_l.lights[i][RENDER_LIGHT_POS], 1, temp);
+
+				vec3f_set(temp, RENDER_DEFAULT_LIGHT_DIF);
+				glUniform3fv(r->uniforms_bump_l.lights[i][RENDER_LIGHT_DIF], 1, temp);
+				vec3f_set(temp, RENDER_DEFAULT_LIGHT_SPC);
+				glUniform3fv(r->uniforms_bump_l.lights[i][RENDER_LIGHT_SPC], 1, temp);
+			}
+			else
+			{
+				// multiply light position by inverse model-world to get into model-space
+				vec3f_copy(temp, obj->lights[i]->pos);
+				mat4f_fulltransformvec3f(temp, inverse_mw);
+				glUniform3fv(r->uniforms_bump_l.lights[i][RENDER_LIGHT_POS], 1, temp);
+
+				glUniform3fv(r->uniforms_bump_l.lights[i][RENDER_LIGHT_DIF], 1, obj->lights[i]->dif);
+				glUniform3fv(r->uniforms_bump_l.lights[i][RENDER_LIGHT_SPC], 1, obj->lights[i]->spc);
+			}
+		}
+
+		// ambient uniform
+		if (!obj->ambient)
+		{
+			vec3f_set(temp, RENDER_DEFAULT_AMBIENT);
+			glUniform3fv(r->uniforms_bump_l.ambient, 1, temp);
+		}
+		else
+			glUniform3fv(r->uniforms_bump_l.ambient, 1, obj->ambient);
 
 		// texture uniforms
 		unit = RENDER_TEXTURE_NORMAL;
-		glUniform1iv(r->uniforms_bumpm.tex_normal, 1, &unit);
+		glUniform1iv(r->uniforms_bump_l.tex_normal, 1, &unit);
 
 		glActiveTexture(GL_TEXTURE0 + RENDER_TEXTURE_NORMAL);
 		glBindTexture(GL_TEXTURE_2D, r->tm->textures[obj->texture_ids[RENDER_TEXTURE_NORMAL]].gl_id);
 
 		// material uniforms
-		glUniform3fv(r->uniforms_bumpm.material[RENDER_MATERIAL_AMB], 1, obj->material.amb);
-		glUniform3fv(r->uniforms_bumpm.material[RENDER_MATERIAL_DIF], 1, obj->material.dif);
-		glUniform3fv(r->uniforms_bumpm.material[RENDER_MATERIAL_SPC], 1, obj->material.spc);
-		glUniform1fv(r->uniforms_bumpm.material[RENDER_MATERIAL_SHN], 1, &obj->material.shn);
-		break;
-
-	case RENDER_TYPE_SOLID:
-		// MVP matrix and eye position uniforms
-		glUniformMatrix4fv(r->uniforms_solid.transform, 1, GL_FALSE, mvp);
-		glUniform3fv(r->uniforms_solid.eyepos, 1, eyepos);
-
-		// light property uniforms
-		for (i = 0; i < RENDER_MAX_LIGHTS; i++)
-		{
-			if (!obj->lights[i])
-			{
-				// multiply light position by inverse model-world to get into model-space
-				vec3f_set(temp, RENDER_DEFAULT_LIGHT_POS);
-				mat4f_fulltransformvec3f(temp, inverse_mw);
-				glUniform3fv(r->uniforms_solid.lights[i][RENDER_LIGHT_POS], 1, temp);
-
-				vec3f_set(temp, RENDER_DEFAULT_LIGHT_DIF);
-				glUniform3fv(r->uniforms_solid.lights[i][RENDER_LIGHT_DIF], 1, temp);
-				vec3f_set(temp, RENDER_DEFAULT_LIGHT_SPC);
-				glUniform3fv(r->uniforms_solid.lights[i][RENDER_LIGHT_SPC], 1, temp);
-			}
-			else
-			{
-				// multiply light position by inverse model-world to get into model-space
-				vec3f_copy(temp, obj->lights[i]->pos);
-				mat4f_fulltransformvec3f(temp, inverse_mw);
-				glUniform3fv(r->uniforms_solid.lights[i][RENDER_LIGHT_POS], 1, temp);
-
-				glUniform3fv(r->uniforms_solid.lights[i][RENDER_LIGHT_DIF], 1, obj->lights[i]->dif);
-				glUniform3fv(r->uniforms_solid.lights[i][RENDER_LIGHT_SPC], 1, obj->lights[i]->spc);
-			}
-		}
-
-		// ambient uniform
-		if (!obj->ambient)
-		{
-			vec3f_set(temp, RENDER_DEFAULT_AMBIENT);
-			glUniform3fv(r->uniforms_solid.ambient, 1, temp);
-		}
-		else
-			glUniform3fv(r->uniforms_solid.ambient, 1, obj->ambient);
-
-		// material uniforms
-		glUniform3fv(r->uniforms_solid.material[RENDER_MATERIAL_AMB], 1, obj->material.amb);
-		glUniform3fv(r->uniforms_solid.material[RENDER_MATERIAL_DIF], 1, obj->material.dif);
-		glUniform3fv(r->uniforms_solid.material[RENDER_MATERIAL_SPC], 1, obj->material.spc);
-		glUniform1fv(r->uniforms_solid.material[RENDER_MATERIAL_SHN], 1, &obj->material.shn);
+		glUniform3fv(r->uniforms_bump_l.material[RENDER_MATERIAL_AMB], 1, obj->material.amb);
+		glUniform3fv(r->uniforms_bump_l.material[RENDER_MATERIAL_DIF], 1, obj->material.dif);
+		glUniform3fv(r->uniforms_bump_l.material[RENDER_MATERIAL_SPC], 1, obj->material.spc);
+		glUniform1fv(r->uniforms_bump_l.material[RENDER_MATERIAL_SHN], 1, &obj->material.shn);
 		break;
 
 	default:
@@ -300,60 +321,73 @@ void renderable_render(struct renderer* r, struct renderable* obj, mat4f modelwo
 */
 unsigned renderer_init(struct renderer* r, struct texturemanager* tm, struct window* window)
 {
-	unsigned wirefvert, wireffrag;
-	unsigned solidvert, solidfrag;
-	unsigned bumpmvert, bumpmfrag;
+	unsigned vert_wire_s, frag_wire_s;
+	unsigned vert_txtr_s, frag_txtr_s;
+	unsigned vert_mats_l, frag_mats_l;
+	unsigned vert_bump_l, frag_bump_l;
 	char uniform[16];
 	unsigned i, len;
 
 	// initialize shaders
-	if (!(wirefvert = shader_create(RENDER_SHADER_WIREFVERT, SHADER_VERTEX)))
+	if (!(vert_wire_s = shader_create(RENDER_SHADER_VERT_WIRE_S, SHADER_VERTEX)))
 		return 0;
-	if (!(wireffrag = shader_create(RENDER_SHADER_WIREFFRAG, SHADER_FRAGMENT)))
+	if (!(frag_wire_s = shader_create(RENDER_SHADER_FRAG_WIRE_S, SHADER_FRAGMENT)))
 		return 0;
-	if (!(solidvert = shader_create(RENDER_SHADER_SOLIDVERT, SHADER_VERTEX)))
+	if (!(vert_txtr_s = shader_create(RENDER_SHADER_VERT_TXTR_S, SHADER_VERTEX)))
 		return 0;
-	if (!(solidfrag = shader_create(RENDER_SHADER_SOLIDFRAG, SHADER_FRAGMENT)))
+	if (!(frag_txtr_s = shader_create(RENDER_SHADER_FRAG_TXTR_S, SHADER_FRAGMENT)))
 		return 0;
-	if (!(bumpmvert = shader_create(RENDER_SHADER_BUMPMVERT, SHADER_VERTEX)))
+	if (!(vert_mats_l = shader_create(RENDER_SHADER_VERT_MATS_L, SHADER_VERTEX)))
 		return 0;
-	if (!(bumpmfrag = shader_create(RENDER_SHADER_BUMPMFRAG, SHADER_FRAGMENT)))
+	if (!(frag_mats_l = shader_create(RENDER_SHADER_FRAG_MATS_L, SHADER_FRAGMENT)))
+		return 0;
+	if (!(vert_bump_l = shader_create(RENDER_SHADER_VERT_BUMP_L, SHADER_VERTEX)))
+		return 0;
+	if (!(frag_bump_l = shader_create(RENDER_SHADER_FRAG_BUMP_L, SHADER_FRAGMENT)))
 		return 0;
 
 	// create shader programs
-	r->id_gl_wiref = shader_program(wirefvert, wireffrag);
-	r->id_gl_solid = shader_program(solidvert, solidfrag);
-	r->id_gl_bumpm = shader_program(bumpmvert, bumpmfrag);
+	r->id_gl_wire_s = shader_program(vert_wire_s, frag_wire_s);
+	r->id_gl_txtr_s = shader_program(vert_txtr_s, frag_txtr_s);
+	r->id_gl_mats_l = shader_program(vert_mats_l, frag_mats_l);
+	r->id_gl_bump_l = shader_program(vert_bump_l, frag_bump_l);
 
 	// bind attribute locations
-	glBindAttribLocation(r->id_gl_wiref, RENDER_ATTRIB_POS, "vertpos");
-	glBindAttribLocation(r->id_gl_wiref, RENDER_ATTRIB_COL, "vertcol");
+	glBindAttribLocation(r->id_gl_wire_s, RENDER_ATTRIB_POS, "vertpos");
+	glBindAttribLocation(r->id_gl_wire_s, RENDER_ATTRIB_COL, "vertcol");
 
-	glBindAttribLocation(r->id_gl_solid, RENDER_ATTRIB_POS, "vertpos");
-	glBindAttribLocation(r->id_gl_solid, RENDER_ATTRIB_NOR, "vertnor");
+	glBindAttribLocation(r->id_gl_txtr_s, RENDER_ATTRIB_POS, "vertpos");
+	glBindAttribLocation(r->id_gl_txtr_s, RENDER_ATTRIB_TEX, "verttex");
 
-	glBindAttribLocation(r->id_gl_bumpm, RENDER_ATTRIB_POS, "vertpos");
-	glBindAttribLocation(r->id_gl_bumpm, RENDER_ATTRIB_NOR, "vertnor");
-	glBindAttribLocation(r->id_gl_bumpm, RENDER_ATTRIB_TAN, "verttan");
-	glBindAttribLocation(r->id_gl_bumpm, RENDER_ATTRIB_TEX, "verttex");
+	glBindAttribLocation(r->id_gl_mats_l, RENDER_ATTRIB_POS, "vertpos");
+	glBindAttribLocation(r->id_gl_mats_l, RENDER_ATTRIB_NOR, "vertnor");
+
+	glBindAttribLocation(r->id_gl_bump_l, RENDER_ATTRIB_POS, "vertpos");
+	glBindAttribLocation(r->id_gl_bump_l, RENDER_ATTRIB_NOR, "vertnor");
+	glBindAttribLocation(r->id_gl_bump_l, RENDER_ATTRIB_TAN, "verttan");
+	glBindAttribLocation(r->id_gl_bump_l, RENDER_ATTRIB_TEX, "verttex");
 
 	// link programs
-	if (!shader_link(r->id_gl_wiref))
+	if (!shader_link(r->id_gl_wire_s))
 		return 0;
-	if (!shader_link(r->id_gl_solid))
+	if (!shader_link(r->id_gl_txtr_s))
 		return 0;
-	if (!shader_link(r->id_gl_bumpm))
+	if (!shader_link(r->id_gl_mats_l))
+		return 0;
+	if (!shader_link(r->id_gl_bump_l))
 		return 0;
 
 	// assign vertex sizes to each render type
-	r->vertsize[RENDER_TYPE_WIREF] = RENDER_VERTSIZE_WIREF;
-	r->vertsize[RENDER_TYPE_SOLID] = RENDER_VERTSIZE_SOLID;
-	r->vertsize[RENDER_TYPE_BUMPM] = RENDER_VERTSIZE_BUMPM;
+	r->vertsize[RENDER_TYPE_WIRE_S] = RENDER_VERTSIZE_WIRE_S;
+	r->vertsize[RENDER_TYPE_TXTR_S] = RENDER_VERTSIZE_TXTR_S;
+	r->vertsize[RENDER_TYPE_MATS_L] = RENDER_VERTSIZE_MATS_L;
+	r->vertsize[RENDER_TYPE_BUMP_L] = RENDER_VERTSIZE_BUMP_L;
 
 	// assign program ID's to render types
-	r->shader[RENDER_TYPE_WIREF] = r->id_gl_wiref;
-	r->shader[RENDER_TYPE_SOLID] = r->id_gl_solid;
-	r->shader[RENDER_TYPE_BUMPM] = r->id_gl_bumpm;
+	r->shader[RENDER_TYPE_WIRE_S] = r->id_gl_wire_s;
+	r->shader[RENDER_TYPE_TXTR_S] = r->id_gl_txtr_s;
+	r->shader[RENDER_TYPE_MATS_L] = r->id_gl_mats_l;
+	r->shader[RENDER_TYPE_BUMP_L] = r->id_gl_bump_l;
 
 	// register window pointer
 	r->window = window;
@@ -361,12 +395,18 @@ unsigned renderer_init(struct renderer* r, struct texturemanager* tm, struct win
 
 
 	// get wireframe uniform locations
-	r->uniforms_wiref.transform = glGetUniformLocation(r->id_gl_wiref, "transform");
+	r->uniforms_wire_s.transform = glGetUniformLocation(r->id_gl_wire_s, "transform");
+
+
+	// get textured uniform locations
+	r->uniforms_txtr_s.transform = glGetUniformLocation(r->id_gl_txtr_s, "transform");
+
+	r->uniforms_txtr_s.tex_diffuse = glGetUniformLocation(r->id_gl_txtr_s, "tex_diffuse");
 
 
 	// get solid uniform locations
-	r->uniforms_solid.transform = glGetUniformLocation(r->id_gl_solid, "transform");
-	r->uniforms_solid.eyepos = glGetUniformLocation(r->id_gl_solid, "eyepos");
+	r->uniforms_mats_l.transform = glGetUniformLocation(r->id_gl_mats_l, "transform");
+	r->uniforms_mats_l.eyepos = glGetUniformLocation(r->id_gl_mats_l, "eyepos");
 
 	for (i = 0; i < RENDER_MAX_LIGHTS; i++)
 	{
@@ -374,24 +414,24 @@ unsigned renderer_init(struct renderer* r, struct texturemanager* tm, struct win
 		len = strlen(uniform);
 
 		strcpy_s(uniform + len, 4, "pos");
-		r->uniforms_solid.lights[i][RENDER_LIGHT_POS] = glGetUniformLocation(r->id_gl_solid, uniform);
+		r->uniforms_mats_l.lights[i][RENDER_LIGHT_POS] = glGetUniformLocation(r->id_gl_mats_l, uniform);
 		strcpy_s(uniform + len, 4, "dif");
-		r->uniforms_solid.lights[i][RENDER_LIGHT_DIF] = glGetUniformLocation(r->id_gl_solid, uniform);
+		r->uniforms_mats_l.lights[i][RENDER_LIGHT_DIF] = glGetUniformLocation(r->id_gl_mats_l, uniform);
 		strcpy_s(uniform + len, 4, "spc");
-		r->uniforms_solid.lights[i][RENDER_LIGHT_SPC] = glGetUniformLocation(r->id_gl_solid, uniform);
+		r->uniforms_mats_l.lights[i][RENDER_LIGHT_SPC] = glGetUniformLocation(r->id_gl_mats_l, uniform);
 	}
 
-	r->uniforms_solid.ambient = glGetUniformLocation(r->id_gl_solid, "ambient");
+	r->uniforms_mats_l.ambient = glGetUniformLocation(r->id_gl_mats_l, "ambient");
 
-	r->uniforms_solid.material[RENDER_MATERIAL_AMB] = glGetUniformLocation(r->id_gl_solid, "material.amb");
-	r->uniforms_solid.material[RENDER_MATERIAL_DIF] = glGetUniformLocation(r->id_gl_solid, "material.dif");
-	r->uniforms_solid.material[RENDER_MATERIAL_SPC] = glGetUniformLocation(r->id_gl_solid, "material.spc");
-	r->uniforms_solid.material[RENDER_MATERIAL_SHN] = glGetUniformLocation(r->id_gl_solid, "material.shn");
+	r->uniforms_mats_l.material[RENDER_MATERIAL_AMB] = glGetUniformLocation(r->id_gl_mats_l, "material.amb");
+	r->uniforms_mats_l.material[RENDER_MATERIAL_DIF] = glGetUniformLocation(r->id_gl_mats_l, "material.dif");
+	r->uniforms_mats_l.material[RENDER_MATERIAL_SPC] = glGetUniformLocation(r->id_gl_mats_l, "material.spc");
+	r->uniforms_mats_l.material[RENDER_MATERIAL_SHN] = glGetUniformLocation(r->id_gl_mats_l, "material.shn");
 
 
 	// get bump mapped uniform locations
-	r->uniforms_bumpm.transform = glGetUniformLocation(r->id_gl_bumpm, "transform");
-	r->uniforms_bumpm.eyepos = glGetUniformLocation(r->id_gl_bumpm, "eyepos");
+	r->uniforms_bump_l.transform = glGetUniformLocation(r->id_gl_bump_l, "transform");
+	r->uniforms_bump_l.eyepos = glGetUniformLocation(r->id_gl_bump_l, "eyepos");
 
 	for (i = 0; i < RENDER_MAX_LIGHTS; i++)
 	{
@@ -399,30 +439,32 @@ unsigned renderer_init(struct renderer* r, struct texturemanager* tm, struct win
 		len = strlen(uniform);
 
 		strcpy_s(uniform + len, 4, "pos");
-		r->uniforms_bumpm.lights[i][RENDER_LIGHT_POS] = glGetUniformLocation(r->id_gl_bumpm, uniform);
+		r->uniforms_bump_l.lights[i][RENDER_LIGHT_POS] = glGetUniformLocation(r->id_gl_bump_l, uniform);
 		strcpy_s(uniform + len, 4, "dif");
-		r->uniforms_bumpm.lights[i][RENDER_LIGHT_DIF] = glGetUniformLocation(r->id_gl_bumpm, uniform);
+		r->uniforms_bump_l.lights[i][RENDER_LIGHT_DIF] = glGetUniformLocation(r->id_gl_bump_l, uniform);
 		strcpy_s(uniform + len, 4, "spc");
-		r->uniforms_bumpm.lights[i][RENDER_LIGHT_SPC] = glGetUniformLocation(r->id_gl_bumpm, uniform);
+		r->uniforms_bump_l.lights[i][RENDER_LIGHT_SPC] = glGetUniformLocation(r->id_gl_bump_l, uniform);
 	}
 
-	r->uniforms_bumpm.ambient = glGetUniformLocation(r->id_gl_bumpm, "ambient");
+	r->uniforms_bump_l.ambient = glGetUniformLocation(r->id_gl_bump_l, "ambient");
 
-	r->uniforms_bumpm.tex_normal = glGetUniformLocation(r->id_gl_bumpm, "tex_normal");
+	r->uniforms_bump_l.tex_normal = glGetUniformLocation(r->id_gl_bump_l, "tex_normal");
 
-	r->uniforms_bumpm.material[RENDER_MATERIAL_AMB] = glGetUniformLocation(r->id_gl_bumpm, "material.amb");
-	r->uniforms_bumpm.material[RENDER_MATERIAL_DIF] = glGetUniformLocation(r->id_gl_bumpm, "material.dif");
-	r->uniforms_bumpm.material[RENDER_MATERIAL_SPC] = glGetUniformLocation(r->id_gl_bumpm, "material.spc");
-	r->uniforms_bumpm.material[RENDER_MATERIAL_SHN] = glGetUniformLocation(r->id_gl_bumpm, "material.shn");
+	r->uniforms_bump_l.material[RENDER_MATERIAL_AMB] = glGetUniformLocation(r->id_gl_bump_l, "material.amb");
+	r->uniforms_bump_l.material[RENDER_MATERIAL_DIF] = glGetUniformLocation(r->id_gl_bump_l, "material.dif");
+	r->uniforms_bump_l.material[RENDER_MATERIAL_SPC] = glGetUniformLocation(r->id_gl_bump_l, "material.spc");
+	r->uniforms_bump_l.material[RENDER_MATERIAL_SHN] = glGetUniformLocation(r->id_gl_bump_l, "material.shn");
 
 
 	// flag shaders for deletion
-	shader_delete(wirefvert);
-	shader_delete(wireffrag);
-	shader_delete(solidvert);
-	shader_delete(solidfrag);
-	shader_delete(bumpmvert);
-	shader_delete(bumpmfrag);
+	shader_delete(vert_wire_s);
+	shader_delete(frag_wire_s);
+	shader_delete(vert_txtr_s);
+	shader_delete(frag_txtr_s);
+	shader_delete(vert_mats_l);
+	shader_delete(frag_mats_l);
+	shader_delete(vert_bump_l);
+	shader_delete(frag_bump_l);
 
 	return 1;
 }
