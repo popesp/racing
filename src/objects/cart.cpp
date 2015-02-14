@@ -53,7 +53,9 @@ void cart_init(struct cart* c, physicsmanager* pm, vec3f pos)
 	vec3f dim;
 
 	vec3f_set(dim, CART_WIDTH/2.f, CART_HEIGHT/2.f, CART_LENGTH/2.f);
-	c->vehicle = physicsmanager_addvehicle(pm, pos, dim);
+	c->index_vehicle = physicsmanager_addvehicle(pm, pos, dim);
+
+	c->pm = pm;
 
 	renderable_init(&c->r_cart, RENDER_MODE_TRIANGLES, RENDER_TYPE_MATS_L, RENDER_FLAG_NONE);
 
@@ -76,7 +78,7 @@ void cart_accelerate(struct cart* c, float d)
 	vec3f_set(force, CART_FORWARD);
 	vec3f_scale(force, d);
 
-	physx::PxRigidBodyExt::addLocalForceAtLocalPos(*c->vehicle->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, 0.f));
+	physx::PxRigidBodyExt::addLocalForceAtLocalPos(*c->pm->vehicles[c->index_vehicle].body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, 0.f));
 }
 
 void cart_turn(struct cart* c, float d)
@@ -86,7 +88,7 @@ void cart_turn(struct cart* c, float d)
 	vec3f_set(force, CART_RIGHT);
 	vec3f_scale(force, d);
 
-	physx::PxRigidBodyExt::addLocalForceAtLocalPos(*c->vehicle->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, -CART_LENGTH/2.f));
+	physx::PxRigidBodyExt::addLocalForceAtLocalPos(*c->pm->vehicles[c->index_vehicle].body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, -CART_LENGTH/2.f));
 }
 
 /*

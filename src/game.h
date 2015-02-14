@@ -46,6 +46,7 @@ struct game
 	struct skybox skybox;
 	struct track track;
 	struct cart player;
+	struct cart otherguy;
 	struct camera cam_debug;
 	struct camera cam_player;
 

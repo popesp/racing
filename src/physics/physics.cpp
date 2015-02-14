@@ -129,9 +129,9 @@ void physicsmanager_update(struct physicsmanager* pm, float dt)
 	param:	pm				physics manager
 	param:	pos				position of the vehicle
 	param:	dim				dimensions of the bounding box
-	return:	struct vehicle*	pointer to the vehicle physics object
+	return:	int				index for the vehicle object
 */
-struct vehicle* physicsmanager_addvehicle(struct physicsmanager* pm, vec3f pos, vec3f dim)
+int physicsmanager_addvehicle(struct physicsmanager* pm, vec3f pos, vec3f dim)
 {
 	struct vehicle* v;
 
@@ -158,7 +158,7 @@ struct vehicle* physicsmanager_addvehicle(struct physicsmanager* pm, vec3f pos, 
 	v->body->setLinearDamping(PHYSICS_VEHICLE_DAMP_LINEAR);
 	v->body->setAngularDamping(PHYSICS_VEHICLE_DAMP_ANGULAR);
 
-	return v;
+	return pm->num_vehicles - 1;
 }
 
 

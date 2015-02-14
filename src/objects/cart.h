@@ -16,12 +16,13 @@
 
 
 struct physicsmanager;
-struct vehicle;
 
 
 struct cart
 {
-	struct vehicle* vehicle;
+	int index_vehicle;
+
+	struct physicsmanager* pm;
 
 	struct renderable r_cart;
 };

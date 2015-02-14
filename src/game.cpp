@@ -78,9 +78,9 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 
 		case GLFW_KEY_R:
 			// reset player position and speed
-			game->player.vehicle->body->setGlobalPose(physx::PxTransform(physx::PxVec3(GAME_STARTINGPOS)));
-			game->player.vehicle->body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
-			game->player.vehicle->body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+			game->physicsmanager.vehicles[game->player.index_vehicle].body->setGlobalPose(physx::PxTransform(physx::PxVec3(GAME_STARTINGPOS)));
+			game->physicsmanager.vehicles[game->player.index_vehicle].body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+			game->physicsmanager.vehicles[game->player.index_vehicle].body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
 			break;
 
 		default:
@@ -208,7 +208,7 @@ static void update(struct game* game)
 	}
 	
 	// update player camera
-	physx::PxMat44 t_player(game->player.vehicle->body->getGlobalPose());
+	physx::PxMat44 t_player(game->physicsmanager.vehicles[game->player.index_vehicle].body->getGlobalPose());
 	physx::PxVec3 cam_targetpos = t_player.transform(physx::PxVec3(0.f, 1.f, 5.f));
 	vec3f_subtractn(diff, (float*)&cam_targetpos, game->cam_player.pos);
 	vec3f_scale(diff, 0.1f);
@@ -226,7 +226,8 @@ static void update(struct game* game)
 static void render(struct game* game)
 {
 	mat4f global_wv, skybox_wv, track_mw, skybox_mw;
-	physx::PxMat44 player_world(game->player.vehicle->body->getGlobalPose());
+	physx::PxMat44 player_world(game->physicsmanager.vehicles[game->player.index_vehicle].body->getGlobalPose());
+	physx::PxMat44 otherguy_world(game->physicsmanager.vehicles[game->otherguy.index_vehicle].body->getGlobalPose());
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -251,8 +252,9 @@ static void render(struct game* game)
 	mat4f_identity(track_mw);
 	renderable_render(&game->renderer, &game->track.r_track, track_mw, global_wv, 0);
 
-	// render player
+	// render carts
 	renderable_render(&game->renderer, &game->player.r_cart, (float*)&player_world, global_wv, 0);
+	renderable_render(&game->renderer, &game->otherguy.r_cart, (float*)&otherguy_world, global_wv, 0);
 
 	glfwSwapBuffers(game->window.w);
 }
@@ -374,15 +376,20 @@ int game_startup(struct game* game)
 	// send track mesh to physX (NOTE: should be in track.cpp)
 	physicsmanager_addstatic_trianglestrip(&game->physicsmanager, game->track.r_track.num_verts, sizeof(float)*RENDER_VERTSIZE_BUMP_L, game->track.r_track.buf_verts);
 	
-	// initialize cart object
+	// initialize cart objects
 	vec3f_set(pos, GAME_STARTINGPOS);
 	cart_init(&game->player, &game->physicsmanager, pos);
 	cart_generatemesh(&game->renderer, &game->player);
 	
+	vec3f_set(pos, 0.f, 1.5f, -20.f);
+	cart_init(&game->otherguy, &game->physicsmanager, pos);
+	cart_generatemesh(&game->renderer, &game->otherguy);
+
 	// send vertex buffers to GPU
 	renderable_sendbuffer(&game->renderer, &game->skybox.r_skybox);
 	renderable_sendbuffer(&game->renderer, &game->track.r_track);
 	renderable_sendbuffer(&game->renderer, &game->player.r_cart);
+	renderable_sendbuffer(&game->renderer, &game->otherguy.r_cart);
 
 	// initialize camera objects
 	vec3f_set(pos, 0.f, 0.f, -30.f);
@@ -404,6 +411,8 @@ int game_startup(struct game* game)
 	game->track.r_track.lights[1] = game->track_lights + 1;
 	game->player.r_cart.lights[0] = game->track_lights + 0;
 	game->player.r_cart.lights[1] = game->track_lights + 1;
+	game->otherguy.r_cart.lights[0] = game->track_lights + 0;
+	game->otherguy.r_cart.lights[1] = game->track_lights + 1;
 	
 	// track normal map
 	game->tex_trackbump = texturemanager_newtexture(&game->texturemanager);
