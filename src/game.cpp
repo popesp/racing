@@ -174,7 +174,7 @@ static void update(struct game* game)
 	// check for callback events
 	glfwPollEvents();
 
-	inputmanager_update(&game->inputmanager, game->window.w, &game->player);
+	inputmanager_update(&game->inputmanager);
 
 	// simulate
 	physicsmanager_update(&game->physicsmanager, GAME_SPU);
@@ -197,16 +197,11 @@ static void update(struct game* game)
 			camera_rotate(&game->cam_debug, up, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_LR]);
 			camera_rotate(&game->cam_debug, game->cam_debug.right, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_UD]);
 		}
-	} else
-	{
-		//joystick
-		if (game->inputmanager.controllers[GLFW_JOYSTICK_1].flags & INPUT_FLAG_ENABLED){
-			cart_accelerate(&game->player, -30.f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_TRIGGERS]);
-			cart_turn(&game->player, 4.f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_LR]);
-		}
-		//keyboard
 	}
 	
+	cart_update(&game->player);
+	cart_update(&game->otherguy);
+
 	// update player camera
 	physx::PxMat44 t_player(game->player.vehicle->body->getGlobalPose());
 	physx::PxVec3 cam_targetpos = t_player.transform(physx::PxVec3(0.f, 1.f, 5.f));
@@ -352,7 +347,7 @@ int game_startup(struct game* game)
 	printf("PhysX initialized, using version %d.%d.%d\n", PX_PHYSICS_VERSION_MAJOR, PX_PHYSICS_VERSION_MINOR, PX_PHYSICS_VERSION_BUGFIX);
 
 	// initialize input manager
-	inputmanager_startup(&game->inputmanager, game->window.w, &game->player);
+	inputmanager_startup(&game->inputmanager, &game->window);
 
 	// print connected joystick information
 	for (int i = 0; i <= GLFW_JOYSTICK_LAST; i++)
@@ -380,7 +375,8 @@ int game_startup(struct game* game)
 	vec3f_set(pos, GAME_STARTINGPOS);
 	cart_init(&game->player, &game->physicsmanager, pos);
 	cart_generatemesh(&game->renderer, &game->player);
-	
+	game->player.controller = game->inputmanager.controllers + 0;
+
 	vec3f_set(pos, 0.f, 1.5f, -20.f);
 	cart_init(&game->otherguy, &game->physicsmanager, pos);
 	cart_generatemesh(&game->renderer, &game->otherguy);

@@ -63,6 +63,8 @@ void cart_init(struct cart* c, physicsmanager* pm, vec3f pos)
 	vec3f_set(c->r_cart.material.dif, 0.8f, 0.15f, 0.1f);
 	vec3f_set(c->r_cart.material.spc, 0.8f, 0.5f, 0.5f);
 	c->r_cart.material.shn = 100.f;
+
+	c->controller = NULL;
 }
 
 void cart_delete(struct cart* c)
@@ -72,43 +74,26 @@ void cart_delete(struct cart* c)
 }
 
 
-void cart_accelerate(struct cart* c, float d)
+void cart_update(struct cart* c)
 {
 	vec3f force;
 
-	vec3f_set(force, CART_FORWARD);
-	vec3f_scale(force, d);
+	if (c->controller != NULL && c->controller->flags & INPUT_FLAG_ENABLED)
+	{
+		// acceleration force
+		vec3f_set(force, CART_FORWARD);
+		vec3f_scale(force, -CART_FORCE_FORWARD * c->controller->axes[INPUT_AXIS_TRIGGERS]);
 
-	physx::PxRigidBodyExt::addLocalForceAtLocalPos(*c->vehicle->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, 0.f));
+		physx::PxRigidBodyExt::addLocalForceAtLocalPos(*c->vehicle->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, 0.f));
+
+		// turning force
+		vec3f_set(force, CART_RIGHT);
+		vec3f_scale(force, CART_FORCE_TURN * c->controller->axes[INPUT_AXIS_LEFT_LR]);
+
+		physx::PxRigidBodyExt::addLocalForceAtLocalPos(*c->vehicle->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, -CART_LENGTH/2.f));
+	}
 }
 
-void cart_turn(struct cart* c, float d)
-{
-	vec3f force;
-
-	vec3f_set(force, CART_RIGHT);
-	vec3f_scale(force, d);
-
-	physx::PxRigidBodyExt::addLocalForceAtLocalPos(*c->vehicle->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, -CART_LENGTH/2.f));
-}
-
-/*
-void cart_shocks(struct cart *c, float d, unsigned bounce){
-
-	vec3f force;
-
-	vec3f_set(force, CART_FORWARD);
-	vec3f_scale(force, d);
-	using namespace physx;
-	if (bounce == 1) {
-	const PxVec3 up(0,1,0);
-	const PxVec3 bodyUpVector = c->vehicle->body->getGlobalPose().q.rotate(up);
-	const PxVec3 Force = bodyUpVector * d;
-	c->vehicle->body->addForce(Force); }
-
-
-}
-*/
 
 void cart_generatemesh(struct renderer* r, struct cart* c)
 {

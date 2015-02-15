@@ -28,6 +28,13 @@
 #define	INPUT_AXIS_RIGHT_UD		3
 #define	INPUT_AXIS_RIGHT_LR		4
 
+#define	INPUT_KEYBOARD_BUTTONS	14
+#define	INPUT_KEYBOARD_AXES		5
+
+#define	INPUT_STATE_INIT		0x00
+#define	INPUT_STATE_DOWN		0x01
+#define	INPUT_STATE_CHANGED		0x02
+
 #define	INPUT_MAX_JOYSTICKS		(GLFW_JOYSTICK_LAST+1)
 #define INPUT_MAX_KEYBOARD		(GLFW_KEY_LAST+1)
 
@@ -37,39 +44,36 @@
 #define	INPUT_FLAG_ENABLED		0x01
 
 
+struct window;
+
+
 struct controller
 {
 	int num_buttons;
-	const unsigned char* buttons;
+	unsigned char* buttons;
 
 	int num_axes;
 	float* axes;
 
 	unsigned char flags;
 };
-struct keyboard
-{
-	int knum_buttons;
-	const unsigned char* kbuttons;
 
-	int knum_axes;
-	float* kaxes;
-
-	unsigned char kflags;
-};
 
 struct inputmanager
 {
+	struct window* win;
+
 	struct controller controllers[INPUT_MAX_JOYSTICKS];
-	struct keyboard keyboards[INPUT_MAX_KEYBOARD];
+
+	struct controller keyboard;
 };
 
 
 /*	start up the texture manager
 	param:	im				input manager (modified)
+	param:	win				window to receive events from
 */
-void inputmanager_startup(struct inputmanager* im, GLFWwindow* window, struct cart* c);
-
+void inputmanager_startup(struct inputmanager* im, struct window* win);
 
 /*	shut down the input manager
 	param:	im				input manager (modified)
@@ -80,7 +84,7 @@ void inputmanager_shutdown(struct inputmanager* im);
 /*	update the input
 	param:	im				input manager (modified)
 */
-void inputmanager_update(struct inputmanager* im, GLFWwindow* window, struct cart* c);
+void inputmanager_update(struct inputmanager* im);
 
 
 /*	get the name of a given joystick
