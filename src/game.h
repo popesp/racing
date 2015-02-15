@@ -2,6 +2,7 @@
 #define	GAME
 
 
+#include	"audio/audio.h"
 #include	"input.h"
 #include	"objects/camera.h"
 #include	"objects/cart.h"
@@ -42,6 +43,7 @@ struct game
 	struct physicsmanager physicsmanager;
 	struct inputmanager inputmanager;
 	struct texturemanager texturemanager;
+	struct audiomanager audiomanager;
 
 	struct skybox skybox;
 	struct track track;
@@ -54,6 +56,8 @@ struct game
 
 	int tex_trackbump;
 	int tex_skybox;
+
+	int bgm_test;
 
 	unsigned char flags;
 };

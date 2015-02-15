@@ -195,7 +195,7 @@ void renderable_render(struct renderer* r, struct renderable* obj, mat4f modelwo
 		unit = RENDER_TEXTURE_DIFFUSE;
 		glUniform1iv(r->uniforms_txtr_s.tex_diffuse, 1, &unit);
 
-		glActiveTexture(GL_TEXTURE0 + unit);
+		glActiveTexture(GL_TEXTURE0 + (unsigned)unit);
 		glBindTexture(GL_TEXTURE_2D, r->tm->textures[obj->texture_ids[RENDER_TEXTURE_DIFFUSE]].gl_id);
 
 		break;

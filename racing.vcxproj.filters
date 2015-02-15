@@ -36,6 +36,12 @@
     <Filter Include="res">
       <UniqueIdentifier>{655f4704-52cb-41ae-ab1e-a0697b125bdd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="headers\audio">
+      <UniqueIdentifier>{776a1d20-9f44-472b-ab8b-761703040e80}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\audio">
+      <UniqueIdentifier>{0dbf3b38-08c7-48ae-b57c-b4320be7ec62}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\game.cpp">
@@ -70,6 +76,9 @@
     </ClCompile>
     <ClCompile Include="src\objects\skybox.cpp">
       <Filter>src\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\audio\audio.cpp">
+      <Filter>src\audio</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -120,6 +129,9 @@
     </ClInclude>
     <ClInclude Include="src\objects\skybox.h">
       <Filter>headers\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\audio\audio.h">
+      <Filter>headers\audio</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

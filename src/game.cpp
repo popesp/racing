@@ -4,6 +4,7 @@
 #include	<GLFW/glfw3.h>			// GL
 #include	<stdio.h>				// printf
 #include	<stdlib.h>				// calloc, free TEMPORARY
+#include	"audio/audio.h"
 #include	"debug.h"				// printvec3f
 #include	"error.h"				// PRINT_ERROR
 #include	"input.h"
@@ -181,6 +182,14 @@ static void update(struct game* game)
 
 	vec3f_set(up, 0.f, 1.f, 0.f);
 
+	if (game->player.controller->buttons[INPUT_BUTTON_Y] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
+	{
+		if (game->flags & GAME_FLAG_DEBUGCAM)
+			game->flags &= ~GAME_FLAG_DEBUGCAM;
+		else
+			game->flags |= GAME_FLAG_DEBUGCAM;
+	}
+
 	// update debug camera; NOTE: a lot of this is temporarily hard-coded
 	if (game->flags & GAME_FLAG_DEBUGCAM)
 	{
@@ -197,9 +206,9 @@ static void update(struct game* game)
 			camera_rotate(&game->cam_debug, up, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_LR]);
 			camera_rotate(&game->cam_debug, game->cam_debug.right, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_UD]);
 		}
-	}
-	
-	cart_update(&game->player);
+	} else
+		cart_update(&game->player);
+
 	cart_update(&game->otherguy);
 
 	// update player camera
@@ -267,17 +276,17 @@ static void trackpoint(struct track_point* p, vec3f pos, vec3f tan, float angle,
 	p->subdivisions = subdivisions;
 }
 
-int game_startup(struct game* game)
+static int start_subsystems(struct game* game)
 {
-	vec3f up, dir, pos;
 	int major, minor, rev;
 	GLenum err;
+	int i;
 
 	// initialize GLFW
-	if (glfwInit() != GL_TRUE)
-		return 0;
+	printf("Initializing GLFW...");
+	glfwInit();
 	glfwGetVersion(&major, &minor, &rev);
-	printf("GLFW initialized, using version %d.%d.%d\n", major, minor, rev);
+	printf("...done. Using version %d.%d.%d.\n", major, minor, rev);
 
 	// initialize window object
 	window_init(&game->window, GAME_DEFAULT_WIDTH, GAME_DEFAULT_HEIGHT, WINDOW_FLAG_NONE);
@@ -286,11 +295,14 @@ int game_startup(struct game* game)
 	glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-	glfwWindowHint(GLFW_SAMPLES, 16);				// 4X FSAA
+	glfwWindowHint(GLFW_SAMPLES, 16);				// 16X FSAA
 
 	// create window handle
 	if ((game->window.w = glfwCreateWindow(game->window.width, game->window.height, GAME_TITLE, NULL, NULL)) == NULL)
+	{
+		PRINT_ERROR("Could not create a window.\n");
 		return 0;
+	}
 
 	// move to default screen position
 	glfwSetWindowPos(game->window.w, GAME_DEFAULT_X, GAME_DEFAULT_Y);
@@ -303,17 +315,13 @@ int game_startup(struct game* game)
 	// print OpenGL version context
 	glGetIntegerv(GL_MAJOR_VERSION, &major);
 	glGetIntegerv(GL_MINOR_VERSION, &minor);
-	printf("OpenGL context initialized, using version %d.%d\n", major, minor);
+	printf("OpenGL context initialized, using version %d.%d.\n", major, minor);
 
 	// initialize GLEW
+	printf("Initializing GLEW...");
 	glewExperimental = GL_TRUE;
-	err = glewInit();
-	if (err != GLEW_OK)
-	{
-		PRINT_ERROR("game.c", "%s\n", glewGetErrorString(err));
-		return 0;
-	}
-	printf("GLEW initialized, using version %s\n", glewGetString(GLEW_VERSION));
+	glewInit();
+	printf("...done. Using version %s.\n", glewGetString(GLEW_VERSION));
 
 	// register game object as user pointer for callback functions
 	glfwSetWindowUserPointer(game->window.w, (void*)game);
@@ -335,37 +343,61 @@ int game_startup(struct game* game)
 	glfwSetScrollCallback(game->window.w, &scroll);
 
 	// initialize texture manager
+	printf("Starting up texture manager...");
 	texturemanager_startup(&game->texturemanager);
-	printf("FreeImage initialized, using version %s\n", texturemanager_getlibversion(&game->texturemanager));
+	printf("...done. Using FreeImage version %s\n", texturemanager_getlibversion(&game->texturemanager));
 
 	// initialize renderer
 	if (!renderer_init(&game->renderer, &game->texturemanager, &game->window))
+	{
+		PRINT_ERROR("Problem initializing the renderer.\n");
 		return 0;
+	}
 
 	// initialize physics manager
+	printf("Starting up physics manager...");
 	physicsmanager_startup(&game->physicsmanager);
-	printf("PhysX initialized, using version %d.%d.%d\n", PX_PHYSICS_VERSION_MAJOR, PX_PHYSICS_VERSION_MINOR, PX_PHYSICS_VERSION_BUGFIX);
+	printf("...done. Using PhysX version %d.%d.%d.\n", PX_PHYSICS_VERSION_MAJOR, PX_PHYSICS_VERSION_MINOR, PX_PHYSICS_VERSION_BUGFIX);
 
 	// initialize input manager
+	printf("Starting up input manager...");
 	inputmanager_startup(&game->inputmanager, &game->window);
+	printf("...done.\n");
 
 	// print connected joystick information
-	for (int i = 0; i <= GLFW_JOYSTICK_LAST; i++)
+	for (i = 0; i <= GLFW_JOYSTICK_LAST; i++)
 	{
 		if (game->inputmanager.controllers[GLFW_JOYSTICK_1+i].flags & INPUT_FLAG_ENABLED)
 			printf("Joystick %d enabled. Name: %s\n", i+1, inputmanager_joystickname(&game->inputmanager, i));
 	}
 
-	/* ----- BEGIN GAME STATE INITIALIZATION ----- */
+	// initialize audio manager
+	printf("Starting up audio manager...");
+	audiomanager_startup(&game->audiomanager);
+	printf("...done. Using FMOD version %d.\n", audiomanager_getlibversion(&game->audiomanager));
+
+	return 1;
+}
+
+int game_startup(struct game* game)
+{
+	vec3f up, dir, pos;
+
+	vec3f_set(up, 0.f, 1.f, 0.f);
+
+	if (!start_subsystems(game))
+	{
+		PRINT_ERROR("Problem starting game subsystems.\n");
+		return 0;
+	}
 
 	// initialize skybox
-	skybox_init(&game->skybox, &game->texturemanager, "res/night.jpg");
+	skybox_init(&game->skybox, &game->texturemanager, "res/images/night.jpg");
 	skybox_generatemesh(&game->renderer, &game->skybox);
 
 	// initialize track object
-	vec3f_set(up, 0.f, 1.f, 0.f);
 	track_init(&game->track, up, &game->physicsmanager);
-	track_loadpointsfile(&game->track, "test.track");
+	track_loadpointsfile(&game->track, "res/tracks/donut.track");
 	track_generatemesh(&game->renderer, &game->track);
 	
 	// send track mesh to physX (NOTE: should be in track.cpp)
@@ -375,7 +407,7 @@ int game_startup(struct game* game)
 	vec3f_set(pos, GAME_STARTINGPOS);
 	cart_init(&game->player, &game->physicsmanager, pos);
 	cart_generatemesh(&game->renderer, &game->player);
-	game->player.controller = game->inputmanager.controllers + 0;
+	game->player.controller = &game->inputmanager.controllers[0];
 
 	vec3f_set(pos, 0.f, 1.5f, -20.f);
 	cart_init(&game->otherguy, &game->physicsmanager, pos);
@@ -412,9 +444,13 @@ int game_startup(struct game* game)
 	
 	// track normal map
 	game->tex_trackbump = texturemanager_newtexture(&game->texturemanager);
-	texture_loadfile(&game->texturemanager, game->tex_trackbump, "res/slate.jpg");
+	texture_loadfile(&game->texturemanager, game->tex_trackbump, "res/images/slate.jpg");
 	texture_upload(&game->texturemanager, game->tex_trackbump, RENDER_TEXTURE_NORMAL);
 	game->track.r_track.texture_ids[RENDER_TEXTURE_NORMAL] = game->tex_trackbump;
+
+	// add background music
+	game->bgm_test = audiomanager_newsound(&game->audiomanager, "res/music/aurora.mp3");
+	audiomanager_playsound(&game->audiomanager, game->bgm_test, -1);
 
 	game->flags = GAME_FLAG_INIT;
 
@@ -470,8 +506,9 @@ void game_shutdown(struct game* game)
 	skybox_delete(&game->skybox);
 
 	// shut down all the game subsytems
-	physicsmanager_shutdown(&game->physicsmanager);
+	audiomanager_shutdown(&game->audiomanager);
 	inputmanager_shutdown(&game->inputmanager);
+	physicsmanager_shutdown(&game->physicsmanager);
 	texturemanager_shutdown(&game->texturemanager);
 	
 	glfwDestroyWindow(game->window.w);
