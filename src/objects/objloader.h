@@ -1,9 +1,10 @@
+/*
 #ifndef OBJLOADER
 #define OBJLOADER
 
 
 #include	<vector>
-#include	"../math/mat4f.h"
+#include	"../math/vec3f.h"
 
 
 bool loadOBJ(
@@ -13,4 +14,4 @@ bool loadOBJ(
     std::vector < vec3f > & out_normals
 );
 
-#endif
+#endif */

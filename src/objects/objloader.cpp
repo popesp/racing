@@ -1,3 +1,4 @@
+/*
 #include "objloader.h"
 
 bool loadOBJ(
@@ -84,3 +85,4 @@ bool loadOBJ(
 	}
 
 }
+*/

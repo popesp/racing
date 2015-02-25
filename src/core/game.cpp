@@ -10,7 +10,6 @@
 #include	"../math/vec3f.h"		// set TEMPORARY
 
 
-
 static void resize(GLFWwindow*, int, int);
 static void keyboard(GLFWwindow*, int, int, int, int);
 static void cursor(GLFWwindow*, double, double);
