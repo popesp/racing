@@ -3,6 +3,18 @@
 #include	<fmod.h>
 #include	"../error.h"
 
+#include	"../tinydir.h"
+#include	"string.h"
+
+
+void ERRCHECK(FMOD_RESULT result)
+{
+    if (result != FMOD_OK)
+    {
+        printf("FMOD error! (%d) %s\n", result, FMOD_ErrorString(result));
+        
+    }
+}
 
 void audiomanager_startup(struct audiomanager* am)
 {
@@ -48,12 +60,14 @@ unsigned audiomanager_getlibversion(struct audiomanager* am)
 int audiomanager_newsound(struct audiomanager* am, const char* filename)
 {
 	int i;
+	FMOD_RESULT result;
 
 	for (i = 0; i < AUDIO_MAX_SOUNDS; i++)
 	{
 		if (!am->sounds[i].enabled)
 		{
-			FMOD_System_CreateSound(am->system, filename, FMOD_SOFTWARE, 0, &am->sounds[i].track);
+			result = FMOD_System_CreateSound(am->system, filename, FMOD_SOFTWARE, 0, &am->sounds[i].track);
+			ERRCHECK(result);
 			am->sounds[i].enabled = true;
 
 			return i;
@@ -68,6 +82,7 @@ void audiomanager_removesound(struct audiomanager* am, int id)
 	FMOD_Sound_Release(am->sounds[id].track);
 	am->sounds[id].track = NULL;
 	am->sounds[id].enabled = false;
+	am->sounds[id].is_playing = false;
 }
 
 
@@ -83,4 +98,50 @@ void audiomanager_playsound(struct audiomanager* am, int id, int loops)
 	
 	// play the sound
 	FMOD_Channel_SetPaused(channel, false);
+	
+	am->sounds[id].is_playing = true;
+}
+
+void audiomanager_pausetoggle(struct audiomanager* am)
+{
+
+	FMOD_CHANNELGROUP *channel;
+    FMOD_BOOL state;
+    FMOD_System_GetMasterChannelGroup(am->system, &channel);
+    FMOD_ChannelGroup_GetPaused(channel, &state);
+
+	if (state)
+		FMOD_ChannelGroup_SetPaused(channel, false);
+	else
+		FMOD_ChannelGroup_SetPaused(channel, true);
+	
+}
+
+
+void audio_menu(struct audiomanager* am)
+{
+	
+	tinydir_dir dir;
+	tinydir_open(&dir, AUDIO_PATH);
+
+	while (dir.has_next)
+	{
+		tinydir_file file;
+		tinydir_readfile(&dir, &file);
+
+		if ( file.extension[0] == 'm'){
+			audiomanager_newsound(am, file.path);
+			printf("%s added to game sounds\n", file.name);
+
+		}
+		if (file.is_dir)
+		{
+		//	printf("/");
+		}
+		//printf("\n");
+
+		tinydir_next(&dir);
+	}
+
+	tinydir_close(&dir);
 }

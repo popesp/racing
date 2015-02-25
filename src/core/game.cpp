@@ -47,6 +47,12 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 			game->flags |= GAME_FLAG_TERMINATED;
 			break;
 
+			//pause music
+		case GLFW_KEY_P:
+			audiomanager_pausetoggle(&game->audiomanager);
+			break;
+
+
 		case GLFW_KEY_Q:
 			if (game->flags & GAME_FLAG_WIREFRAME)
 			{
@@ -69,13 +75,12 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 
 		case GLFW_KEY_R:
 			// reset players' position and speed
-			game->player.cart.vehicle->body->setGlobalPose(physx::PxTransform(physx::PxVec3(GAME_STARTINGPOS)));
-			game->player.cart.vehicle->body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
-			game->player.cart.vehicle->body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+			game_resetplayer(game);
+			break;
 
-			game->aiplayer.cart.vehicle->body->setGlobalPose(physx::PxTransform(physx::PxVec3(GAME_AISTARTINGPOS)));
-			game->aiplayer.cart.vehicle->body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
-			game->aiplayer.cart.vehicle->body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+		case GLFW_KEY_F:
+			// reload the config file for cart
+			
 			break;
 
 		default:
@@ -359,12 +364,13 @@ static int start_subsystems(struct game* game)
 			printf("Joystick %d enabled. Name: %s\n", i+1, inputmanager_joystickname(&game->inputmanager, i));
 	}
 
-	/*
+	
 	// initialize audio manager
 	printf("Starting up audio manager...");
 	audiomanager_startup(&game->audiomanager);
 	printf("...done. Using FMOD version %d.\n", audiomanager_getlibversion(&game->audiomanager));
-	*/
+	
+	audio_menu(&game->audiomanager);
 	return 1;
 }
 
@@ -428,14 +434,25 @@ int game_startup(struct game* game)
 	texture_loadfile(&game->texturemanager, game->tex_trackbump, "res/images/slate.jpg");
 	texture_upload(&game->texturemanager, game->tex_trackbump, RENDER_TEXTURE_NORMAL);
 	game->track.r_track.texture_ids[RENDER_TEXTURE_NORMAL] = game->tex_trackbump;
-	/*
+	
 	// add background music
-	game->bgm_test = audiomanager_newsound(&game->audiomanager, "res/music/aurora.mp3");
-	audiomanager_playsound(&game->audiomanager, game->bgm_test, -1);
-	*/
+	//game->bgm_test = audiomanager_newsound(&game->audiomanager, "res/music/aurora.mp3");
+	audiomanager_playsound(&game->audiomanager, 0, -1);
+	
 	game->flags = GAME_FLAG_INIT;
 
 	return 1;
+}
+
+
+void game_resetplayer(struct game* game){
+	game->player.cart.vehicle->body->setGlobalPose(physx::PxTransform(physx::PxVec3(GAME_STARTINGPOS)));
+	game->player.cart.vehicle->body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+	game->player.cart.vehicle->body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+
+	game->aiplayer.cart.vehicle->body->setGlobalPose(physx::PxTransform(physx::PxVec3(GAME_AISTARTINGPOS)));
+	game->aiplayer.cart.vehicle->body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+	game->aiplayer.cart.vehicle->body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
 }
 
 void game_mainloop(struct game* game)
