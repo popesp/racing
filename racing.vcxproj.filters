@@ -80,6 +80,9 @@
     <ClCompile Include="src\audio\audio.cpp">
       <Filter>src\audio</Filter>
     </ClCompile>
+    <ClCompile Include="src\objects\objloader.cpp">
+      <Filter>src\objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\debug.h">
@@ -132,6 +135,9 @@
     </ClInclude>
     <ClInclude Include="src\audio\audio.h">
       <Filter>headers\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="src\objects\objloader.h">
+      <Filter>headers\objects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
