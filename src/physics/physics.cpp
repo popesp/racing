@@ -81,7 +81,8 @@ static void updatevehicles(struct physicsmanager* pm, float dt)
 	PxHitFlags outflags;
 	struct vehicle* v;
 	bool status;
-	vec3f g_origin, g_dir;
+	vec3f g_origin, g_dir, vel;
+	PxVec3 velocity;
 	int i, j;
 
 	(void)dt;
@@ -119,6 +120,11 @@ static void updatevehicles(struct physicsmanager* pm, float dt)
 				PxRigidBodyExt::addLocalForceAtLocalPos(*v->body, PxVec3(force[VX], force[VY], force[VZ]), PxVec3(v->origins[j][VX], v->origins[j][VY], v->origins[j][VZ]));
 			}
 		}
+
+		velocity = PxRigidBodyExt::getLocalVelocityAtLocalPos(*v->body, PxVec3(0.f, 0.f, 0.f));
+		vec3f_set(vel, velocity.x, velocity.y, velocity.z);
+
+		printf("Velocity: %f, %f, %f\n", vel[VX], vel[VY], vel[VZ]);
 	}
 }
 

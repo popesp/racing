@@ -2,16 +2,17 @@
 #define	GAME
 
 
-#include	"audio/audio.h"
+#include	"../audio/audio.h"
 #include	"input.h"
-#include	"objects/camera.h"
-#include	"objects/cart.h"
-#include	"objects/skybox.h"
-#include	"objects/track.h"
-#include	"physics/physics.h"
-#include	"render/render.h"
-#include	"render/texture.h"
-#include	"render/window.h"
+#include	"../objects/camera.h"
+#include	"../objects/cart.h"
+#include	"../objects/skybox.h"
+#include	"../objects/track.h"
+#include	"../physics/physics.h"
+#include	"player.h"
+#include	"../render/render.h"
+#include	"../render/texture.h"
+#include	"../render/window.h"
 
 
 #define	GAME_DEFAULT_WIDTH		600
@@ -28,7 +29,8 @@
 
 #define	GAME_POINTSIZE			10.f
 
-#define	GAME_STARTINGPOS		-20.0f, 1.5f, 0.0f // TEMP
+#define	GAME_STARTINGPOS		20.f, 1.5f, 100.f // TEMP
+#define	GAME_AISTARTINGPOS		20.f, 1.5f, 80.f // TEMP
 
 #define	GAME_FLAG_INIT			0x00
 #define	GAME_FLAG_TERMINATED	0x01
@@ -47,10 +49,11 @@ struct game
 
 	struct skybox skybox;
 	struct track track;
-	struct cart player;
-	struct cart otherguy;
+
+	struct player player;
+	struct aiplayer aiplayer;
+
 	struct camera cam_debug;
-	struct camera cam_player;
 
 	struct light track_lights[2];
 
