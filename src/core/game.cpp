@@ -19,6 +19,18 @@ static void update(struct game*);
 static void render(struct game*);
 
 
+static void resetplayers(struct game* game)
+{
+	game->player.cart.vehicle->body->setGlobalPose(physx::PxTransform(physx::PxVec3(GAME_STARTINGPOS)));
+	game->player.cart.vehicle->body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+	game->player.cart.vehicle->body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+
+	game->aiplayer.cart.vehicle->body->setGlobalPose(physx::PxTransform(physx::PxVec3(GAME_AISTARTINGPOS)));
+	game->aiplayer.cart.vehicle->body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+	game->aiplayer.cart.vehicle->body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+}
+
+
 static void resize(GLFWwindow* window, int width, int height)
 {
 	struct game* game;
@@ -49,7 +61,6 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 
 			//pause music
 		case GLFW_KEY_P:
-			audiomanager_pausetoggle(&game->audiomanager);
 			break;
 
 
@@ -75,7 +86,8 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 
 		case GLFW_KEY_R:
 			// reset players' position and speed
-			game_resetplayer(game);
+			
+			resetplayers(game);
 			break;
 
 		case GLFW_KEY_F:
@@ -170,6 +182,7 @@ static void scroll(GLFWwindow* window, double xoffset, double yoffset)
 static void update(struct game* game)
 {
 	vec3f up, move, diff;
+	vec3f pos, playerpos;
 
 	// check for callback events
 	glfwPollEvents();
@@ -207,9 +220,9 @@ static void update(struct game* game)
 			camera_rotate(&game->cam_debug, game->cam_debug.right, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_UD]);
 		}
 	} else
-		cart_update(&game->player.cart);
+		player_update(&game->player, &game->track);
 
-	cart_update(&game->aiplayer.cart);
+	aiplayer_update(&game->aiplayer, &game->track);
 
 	player_updatecamera(&game->player);
 
@@ -255,19 +268,6 @@ static void render(struct game* game)
 	renderable_render(&game->renderer, &game->aiplayer.cart.r_cart, (float*)&otherguy_world, global_wv, 0);
 
 	glfwSwapBuffers(game->window.w);
-}
-
-static void trackpoint(struct track_point* p, vec3f pos, vec3f tan, float angle, float weight, float width, unsigned subdivisions)
-{
-	vec3f_copy(p->pos, pos);
-
-	vec3f_copy(p->tan, tan);
-	vec3f_normalize(p->tan);
-
-	p->angle = angle;
-	p->weight = weight;
-	p->width = width;
-	p->subdivisions = subdivisions;
 }
 
 static int start_subsystems(struct game* game)
@@ -395,7 +395,7 @@ int game_startup(struct game* game)
 	// initialize track object
 	track_init(&game->track, up, &game->physicsmanager);
 	track_loadpointsfile(&game->track, "res/tracks/wipeout.track");
-	track_generatemesh(&game->renderer, &game->track);
+	track_generate(&game->renderer, &game->track);
 	renderable_sendbuffer(&game->renderer, &game->track.r_track);
 
 	// send track mesh to physX
@@ -440,7 +440,6 @@ int game_startup(struct game* game)
 	game->track.r_track.texture_ids[RENDER_TEXTURE_NORMAL] = game->tex_trackbump;
 	
 	// add background music
-	//game->bgm_test = audiomanager_newsound(&game->audiomanager, "res/music/aurora.mp3");
 	audiomanager_playsound(&game->audiomanager, 0, -1);
 	
 	game->flags = GAME_FLAG_INIT;
@@ -448,16 +447,6 @@ int game_startup(struct game* game)
 	return 1;
 }
 
-
-void game_resetplayer(struct game* game){
-	game->player.cart.vehicle->body->setGlobalPose(physx::PxTransform(physx::PxVec3(GAME_STARTINGPOS)));
-	game->player.cart.vehicle->body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
-	game->player.cart.vehicle->body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
-
-	game->aiplayer.cart.vehicle->body->setGlobalPose(physx::PxTransform(physx::PxVec3(GAME_AISTARTINGPOS)));
-	game->aiplayer.cart.vehicle->body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
-	game->aiplayer.cart.vehicle->body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
-}
 
 void game_mainloop(struct game* game)
 {

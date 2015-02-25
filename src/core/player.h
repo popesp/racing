@@ -6,6 +6,7 @@
 #include	"../math/vec3f.h"
 #include	"../objects/camera.h"
 #include	"../objects/cart.h"
+#include	"../objects/track.h"
 #include	"../physics/physics.h"
 
 
@@ -17,12 +18,16 @@ struct player
 {
 	struct cart cart;
 
+	int index_track;
+
 	struct camera camera;
 };
 
 struct aiplayer
 {
 	struct cart cart;
+
+	int index_track;
 
 	struct controller controller;
 };
@@ -37,6 +42,9 @@ void aiplayer_delete(struct aiplayer* p);
 void aiplayer_updateinput(struct aiplayer* p);
 
 void player_updatecamera(struct player* p);
+
+void player_update(struct player* p, struct track* t);
+void aiplayer_update(struct aiplayer* p, struct track* t);
 
 
 #endif

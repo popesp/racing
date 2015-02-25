@@ -30,9 +30,6 @@ struct audiomanager
 };
 
 
-
-void ERRCHECK(FMOD_RESULT result);
-
 void audiomanager_startup(struct audiomanager* am);
 void audiomanager_shutdown(struct audiomanager* am);
 unsigned audiomanager_getlibversion(struct audiomanager* am);
@@ -44,4 +41,6 @@ void audiomanager_playsound(struct audiomanager* am, int id, int loops);
 void audio_menu(struct audiomanager* am);
 
 void audiomanager_pausetoggle(struct audiomanager* am);
+
+
 #endif
