@@ -77,11 +77,10 @@ void physicsmanager_shutdown(struct physicsmanager* pm)
 
 static void updatevehicles(struct physicsmanager* pm, float dt)
 {
+	vec3f g_origin, g_dir, vel, forward;
 	PxRaycastBuffer hit;
 	PxHitFlags outflags;
 	struct vehicle* v;
-	bool status;
-	vec3f g_origin, g_dir, vel;
 	PxVec3 velocity;
 	int i, j;
 
@@ -105,9 +104,9 @@ static void updatevehicles(struct physicsmanager* pm, float dt)
 			mat4f_transformvec3fn(g_dir, v->dir[j], (float*)&vehicle_world);
 
 			// raycast
-			status = pm->scene->raycast(PxVec3(g_origin[VX], g_origin[VY], g_origin[VZ]), PxVec3(g_dir[VX], g_dir[VY], g_dir[VZ]), PHYSICS_VEHICLE_RAYCAST_MAXDIST, hit, outflags, filterData);
+			v->touching[j] = pm->scene->raycast(PxVec3(g_origin[VX], g_origin[VY], g_origin[VZ]), PxVec3(g_dir[VX], g_dir[VY], g_dir[VZ]), PHYSICS_VEHICLE_RAYCAST_MAXDIST, hit, outflags, filterData);
 
-			if (status)
+			if (v->touching[j])
 			{
 				vec3f force;
 				float d;
@@ -121,10 +120,14 @@ static void updatevehicles(struct physicsmanager* pm, float dt)
 			}
 		}
 
-		velocity = PxRigidBodyExt::getLocalVelocityAtLocalPos(*v->body, PxVec3(0.f, 0.f, 0.f));
+		velocity = v->body->getLinearVelocity();
 		vec3f_set(vel, velocity.x, velocity.y, velocity.z);
 
-		printf("Velocity: %f, %f, %f\n", vel[VX], vel[VY], vel[VZ]);
+
+		vec3f_set(forward, CART_FORWARD);
+		mat4f_transformvec3f(forward, (float*)&vehicle_world);
+
+		printf("Forward Velocity: %f\n", vec3f_dot(forward, vel));
 	}
 }
 

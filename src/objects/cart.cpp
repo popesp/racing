@@ -80,11 +80,19 @@ void cart_update(struct cart* c)
 
 	if (c->controller != NULL && c->controller->flags & INPUT_FLAG_ENABLED)
 	{
-		// acceleration force
-		vec3f_set(force, CART_FORWARD);
-		vec3f_scale(force, -CART_FORCE_FORWARD * c->controller->axes[INPUT_AXIS_TRIGGERS]);
+		int i;
 
-		physx::PxRigidBodyExt::addLocalForceAtLocalPos(*c->vehicle->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, 0.f));
+		// if at least one raycast is touching the ground, apply an acceleration force
+		for (i = 0; i < PHYSICS_VEHICLE_RAYCAST_COUNT; i++)
+			if (c->vehicle->touching[i])
+			{
+				vec3f_set(force, CART_FORWARD);
+				vec3f_scale(force, -CART_FORCE_FORWARD * c->controller->axes[INPUT_AXIS_TRIGGERS]);
+
+				physx::PxRigidBodyExt::addLocalForceAtLocalPos(*c->vehicle->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, 0.f));
+
+				break;
+			}
 
 		// turning force
 		vec3f_set(force, CART_RIGHT);

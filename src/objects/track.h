@@ -46,6 +46,8 @@ struct track
 void track_init(struct track*, vec3f, struct physicsmanager*);
 void track_delete(struct track*);
 
+int track_closestindex(struct track* t, vec3f pos, int last);
+
 void track_loadpointsfile(struct track* t, const char* filename);
 
 void track_generatemesh(struct renderer*, struct track*);

@@ -54,6 +54,12 @@ void track_delete(struct track* t)
 }
 
 
+int track_closestindex(struct track* t, vec3f pos, int last)
+{
+	return 0;
+}
+
+
 void track_loadpointsfile(struct track* t, const char* filename)
 {
 	FILE* file;
