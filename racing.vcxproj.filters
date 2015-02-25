@@ -42,11 +42,14 @@
     <Filter Include="src\audio">
       <UniqueIdentifier>{0dbf3b38-08c7-48ae-b57c-b4320be7ec62}</UniqueIdentifier>
     </Filter>
+    <Filter Include="headers\core">
+      <UniqueIdentifier>{83b9842a-89ac-4d49-8871-63a4ade7448b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\core">
+      <UniqueIdentifier>{1690f433-fd9c-4b16-acfa-eaec98246453}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\game.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\main.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -65,9 +68,6 @@
     <ClCompile Include="src\objects\cart.cpp">
       <Filter>src\objects</Filter>
     </ClCompile>
-    <ClCompile Include="src\input.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\objects\camera.cpp">
       <Filter>src\objects</Filter>
     </ClCompile>
@@ -80,8 +80,14 @@
     <ClCompile Include="src\audio\audio.cpp">
       <Filter>src\audio</Filter>
     </ClCompile>
-    <ClCompile Include="src\objects\objloader.cpp">
-      <Filter>src\objects</Filter>
+    <ClCompile Include="src\core\game.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\input.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\player.cpp">
+      <Filter>src\core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -89,9 +95,6 @@
       <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="src\error.h">
-      <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="src\game.h">
       <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="src\mem.h">
@@ -121,9 +124,6 @@
     <ClInclude Include="src\objects\cart.h">
       <Filter>headers\objects</Filter>
     </ClInclude>
-    <ClInclude Include="src\input.h">
-      <Filter>headers</Filter>
-    </ClInclude>
     <ClInclude Include="src\objects\camera.h">
       <Filter>headers\objects</Filter>
     </ClInclude>
@@ -136,8 +136,14 @@
     <ClInclude Include="src\audio\audio.h">
       <Filter>headers\audio</Filter>
     </ClInclude>
-    <ClInclude Include="src\objects\objloader.h">
-      <Filter>headers\objects</Filter>
+    <ClInclude Include="src\core\game.h">
+      <Filter>headers\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\input.h">
+      <Filter>headers\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\player.h">
+      <Filter>headers\core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

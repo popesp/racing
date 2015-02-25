@@ -4,19 +4,10 @@
 #include	<GLFW/glfw3.h>			// GL
 #include	<stdio.h>				// printf
 #include	<stdlib.h>				// calloc, free TEMPORARY
-#include	"audio/audio.h"
-#include	"debug.h"				// printvec3f
-#include	"error.h"				// PRINT_ERROR
-#include	"input.h"
-#include	"math/mat4f.h"			// identity TEMPORARY
-#include	"math/vec3f.h"			// set TEMPORARY
-#include	"objects/camera.h"
-#include	"objects/cart.h"		// init, generatemesh
-#include	"objects/track.h"		// init, generatemesh
-#include	"physics/physics.h"		// startup, shutdown
-#include	"render/render.h"		// renderer: init
-#include	"render/texture.h"
-#include	"render/window.h"		// init, resize
+#include	"../debug.h"			// printvec3f
+#include	"../error.h"			// PRINT_ERROR
+#include	"../math/mat4f.h"		// identity TEMPORARY
+#include	"../math/vec3f.h"		// set TEMPORARY
 
 
 
@@ -78,10 +69,14 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 			break;
 
 		case GLFW_KEY_R:
-			// reset player position and speed
-			game->player.vehicle->body->setGlobalPose(physx::PxTransform(physx::PxVec3(GAME_STARTINGPOS)));
-			game->player.vehicle->body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
-			game->player.vehicle->body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+			// reset players' position and speed
+			game->player.cart.vehicle->body->setGlobalPose(physx::PxTransform(physx::PxVec3(GAME_STARTINGPOS)));
+			game->player.cart.vehicle->body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+			game->player.cart.vehicle->body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+
+			game->aiplayer.cart.vehicle->body->setGlobalPose(physx::PxTransform(physx::PxVec3(GAME_AISTARTINGPOS)));
+			game->aiplayer.cart.vehicle->body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+			game->aiplayer.cart.vehicle->body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
 			break;
 
 		default:
@@ -175,14 +170,14 @@ static void update(struct game* game)
 	// check for callback events
 	glfwPollEvents();
 
+	// update player and ai input
 	inputmanager_update(&game->inputmanager);
-
-	// simulate
-	physicsmanager_update(&game->physicsmanager, GAME_SPU);
+	aiplayer_updateinput(&game->aiplayer);
 
 	vec3f_set(up, 0.f, 1.f, 0.f);
 
-	if (game->player.controller->buttons[INPUT_BUTTON_Y] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
+	// temporary debug button
+	if (game->inputmanager.controllers[0].buttons[INPUT_BUTTON_Y] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
 	{
 		if (game->flags & GAME_FLAG_DEBUGCAM)
 			game->flags &= ~GAME_FLAG_DEBUGCAM;
@@ -207,20 +202,14 @@ static void update(struct game* game)
 			camera_rotate(&game->cam_debug, game->cam_debug.right, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_UD]);
 		}
 	} else
-		cart_update(&game->player);
+		cart_update(&game->player.cart);
 
-	cart_update(&game->otherguy);
+	cart_update(&game->aiplayer.cart);
 
-	// update player camera
-	physx::PxMat44 t_player(game->player.vehicle->body->getGlobalPose());
-	physx::PxVec3 cam_targetpos = t_player.transform(physx::PxVec3(0.f, 1.f, 5.f));
-	vec3f_subtractn(diff, (float*)&cam_targetpos, game->cam_player.pos);
-	vec3f_scale(diff, 0.1f);
-	vec3f_add(game->cam_player.pos, diff);
-	camera_lookat(&game->cam_player, (float*)&t_player.getPosition(), up);
+	player_updatecamera(&game->player);
 
-	// update light to be at player position TEMPORARY
-	vec3f_copy(game->track_lights[1].pos, (float*)&t_player.getPosition());
+	// simulate
+	physicsmanager_update(&game->physicsmanager, GAME_SPU);
 
 	// check for window close messages
 	if (glfwWindowShouldClose(game->window.w))
@@ -230,8 +219,8 @@ static void update(struct game* game)
 static void render(struct game* game)
 {
 	mat4f global_wv, skybox_wv, track_mw, skybox_mw;
-	physx::PxMat44 player_world(game->player.vehicle->body->getGlobalPose());
-	physx::PxMat44 otherguy_world(game->otherguy.vehicle->body->getGlobalPose());
+	physx::PxMat44 player_world(game->player.cart.vehicle->body->getGlobalPose());
+	physx::PxMat44 otherguy_world(game->aiplayer.cart.vehicle->body->getGlobalPose());
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -239,7 +228,7 @@ static void render(struct game* game)
 	if (game->flags & GAME_FLAG_DEBUGCAM)
 		camera_gettransform(&game->cam_debug, global_wv);
 	else
-		camera_gettransform(&game->cam_player, global_wv);
+		camera_gettransform(&game->player.camera, global_wv);
 
 	// remove translation from camera transform
 	mat4f_copy(skybox_wv, global_wv);
@@ -257,8 +246,8 @@ static void render(struct game* game)
 	renderable_render(&game->renderer, &game->track.r_track, track_mw, global_wv, 0);
 
 	// render carts
-	renderable_render(&game->renderer, &game->player.r_cart, (float*)&player_world, global_wv, 0);
-	renderable_render(&game->renderer, &game->otherguy.r_cart, (float*)&otherguy_world, global_wv, 0);
+	renderable_render(&game->renderer, &game->player.cart.r_cart, (float*)&player_world, global_wv, 0);
+	renderable_render(&game->renderer, &game->aiplayer.cart.r_cart, (float*)&otherguy_world, global_wv, 0);
 
 	glfwSwapBuffers(game->window.w);
 }
@@ -371,11 +360,12 @@ static int start_subsystems(struct game* game)
 			printf("Joystick %d enabled. Name: %s\n", i+1, inputmanager_joystickname(&game->inputmanager, i));
 	}
 
+	/*
 	// initialize audio manager
 	printf("Starting up audio manager...");
 	audiomanager_startup(&game->audiomanager);
 	printf("...done. Using FMOD version %d.\n", audiomanager_getlibversion(&game->audiomanager));
-
+	*/
 	return 1;
 }
 
@@ -394,36 +384,27 @@ int game_startup(struct game* game)
 	// initialize skybox
 	skybox_init(&game->skybox, &game->texturemanager, "res/images/night.jpg");
 	skybox_generatemesh(&game->renderer, &game->skybox);
+	renderable_sendbuffer(&game->renderer, &game->skybox.r_skybox);
 
 	// initialize track object
 	track_init(&game->track, up, &game->physicsmanager);
-	track_loadpointsfile(&game->track, "res/tracks/donut.track");
+	track_loadpointsfile(&game->track, "res/tracks/wipeout.track");
 	track_generatemesh(&game->renderer, &game->track);
-	
-	// send track mesh to physX (NOTE: should be in track.cpp)
+	renderable_sendbuffer(&game->renderer, &game->track.r_track);
+
+	// send track mesh to physX
 	physicsmanager_addstatic_trianglestrip(&game->physicsmanager, game->track.r_track.num_verts, sizeof(float)*RENDER_VERTSIZE_BUMP_L, game->track.r_track.buf_verts);
 	
-	// initialize cart objects
+	// initialize player objects
 	vec3f_set(pos, GAME_STARTINGPOS);
-	cart_init(&game->player, &game->physicsmanager, pos);
-	cart_generatemesh(&game->renderer, &game->player);
-	game->player.controller = &game->inputmanager.controllers[0];
+	player_init(&game->player, &game->physicsmanager, &game->renderer, &game->inputmanager.controllers[0], pos);
+	vec3f_set(pos, GAME_AISTARTINGPOS);
+	aiplayer_init(&game->aiplayer, &game->physicsmanager, &game->renderer, pos);
 
-	vec3f_set(pos, 0.f, 1.5f, -20.f);
-	cart_init(&game->otherguy, &game->physicsmanager, pos);
-	cart_generatemesh(&game->renderer, &game->otherguy);
-
-	// send vertex buffers to GPU
-	renderable_sendbuffer(&game->renderer, &game->skybox.r_skybox);
-	renderable_sendbuffer(&game->renderer, &game->track.r_track);
-	renderable_sendbuffer(&game->renderer, &game->player.r_cart);
-	renderable_sendbuffer(&game->renderer, &game->otherguy.r_cart);
-
-	// initialize camera objects
+	// initialize debug camera
 	vec3f_set(pos, 0.f, 0.f, -30.f);
-	vec3f_set(dir, 0.f, 0.f, 0.f);
+	vec3f_set(dir, 0.f, 0.f, -1.f);
 	camera_init(&game->cam_debug, pos, dir, up);
-	camera_init(&game->cam_player, pos, dir, up);
 
 	// initialize lights
 	vec3f_set(game->track_lights[0].pos, 0.f, 10.f, 0.f);
@@ -435,23 +416,24 @@ int game_startup(struct game* game)
 	vec3f_set(game->track_lights[1].spc, 1.f, 1.f, 1.f);
 
 	// give renderable objects references to the light objects
+	// TODO: need a better way to do this without manually setting it
 	game->track.r_track.lights[0] = game->track_lights + 0;
 	game->track.r_track.lights[1] = game->track_lights + 1;
-	game->player.r_cart.lights[0] = game->track_lights + 0;
-	game->player.r_cart.lights[1] = game->track_lights + 1;
-	game->otherguy.r_cart.lights[0] = game->track_lights + 0;
-	game->otherguy.r_cart.lights[1] = game->track_lights + 1;
+	game->player.cart.r_cart.lights[0] = game->track_lights + 0;
+	game->player.cart.r_cart.lights[1] = game->track_lights + 1;
+	game->aiplayer.cart.r_cart.lights[0] = game->track_lights + 0;
+	game->aiplayer.cart.r_cart.lights[1] = game->track_lights + 1;
 	
 	// track normal map
 	game->tex_trackbump = texturemanager_newtexture(&game->texturemanager);
 	texture_loadfile(&game->texturemanager, game->tex_trackbump, "res/images/slate.jpg");
 	texture_upload(&game->texturemanager, game->tex_trackbump, RENDER_TEXTURE_NORMAL);
 	game->track.r_track.texture_ids[RENDER_TEXTURE_NORMAL] = game->tex_trackbump;
-
+	/*
 	// add background music
 	game->bgm_test = audiomanager_newsound(&game->audiomanager, "res/music/aurora.mp3");
 	audiomanager_playsound(&game->audiomanager, game->bgm_test, -1);
-
+	*/
 	game->flags = GAME_FLAG_INIT;
 
 	return 1;
@@ -501,12 +483,16 @@ void game_mainloop(struct game* game)
 
 void game_shutdown(struct game* game)
 {
-	cart_delete(&game->player);
+	// delete players
+	player_delete(&game->player);
+	aiplayer_delete(&game->aiplayer);
+
+	// delete world objects
 	track_delete(&game->track);
 	skybox_delete(&game->skybox);
 
 	// shut down all the game subsytems
-	audiomanager_shutdown(&game->audiomanager);
+	//audiomanager_shutdown(&game->audiomanager);
 	inputmanager_shutdown(&game->inputmanager);
 	physicsmanager_shutdown(&game->physicsmanager);
 	texturemanager_shutdown(&game->texturemanager);

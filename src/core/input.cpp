@@ -3,8 +3,8 @@
 #include	<gl/glew.h>
 #include	<GLFW/glfw3.h>
 #include	<stdio.h>				// printf
-#include	"mem.h"
-#include	"render/window.h"
+#include	"../mem.h"
+#include	"../render/window.h"
 
 
 /*	start up the texture manager
@@ -31,8 +31,8 @@ void inputmanager_startup(struct inputmanager* im, struct window* win)
 
 
 	// initialize keyboard
-	im->keyboard.num_buttons = INPUT_KEYBOARD_BUTTONS;
-	im->keyboard.num_axes = INPUT_KEYBOARD_AXES;
+	im->keyboard.num_buttons = INPUT_CONTROLLER_BUTTONS;
+	im->keyboard.num_axes = INPUT_CONTROLLER_AXES;
 
 	im->keyboard.buttons = (unsigned char*)mem_alloc(sizeof(unsigned char) * im->keyboard.num_buttons);
 	for (i = 0; i < im->keyboard.num_buttons; i++)

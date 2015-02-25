@@ -1,0 +1,8 @@
+npoints = 5;
+looped = false;
+
+point0 = pos(20.0, 0.0, -60.0), tan(0.0, 0.0, 1.0), angle(0.0), weight(50.0), width(10.0), subdivisions(20)
+point1 = pos(20.0, 0.0, 160.0), tan(0.0, 0.0, 1.0), angle(0.0), weight(50.0), width(10.0), subdivisions(20)
+point2 = pos(60.0, 10.0, 200.0), tan(1.0, 0.0, 0.0), angle(0.0), weight(50.0), width(10.0), subdivisions(20)
+point3 = pos(100.0, 15.0, 160.0), tan(1.0, 0.0, -2.0), angle(0.0), weight(50.0), width(10.0), subdivisions(20)
+point4 = pos(120.0, 18.0, 140.0), tan(1.0, 0.0, 0.0), angle(0.0), weight(50.0), width(10.0), subdivisions(20)

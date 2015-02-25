@@ -2,7 +2,7 @@
 #define	CART
 
 
-#include	"../input.h"
+#include	"../core/input.h"
 #include	"../math/vec3f.h"
 #include	"../render/render.h"
 
@@ -15,7 +15,7 @@
 #define	CART_FORWARD		0.f, 0.f, -1.f
 #define	CART_RIGHT			1.f, 0.f, 0.f
 
-#define	CART_FORCE_FORWARD	30.f
+#define	CART_FORCE_FORWARD	40.f
 #define	CART_FORCE_TURN		4.f
 
 
