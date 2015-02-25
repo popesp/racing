@@ -181,13 +181,14 @@ static void update(struct game* game)
 	vec3f_set(up, 0.f, 1.f, 0.f);
 
 	// temporary debug button
+			if (game->inputmanager.controllers[GLFW_JOYSTICK_1].flags & INPUT_FLAG_ENABLED){
 	if (game->inputmanager.controllers[0].buttons[INPUT_BUTTON_Y] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
 	{
 		if (game->flags & GAME_FLAG_DEBUGCAM)
 			game->flags &= ~GAME_FLAG_DEBUGCAM;
 		else
 			game->flags |= GAME_FLAG_DEBUGCAM;
-	}
+	}}
 
 	// update debug camera; NOTE: a lot of this is temporarily hard-coded
 	if (game->flags & GAME_FLAG_DEBUGCAM)
@@ -402,7 +403,10 @@ int game_startup(struct game* game)
 	
 	// initialize player objects
 	vec3f_set(pos, GAME_STARTINGPOS);
-	player_init(&game->player, &game->physicsmanager, &game->renderer, &game->inputmanager.controllers[0], pos);
+	if (game->inputmanager.controllers[0].flags & INPUT_FLAG_ENABLED)
+		player_init(&game->player, &game->physicsmanager, &game->renderer, &game->inputmanager.controllers[0], pos);
+	else
+		player_init(&game->player, &game->physicsmanager, &game->renderer, &game->inputmanager.keyboard, pos);
 	vec3f_set(pos, GAME_AISTARTINGPOS);
 	aiplayer_init(&game->aiplayer, &game->physicsmanager, &game->renderer, pos);
 
