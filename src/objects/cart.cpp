@@ -88,7 +88,12 @@ void cart_update(struct cart* c)
 
 		// turning force
 		vec3f_set(force, CART_RIGHT);
-		vec3f_scale(force, CART_FORCE_TURN * c->controller->axes[INPUT_AXIS_LEFT_LR]);
+
+		if (c->controller->axes[INPUT_AXIS_TRIGGERS] > 0) 
+			vec3f_scale(force, -CART_FORCE_TURN * c->controller->axes[INPUT_AXIS_LEFT_LR]);
+		else
+			vec3f_scale(force, CART_FORCE_TURN * c->controller->axes[INPUT_AXIS_LEFT_LR]);
+		
 
 		physx::PxRigidBodyExt::addLocalForceAtLocalPos(*c->vehicle->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, -CART_LENGTH/2.f));
 	}

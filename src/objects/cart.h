@@ -16,7 +16,7 @@
 #define	CART_RIGHT			1.f, 0.f, 0.f
 
 #define	CART_FORCE_FORWARD	40.f
-#define	CART_FORCE_TURN		4.f
+#define	CART_FORCE_TURN		5.f
 
 
 struct physicsmanager;
