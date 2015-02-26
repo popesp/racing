@@ -89,6 +89,12 @@
     <ClCompile Include="src\core\player.cpp">
       <Filter>src\core</Filter>
     </ClCompile>
+    <ClCompile Include="src\objects\objloader.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\objects\powerup.cpp">
+      <Filter>src\objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\debug.h">
@@ -144,6 +150,12 @@
     </ClInclude>
     <ClInclude Include="src\core\player.h">
       <Filter>headers\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\objects\objloader.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\objects\powerup.h">
+      <Filter>headers\objects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

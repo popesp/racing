@@ -29,7 +29,11 @@ void audiomanager_startup(struct audiomanager* am)
 	for (i = 0; i < AUDIO_MAX_SOUNDS; i++)
 	{
 		am->sounds[i].track = NULL;
+		am->sounds[i].channel = NULL;
 		am->sounds[i].enabled = false;
+		
+		am->fx[i].track = NULL;
+		am->fx[i].enabled = false;
 	}
 
 	// default volume to 100%
@@ -77,43 +81,49 @@ int audiomanager_newsound(struct audiomanager* am, const char* filename)
 	return -1;
 }
 
+void audiomanager_playcrash(struct audiomanager* am){
+	
+}
+
 void audiomanager_removesound(struct audiomanager* am, int id)
 {
 	FMOD_Sound_Release(am->sounds[id].track);
 	am->sounds[id].track = NULL;
+	am->sounds[id].channel = NULL;
+	
 	am->sounds[id].enabled = false;
-	am->sounds[id].is_playing = false;
 }
 
 
 void audiomanager_playsound(struct audiomanager* am, int id, int loops)
 {
-	FMOD_CHANNEL* channel;
-
-	FMOD_System_PlaySound(am->system, FMOD_CHANNEL_FREE, am->sounds[id].track, true, &channel);
+	
+	
+	FMOD_System_PlaySound(am->system, FMOD_CHANNEL_FREE, am->sounds[id].track, true, &am->sounds[id].channel);
 
 	// set volume and loop count
-	FMOD_Channel_SetVolume(channel, am->volume);
-	FMOD_Channel_SetLoopCount(channel, loops);
+	FMOD_Channel_SetVolume(am->sounds[id].channel, am->volume);
+	FMOD_Channel_SetLoopCount(am->sounds[id].channel, loops);
 	
 	// play the sound
-	FMOD_Channel_SetPaused(channel, false);
-	
-	am->sounds[id].is_playing = true;
+
+	FMOD_Channel_SetPaused(am->sounds[id].channel, false);
+
 }
 
-void audiomanager_pausetoggle(struct audiomanager* am)
+void audiomanager_pausetoggle(struct audiomanager* am, int id)
 {
+	
 
-	FMOD_CHANNELGROUP *channel;
     FMOD_BOOL state;
-    FMOD_System_GetMasterChannelGroup(am->system, &channel);
-    FMOD_ChannelGroup_GetPaused(channel, &state);
+   
+    FMOD_Channel_GetPaused(am->sounds[id].channel, &state);
+
 
 	if (state)
-		FMOD_ChannelGroup_SetPaused(channel, false);
+		FMOD_Channel_SetPaused(am->sounds[id].channel,false);
 	else
-		FMOD_ChannelGroup_SetPaused(channel, true);
+		FMOD_Channel_SetPaused(am->sounds[id].channel,true);
 	
 }
 
@@ -134,11 +144,6 @@ void audio_menu(struct audiomanager* am)
 			printf("%s added to game sounds\n", file.name);
 
 		}
-		if (file.is_dir)
-		{
-		//	printf("/");
-		}
-		//printf("\n");
 
 		tinydir_next(&dir);
 	}

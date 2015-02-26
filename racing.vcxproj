@@ -53,7 +53,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>..\glew\lib\Release\Win32;..\glfw\lib-vc2012;..\physx\Lib\vc11win32;..\freeimage\lib;..\fmod\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3.lib;FreeImage.lib;PhysX3DEBUG_x86.lib;PhysX3ExtensionsDEBUG.lib;PhysX3CommonDEBUG_x86.lib;PhysX3CookingDEBUG_x86.lib;PhysX3VehicleDEBUG.lib;fmodexL_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>fmodexL_vc.lib;opengl32.lib;glew32.lib;glfw3.lib;FreeImage.lib;PhysX3DEBUG_x86.lib;PhysX3ExtensionsDEBUG.lib;PhysX3CommonDEBUG_x86.lib;PhysX3CookingDEBUG_x86.lib;PhysX3VehicleDEBUG.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
       <EntryPointSymbol>
       </EntryPointSymbol>
@@ -90,6 +90,7 @@
     <ClCompile Include="src\objects\camera.cpp" />
     <ClCompile Include="src\objects\cart.cpp" />
     <ClCompile Include="src\objects\objloader.cpp" />
+    <ClCompile Include="src\objects\powerup.cpp" />
     <ClCompile Include="src\objects\skybox.cpp" />
     <ClCompile Include="src\objects\track.cpp" />
     <ClCompile Include="src\physics\physics.cpp" />
@@ -112,6 +113,7 @@
     <ClInclude Include="src\objects\camera.h" />
     <ClInclude Include="src\objects\cart.h" />
     <ClInclude Include="src\objects\objloader.h" />
+    <ClInclude Include="src\objects\powerup.h" />
     <ClInclude Include="src\objects\skybox.h" />
     <ClInclude Include="src\objects\track.h" />
     <ClInclude Include="src\physics\physics.h" />

@@ -3,7 +3,7 @@
 #include	"../math/vec3f.h"
 #include	"../physics/physics.h"
 #include	"../render/render.h"
-
+#include	"objloader.h"
 
 static float cart_pos[8][3] =
 {
@@ -47,6 +47,7 @@ static int cart_norindex[36] =
 	5, 5, 5, 5, 5, 5
 };
 
+using namespace physx;
 
 void cart_init(struct cart* c, physicsmanager* pm, vec3f pos)
 {
@@ -96,7 +97,15 @@ void cart_update(struct cart* c)
 
 		// turning force
 		vec3f_set(force, CART_RIGHT);
-		vec3f_scale(force, CART_FORCE_TURN * c->controller->axes[INPUT_AXIS_LEFT_LR]);
+		PxVec3 velocity = PxRigidBodyExt::getLocalVelocityAtLocalPos(*c->vehicle->body, PxVec3(0.f, 0.f, 0.f));
+
+		if ((c->controller->axes[INPUT_AXIS_TRIGGERS] > 0)){// || ((float)velocity.z > 0)){
+			//printf("local velocity z: %d\n",velocity.z);
+			vec3f_scale(force, -CART_FORCE_TURN * c->controller->axes[INPUT_AXIS_LEFT_LR]);
+		}
+		else
+			vec3f_scale(force, CART_FORCE_TURN * c->controller->axes[INPUT_AXIS_LEFT_LR]);
+		
 
 		physx::PxRigidBodyExt::addLocalForceAtLocalPos(*c->vehicle->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, -CART_LENGTH/2.f));
 	}
@@ -107,7 +116,8 @@ void cart_generatemesh(struct renderer* r, struct cart* c)
 {
 	float* ptr;
 	int i;
-
+	vec3f * cverts, *cuv, *cnorm;
+	loadOBJ("res/Models/car/car.obj", &cverts, &cuv, &cnorm);
 	renderable_allocate(r, &c->r_cart, 36);
 
 	ptr = c->r_cart.buf_verts;
@@ -119,4 +129,8 @@ void cart_generatemesh(struct renderer* r, struct cart* c)
 		vec3f_copy(ptr, cart_nor[cart_norindex[i]]);
 		ptr += RENDER_ATTRIBSIZE_NOR;
 	}
+
+
+
+
 }

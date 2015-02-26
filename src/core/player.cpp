@@ -28,6 +28,8 @@ void player_init(struct player* p, struct physicsmanager* pm, struct renderer* r
 
 	p->cart.controller = controller;
 
+	p->index_track = 0;
+
 	vec3f_set(zero, 0.f, 0.f, 0.f);
 	vec3f_set(up, 0.f, 1.f, 0.f);
 
@@ -40,6 +42,8 @@ void aiplayer_init(struct aiplayer* p, struct physicsmanager* pm, struct rendere
 	cart_init(&p->cart, pm, pos);
 	cart_generatemesh(r, &p->cart);
 	renderable_sendbuffer(r, &p->cart.r_cart);
+
+	p->index_track = 0;
 
 	p->controller.flags = INPUT_FLAG_ENABLED;
 
@@ -91,4 +95,34 @@ void player_updatecamera(struct player* p)
 
 	vec3f_set(up, 0.f, 1.f, 0.f);
 	camera_lookat(&p->camera, (float*)&t_player.getPosition(), up);
+}
+
+
+void player_update(struct player* p, struct track* t)
+{
+	vec3f vpos;
+
+	physx::PxVec3 pos = p->cart.vehicle->body->getGlobalPose().p;
+	vec3f_set(vpos, pos.x, pos.y, pos.z);
+
+	p->index_track = track_closestindex(t, vpos, p->index_track);
+
+	/* temp */
+	vec3f_copy(vpos, t->searchpoints[p->index_track]);
+	//printf("Closest track point: %f, %f, %f\n", vpos[VX], vpos[VY], vpos[VZ]);
+	/* end temp */
+
+	cart_update(&p->cart);
+}
+
+void aiplayer_update(struct aiplayer* p, struct track* t)
+{
+	vec3f vpos;
+
+	physx::PxVec3 pos = p->cart.vehicle->body->getGlobalPose().p;
+	vec3f_set(vpos, pos.x, pos.y, pos.z);
+
+	track_closestindex(t, vpos, p->index_track);
+
+	cart_update(&p->cart);
 }

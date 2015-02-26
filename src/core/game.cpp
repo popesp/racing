@@ -19,6 +19,18 @@ static void update(struct game*);
 static void render(struct game*);
 
 
+static void resetplayers(struct game* game)
+{
+	game->player.cart.vehicle->body->setGlobalPose(physx::PxTransform(physx::PxVec3(GAME_STARTINGPOS)));
+	game->player.cart.vehicle->body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+	game->player.cart.vehicle->body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+
+	game->aiplayer.cart.vehicle->body->setGlobalPose(physx::PxTransform(physx::PxVec3(GAME_AISTARTINGPOS)));
+	game->aiplayer.cart.vehicle->body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+	game->aiplayer.cart.vehicle->body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+}
+
+
 static void resize(GLFWwindow* window, int width, int height)
 {
 	struct game* game;
@@ -49,7 +61,7 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 
 			//pause music
 		case GLFW_KEY_P:
-			audiomanager_pausetoggle(&game->audiomanager);
+			audiomanager_pausetoggle(&game->audiomanager,0);
 			break;
 
 
@@ -75,7 +87,8 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 
 		case GLFW_KEY_R:
 			// reset players' position and speed
-			game_resetplayer(game);
+			
+			resetplayers(game);
 			break;
 
 		case GLFW_KEY_F:
@@ -170,6 +183,7 @@ static void scroll(GLFWwindow* window, double xoffset, double yoffset)
 static void update(struct game* game)
 {
 	vec3f up, move, diff;
+	vec3f pos, playerpos;
 
 	// check for callback events
 	glfwPollEvents();
@@ -181,13 +195,14 @@ static void update(struct game* game)
 	vec3f_set(up, 0.f, 1.f, 0.f);
 
 	// temporary debug button
+			if (game->inputmanager.controllers[GLFW_JOYSTICK_1].flags & INPUT_FLAG_ENABLED){
 	if (game->inputmanager.controllers[0].buttons[INPUT_BUTTON_Y] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
 	{
 		if (game->flags & GAME_FLAG_DEBUGCAM)
 			game->flags &= ~GAME_FLAG_DEBUGCAM;
 		else
 			game->flags |= GAME_FLAG_DEBUGCAM;
-	}
+	}}
 
 	// update debug camera; NOTE: a lot of this is temporarily hard-coded
 	if (game->flags & GAME_FLAG_DEBUGCAM)
@@ -205,10 +220,26 @@ static void update(struct game* game)
 			camera_rotate(&game->cam_debug, up, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_LR]);
 			camera_rotate(&game->cam_debug, game->cam_debug.right, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_UD]);
 		}
-	} else
-		cart_update(&game->player.cart);
+	} else {
+		player_update(&game->player, &game->track);
 
-	cart_update(&game->aiplayer.cart);
+		if (game->player.cart.controller->buttons[0] == 1.0) {
+
+			if (game->player_proj_flag == 1) {
+				projectile_delete(&game->player_proj, &game->physicsmanager);
+			}
+			else {
+				game->player_proj_flag = 1;
+			}
+
+			projectile_init(&game->player_proj, &game->physicsmanager, &game->player);
+			projectile_generatemesh(&game->renderer, &game->player_proj);
+			game->player_proj.r_proj.lights[0] = &game->track_lights[0];
+			renderable_sendbuffer(&game->renderer, &game->player_proj.r_proj);
+		}
+	}
+
+	aiplayer_update(&game->aiplayer, &game->track);
 
 	player_updatecamera(&game->player);
 
@@ -253,20 +284,12 @@ static void render(struct game* game)
 	renderable_render(&game->renderer, &game->player.cart.r_cart, (float*)&player_world, global_wv, 0);
 	renderable_render(&game->renderer, &game->aiplayer.cart.r_cart, (float*)&otherguy_world, global_wv, 0);
 
+	if (game->player_proj_flag == 1) {
+		physx::PxMat44 player_proj_world(game->player_proj.proj->getGlobalPose());
+		renderable_render(&game->renderer, &game->player_proj.r_proj, (float*)&player_proj_world, global_wv, 0);
+	}
+
 	glfwSwapBuffers(game->window.w);
-}
-
-static void trackpoint(struct track_point* p, vec3f pos, vec3f tan, float angle, float weight, float width, unsigned subdivisions)
-{
-	vec3f_copy(p->pos, pos);
-
-	vec3f_copy(p->tan, tan);
-	vec3f_normalize(p->tan);
-
-	p->angle = angle;
-	p->weight = weight;
-	p->width = width;
-	p->subdivisions = subdivisions;
 }
 
 static int start_subsystems(struct game* game)
@@ -394,7 +417,7 @@ int game_startup(struct game* game)
 	// initialize track object
 	track_init(&game->track, up, &game->physicsmanager);
 	track_loadpointsfile(&game->track, "res/tracks/wipeout.track");
-	track_generatemesh(&game->renderer, &game->track);
+	track_generate(&game->renderer, &game->track);
 	renderable_sendbuffer(&game->renderer, &game->track.r_track);
 
 	// send track mesh to physX
@@ -402,7 +425,10 @@ int game_startup(struct game* game)
 	
 	// initialize player objects
 	vec3f_set(pos, GAME_STARTINGPOS);
-	player_init(&game->player, &game->physicsmanager, &game->renderer, &game->inputmanager.controllers[0], pos);
+	if (game->inputmanager.controllers[0].flags & INPUT_FLAG_ENABLED)
+		player_init(&game->player, &game->physicsmanager, &game->renderer, &game->inputmanager.controllers[0], pos);
+	else
+		player_init(&game->player, &game->physicsmanager, &game->renderer, &game->inputmanager.keyboard, pos);
 	vec3f_set(pos, GAME_AISTARTINGPOS);
 	aiplayer_init(&game->aiplayer, &game->physicsmanager, &game->renderer, pos);
 
@@ -436,7 +462,6 @@ int game_startup(struct game* game)
 	game->track.r_track.texture_ids[RENDER_TEXTURE_NORMAL] = game->tex_trackbump;
 	
 	// add background music
-	//game->bgm_test = audiomanager_newsound(&game->audiomanager, "res/music/aurora.mp3");
 	audiomanager_playsound(&game->audiomanager, 0, -1);
 	
 	game->flags = GAME_FLAG_INIT;
@@ -444,16 +469,6 @@ int game_startup(struct game* game)
 	return 1;
 }
 
-
-void game_resetplayer(struct game* game){
-	game->player.cart.vehicle->body->setGlobalPose(physx::PxTransform(physx::PxVec3(GAME_STARTINGPOS)));
-	game->player.cart.vehicle->body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
-	game->player.cart.vehicle->body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
-
-	game->aiplayer.cart.vehicle->body->setGlobalPose(physx::PxTransform(physx::PxVec3(GAME_AISTARTINGPOS)));
-	game->aiplayer.cart.vehicle->body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
-	game->aiplayer.cart.vehicle->body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
-}
 
 void game_mainloop(struct game* game)
 {

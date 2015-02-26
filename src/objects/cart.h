@@ -6,6 +6,7 @@
 #include	"../math/vec3f.h"
 #include	"../render/render.h"
 
+#include	<PxPhysicsAPI.h>
 
 #define	CART_WIDTH			1.2f
 #define	CART_HEIGHT			0.6f
@@ -16,7 +17,7 @@
 #define	CART_RIGHT			1.f, 0.f, 0.f
 
 #define	CART_FORCE_FORWARD	40.f
-#define	CART_FORCE_TURN		4.f
+#define	CART_FORCE_TURN		5.f
 
 
 struct physicsmanager;

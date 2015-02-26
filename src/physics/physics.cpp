@@ -124,6 +124,7 @@ static void updatevehicles(struct physicsmanager* pm, float dt)
 		vec3f_set(vel, velocity.x, velocity.y, velocity.z);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 		vec3f_set(forward, CART_FORWARD);
 		mat4f_transformvec3f(forward, (float*)&vehicle_world);
@@ -132,6 +133,9 @@ static void updatevehicles(struct physicsmanager* pm, float dt)
 =======
 		//printf("Velocity: %f, %f, %f\n", vel[VX], vel[VY], vel[VZ]);
 >>>>>>> e7a03136901237d44e74be367b50c0b98f5c4dc4
+=======
+		printf("Velocity: %f, %f, %f\n", vel[VX], vel[VY], vel[VZ]);
+>>>>>>> 2ec64863d3a143ac75102eef18f1288c5a256508
 	}
 }
 
