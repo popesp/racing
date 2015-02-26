@@ -61,7 +61,7 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 
 			//pause music
 		case GLFW_KEY_P:
-			audiomanager_pausetoggle(&game->audiomanager);
+			audiomanager_pausetoggle(&game->audiomanager,0);
 			break;
 
 
