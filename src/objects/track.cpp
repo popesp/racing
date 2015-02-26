@@ -59,11 +59,6 @@ void track_delete(struct track* t)
 }
 
 
-<<<<<<< HEAD
-int track_closestindex(struct track* t, vec3f pos, int last)
-{
-	return 0;
-=======
 /*	find the closest point on the track to a given position
 	param:	t					track object
 	param:	pos					position in space to search around
@@ -96,7 +91,6 @@ int track_closestindex(struct track* t, vec3f pos, int last)
 	}
 
 	return l;
->>>>>>> 2ec64863d3a143ac75102eef18f1288c5a256508
 }
 
 

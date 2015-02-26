@@ -61,7 +61,7 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 
 			//pause music
 		case GLFW_KEY_P:
-			audiomanager_pausetoggle(&game->audiomanager,0);
+			audiomanager_togglemusic(&game->audiomanager,0);
 			break;
 
 
@@ -87,7 +87,6 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 
 		case GLFW_KEY_R:
 			// reset players' position and speed
-			
 			resetplayers(game);
 			break;
 
@@ -111,30 +110,7 @@ static void cursor(GLFWwindow* window, double x, double y)
 
 	game = (struct game*)glfwGetWindowUserPointer(window);
 
-	/*
-	if (game->flags & GAME_FLAG_ROTATING)
-	{
-		dx = x - game->mx;
-		dy = y - game->my;
-
-		game->rotx += (float)(dy * GAME_ROTATEXSPEED);
-		game->roty += (float)(dx * GAME_ROTATEYSPEED);
-
-		while (game->roty > 360.f)
-			game->roty -= 360.f;
-
-		while (game->roty < 0.f)
-			game->roty += 360.f;
-
-		if (game->rotx > GAME_ROTATEXMAX)
-			game->rotx = GAME_ROTATEXMAX;
-		else if (game->rotx < GAME_ROTATEXMIN)
-			game->rotx = GAME_ROTATEXMIN;
-	}
-
-	game->mx = x;
-	game->my = y;
-	*/
+	// cursor processing
 }
 
 static void mouse(GLFWwindow* window, int button, int action, int mods)
@@ -147,18 +123,7 @@ static void mouse(GLFWwindow* window, int button, int action, int mods)
 
 	game = (struct game*)glfwGetWindowUserPointer(window);
 
-	/*
-	if (action == GLFW_PRESS)
-	{
-		if (button == GLFW_MOUSE_BUTTON_RIGHT)
-			game->flags |= GAME_FLAG_ROTATING;
-	}
-	else
-	{
-		if (button == GLFW_MOUSE_BUTTON_RIGHT)
-			game->flags &= ~GAME_FLAG_ROTATING;
-	}
-	*/
+	// mouse button processing
 }
 
 static void scroll(GLFWwindow* window, double xoffset, double yoffset)
@@ -170,20 +135,12 @@ static void scroll(GLFWwindow* window, double xoffset, double yoffset)
 
 	game = (struct game*)glfwGetWindowUserPointer(window);
 
-	/*
-	game->zoom += (float)yoffset*GAME_ZOOMSPEED;
-
-	if (game->zoom > GAME_ZOOMMAX)
-		game->zoom = GAME_ZOOMMAX;
-	else if (game->zoom < GAME_ZOOMMIN)
-		game->zoom = GAME_ZOOMMIN;
-	*/
+	// scroll processing
 }
 
 static void update(struct game* game)
 {
-	vec3f up, move, diff;
-	vec3f pos, playerpos;
+	vec3f up, move;
 
 	// check for callback events
 	glfwPollEvents();
@@ -295,7 +252,6 @@ static void render(struct game* game)
 static int start_subsystems(struct game* game)
 {
 	int major, minor, rev;
-	GLenum err;
 	int i;
 
 	// initialize GLFW
@@ -387,13 +343,11 @@ static int start_subsystems(struct game* game)
 			printf("Joystick %d enabled. Name: %s\n", i+1, inputmanager_joystickname(&game->inputmanager, i));
 	}
 
-	
 	// initialize audio manager
 	printf("Starting up audio manager...");
 	audiomanager_startup(&game->audiomanager);
 	printf("...done. Using FMOD version %d.\n", audiomanager_getlibversion(&game->audiomanager));
 	
-	audio_menu(&game->audiomanager);
 	return 1;
 }
 
@@ -462,7 +416,8 @@ int game_startup(struct game* game)
 	game->track.r_track.texture_ids[RENDER_TEXTURE_NORMAL] = game->tex_trackbump;
 	
 	// add background music
-	audiomanager_playsound(&game->audiomanager, 0, -1);
+	game->bgm_test = audiomanager_newmusic(&game->audiomanager, "res/music/07.-dialed-in.mp3");
+	audiomanager_playmusic(&game->audiomanager, game->bgm_test, -1);
 	
 	game->flags = GAME_FLAG_INIT;
 
@@ -523,7 +478,7 @@ void game_shutdown(struct game* game)
 	skybox_delete(&game->skybox);
 
 	// shut down all the game subsytems
-	//audiomanager_shutdown(&game->audiomanager);
+	audiomanager_shutdown(&game->audiomanager);
 	inputmanager_shutdown(&game->inputmanager);
 	physicsmanager_shutdown(&game->physicsmanager);
 	texturemanager_shutdown(&game->texturemanager);
