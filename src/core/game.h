@@ -70,5 +70,4 @@ int game_startup(struct game* game);
 void game_mainloop(struct game* game);
 void game_shutdown(struct game* game);
 
-
 #endif

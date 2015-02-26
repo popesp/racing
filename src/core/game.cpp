@@ -19,6 +19,18 @@ static void update(struct game*);
 static void render(struct game*);
 
 
+static void resetplayers(struct game* game)
+{
+	game->player.cart.vehicle->body->setGlobalPose(physx::PxTransform(physx::PxVec3(GAME_STARTINGPOS)));
+	game->player.cart.vehicle->body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+	game->player.cart.vehicle->body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+
+	game->aiplayer.cart.vehicle->body->setGlobalPose(physx::PxTransform(physx::PxVec3(GAME_AISTARTINGPOS)));
+	game->aiplayer.cart.vehicle->body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+	game->aiplayer.cart.vehicle->body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+}
+
+
 static void resize(GLFWwindow* window, int width, int height)
 {
 	struct game* game;
@@ -47,6 +59,12 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 			game->flags |= GAME_FLAG_TERMINATED;
 			break;
 
+			//pause music
+		case GLFW_KEY_P:
+			audiomanager_pausetoggle(&game->audiomanager);
+			break;
+
+
 		case GLFW_KEY_Q:
 			if (game->flags & GAME_FLAG_WIREFRAME)
 			{
@@ -69,13 +87,13 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 
 		case GLFW_KEY_R:
 			// reset players' position and speed
-			game->player.cart.vehicle->body->setGlobalPose(physx::PxTransform(physx::PxVec3(GAME_STARTINGPOS)));
-			game->player.cart.vehicle->body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
-			game->player.cart.vehicle->body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+			
+			resetplayers(game);
+			break;
 
-			game->aiplayer.cart.vehicle->body->setGlobalPose(physx::PxTransform(physx::PxVec3(GAME_AISTARTINGPOS)));
-			game->aiplayer.cart.vehicle->body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
-			game->aiplayer.cart.vehicle->body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+		case GLFW_KEY_F:
+			// reload the config file for cart
+			
 			break;
 
 		default:
@@ -165,6 +183,7 @@ static void scroll(GLFWwindow* window, double xoffset, double yoffset)
 static void update(struct game* game)
 {
 	vec3f up, move, diff;
+	vec3f pos, playerpos;
 
 	// check for callback events
 	glfwPollEvents();
@@ -176,13 +195,14 @@ static void update(struct game* game)
 	vec3f_set(up, 0.f, 1.f, 0.f);
 
 	// temporary debug button
+			if (game->inputmanager.controllers[GLFW_JOYSTICK_1].flags & INPUT_FLAG_ENABLED){
 	if (game->inputmanager.controllers[0].buttons[INPUT_BUTTON_Y] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
 	{
 		if (game->flags & GAME_FLAG_DEBUGCAM)
 			game->flags &= ~GAME_FLAG_DEBUGCAM;
 		else
 			game->flags |= GAME_FLAG_DEBUGCAM;
-	}
+	}}
 
 	// update debug camera; NOTE: a lot of this is temporarily hard-coded
 	if (game->flags & GAME_FLAG_DEBUGCAM)
@@ -201,9 +221,9 @@ static void update(struct game* game)
 			camera_rotate(&game->cam_debug, game->cam_debug.right, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_UD]);
 		}
 	} else
-		cart_update(&game->player.cart);
+		player_update(&game->player, &game->track);
 
-	cart_update(&game->aiplayer.cart);
+	aiplayer_update(&game->aiplayer, &game->track);
 
 	player_updatecamera(&game->player);
 
@@ -249,19 +269,6 @@ static void render(struct game* game)
 	renderable_render(&game->renderer, &game->aiplayer.cart.r_cart, (float*)&otherguy_world, global_wv, 0);
 
 	glfwSwapBuffers(game->window.w);
-}
-
-static void trackpoint(struct track_point* p, vec3f pos, vec3f tan, float angle, float weight, float width, unsigned subdivisions)
-{
-	vec3f_copy(p->pos, pos);
-
-	vec3f_copy(p->tan, tan);
-	vec3f_normalize(p->tan);
-
-	p->angle = angle;
-	p->weight = weight;
-	p->width = width;
-	p->subdivisions = subdivisions;
 }
 
 static int start_subsystems(struct game* game)
@@ -359,12 +366,13 @@ static int start_subsystems(struct game* game)
 			printf("Joystick %d enabled. Name: %s\n", i+1, inputmanager_joystickname(&game->inputmanager, i));
 	}
 
-	/*
+	
 	// initialize audio manager
 	printf("Starting up audio manager...");
 	audiomanager_startup(&game->audiomanager);
 	printf("...done. Using FMOD version %d.\n", audiomanager_getlibversion(&game->audiomanager));
-	*/
+	
+	audio_menu(&game->audiomanager);
 	return 1;
 }
 
@@ -388,7 +396,7 @@ int game_startup(struct game* game)
 	// initialize track object
 	track_init(&game->track, up, &game->physicsmanager);
 	track_loadpointsfile(&game->track, "res/tracks/wipeout.track");
-	track_generatemesh(&game->renderer, &game->track);
+	track_generate(&game->renderer, &game->track);
 	renderable_sendbuffer(&game->renderer, &game->track.r_track);
 
 	// send track mesh to physX
@@ -396,7 +404,10 @@ int game_startup(struct game* game)
 	
 	// initialize player objects
 	vec3f_set(pos, GAME_STARTINGPOS);
-	player_init(&game->player, &game->physicsmanager, &game->renderer, &game->inputmanager.controllers[0], pos);
+	if (game->inputmanager.controllers[0].flags & INPUT_FLAG_ENABLED)
+		player_init(&game->player, &game->physicsmanager, &game->renderer, &game->inputmanager.controllers[0], pos);
+	else
+		player_init(&game->player, &game->physicsmanager, &game->renderer, &game->inputmanager.keyboard, pos);
 	vec3f_set(pos, GAME_AISTARTINGPOS);
 	aiplayer_init(&game->aiplayer, &game->physicsmanager, &game->renderer, pos);
 
@@ -428,15 +439,15 @@ int game_startup(struct game* game)
 	texture_loadfile(&game->texturemanager, game->tex_trackbump, "res/images/slate.jpg");
 	texture_upload(&game->texturemanager, game->tex_trackbump, RENDER_TEXTURE_NORMAL);
 	game->track.r_track.texture_ids[RENDER_TEXTURE_NORMAL] = game->tex_trackbump;
-	/*
+	
 	// add background music
-	game->bgm_test = audiomanager_newsound(&game->audiomanager, "res/music/aurora.mp3");
-	audiomanager_playsound(&game->audiomanager, game->bgm_test, -1);
-	*/
+	audiomanager_playsound(&game->audiomanager, 0, -1);
+	
 	game->flags = GAME_FLAG_INIT;
 
 	return 1;
 }
+
 
 void game_mainloop(struct game* game)
 {

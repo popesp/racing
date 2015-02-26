@@ -1,5 +1,6 @@
 #include	"track.h"
 
+#include	<float.h>
 #include	<math.h>				// cosf, sinf
 #include	"../error.h"
 #include	"../math/mat4f.h"		// identity
@@ -31,6 +32,9 @@ void track_init(struct track* t, vec3f up, struct physicsmanager* pm)
 	t->num_points = 0;
 	t->points = NULL;
 
+	t->num_searchpoints = 0;
+	t->searchpoints = NULL;
+
 	t->p_track = NULL;
 
 	renderable_init(&t->r_track, RENDER_MODE_TRIANGLESTRIP, RENDER_TYPE_BUMP_L, RENDER_FLAG_NONE);
@@ -49,8 +53,44 @@ void track_init(struct track* t, vec3f up, struct physicsmanager* pm)
 void track_delete(struct track* t)
 {
 	mem_free(t->points);
+	mem_free(t->searchpoints);
 
 	renderable_deallocate(&t->r_track);
+}
+
+
+/*	find the closest point on the track to a given position
+	param:	t					track object
+	param:	pos					position in space to search around
+	param:	last				last known "closest" index (used so as to not search every point on the track)
+	return:	int					index of the closest track point
+*/
+int track_closestindex(struct track* t, vec3f pos, int last)
+{
+	float d, least;
+	vec3f diff;
+	int i, l;
+
+	least = FLT_MAX;
+	l = last;
+
+	// search through nearby track points
+	i = (last - TRACK_SEARCHSIZE) % t->num_searchpoints;
+	while (i != (last + TRACK_SEARCHSIZE) % t->num_searchpoints)
+	{
+		vec3f_subtractn(diff, pos, t->searchpoints[i]);
+		d = vec3f_length(diff);
+
+		if (d < least)
+		{
+			least = d;
+			l = i;
+		}
+
+		i = (i + 1) % t->num_searchpoints;
+	}
+
+	return l;
 }
 
 
@@ -292,7 +332,7 @@ static float* copyvert(float* vptr, float* srcptr)
 	return vptr;
 }
 
-void track_generatemesh(struct renderer* r, struct track* t)
+void track_generate(struct renderer* r, struct track* t)
 {
 	struct track_point p;
 	unsigned i, j, n, s, ps;
@@ -310,9 +350,13 @@ void track_generatemesh(struct renderer* r, struct track* t)
 	for (i = 0; i < n; i++)
 		s += t->points[i].subdivisions + 1;
 
-	// re-allocate mesh renderable vertex buffer
+	// allocate mesh renderable vertex buffer
 	// the second parameter here looks complicated but is just calculating the required number of vertices to triangle strip the track
 	renderable_allocate(r, &t->r_track, 2 * ((2 * TRACK_SEGMENT_VERTCOUNT - 1)*s + 2 * (TRACK_SEGMENT_VERTCOUNT - 1)));
+
+	// allocate space for the search points (underlying track spline, independent from rendered/physical mesh)
+	t->num_searchpoints = n * (TRACK_SEARCHDIVIDE + 1);
+	t->searchpoints = (vec3f*)mem_calloc(t->num_searchpoints, sizeof(vec3f));
 
 	// temporary vertex buffer
 	verts = (float*)mem_calloc(2 * (2 * TRACK_SEGMENT_VERTCOUNT - 1)*s, RENDER_VERTSIZE_BUMP_L * sizeof(float));
@@ -323,14 +367,20 @@ void track_generatemesh(struct renderer* r, struct track* t)
 	{
 		d = 0.f;
 
+		// loop for rendered/physical mesh
 		ps = t->points[i].subdivisions + 1;
-		for (j = 0; j < ps; j++)
+		for (j = 0, d = 0.f; j < ps; j++, d += 1.f / (float)ps)
 		{
 			// find point on track curve and add vertices to generate track
 			curvepoint(t, i, d, &p);
 			ptr = addverts(t, &p, ptr);
+		}
 
-			d += 1.f / (float)ps;
+		// loop for search points
+		for (j = 0, d = 0.f; j < TRACK_SEARCHDIVIDE + 1; j++, d += 1.f / (float)(TRACK_SEARCHDIVIDE + 1))
+		{
+			curvepoint(t, i, d, &p);
+			vec3f_copy(t->searchpoints[i*n + j], p.pos);
 		}
 	}
 
