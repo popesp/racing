@@ -220,8 +220,24 @@ static void update(struct game* game)
 			camera_rotate(&game->cam_debug, up, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_LR]);
 			camera_rotate(&game->cam_debug, game->cam_debug.right, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_UD]);
 		}
-	} else
+	} else {
 		player_update(&game->player, &game->track);
+
+		if (game->player.cart.controller->buttons[0] == 1.0) {
+
+			if (game->player_proj_flag == 1) {
+				projectile_delete(&game->player_proj, &game->physicsmanager);
+			}
+			else {
+				game->player_proj_flag = 1;
+			}
+
+			projectile_init(&game->player_proj, &game->physicsmanager, &game->player);
+			projectile_generatemesh(&game->renderer, &game->player_proj);
+			game->player_proj.r_proj.lights[0] = &game->track_lights[0];
+			renderable_sendbuffer(&game->renderer, &game->player_proj.r_proj);
+		}
+	}
 
 	aiplayer_update(&game->aiplayer, &game->track);
 
@@ -267,6 +283,11 @@ static void render(struct game* game)
 	// render carts
 	renderable_render(&game->renderer, &game->player.cart.r_cart, (float*)&player_world, global_wv, 0);
 	renderable_render(&game->renderer, &game->aiplayer.cart.r_cart, (float*)&otherguy_world, global_wv, 0);
+
+	if (game->player_proj_flag == 1) {
+		physx::PxMat44 player_proj_world(game->player_proj.proj->getGlobalPose());
+		renderable_render(&game->renderer, &game->player_proj.r_proj, (float*)&player_proj_world, global_wv, 0);
+	}
 
 	glfwSwapBuffers(game->window.w);
 }

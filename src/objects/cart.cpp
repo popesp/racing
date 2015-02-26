@@ -47,6 +47,7 @@ static int cart_norindex[36] =
 	5, 5, 5, 5, 5, 5
 };
 
+using namespace physx;
 
 void cart_init(struct cart* c, physicsmanager* pm, vec3f pos)
 {
@@ -88,9 +89,12 @@ void cart_update(struct cart* c)
 
 		// turning force
 		vec3f_set(force, CART_RIGHT);
+		PxVec3 velocity = PxRigidBodyExt::getLocalVelocityAtLocalPos(*c->vehicle->body, PxVec3(0.f, 0.f, 0.f));
 
-		if (c->controller->axes[INPUT_AXIS_TRIGGERS] > 0) 
+		if ((c->controller->axes[INPUT_AXIS_TRIGGERS] > 0)){// || ((float)velocity.z > 0)){
+			//printf("local velocity z: %d\n",velocity.z);
 			vec3f_scale(force, -CART_FORCE_TURN * c->controller->axes[INPUT_AXIS_LEFT_LR]);
+		}
 		else
 			vec3f_scale(force, CART_FORCE_TURN * c->controller->axes[INPUT_AXIS_LEFT_LR]);
 		
@@ -117,4 +121,8 @@ void cart_generatemesh(struct renderer* r, struct cart* c)
 		vec3f_copy(ptr, cart_nor[cart_norindex[i]]);
 		ptr += RENDER_ATTRIBSIZE_NOR;
 	}
+
+
+
+
 }

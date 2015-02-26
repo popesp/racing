@@ -13,6 +13,7 @@
 #include	"../render/render.h"
 #include	"../render/texture.h"
 #include	"../render/window.h"
+#include	"../objects/powerup.h"
 
 
 #define	GAME_DEFAULT_WIDTH		600
@@ -52,6 +53,9 @@ struct game
 
 	struct player player;
 	struct aiplayer aiplayer;
+
+	struct projectile player_proj;
+	int player_proj_flag;
 
 	struct camera cam_debug;
 

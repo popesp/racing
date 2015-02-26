@@ -6,6 +6,7 @@
 #include	"../math/vec3f.h"
 #include	"../render/render.h"
 
+#include	<PxPhysicsAPI.h>
 
 #define	CART_WIDTH			1.2f
 #define	CART_HEIGHT			0.6f
