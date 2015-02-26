@@ -123,11 +123,15 @@ static void updatevehicles(struct physicsmanager* pm, float dt)
 		velocity = v->body->getLinearVelocity();
 		vec3f_set(vel, velocity.x, velocity.y, velocity.z);
 
+<<<<<<< HEAD
 
 		vec3f_set(forward, CART_FORWARD);
 		mat4f_transformvec3f(forward, (float*)&vehicle_world);
 
 		printf("Forward Velocity: %f\n", vec3f_dot(forward, vel));
+=======
+		//printf("Velocity: %f, %f, %f\n", vel[VX], vel[VY], vel[VZ]);
+>>>>>>> e7a03136901237d44e74be367b50c0b98f5c4dc4
 	}
 }
 
