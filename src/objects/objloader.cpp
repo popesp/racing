@@ -6,9 +6,9 @@
 
 bool loadOBJ(
     const char * path,
-    vec3f*  out_vertices,
-    vec3f*  out_uvs,
-    vec3f*  out_normals)
+    vec3f**  out_vertices,
+    vec3f**  out_uvs,
+    vec3f**  out_normals)
 {
 
 
@@ -52,9 +52,9 @@ bool loadOBJ(
 	temp_vertices = (vec3f*)mem_alloc(numv * sizeof(vec3f));
 	temp_uvs = (vec3f*)mem_alloc(numuv * sizeof(vec3f));
 	temp_normals = (vec3f*)mem_alloc(numnorm * sizeof(vec3f));
-	out_vertices = (vec3f*)mem_alloc(3 * numface * sizeof(vec3f));
-	out_normals  = (vec3f*)mem_alloc(3 * numface * sizeof(vec3f));
-	out_normals  = (vec3f*)mem_alloc(3 * numface * sizeof(vec3f));
+	*out_vertices = (vec3f*)mem_alloc(3 * numface * sizeof(vec3f));
+	*out_uvs  = (vec3f*)mem_alloc(3 * numface * sizeof(vec3f));
+	*out_normals  = (vec3f*)mem_alloc(3 * numface * sizeof(vec3f));
 	while(true){
 		
 		char lineHeader[128];
@@ -103,23 +103,23 @@ bool loadOBJ(
 		}
 
 	}
-	for(unsigned int i = 0; i< t_i_v_p; i++){
+	for(unsigned int i = 0; i< t_i_v_p - 1; i++){
 		unsigned int vertexIndex = vertexIndices[i];
 		vec3f vertex;
 		vec3f_copy(vertex, temp_vertices[vertexIndex -1]);
-		vec3f_copy(out_vertices[i],(vertex));
+		vec3f_copy((*out_vertices)[i],(vertex));
 	}
-	for(unsigned int i = 0; i< t_i_uv_p; i++){
+	for(unsigned int i = 0; i< t_i_uv_p - 1; i++){
 		unsigned int uvIndex = uvIndices[i];
 		vec3f uv;
 		vec3f_copy(uv, temp_uvs[uvIndex -1]);
-		vec3f_copy(out_uvs[i],(uv));
+		vec3f_copy((*out_uvs)[i],(uv));
 	}
-	for(unsigned int i = 0; i< t_i_n_p; i++){
+	for(unsigned int i = 0; i< t_i_n_p - 1; i++){
 		unsigned int normalIndex = normalIndices[i];
 		vec3f normal;
 		vec3f_copy(normal, temp_normals[normalIndex -1]);
-		vec3f_copy(out_normals[i],(normal));
+		vec3f_copy((*out_normals)[i],(normal));
 	}
 	return true;
 }

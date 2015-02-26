@@ -3,7 +3,7 @@
 #include	"../math/vec3f.h"
 #include	"../physics/physics.h"
 #include	"../render/render.h"
-
+#include	"objloader.h"
 
 static float cart_pos[8][3] =
 {
@@ -104,7 +104,8 @@ void cart_generatemesh(struct renderer* r, struct cart* c)
 {
 	float* ptr;
 	int i;
-
+	vec3f * cverts, *cuv, *cnorm;
+	loadOBJ("res/Models/car/car.obj", &cverts, &cuv, &cnorm);
 	renderable_allocate(r, &c->r_cart, 36);
 
 	ptr = c->r_cart.buf_verts;

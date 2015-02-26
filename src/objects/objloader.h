@@ -8,9 +8,9 @@
 
 bool loadOBJ(
     const char * path,
-    vec3f*  out_vertices,
-    vec3f*  out_uvs,
-    vec3f*  out_normals
+    vec3f**  out_vertices,
+    vec3f**  out_uvs,
+    vec3f**  out_normals
 );
 
 #endif
