@@ -124,7 +124,7 @@ static void updatevehicles(struct physicsmanager* pm, float dt)
 		velocity = PxRigidBodyExt::getLocalVelocityAtLocalPos(*v->body, PxVec3(0.f, 0.f, 0.f));
 		vec3f_set(vel, velocity.x, velocity.y, velocity.z);
 
-		//printf("Velocity: %f, %f, %f\n", vel[VX], vel[VY], vel[VZ]);
+		printf("Velocity: %f, %f, %f\n", vel[VX], vel[VY], vel[VZ]);
 	}
 }
 

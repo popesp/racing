@@ -109,7 +109,7 @@ void player_update(struct player* p, struct track* t)
 
 	/* temp */
 	vec3f_copy(vpos, t->searchpoints[p->index_track]);
-	printf("Closest track point: %f, %f, %f\n", vpos[VX], vpos[VY], vpos[VZ]);
+	//printf("Closest track point: %f, %f, %f\n", vpos[VX], vpos[VY], vpos[VZ]);
 	/* end temp */
 
 	cart_update(&p->cart);
