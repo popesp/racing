@@ -4,6 +4,7 @@
 
 #include	"../core/input.h"
 #include	"../math/vec3f.h"
+#include	"../objects/track.h"
 #include	"../physics/physics.h"
 #include	"../render/render.h"
 
@@ -28,7 +29,7 @@ struct cart
 	struct physicsmanager* pm;
 	struct vehicle* vehicle;
 
-	struct renderable r_cart;
+	struct renderable* renderable;
 
 	struct controller* controller;
 
@@ -41,10 +42,11 @@ struct cart
 /*	initialize a cart object
 	param:	c				cart object to initialize (modified)
 	param:	pm				physics manager
+	param:	obj				renderable object pointer
 	param:	t				track object
 	param:	index_track		track point index on which to spawn cart
 */
-void cart_init(struct cart* c, struct physicsmanager* pm, struct track* t, int index_track);
+void cart_init(struct cart* c, struct physicsmanager* pm, struct renderable* obj, struct track* t, int index_track);
 
 /*	delete a cart object
 	param:	c				cart object to delete
@@ -64,13 +66,6 @@ void cart_update(struct cart* c, struct track* t);
 	param:	t				track object
 */
 void cart_reset(struct cart* c, struct track* t);
-
-
-/*	generate a mesh for a cart
-	param:	c				cart object
-	param:	r				renderer
-*/
-void cart_generatemesh(struct cart* c, struct renderer* r);
 
 
 #endif

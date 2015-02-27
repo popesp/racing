@@ -89,11 +89,11 @@
     <ClCompile Include="src\core\player.cpp">
       <Filter>src\core</Filter>
     </ClCompile>
-    <ClCompile Include="src\objects\objloader.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\objects\powerup.cpp">
       <Filter>src\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\objloader.cpp">
+      <Filter>src\render</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -151,11 +151,14 @@
     <ClInclude Include="src\core\player.h">
       <Filter>headers\core</Filter>
     </ClInclude>
-    <ClInclude Include="src\objects\objloader.h">
-      <Filter>headers</Filter>
-    </ClInclude>
     <ClInclude Include="src\objects\powerup.h">
       <Filter>headers\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\objloader.h">
+      <Filter>headers\render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\math\vec2f.h">
+      <Filter>headers\math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -181,6 +184,12 @@
       <Filter>shaders</Filter>
     </None>
     <None Include="shaders\wires.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\txtrl.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\txtrl.vert">
       <Filter>shaders</Filter>
     </None>
   </ItemGroup>

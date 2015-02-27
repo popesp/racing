@@ -29,8 +29,8 @@ struct aiplayer
 };
 
 
-void player_init(struct player* p, struct physicsmanager* pm, struct renderer* r, struct controller* controller, struct track* t, int index_track);
-void aiplayer_init(struct aiplayer* p, struct physicsmanager* pm, struct renderer* r, struct track* t, int index_track);
+void player_init(struct player* p, struct physicsmanager* pm, struct renderable* obj, struct controller* controller, struct track* t, int index_track);
+void aiplayer_init(struct aiplayer* p, struct physicsmanager* pm, struct renderable* obj, struct track* t, int index_track);
 
 void player_delete(struct player* p);
 void aiplayer_delete(struct aiplayer* p);

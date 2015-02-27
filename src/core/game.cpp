@@ -8,6 +8,7 @@
 #include	"../error.h"			// PRINT_ERROR
 #include	"../math/mat4f.h"		// identity TEMPORARY
 #include	"../math/vec3f.h"		// set TEMPORARY
+#include	"../render/objloader.h"
 
 
 static void resize(GLFWwindow*, int, int);
@@ -172,8 +173,11 @@ static void update(struct game* game)
 			camera_rotate(&game->cam_debug, up, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_LR]);
 			camera_rotate(&game->cam_debug, game->cam_debug.right, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_UD]);
 		}
-	} else {
-		player_update(&game->player, &game->track);
+
+		game->player.cart.controller = NULL;
+	} else
+	{
+		game->player.cart.controller = &game->inputmanager.controllers[0];
 
 		if (game->player.cart.controller->buttons[0] == 1.0) {
 
@@ -244,8 +248,8 @@ static void render(struct game* game)
 	renderable_render(&game->renderer, &game->track.r_track, track_mw, global_wv, 0);
 
 	// render carts
-	renderable_render(&game->renderer, &game->player.cart.r_cart, (float*)&player_world, global_wv, 0);
-	renderable_render(&game->renderer, &game->aiplayer.cart.r_cart, (float*)&otherguy_world, global_wv, 0);
+	renderable_render(&game->renderer, game->player.cart.renderable, (float*)&player_world, global_wv, 0);
+	renderable_render(&game->renderer, game->aiplayer.cart.renderable, (float*)&otherguy_world, global_wv, 0);
 
 	if (game->player_proj_flag == 1) {
 		physx::PxMat44 player_proj_world(game->player_proj.proj->getGlobalPose());
@@ -387,12 +391,21 @@ int game_startup(struct game* game)
 	// send track mesh to physX
 	physicsmanager_addstatic_trianglestrip(&game->physicsmanager, game->track.r_track.num_verts, sizeof(float)*RENDER_VERTSIZE_BUMP_L, game->track.r_track.buf_verts);
 	
+	// initialize vehicle mesh
+	renderable_init(&game->r_vehicle, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
+	objloader_load("res/models/car/car.obj", &game->renderer, &game->r_vehicle);
+	renderable_sendbuffer(&game->renderer, &game->r_vehicle);
+	game->tex_vehicle = texturemanager_newtexture(&game->texturemanager);
+	texture_loadfile(&game->texturemanager, game->tex_vehicle, "res/models/car/outUV.jpg");
+	texture_upload(&game->texturemanager, game->tex_vehicle, RENDER_TEXTURE_DIFFUSE);
+	game->r_vehicle.texture_ids[RENDER_TEXTURE_DIFFUSE] = game->tex_vehicle;
+
 	// initialize player objects
 	if (game->inputmanager.controllers[0].flags & INPUT_FLAG_ENABLED)
-		player_init(&game->player, &game->physicsmanager, &game->renderer, &game->inputmanager.controllers[0], &game->track, 0);
+		player_init(&game->player, &game->physicsmanager, &game->r_vehicle, &game->inputmanager.controllers[0], &game->track, 0);
 	else
-		player_init(&game->player, &game->physicsmanager, &game->renderer, &game->inputmanager.keyboard, &game->track, 0);
-	aiplayer_init(&game->aiplayer, &game->physicsmanager, &game->renderer, &game->track, 5);
+		player_init(&game->player, &game->physicsmanager, &game->r_vehicle, &game->inputmanager.keyboard, &game->track, 0);
+	aiplayer_init(&game->aiplayer, &game->physicsmanager, &game->r_vehicle, &game->track, 5);
 
 	// initialize debug camera
 	vec3f_set(pos, 0.f, 0.f, -30.f);
@@ -412,10 +425,10 @@ int game_startup(struct game* game)
 	// TODO: need a better way to do this without manually setting it
 	game->track.r_track.lights[0] = game->track_lights + 0;
 	game->track.r_track.lights[1] = game->track_lights + 1;
-	game->player.cart.r_cart.lights[0] = game->track_lights + 0;
-	game->player.cart.r_cart.lights[1] = game->track_lights + 1;
-	game->aiplayer.cart.r_cart.lights[0] = game->track_lights + 0;
-	game->aiplayer.cart.r_cart.lights[1] = game->track_lights + 1;
+	game->player.cart.renderable->lights[0] = game->track_lights + 0;
+	game->player.cart.renderable->lights[1] = game->track_lights + 1;
+	game->aiplayer.cart.renderable->lights[0] = game->track_lights + 0;
+	game->aiplayer.cart.renderable->lights[1] = game->track_lights + 1;
 	
 	// track normal map
 	game->tex_trackbump = texturemanager_newtexture(&game->texturemanager);

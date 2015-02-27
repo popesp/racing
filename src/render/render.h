@@ -23,15 +23,17 @@
 #define	RENDER_MODE_TRIANGLESTRIP	2
 #define	RENDER_MODE_TRIANGLES		3
 
-#define	RENDER_TYPE_COUNT			4
+#define	RENDER_TYPE_COUNT			5
 #define	RENDER_TYPE_WIRE_S			0
 #define	RENDER_TYPE_TXTR_S			1
 #define	RENDER_TYPE_MATS_L			2
-#define	RENDER_TYPE_BUMP_L			3
+#define	RENDER_TYPE_TXTR_L			3
+#define	RENDER_TYPE_BUMP_L			4
 
 #define	RENDER_VERTSIZE_WIRE_S		(RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_COL)
 #define	RENDER_VERTSIZE_TXTR_S		(RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_TEX)
 #define	RENDER_VERTSIZE_MATS_L		(RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_NOR)
+#define	RENDER_VERTSIZE_TXTR_L		(RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_NOR + RENDER_ATTRIBSIZE_TEX)
 #define	RENDER_VERTSIZE_BUMP_L		(RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_NOR + RENDER_ATTRIBSIZE_TAN + RENDER_ATTRIBSIZE_TEX)
 
 #define	RENDER_LIGHT_UNIFORMS		3
@@ -68,6 +70,8 @@
 #define	RENDER_SHADER_FRAG_TXTR_S	"shaders/txtrs.frag"
 #define	RENDER_SHADER_VERT_MATS_L	"shaders/matsl.vert"
 #define	RENDER_SHADER_FRAG_MATS_L	"shaders/matsl.frag"
+#define	RENDER_SHADER_VERT_TXTR_L	"shaders/txtrl.vert"
+#define	RENDER_SHADER_FRAG_TXTR_L	"shaders/txtrl.frag"
 #define	RENDER_SHADER_VERT_BUMP_L	"shaders/bumpl.vert"
 #define	RENDER_SHADER_FRAG_BUMP_L	"shaders/bumpl.frag"
 
@@ -120,6 +124,7 @@ struct renderer
 	unsigned id_gl_wire_s;
 	unsigned id_gl_txtr_s;
 	unsigned id_gl_mats_l;
+	unsigned id_gl_txtr_l;
 	unsigned id_gl_bump_l;
 
 	unsigned vertsize[RENDER_TYPE_COUNT];
@@ -147,6 +152,16 @@ struct renderer
 		int ambient;
 		int material[RENDER_MATERIAL_UNIFORMS];
 	} uniforms_mats_l;
+
+	struct
+	{
+		int transform;
+		int eyepos;
+		int lights[RENDER_MAX_LIGHTS][RENDER_LIGHT_UNIFORMS];
+		int ambient;
+		int tex_diffuse;
+		int material[RENDER_MATERIAL_UNIFORMS];
+	} uniforms_txtr_l;
 
 	struct
 	{

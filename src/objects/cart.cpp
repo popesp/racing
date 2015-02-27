@@ -1,8 +1,5 @@
 #include	"cart.h"
 
-#include	"../objects/track.h"
-#include	"objloader.h"
-
 
 static float cart_pos[8][3] =
 {
@@ -50,10 +47,11 @@ static int cart_norindex[36] =
 /*	initialize a cart object
 	param:	c				cart object to initialize (modified)
 	param:	pm				physics manager
+	param:	obj				renderable object pointer
 	param:	t				track object
 	param:	index_track		track point index on which to spawn cart
 */
-void cart_init(struct cart* c, struct physicsmanager* pm, struct track* t, int index_track)
+void cart_init(struct cart* c, struct physicsmanager* pm, struct renderable* obj, struct track* t, int index_track)
 {
 	vec3f dim, spawn;
 
@@ -69,12 +67,7 @@ void cart_init(struct cart* c, struct physicsmanager* pm, struct track* t, int i
 	vec3f_set(dim, CART_WIDTH/2.f, CART_HEIGHT/2.f, CART_LENGTH/2.f);
 	c->vehicle = physicsmanager_newvehicle(pm, c->pos, dim);
 
-	renderable_init(&c->r_cart, RENDER_MODE_TRIANGLES, RENDER_TYPE_MATS_L, RENDER_FLAG_NONE);
-
-	vec3f_set(c->r_cart.material.amb, 0.8f, 0.15f, 0.1f);
-	vec3f_set(c->r_cart.material.dif, 0.8f, 0.15f, 0.1f);
-	vec3f_set(c->r_cart.material.spc, 0.8f, 0.5f, 0.5f);
-	c->r_cart.material.shn = 100.f;
+	c->renderable = obj;
 
 	c->controller = NULL;
 
@@ -87,7 +80,6 @@ void cart_init(struct cart* c, struct physicsmanager* pm, struct track* t, int i
 void cart_delete(struct cart* c)
 {
 	physicsmanager_removevehicle(c->pm, c->vehicle);
-	renderable_deallocate(&c->r_cart);
 }
 
 
@@ -159,32 +151,4 @@ void cart_reset(struct cart* c, struct track* t)
 	c->vehicle->body->setGlobalPose(physx::PxTransform(physx::PxVec3(c->pos[VX], c->pos[VY], c->pos[VZ])));
 	c->vehicle->body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
 	c->vehicle->body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
-}
-
-
-/*	generate a mesh for a cart
-	param:	c				cart object
-	param:	r				renderer
-*/
-void cart_generatemesh(struct cart* c, struct renderer* r)
-{
-	float* ptr;
-	int i;
-	vec3f * cverts, *cuv, *cnorm;
-	loadOBJ("res/Models/car/car.obj", &cverts, &cuv, &cnorm);
-	renderable_allocate(r, &c->r_cart, 36);
-
-	ptr = c->r_cart.buf_verts;
-
-	for (i = 0; i < 36; i++)
-	{
-		vec3f_copy(ptr, cart_pos[cart_posindex[i]]);
-		ptr += RENDER_ATTRIBSIZE_POS;
-		vec3f_copy(ptr, cart_nor[cart_norindex[i]]);
-		ptr += RENDER_ATTRIBSIZE_NOR;
-	}
-
-
-
-
 }

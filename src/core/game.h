@@ -51,6 +51,8 @@ struct game
 	struct skybox skybox;
 	struct track track;
 
+	struct renderable r_vehicle;
+
 	struct player player;
 	struct aiplayer aiplayer;
 
@@ -65,6 +67,7 @@ struct game
 
 	int tex_trackbump;
 	int tex_skybox;
+	int tex_vehicle;
 
 	int bgm_test;
 
