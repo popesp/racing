@@ -78,7 +78,8 @@ void objloader_load(const char* filename, struct renderer* r, struct renderable*
 		} else if(!strcmp(line, "vt"))
 		{
 			// vertex texture coords
-			fscanf(file, "%f %f", ptr_uvs + 0, ptr_uvs + 1);
+			fscanf(file, "%f %f", ptr_uvs + U, ptr_uvs + V);
+			ptr_uvs[V] = -ptr_uvs[V];
 			ptr_uvs += 2;
 		} else if (!strcmp(line, "f"))
 		{

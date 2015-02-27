@@ -21,7 +21,7 @@ void player_init(struct player* p, struct physicsmanager* pm, struct renderable*
 {
 	vec3f zero, up;
 
-	// generate cart and send mesh to OpengL
+	// initialize cart
 	cart_init(&p->cart, pm, obj, t, index_track);
 
 	p->cart.controller = controller;
@@ -34,7 +34,7 @@ void player_init(struct player* p, struct physicsmanager* pm, struct renderable*
 
 void aiplayer_init(struct aiplayer* p, struct physicsmanager* pm, struct renderable* obj, struct track* t, int index_track)
 {
-	// generate cart and send mesh to OpengL
+	// initialize cart
 	cart_init(&p->cart, pm, obj, t, index_track);
 
 	p->controller.flags = INPUT_FLAG_ENABLED;

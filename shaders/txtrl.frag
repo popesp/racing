@@ -40,7 +40,7 @@ void main()
 	n = normalize(pass_normal);
 	e = normalize(pass_toeye);
 
-	dif = vec3(0.f);
+	dif = texture2D(tex_diffuse, pass_uv).rgb;
 	spc = vec3(0.f);
 	for (int i = 0; i < MAX_LIGHTS; i++)
 	{
@@ -55,7 +55,7 @@ void main()
 	}
 	
 	amb = ambient*material.amb;
-	dif *= (material.dif + texture2D(tex_diffuse, pass_uv).rgb);
+	dif *= material.dif;
 	spc *= material.spc;
 	
 	fragcol = amb + dif + spc;
