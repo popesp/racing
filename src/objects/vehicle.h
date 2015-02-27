@@ -23,9 +23,9 @@
 #define	VEHICLE_RAYCAST_MAXDIST		1.f
 #define	VEHICLE_RAYCAST_MAXFORCE	20.f
 
-#define	VEHICLE_WIDTH				2.8f
-#define	VEHICLE_HEIGHT				0.4f
-#define	VEHICLE_LENGTH				1.2f
+#define	VEHICLE_MESHSCALE			0.2f
+
+#define	VEHICLE_DENSITY				0.8f
 
 #define	VEHICLE_SPAWNHEIGHT			1.5f
 
@@ -70,6 +70,8 @@ struct vehiclemanager
 	struct track* track;
 
 	struct renderable r_vehicle;
+
+	vec3f dim;
 
 	int tex_diffuse;
 
