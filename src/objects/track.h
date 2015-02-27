@@ -38,8 +38,8 @@ struct track
 	unsigned num_points;
 	struct track_point* points;
 
-	unsigned num_searchpoints;
-	vec3f* searchpoints;
+	unsigned num_pathpoints;
+	vec3f* pathpoints;
 
 	physx::PxRigidStatic* p_track;
 

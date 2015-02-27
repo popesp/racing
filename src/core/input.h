@@ -4,7 +4,6 @@
 
 #include	<GL/glew.h>
 #include	<GLFW/glfw3.h>
-#include	"../objects/cart.h"		// init, generatemesh
 
 
 #define	INPUT_BUTTON_A				0

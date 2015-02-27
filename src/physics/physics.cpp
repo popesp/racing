@@ -3,7 +3,7 @@
 #include	<PxPhysicsAPI.h>
 #include	"../math/vec3f.h"
 #include	"../mem.h"
-#include	"../objects/cart.h"
+#include	"../objects/vehicle.h"
 #include	"../render/render.h"
 
 
@@ -16,7 +16,6 @@ using namespace physx;
 void physicsmanager_startup(struct physicsmanager* pm)
 {
 	PxTolerancesScale scale;
-	int i;
 
 	// initialize foundation object
 	pm->foundation = PxCreateFoundation(PX_PHYSICS_VERSION, pm->default_alloc, pm->default_error);
@@ -30,11 +29,6 @@ void physicsmanager_startup(struct physicsmanager* pm)
 	params.meshPreprocessParams = PxMeshPreprocessingFlags(PxMeshPreprocessingFlag::eWELD_VERTICES | PxMeshPreprocessingFlag::eREMOVE_UNREFERENCED_VERTICES | PxMeshPreprocessingFlag::eREMOVE_DUPLICATED_TRIANGLES);
 	pm->cooking = PxCreateCooking(PX_PHYSICS_VERSION, *pm->foundation, params);
 
-	// setup vehicle sdk
-	PxInitVehicleSDK(*pm->sdk);
-	PxVehicleSetBasisVectors(PxVec3(CART_UP), PxVec3(CART_FORWARD));
-	PxVehicleSetUpdateMode(PxVehicleUpdateMode::eVELOCITY_CHANGE);
-
 	// create default material
 	pm->default_material = pm->sdk->createMaterial(0.1f, 0.1f, 0.5f);
 
@@ -44,13 +38,6 @@ void physicsmanager_startup(struct physicsmanager* pm)
 	scenedesc.cpuDispatcher = PxDefaultCpuDispatcherCreate(1);
 	scenedesc.filterShader = PxDefaultSimulationFilterShader;
 	pm->scene = pm->sdk->createScene(scenedesc);
-
-	// initialize vehicle array
-	for (i = 0; i < PHYSICS_MAX_VEHICLES; i++)
-	{
-		pm->vehicles[i].body = NULL;
-		pm->vehicles[i].enabled = false;
-	}
 }
 
 /*	shut down the physics manager
@@ -58,12 +45,6 @@ void physicsmanager_startup(struct physicsmanager* pm)
 */
 void physicsmanager_shutdown(struct physicsmanager* pm)
 {
-	int i;
-
-	for (i = 0; i < PHYSICS_MAX_VEHICLES; i++)
-		if (pm->vehicles[i].enabled)
-			pm->vehicles[i].body->release();
-
 	pm->scene->release();
 	pm->default_material->release();
 
@@ -75,129 +56,14 @@ void physicsmanager_shutdown(struct physicsmanager* pm)
 }
 
 
-static void updatevehicles(struct physicsmanager* pm, float dt)
-{
-	vec3f g_origin, g_dir, force;
-	PxRaycastBuffer hit;
-	PxHitFlags outflags;
-	struct vehicle* v;
-	float vel, d;
-	int i, j;
-
-	(void)dt;
-
-	outflags = PxHitFlag::eDISTANCE;
-	PxQueryFilterData filterData(PxQueryFlag::eSTATIC);
-
-	for (i = 0; i < PHYSICS_MAX_VEHICLES; i++)
-	{
-		if (!pm->vehicles[i].enabled)
-			continue;
-
-		v = pm->vehicles + i;
-		physx::PxMat44 vehicle_world(v->body->getGlobalPose());
-
-		for (j = 0; j < PHYSICS_VEHICLE_RAYCAST_COUNT; j++)
-		{
-			// transform ray into global coordinates
-			mat4f_fulltransformvec3fn(g_origin, v->origins[j], (float*)&vehicle_world);
-			mat4f_transformvec3fn(g_dir, v->dir[j], (float*)&vehicle_world);
-
-			// raycast
-			v->touching[j] = pm->scene->raycast(PxVec3(g_origin[VX], g_origin[VY], g_origin[VZ]), PxVec3(g_dir[VX], g_dir[VY], g_dir[VZ]), PHYSICS_VEHICLE_RAYCAST_MAXDIST, hit, outflags, filterData);
-
-			if (v->touching[j])
-			{
-				d = hit.block.distance;
-
-				// calculate raycast force (quadratic)
-				vec3f_scalen(force, v->dir[j], -PHYSICS_VEHICLE_RAYCAST_MAXFORCE * (d*d/(PHYSICS_VEHICLE_RAYCAST_MAXDIST * PHYSICS_VEHICLE_RAYCAST_MAXDIST) - 2.f*d/PHYSICS_VEHICLE_RAYCAST_MAXDIST + 1.f));
-
-				PxRigidBodyExt::addLocalForceAtLocalPos(*v->body, PxVec3(force[VX], force[VY], force[VZ]), PxVec3(v->origins[j][VX], v->origins[j][VY], v->origins[j][VZ]));
-			}
-		}
-
-		// downward force
-		vel = vehicle_getspeed(v);
-
-		vec3f_set(force, CART_DOWN);
-		vec3f_scale(force, PHYSICS_VEHICLE_DOWNFORCE * fabs(vel));
-
-		PxRigidBodyExt::addLocalForceAtLocalPos(*v->body, PxVec3(force[VX], force[VY], force[VZ]), PxVec3(0.f, 0.f, 0.f));
-	}
-}
-
-
 /*	update the physics simulation
 	param:	pm				physics manager
 	param:	dt				delta time
 */
 void physicsmanager_update(struct physicsmanager* pm, float dt)
 {
-	updatevehicles(pm, dt);
-
 	pm->scene->simulate(dt);
 	pm->scene->fetchResults(true);
-	
-}
-
-
-/*	add a vehicle to the simulation
-	param:	pm				physics manager
-	param:	pos				position of the vehicle
-	param:	dim				dimensions of the bounding box
-	return:	struct vehicle*	pointer to the new vehicle object
-*/
-struct vehicle* physicsmanager_newvehicle(struct physicsmanager* pm, vec3f pos, vec3f dim){
-	struct vehicle* v;
-	int i;
-
-	for (i = 0; i < PHYSICS_MAX_VEHICLES; i++)
-		if (!pm->vehicles[i].enabled)
-			break;
-
-	if (i == PHYSICS_MAX_VEHICLES)
-		return NULL;
-
-	v = pm->vehicles + i;
-
-	v->body = PxCreateDynamic(*pm->sdk, PxTransform(pos[VX], pos[VY], pos[VZ]), PxBoxGeometry(dim[VX], dim[VY], dim[VZ]), *pm->default_material, 1.f);
-	pm->scene->addActor(*v->body);
-
-	// create the raycast origins in "model" space
-	vec3f_set(v->origins[0], -dim[VX] + 0.2f, -dim[VY], -dim[VZ] + 0.2f);
-	vec3f_set(v->origins[1], dim[VX] - 0.2f, -dim[VY], -dim[VZ] + 0.2f);
-	vec3f_set(v->origins[2], -dim[VX] + 0.2f, -dim[VY], dim[VZ] - 0.2f);
-	vec3f_set(v->origins[3], dim[VX] - 0.2f, -dim[VY], dim[VZ] - 0.2f);
-
-	// create the raycast directions in "model" space
-	vec3f_set(v->dir[0], 0.f, -1.f, 0.f);
-	vec3f_set(v->dir[1], 0.f, -1.f, 0.f);
-	vec3f_set(v->dir[2], 0.f, -1.f, 0.f);
-	vec3f_set(v->dir[3], 0.f, -1.f, 0.f);
-
-	v->body->setLinearDamping(PHYSICS_VEHICLE_DAMP_LINEAR);
-	v->body->setAngularDamping(PHYSICS_VEHICLE_DAMP_ANGULAR);
-
-	v->enabled = true;
-
-	return v;
-}
-
-/*	remove a vehicle from the simulation
-	param:	pm				physics manager
-	param:	v				pointer to vehicle object to remove
-*/
-void physicsmanager_removevehicle(struct physicsmanager* pm, struct vehicle* v)
-{
-	int i;
-
-	for (i = 0; i < PHYSICS_MAX_VEHICLES; i++)
-		if (v == pm->vehicles + i)
-		{
-			pm->vehicles[i].body->release();
-			pm->vehicles[i].enabled = false;
-		}
 }
 
 
@@ -265,24 +131,4 @@ void physicsmanager_addstatic_trianglestrip(struct physicsmanager* pm, unsigned 
 	pm->scene->addActor(*obj);
 
 	mem_free(indices);
-}
-
-
-/*	get the speed of a vehicle in the forward direction
-	param:	v				vehicle object
-	return:	float			speed of the vehicle
-*/
-float vehicle_getspeed(struct vehicle* v)
-{
-	vec3f vel, forward;
-
-	PxVec3 velocity = v->body->getLinearVelocity();
-	physx::PxMat44 vehicle_mw(v->body->getGlobalPose());
-
-	vec3f_set(vel, velocity.x, velocity.y, velocity.z);
-
-	vec3f_set(forward, CART_FORWARD);
-	mat4f_transformvec3f(forward, (float*)&vehicle_mw);
-
-	return vec3f_dot(vel, forward);
 }

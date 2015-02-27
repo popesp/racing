@@ -5,7 +5,7 @@
 #include	"../audio/audio.h"
 #include	"input.h"
 #include	"../objects/camera.h"
-#include	"../objects/cart.h"
+#include	"../objects/vehicle.h"
 #include	"../objects/skybox.h"
 #include	"../objects/track.h"
 #include	"../physics/physics.h"
@@ -48,18 +48,16 @@ struct game
 	struct texturemanager texturemanager;
 	struct audiomanager audiomanager;
 
+	struct vehiclemanager vehiclemanager;
+
 	struct skybox skybox;
 	struct track track;
 
 	struct renderable r_vehicle;
+	struct renderable closestpoint; // temp
 
 	struct player player;
 	struct aiplayer aiplayer;
-
-	struct renderable closestpoint; // temp
-
-	struct projectile player_proj;
-	int player_proj_flag;
 
 	struct camera cam_debug;
 

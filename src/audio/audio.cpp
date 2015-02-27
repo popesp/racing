@@ -90,7 +90,7 @@ int audiomanager_newmusic(struct audiomanager* am, const char* filename)
 	{
 		if (!am->music[i].enabled)
 		{
-			FMOD_System_CreateSound(am->system, filename, FMOD_SOFTWARE, 0, &am->music[i].track);
+			FMOD_System_CreateStream(am->system, filename, FMOD_DEFAULT, 0, &am->music[i].track);
 			am->music[i].enabled = true;
 
 			return i;
@@ -113,7 +113,7 @@ int audiomanager_newsfx(struct audiomanager* am, const char* filename)
 	{
 		if (!am->sfx[i].enabled)
 		{
-			FMOD_System_CreateSound(am->system, filename, FMOD_SOFTWARE, 0, &am->sfx[i].track);
+			FMOD_System_CreateSound(am->system, filename, FMOD_DEFAULT, 0, &am->sfx[i].track);
 			am->sfx[i].enabled = true;
 
 			return i;

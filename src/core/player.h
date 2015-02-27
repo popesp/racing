@@ -5,7 +5,7 @@
 #include	"input.h"
 #include	"../math/vec3f.h"
 #include	"../objects/camera.h"
-#include	"../objects/cart.h"
+#include	"../objects/vehicle.h"
 #include	"../objects/track.h"
 #include	"../physics/physics.h"
 
@@ -16,31 +16,28 @@
 
 struct player
 {
-	struct cart cart;
+	struct vehicle* vehicle;
 
 	struct camera camera;
 };
 
 struct aiplayer
 {
-	struct cart cart;
+	struct vehicle* vehicle;
 
 	struct controller controller;
 };
 
 
-void player_init(struct player* p, struct physicsmanager* pm, struct renderable* obj, struct controller* controller, struct track* t, int index_track);
-void aiplayer_init(struct aiplayer* p, struct physicsmanager* pm, struct renderable* obj, struct track* t, int index_track);
+void player_init(struct player* p, struct vehiclemanager* vm, controller* controller, int index_track, vec3f offs);
+void aiplayer_init(struct aiplayer* p, struct vehiclemanager* vm, int index_track, vec3f offs);
 
-void player_delete(struct player* p);
-void aiplayer_delete(struct aiplayer* p);
+void player_delete(struct player* p, struct vehiclemanager* vm);
+void aiplayer_delete(struct aiplayer* p, struct vehiclemanager* vm);
 
 void aiplayer_updateinput(struct aiplayer* p);
 
 void player_updatecamera(struct player* p);
-
-void player_update(struct player* p, struct track* t);
-void aiplayer_update(struct aiplayer* p, struct track* t);
 
 
 #endif

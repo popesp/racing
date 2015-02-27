@@ -22,8 +22,8 @@ static void render(struct game*);
 
 static void resetplayers(struct game* game)
 {
-	cart_reset(&game->player.cart, &game->track);
-	cart_reset(&game->aiplayer.cart, &game->track);
+	vehicle_reset(&game->vehiclemanager, game->player.vehicle);
+	vehicle_reset(&game->vehiclemanager, game->aiplayer.vehicle);
 }
 
 
@@ -136,7 +136,7 @@ static void scroll(GLFWwindow* window, double xoffset, double yoffset)
 
 static void update(struct game* game)
 {
-	vec3f up, move;
+	vec3f move, up;
 
 	// check for callback events
 	glfwPollEvents();
@@ -145,17 +145,18 @@ static void update(struct game* game)
 	inputmanager_update(&game->inputmanager);
 	aiplayer_updateinput(&game->aiplayer);
 
-	vec3f_set(up, 0.f, 1.f, 0.f);
-
 	// temporary debug button
-			if (game->inputmanager.controllers[GLFW_JOYSTICK_1].flags & INPUT_FLAG_ENABLED){
-	if (game->inputmanager.controllers[0].buttons[INPUT_BUTTON_Y] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
-	{
-		if (game->flags & GAME_FLAG_DEBUGCAM)
-			game->flags &= ~GAME_FLAG_DEBUGCAM;
-		else
-			game->flags |= GAME_FLAG_DEBUGCAM;
-	}}
+	if (game->inputmanager.controllers[GLFW_JOYSTICK_1].flags & INPUT_FLAG_ENABLED){
+		if (game->inputmanager.controllers[0].buttons[INPUT_BUTTON_Y] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
+		{
+			if (game->flags & GAME_FLAG_DEBUGCAM)
+				game->flags &= ~GAME_FLAG_DEBUGCAM;
+			else
+				game->flags |= GAME_FLAG_DEBUGCAM;
+		}
+	}
+
+	vec3f_set(up, 0.f, 1.f, 0.f);
 
 	// update debug camera; NOTE: a lot of this is temporarily hard-coded
 	if (game->flags & GAME_FLAG_DEBUGCAM)
@@ -174,39 +175,22 @@ static void update(struct game* game)
 			camera_rotate(&game->cam_debug, game->cam_debug.right, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_UD]);
 		}
 
-		game->player.cart.controller = NULL;
+		// disable cart controls if debug camera is enabled
+		game->player.vehicle->controller = NULL;
 	} else
-	{
-		game->player.cart.controller = &game->inputmanager.controllers[0];
+		game->player.vehicle->controller = &game->inputmanager.controllers[0];
 
-		if (game->player.cart.controller->buttons[0] == 1.0) {
-
-			if (game->player_proj_flag == 1) {
-				projectile_delete(&game->player_proj, &game->physicsmanager);
-			}
-			else {
-				game->player_proj_flag = 1;
-			}
-
-			projectile_init(&game->player_proj, &game->physicsmanager, &game->player);
-			projectile_generatemesh(&game->renderer, &game->player_proj);
-			game->player_proj.r_proj.lights[0] = &game->track_lights[0];
-			renderable_sendbuffer(&game->renderer, &game->player_proj.r_proj);
-		}
-	}
-
-	player_update(&game->player, &game->track);
-	aiplayer_update(&game->aiplayer, &game->track);
-
+	// update the vehicles
+	vehiclemanager_update(&game->vehiclemanager);
 
 	// set closest point
-	vec3f_copy(game->closestpoint.buf_verts, game->track.searchpoints[game->player.cart.index_track]);
+	vec3f_copy(game->closestpoint.buf_verts, game->track.pathpoints[game->player.vehicle->index_track]);
 	vec3f_set(game->closestpoint.buf_verts + 3, 1.f, 0.f, 0.f);
-	vec3f_copy(game->closestpoint.buf_verts + 6, game->player.cart.pos);
+	vec3f_copy(game->closestpoint.buf_verts + 6, game->player.vehicle->pos);
 	vec3f_set(game->closestpoint.buf_verts + 9, 1.f, 0.f, 0.f);
 	renderable_sendbuffer(&game->renderer, &game->closestpoint);
 
-	printf("%d/%d\n", game->player.cart.index_track, game->track.num_searchpoints);
+	printf("%d/%d\n", game->player.vehicle->index_track, game->track.num_pathpoints);
 
 	player_updatecamera(&game->player);
 
@@ -221,8 +205,8 @@ static void update(struct game* game)
 static void render(struct game* game)
 {
 	mat4f global_wv, skybox_wv, track_mw, skybox_mw;
-	physx::PxMat44 player_world(game->player.cart.vehicle->body->getGlobalPose());
-	physx::PxMat44 otherguy_world(game->aiplayer.cart.vehicle->body->getGlobalPose());
+	physx::PxMat44 player_world(game->player.vehicle->body->getGlobalPose());
+	physx::PxMat44 otherguy_world(game->aiplayer.vehicle->body->getGlobalPose());
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -248,14 +232,14 @@ static void render(struct game* game)
 	renderable_render(&game->renderer, &game->track.r_track, track_mw, global_wv, 0);
 
 	// render carts
-	renderable_render(&game->renderer, game->player.cart.renderable, (float*)&player_world, global_wv, 0);
-	renderable_render(&game->renderer, game->aiplayer.cart.renderable, (float*)&otherguy_world, global_wv, 0);
-
+	renderable_render(&game->renderer, &game->vehiclemanager.r_vehicle, (float*)&player_world, global_wv, 0);
+	renderable_render(&game->renderer, &game->vehiclemanager.r_vehicle, (float*)&otherguy_world, global_wv, 0);
+	/*
 	if (game->player_proj_flag == 1) {
 		physx::PxMat44 player_proj_world(game->player_proj.proj->getGlobalPose());
 		renderable_render(&game->renderer, &game->player_proj.r_proj, (float*)&player_proj_world, global_wv, 0);
 	}
-
+	*/
 	glClear(GL_DEPTH_BUFFER_BIT);
 	renderable_render(&game->renderer, &game->closestpoint, track_mw, global_wv, 0);
 
@@ -367,7 +351,7 @@ static int start_subsystems(struct game* game)
 
 int game_startup(struct game* game)
 {
-	vec3f up, dir, pos;
+	vec3f up, dir, pos, offs;
 
 	vec3f_set(up, 0.f, 1.f, 0.f);
 
@@ -391,21 +375,16 @@ int game_startup(struct game* game)
 	// send track mesh to physX
 	physicsmanager_addstatic_trianglestrip(&game->physicsmanager, game->track.r_track.num_verts, sizeof(float)*RENDER_VERTSIZE_BUMP_L, game->track.r_track.buf_verts);
 	
-	// initialize vehicle mesh
-	renderable_init(&game->r_vehicle, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
-	objloader_load("res/models/car/car.obj", &game->renderer, &game->r_vehicle);
-	renderable_sendbuffer(&game->renderer, &game->r_vehicle);
-	game->tex_vehicle = texturemanager_newtexture(&game->texturemanager);
-	texture_loadfile(&game->texturemanager, game->tex_vehicle, "res/models/car/outUV.jpg");
-	texture_upload(&game->texturemanager, game->tex_vehicle, RENDER_TEXTURE_DIFFUSE);
-	game->r_vehicle.texture_ids[RENDER_TEXTURE_DIFFUSE] = game->tex_vehicle;
+	// start up the vehicle manager for the track
+	vehiclemanager_startup(&game->vehiclemanager, &game->renderer, &game->texturemanager, &game->physicsmanager, &game->track, "res/models/car/car.obj", "res/models/car/outUV.jpg");
 
 	// initialize player objects
+	vec3f_set(offs, 0.f, 0.f, 0.f);
 	if (game->inputmanager.controllers[0].flags & INPUT_FLAG_ENABLED)
-		player_init(&game->player, &game->physicsmanager, &game->r_vehicle, &game->inputmanager.controllers[0], &game->track, 0);
+		player_init(&game->player, &game->vehiclemanager, &game->inputmanager.controllers[0], 0, offs);
 	else
-		player_init(&game->player, &game->physicsmanager, &game->r_vehicle, &game->inputmanager.keyboard, &game->track, 0);
-	aiplayer_init(&game->aiplayer, &game->physicsmanager, &game->r_vehicle, &game->track, 5);
+		player_init(&game->player, &game->vehiclemanager, &game->inputmanager.keyboard, 0, offs);
+	aiplayer_init(&game->aiplayer, &game->vehiclemanager, 5, offs);
 
 	// initialize debug camera
 	vec3f_set(pos, 0.f, 0.f, -30.f);
@@ -425,10 +404,8 @@ int game_startup(struct game* game)
 	// TODO: need a better way to do this without manually setting it
 	game->track.r_track.lights[0] = game->track_lights + 0;
 	game->track.r_track.lights[1] = game->track_lights + 1;
-	game->player.cart.renderable->lights[0] = game->track_lights + 0;
-	game->player.cart.renderable->lights[1] = game->track_lights + 1;
-	game->aiplayer.cart.renderable->lights[0] = game->track_lights + 0;
-	game->aiplayer.cart.renderable->lights[1] = game->track_lights + 1;
+	game->vehiclemanager.r_vehicle.lights[0] = game->track_lights + 0;
+	game->vehiclemanager.r_vehicle.lights[1] = game->track_lights + 1;
 	
 	// track normal map
 	game->tex_trackbump = texturemanager_newtexture(&game->texturemanager);
@@ -496,8 +473,8 @@ void game_mainloop(struct game* game)
 void game_shutdown(struct game* game)
 {
 	// delete players
-	player_delete(&game->player);
-	aiplayer_delete(&game->aiplayer);
+	player_delete(&game->player, &game->vehiclemanager);
+	aiplayer_delete(&game->aiplayer, &game->vehiclemanager);
 
 	// delete world objects
 	track_delete(&game->track);

@@ -17,14 +17,14 @@ static void resetcontroller(struct aiplayer* p)
 }
 
 
-void player_init(struct player* p, struct physicsmanager* pm, struct renderable* obj, struct controller* controller, struct track* t, int index_track)
+void player_init(struct player* p, struct vehiclemanager* vm, controller* controller, int index_track, vec3f offs)
 {
 	vec3f zero, up;
 
-	// initialize cart
-	cart_init(&p->cart, pm, obj, t, index_track);
+	// initialize vehicle
+	p->vehicle = vehiclemanager_newvehicle(vm, index_track, offs);
 
-	p->cart.controller = controller;
+	p->vehicle->controller = controller;
 
 	vec3f_set(zero, 0.f, 0.f, 0.f);
 	vec3f_set(up, 0.f, 1.f, 0.f);
@@ -32,10 +32,10 @@ void player_init(struct player* p, struct physicsmanager* pm, struct renderable*
 	camera_init(&p->camera, zero, zero, up);
 }
 
-void aiplayer_init(struct aiplayer* p, struct physicsmanager* pm, struct renderable* obj, struct track* t, int index_track)
+void aiplayer_init(struct aiplayer* p, struct vehiclemanager* vm, int index_track, vec3f offs)
 {
-	// initialize cart
-	cart_init(&p->cart, pm, obj, t, index_track);
+	// initialize vehicle
+	p->vehicle = vehiclemanager_newvehicle(vm, index_track, offs);
 
 	p->controller.flags = INPUT_FLAG_ENABLED;
 
@@ -46,20 +46,20 @@ void aiplayer_init(struct aiplayer* p, struct physicsmanager* pm, struct rendera
 	p->controller.axes = (float*)mem_alloc(sizeof(float) * INPUT_CONTROLLER_AXES);
 
 	// connect controller to the cart
-	p->cart.controller = &p->controller;
+	p->vehicle->controller = &p->controller;
 
 	resetcontroller(p);
 }
 
 
-void player_delete(struct player* p)
+void player_delete(struct player* p, struct vehiclemanager* vm)
 {
-	cart_delete(&p->cart);
+	vehiclemanager_removevehicle(vm, p->vehicle);
 }
 
-void aiplayer_delete(struct aiplayer* p)
+void aiplayer_delete(struct aiplayer* p, struct vehiclemanager* vm)
 {
-	cart_delete(&p->cart);
+	vehiclemanager_removevehicle(vm, p->vehicle);
 
 	mem_free(p->controller.buttons);
 	mem_free(p->controller.axes);
@@ -78,7 +78,7 @@ void player_updatecamera(struct player* p)
 {
 	vec3f diff, up;
 
-	physx::PxMat44 t_player(p->cart.vehicle->body->getGlobalPose());
+	physx::PxMat44 t_player(p->vehicle->body->getGlobalPose());
 	physx::PxVec3 targetpos = t_player.transform(physx::PxVec3(PLAYER_CAMERA_TARGETPOS));
 
 	vec3f_subtractn(diff, (float*)&targetpos, p->camera.pos);
@@ -87,15 +87,4 @@ void player_updatecamera(struct player* p)
 
 	vec3f_set(up, 0.f, 1.f, 0.f);
 	camera_lookat(&p->camera, (float*)&t_player.getPosition(), up);
-}
-
-
-void player_update(struct player* p, struct track* t)
-{
-	cart_update(&p->cart, t);
-}
-
-void aiplayer_update(struct aiplayer* p, struct track* t)
-{
-	cart_update(&p->cart, t);
 }

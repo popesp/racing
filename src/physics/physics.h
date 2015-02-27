@@ -8,29 +8,6 @@
 
 #define	PHYSICS_DEFAULT_GRAVITY				0.f, -10.f, 0.f
 
-#define	PHYSICS_MAX_VEHICLES				16
-
-#define	PHYSICS_VEHICLE_RAYCAST_COUNT		4
-#define	PHYSICS_VEHICLE_RAYCAST_MAXDIST		1.f
-#define	PHYSICS_VEHICLE_RAYCAST_MAXFORCE	20.f
-
-#define	PHYSICS_VEHICLE_DOWNFORCE			0.2f
-
-#define	PHYSICS_VEHICLE_DAMP_LINEAR			0.6f
-#define	PHYSICS_VEHICLE_DAMP_ANGULAR		5.f
-
-
-struct vehicle
-{
-	physx::PxRigidDynamic* body;
-
-	vec3f origins[PHYSICS_VEHICLE_RAYCAST_COUNT];
-	vec3f dir[PHYSICS_VEHICLE_RAYCAST_COUNT];
-
-	bool touching[PHYSICS_VEHICLE_RAYCAST_COUNT];
-
-	bool enabled;
-};
 
 struct physicsmanager
 {
@@ -43,8 +20,6 @@ struct physicsmanager
 	physx::PxMaterial* default_material;
 
 	physx::PxScene* scene;
-
-	struct vehicle vehicles[PHYSICS_MAX_VEHICLES];
 };
 
 
@@ -66,21 +41,6 @@ void physicsmanager_shutdown(struct physicsmanager* pm);
 void physicsmanager_update(struct physicsmanager* pm, float dt);
 
 
-/*	add a vehicle to the simulation
-	param:	pm				physics manager
-	param:	pos				position of the vehicle
-	param:	dim				dimensions of the bounding box
-	return:	struct vehicle*	pointer to the new vehicle object
-*/
-struct vehicle* physicsmanager_newvehicle(struct physicsmanager* pm, vec3f pos, vec3f dim);
-
-/*	remove a vehicle from the simulation
-	param:	pm				physics manager
-	param:	v				pointer to vehicle object to remove
-*/
-void physicsmanager_removevehicle(struct physicsmanager* pm, struct vehicle* v);
-
-
 /*	probably temporary	*/
 physx::PxRigidDynamic* physics_adddynamic_box(struct physicsmanager*, vec3f, vec3f);
 
@@ -91,13 +51,6 @@ physx::PxRigidDynamic* physics_adddynamic_box(struct physicsmanager*, vec3f, vec
 	param:	buf_verts		vertex buffer
 */
 void physicsmanager_addstatic_trianglestrip(struct physicsmanager* pm, unsigned num_verts, unsigned stride, float* buf_verts);
-
-
-/*	get the speed of a vehicle in the forward direction
-	param:	v				vehicle object
-	return:	float			speed of the vehicle
-*/
-float vehicle_getspeed(struct vehicle* v);
 
 
 #endif

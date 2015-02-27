@@ -32,8 +32,8 @@ void track_init(struct track* t, vec3f up, struct physicsmanager* pm)
 	t->num_points = 0;
 	t->points = NULL;
 
-	t->num_searchpoints = 0;
-	t->searchpoints = NULL;
+	t->num_pathpoints = 0;
+	t->pathpoints = NULL;
 
 	t->p_track = NULL;
 
@@ -55,7 +55,7 @@ void track_init(struct track* t, vec3f up, struct physicsmanager* pm)
 void track_delete(struct track* t)
 {
 	mem_free(t->points);
-	mem_free(t->searchpoints);
+	mem_free(t->pathpoints);
 
 	renderable_deallocate(&t->r_track);
 }
@@ -81,24 +81,24 @@ int track_closestindex(struct track* t, vec3f pos, int last)
 	if (i < 0)
 	{
 		if (t->flags & TRACK_FLAG_LOOPED)
-			i += t->num_searchpoints;
+			i += t->num_pathpoints;
 		else
 			i = 0;
 	}
 
 	// find ending index
 	e = last + TRACK_SEARCHSIZE;
-	if (e >= (int)t->num_searchpoints)
+	if (e >= (int)t->num_pathpoints)
 	{
 		if (t->flags & TRACK_FLAG_LOOPED)
-			e -= t->num_searchpoints;
+			e -= t->num_pathpoints;
 		else
-			e = (int)t->num_searchpoints - 1;
+			e = (int)t->num_pathpoints - 1;
 	}
 
 	while (i != e)
 	{
-		vec3f_subtractn(diff, pos, t->searchpoints[i]);
+		vec3f_subtractn(diff, pos, t->pathpoints[i]);
 		d = vec3f_length(diff);
 
 		if (d < least)
@@ -107,7 +107,7 @@ int track_closestindex(struct track* t, vec3f pos, int last)
 			l = i;
 		}
 
-		i = (i+1) % (int)t->num_searchpoints;
+		i = (i+1) % (int)t->num_pathpoints;
 	}
 
 	return l;
@@ -375,8 +375,8 @@ void track_generate(struct renderer* r, struct track* t)
 	renderable_allocate(r, &t->r_track, 2 * ((2 * TRACK_SEGMENT_VERTCOUNT - 1)*s + 2 * (TRACK_SEGMENT_VERTCOUNT - 1)));
 
 	// allocate space for the search points (underlying track spline, independent from rendered/physical mesh)
-	t->num_searchpoints = n * (TRACK_SEARCHDIVIDE + 1);
-	t->searchpoints = (vec3f*)mem_calloc(t->num_searchpoints, sizeof(vec3f));
+	t->num_pathpoints = n * (TRACK_SEARCHDIVIDE + 1);
+	t->pathpoints = (vec3f*)mem_calloc(t->num_pathpoints, sizeof(vec3f));
 
 	// temporary vertex buffer
 	verts = (float*)mem_calloc(2 * (2 * TRACK_SEGMENT_VERTCOUNT - 1)*s, RENDER_VERTSIZE_BUMP_L * sizeof(float));
@@ -400,7 +400,7 @@ void track_generate(struct renderer* r, struct track* t)
 		for (j = 0, d = 0.f; j < TRACK_SEARCHDIVIDE + 1; j++, d += 1.f / (float)(TRACK_SEARCHDIVIDE + 1))
 		{
 			curvepoint(t, i, d, &p);
-			vec3f_copy(t->searchpoints[i*(TRACK_SEARCHDIVIDE+1) + j], p.pos);
+			vec3f_copy(t->pathpoints[i*(TRACK_SEARCHDIVIDE+1) + j], p.pos);
 		}
 	}
 
