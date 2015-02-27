@@ -68,15 +68,33 @@ void track_delete(struct track* t)
 int track_closestindex(struct track* t, vec3f pos, int last)
 {
 	float d, least;
+	int i, l, e;
 	vec3f diff;
-	int i, l;
 
 	least = FLT_MAX;
 	l = last;
 
-	// search through nearby track points
-	i = (last - TRACK_SEARCHSIZE) % t->num_searchpoints;
-	while (i != (last + TRACK_SEARCHSIZE) % t->num_searchpoints)
+	// find starting index
+	i = last - TRACK_SEARCHSIZE;
+	if (i < 0)
+	{
+		if (t->flags & TRACK_FLAG_LOOPED)
+			i += t->num_searchpoints;
+		else
+			i = 0;
+	}
+
+	// find ending index
+	e = last + TRACK_SEARCHSIZE;
+	if (e >= t->num_searchpoints)
+	{
+		if (t->flags & TRACK_FLAG_LOOPED)
+			e -= t->num_searchpoints;
+		else
+			e = t->num_searchpoints - 1;
+	}
+
+	while (i != e)
 	{
 		vec3f_subtractn(diff, pos, t->searchpoints[i]);
 		d = vec3f_length(diff);
@@ -87,7 +105,7 @@ int track_closestindex(struct track* t, vec3f pos, int last)
 			l = i;
 		}
 
-		i = (i + 1) % t->num_searchpoints;
+		i = (i+1) % t->num_searchpoints;
 	}
 
 	return l;
@@ -380,7 +398,7 @@ void track_generate(struct renderer* r, struct track* t)
 		for (j = 0, d = 0.f; j < TRACK_SEARCHDIVIDE + 1; j++, d += 1.f / (float)(TRACK_SEARCHDIVIDE + 1))
 		{
 			curvepoint(t, i, d, &p);
-			vec3f_copy(t->searchpoints[i*n + j], p.pos);
+			vec3f_copy(t->searchpoints[i*(TRACK_SEARCHDIVIDE+1) + j], p.pos);
 		}
 	}
 

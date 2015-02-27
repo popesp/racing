@@ -11,8 +11,10 @@
 #define	PHYSICS_MAX_VEHICLES				16
 
 #define	PHYSICS_VEHICLE_RAYCAST_COUNT		4
-#define	PHYSICS_VEHICLE_RAYCAST_MAXDIST		0.6f
-#define	PHYSICS_VEHICLE_RAYCAST_MAXFORCE	10.f
+#define	PHYSICS_VEHICLE_RAYCAST_MAXDIST		1.f
+#define	PHYSICS_VEHICLE_RAYCAST_MAXFORCE	20.f
+
+#define	PHYSICS_VEHICLE_DOWNFORCE			0.2f
 
 #define	PHYSICS_VEHICLE_DAMP_LINEAR			0.6f
 #define	PHYSICS_VEHICLE_DAMP_ANGULAR		5.f
@@ -89,6 +91,13 @@ physx::PxRigidDynamic* physics_adddynamic_box(struct physicsmanager*, vec3f, vec
 	param:	buf_verts		vertex buffer
 */
 void physicsmanager_addstatic_trianglestrip(struct physicsmanager* pm, unsigned num_verts, unsigned stride, float* buf_verts);
+
+
+/*	get the speed of a vehicle in the forward direction
+	param:	v				vehicle object
+	return:	float			speed of the vehicle
+*/
+float vehicle_getspeed(struct vehicle* v);
 
 
 #endif

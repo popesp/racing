@@ -78,6 +78,7 @@ void cart_delete(struct cart* c)
 void cart_update(struct cart* c)
 {
 	vec3f force;
+	float vel;
 
 	if (c->controller != NULL && c->controller->flags & INPUT_FLAG_ENABLED)
 	{
@@ -96,17 +97,14 @@ void cart_update(struct cart* c)
 			}
 
 		// turning force
+		vel = vehicle_getspeed(c->vehicle);
+
 		vec3f_set(force, CART_RIGHT);
-		PxVec3 velocity = PxRigidBodyExt::getLocalVelocityAtLocalPos(*c->vehicle->body, PxVec3(0.f, 0.f, 0.f));
+		vec3f_scale(force, CART_FORCE_TURN * c->controller->axes[INPUT_AXIS_LEFT_LR]);
 
-		if ((c->controller->axes[INPUT_AXIS_TRIGGERS] > 0)){// || ((float)velocity.z > 0)){
-			//printf("local velocity z: %d\n",velocity.z);
-			vec3f_scale(force, -CART_FORCE_TURN * c->controller->axes[INPUT_AXIS_LEFT_LR]);
-		}
-		else
-			vec3f_scale(force, CART_FORCE_TURN * c->controller->axes[INPUT_AXIS_LEFT_LR]);
+		if (c->controller->axes[INPUT_AXIS_TRIGGERS] > 0.1f && vel < 0.f)
+			vec3f_negate(force);
 		
-
 		physx::PxRigidBodyExt::addLocalForceAtLocalPos(*c->vehicle->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, -CART_LENGTH/2.f));
 	}
 }

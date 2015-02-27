@@ -78,7 +78,7 @@ void aiplayer_updateinput(struct aiplayer* p)
 {
 	resetcontroller(p);
 
-	p->controller.axes[INPUT_AXIS_TRIGGERS] = 1.f;
+	p->controller.axes[INPUT_AXIS_TRIGGERS] = -1.f;
 }
 
 

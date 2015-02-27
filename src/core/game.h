@@ -16,12 +16,12 @@
 #include	"../objects/powerup.h"
 
 
-#define	GAME_DEFAULT_WIDTH		600
-#define	GAME_DEFAULT_HEIGHT		400
-#define	GAME_DEFAULT_X			400
-#define	GAME_DEFAULT_Y			400
+#define	GAME_DEFAULT_WIDTH		1280
+#define	GAME_DEFAULT_HEIGHT		800
+#define	GAME_DEFAULT_X			200
+#define	GAME_DEFAULT_Y			200
 
-#define	GAME_TITLE				"Twisted Steel"
+#define	GAME_TITLE				"Warped Steel"
 
 #define	GAME_UPS				60.f
 #define	GAME_SPU				1.f/GAME_UPS
@@ -30,8 +30,8 @@
 
 #define	GAME_POINTSIZE			10.f
 
-#define	GAME_STARTINGPOS		20.f, 1.5f, 100.f // TEMP
-#define	GAME_AISTARTINGPOS		20.f, 1.5f, 80.f // TEMP
+#define	GAME_STARTINGPOS		-20.f, 1.5f, 0.f // TEMP
+#define	GAME_AISTARTINGPOS		-20.f, 1.5f, -20.f // TEMP
 
 #define	GAME_FLAG_INIT			0x00
 #define	GAME_FLAG_TERMINATED	0x01
@@ -53,6 +53,8 @@ struct game
 
 	struct player player;
 	struct aiplayer aiplayer;
+
+	struct renderable closestpoint; // temp
 
 	struct projectile player_proj;
 	int player_proj_flag;

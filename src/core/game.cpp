@@ -61,7 +61,7 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 
 			//pause music
 		case GLFW_KEY_P:
-			audiomanager_togglemusic(&game->audiomanager,0);
+			audiomanager_togglemusic(&game->audiomanager, game->bgm_test);
 			break;
 
 
@@ -198,6 +198,14 @@ static void update(struct game* game)
 
 	aiplayer_update(&game->aiplayer, &game->track);
 
+
+	// set closest point
+	vec3f_copy(game->closestpoint.buf_verts, game->track.searchpoints[game->player.index_track]);
+	vec3f_set(game->closestpoint.buf_verts + 3, 1.f, 0.f, 0.f);
+	renderable_sendbuffer(&game->renderer, &game->closestpoint);
+
+	printf("%d/%d\n", game->player.index_track, game->track.num_searchpoints);
+
 	player_updatecamera(&game->player);
 
 	// simulate
@@ -245,6 +253,10 @@ static void render(struct game* game)
 		physx::PxMat44 player_proj_world(game->player_proj.proj->getGlobalPose());
 		renderable_render(&game->renderer, &game->player_proj.r_proj, (float*)&player_proj_world, global_wv, 0);
 	}
+
+	glClear(GL_DEPTH_BUFFER_BIT);
+	renderable_render(&game->renderer, &game->closestpoint, track_mw, global_wv, 0);
+
 
 	glfwSwapBuffers(game->window.w);
 }
@@ -419,6 +431,11 @@ int game_startup(struct game* game)
 	game->bgm_test = audiomanager_newmusic(&game->audiomanager, "res/music/07.-dialed-in.mp3");
 	audiomanager_playmusic(&game->audiomanager, game->bgm_test, -1);
 	
+	/* temp */
+	renderable_init(&game->closestpoint, RENDER_MODE_POINTS, RENDER_TYPE_WIRE_S, RENDER_FLAG_DYNAMIC);
+	renderable_allocate(&game->renderer, &game->closestpoint, 1);
+	/* end temp */
+
 	game->flags = GAME_FLAG_INIT;
 
 	return 1;

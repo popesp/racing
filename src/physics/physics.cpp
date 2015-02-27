@@ -77,11 +77,11 @@ void physicsmanager_shutdown(struct physicsmanager* pm)
 
 static void updatevehicles(struct physicsmanager* pm, float dt)
 {
-	vec3f g_origin, g_dir, vel, forward;
+	vec3f g_origin, g_dir, force;
 	PxRaycastBuffer hit;
 	PxHitFlags outflags;
 	struct vehicle* v;
-	PxVec3 velocity;
+	float vel, d;
 	int i, j;
 
 	(void)dt;
@@ -108,9 +108,6 @@ static void updatevehicles(struct physicsmanager* pm, float dt)
 
 			if (v->touching[j])
 			{
-				vec3f force;
-				float d;
-
 				d = hit.block.distance;
 
 				// calculate raycast force (quadratic)
@@ -120,13 +117,13 @@ static void updatevehicles(struct physicsmanager* pm, float dt)
 			}
 		}
 
-		velocity = v->body->getLinearVelocity();
-		vec3f_set(vel, velocity.x, velocity.y, velocity.z);
+		// downward force
+		vel = vehicle_getspeed(v);
 
-		vec3f_set(forward, CART_FORWARD);
-		mat4f_transformvec3f(forward, (float*)&vehicle_world);
+		vec3f_set(force, CART_DOWN);
+		vec3f_scale(force, PHYSICS_VEHICLE_DOWNFORCE * fabs(vel));
 
-		//printf("Forward Velocity: %f\n", vec3f_dot(forward, vel));
+		PxRigidBodyExt::addLocalForceAtLocalPos(*v->body, PxVec3(force[VX], force[VY], force[VZ]), PxVec3(0.f, 0.f, 0.f));
 	}
 }
 
@@ -268,4 +265,24 @@ void physicsmanager_addstatic_trianglestrip(struct physicsmanager* pm, unsigned 
 	pm->scene->addActor(*obj);
 
 	mem_free(indices);
+}
+
+
+/*	get the speed of a vehicle in the forward direction
+	param:	v				vehicle object
+	return:	float			speed of the vehicle
+*/
+float vehicle_getspeed(struct vehicle* v)
+{
+	vec3f vel, forward;
+
+	PxVec3 velocity = v->body->getLinearVelocity();
+	physx::PxMat44 vehicle_mw(v->body->getGlobalPose());
+
+	vec3f_set(vel, velocity.x, velocity.y, velocity.z);
+
+	vec3f_set(forward, CART_FORWARD);
+	mat4f_transformvec3f(forward, (float*)&vehicle_mw);
+
+	return vec3f_dot(vel, forward);
 }
