@@ -111,6 +111,9 @@ void renderable_init(struct renderable* obj, unsigned char mode, unsigned char t
 	for (i = 0; i < RENDER_TEXTURE_TYPES; i++)
 		obj->texture_ids[i] = 0;
 
+	// set model transformation to the identity
+	mat4f_identity(obj->matrix_model);
+
 	obj->flags = flags;
 	obj->type = type;
 }
@@ -170,6 +173,9 @@ void renderable_render(struct renderer* r, struct renderable* obj, mat4f modelwo
 
 	glUseProgram(r->shader[obj->type]);
 	glBindVertexArray(obj->id_gl_vao);
+
+	// multiply by object model matrix
+	mat4f_multiply(modelworld, obj->matrix_model);
 
 	// calculate inverse model-world
 	mat4f_invertn(inverse_mw, modelworld);

@@ -34,6 +34,7 @@ void track_init(struct track* t, vec3f up, struct physicsmanager* pm)
 
 	t->num_pathpoints = 0;
 	t->pathpoints = NULL;
+	t->pathangles = NULL;
 
 	t->p_track = NULL;
 
@@ -377,6 +378,7 @@ void track_generate(struct renderer* r, struct track* t)
 	// allocate space for the search points (underlying track spline, independent from rendered/physical mesh)
 	t->num_pathpoints = n * (TRACK_SEARCHDIVIDE + 1);
 	t->pathpoints = (vec3f*)mem_calloc(t->num_pathpoints, sizeof(vec3f));
+	t->pathangles = (float*)mem_calloc(t->num_pathpoints, sizeof(float));
 
 	// temporary vertex buffer
 	verts = (float*)mem_calloc(2 * (2 * TRACK_SEGMENT_VERTCOUNT - 1)*s, RENDER_VERTSIZE_BUMP_L * sizeof(float));
@@ -401,6 +403,7 @@ void track_generate(struct renderer* r, struct track* t)
 		{
 			curvepoint(t, i, d, &p);
 			vec3f_copy(t->pathpoints[i*(TRACK_SEARCHDIVIDE+1) + j], p.pos);
+			t->pathangles[i*(TRACK_SEARCHDIVIDE+1) + j] = p.angle;
 		}
 	}
 

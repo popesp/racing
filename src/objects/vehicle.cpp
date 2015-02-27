@@ -1,5 +1,6 @@
 #include	"vehicle.h"
 
+#include	<float.h>
 #include	"../render/objloader.h"
 #include	"../render/texture.h"
 
@@ -15,7 +16,9 @@
 */
 void vehiclemanager_startup(struct vehiclemanager* vm, struct renderer* r, struct texturemanager* tm, struct physicsmanager* pm, struct track* t, const char* mesh_filename, const char* tex_filename)
 {
+	vec3f min, max, avg, diff, dim;
 	struct vehicle* v;
+	float scale;
 	int i;
 
 	vm->pm = pm;
@@ -26,6 +29,54 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct renderer* r, struc
 	renderable_init(&vm->r_vehicle, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
 	objloader_load(mesh_filename, r, &vm->r_vehicle);
 	renderable_sendbuffer(r, &vm->r_vehicle);
+
+	// find the limits of the loaded mesh
+	vec3f_set(min, FLT_MAX, FLT_MAX, FLT_MAX);
+	vec3f_set(max, -FLT_MAX, -FLT_MAX, -FLT_MAX);
+	for (i = 0; i < vm->r_vehicle.num_verts; i++)
+	{
+		vec3f temp;
+
+		// retrieve vertex from buffer
+		vec3f_copy(temp, vm->r_vehicle.buf_verts + i*r->vertsize[vm->r_vehicle.type]);
+
+		// check for min and max vector positions
+		if (temp[VX] < min[VX])
+			min[VX] = temp[VX];
+		if (temp[VX] > max[VX])
+			max[VX] = temp[VX];
+
+		if (temp[VY] < min[VY])
+			min[VY] = temp[VY];
+		if (temp[VY] > max[VY])
+			max[VY] = temp[VY];
+
+		if (temp[VZ] < min[VZ])
+			min[VZ] = temp[VZ];
+		if (temp[VZ] > max[VZ])
+			max[VZ] = temp[VZ];
+	}
+
+	// find center point of model
+	vec3f_addn(avg, min, max);
+	vec3f_scale(avg, 0.5f);
+
+	// find scale ratios for each dimension
+	vec3f_subtractn(diff, max, min);
+	vec3f_set(dim, VEHICLE_WIDTH / diff[VX], VEHICLE_HEIGHT / diff[VY], VEHICLE_LENGTH / diff[VZ]);
+	
+	printf("%f, %f, %f\n", diff[VX], diff[VY], diff[VZ]);
+
+	// find smallest ratio
+	scale = dim[VX];
+	if (dim[VY] < scale)
+		scale = dim[VY];
+	if (dim[VZ] < scale)
+		scale = dim[VZ];
+
+	mat4f_scalemul(vm->r_vehicle.matrix_model, scale, scale, scale);
+	mat4f_rotateymul(vm->r_vehicle.matrix_model, -1.57080f);
+	mat4f_translatemul(vm->r_vehicle.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
 
 	// initialize vehicle texture
 	vm->tex_diffuse = texturemanager_newtexture(tm);

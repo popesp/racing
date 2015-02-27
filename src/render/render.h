@@ -114,6 +114,8 @@ struct renderable
 
 	int texture_ids[RENDER_TEXTURE_TYPES];
 
+	mat4f matrix_model;
+
 	unsigned char flags;
 	unsigned char type;
 };

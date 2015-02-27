@@ -190,8 +190,6 @@ static void update(struct game* game)
 	vec3f_set(game->closestpoint.buf_verts + 9, 1.f, 0.f, 0.f);
 	renderable_sendbuffer(&game->renderer, &game->closestpoint);
 
-	printf("%d/%d\n", game->player.vehicle->index_track, game->track.num_pathpoints);
-
 	player_updatecamera(&game->player);
 
 	// simulate

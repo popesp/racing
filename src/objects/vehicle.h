@@ -23,9 +23,9 @@
 #define	VEHICLE_RAYCAST_MAXDIST		1.f
 #define	VEHICLE_RAYCAST_MAXFORCE	20.f
 
-#define	VEHICLE_WIDTH				1.2f
-#define	VEHICLE_HEIGHT				0.6f
-#define	VEHICLE_LENGTH				2.f
+#define	VEHICLE_WIDTH				2.8f
+#define	VEHICLE_HEIGHT				0.4f
+#define	VEHICLE_LENGTH				1.2f
 
 #define	VEHICLE_SPAWNHEIGHT			1.5f
 
@@ -35,7 +35,7 @@
 #define	VEHICLE_RIGHT				1.f, 0.f, 0.f
 
 #define	VEHICLE_ACCELERATION		40.f
-#define	VEHICLE_TURNFORCE			5.f
+#define	VEHICLE_TURNFORCE			10.f
 #define	VEHICLE_DOWNFORCE			0.2f
 
 #define	VEHICLE_DAMP_LINEAR			0.6f

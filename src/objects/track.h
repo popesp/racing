@@ -40,6 +40,7 @@ struct track
 
 	unsigned num_pathpoints;
 	vec3f* pathpoints;
+	float* pathangles;
 
 	physx::PxRigidStatic* p_track;
 
