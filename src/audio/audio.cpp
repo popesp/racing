@@ -6,12 +6,6 @@
 //#include	"string.h"
 
 
-static void ERRCHECK(FMOD_RESULT result)
-{
-	if (result != FMOD_OK)
-		printf("FMOD error! (%d) %s\n", result, FMOD_ErrorString(result));
-}
-
 static void resetsound(struct sound* s)
 {
 	s->track = NULL;
@@ -90,15 +84,13 @@ unsigned audiomanager_getlibversion(struct audiomanager* am)
 */
 int audiomanager_newmusic(struct audiomanager* am, const char* filename)
 {
-	FMOD_RESULT result;
 	int i;
 
 	for (i = 0; i < AUDIO_MAX_MUSIC; i++)
 	{
 		if (!am->music[i].enabled)
 		{
-			result = FMOD_System_CreateSound(am->system, filename, FMOD_SOFTWARE, 0, &am->music[i].track);
-			ERRCHECK(result);
+			FMOD_System_CreateSound(am->system, filename, FMOD_SOFTWARE, 0, &am->music[i].track);
 			am->music[i].enabled = true;
 
 			return i;
@@ -115,15 +107,13 @@ int audiomanager_newmusic(struct audiomanager* am, const char* filename)
 */
 int audiomanager_newsfx(struct audiomanager* am, const char* filename)
 {
-	FMOD_RESULT result;
 	int i;
 
 	for (i = 0; i < AUDIO_MAX_SFX; i++)
 	{
 		if (!am->sfx[i].enabled)
 		{
-			result = FMOD_System_CreateSound(am->system, filename, FMOD_SOFTWARE, 0, &am->sfx[i].track);
-			ERRCHECK(result);
+			FMOD_System_CreateSound(am->system, filename, FMOD_SOFTWARE, 0, &am->sfx[i].track);
 			am->sfx[i].enabled = true;
 
 			return i;

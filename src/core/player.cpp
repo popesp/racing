@@ -17,18 +17,16 @@ static void resetcontroller(struct aiplayer* p)
 }
 
 
-void player_init(struct player* p, struct physicsmanager* pm, struct renderer* r, struct controller* controller, vec3f pos)
+void player_init(struct player* p, struct physicsmanager* pm, struct renderer* r, struct controller* controller, struct track* t, int index_track)
 {
 	vec3f zero, up;
 
 	// generate cart and send mesh to OpengL
-	cart_init(&p->cart, pm, pos);
-	cart_generatemesh(r, &p->cart);
+	cart_init(&p->cart, pm, t, index_track);
+	cart_generatemesh(&p->cart, r);
 	renderable_sendbuffer(r, &p->cart.r_cart);
 
 	p->cart.controller = controller;
-
-	p->index_track = 0;
 
 	vec3f_set(zero, 0.f, 0.f, 0.f);
 	vec3f_set(up, 0.f, 1.f, 0.f);
@@ -36,14 +34,12 @@ void player_init(struct player* p, struct physicsmanager* pm, struct renderer* r
 	camera_init(&p->camera, zero, zero, up);
 }
 
-void aiplayer_init(struct aiplayer* p, struct physicsmanager* pm, struct renderer* r, vec3f pos)
+void aiplayer_init(struct aiplayer* p, struct physicsmanager* pm, struct renderer* r, struct track* t, int index_track)
 {
 	// generate cart and send mesh to OpengL
-	cart_init(&p->cart, pm, pos);
-	cart_generatemesh(r, &p->cart);
+	cart_init(&p->cart, pm, t, index_track);
+	cart_generatemesh(&p->cart, r);
 	renderable_sendbuffer(r, &p->cart.r_cart);
-
-	p->index_track = 0;
 
 	p->controller.flags = INPUT_FLAG_ENABLED;
 
@@ -100,29 +96,10 @@ void player_updatecamera(struct player* p)
 
 void player_update(struct player* p, struct track* t)
 {
-	vec3f vpos;
-
-	physx::PxVec3 pos = p->cart.vehicle->body->getGlobalPose().p;
-	vec3f_set(vpos, pos.x, pos.y, pos.z);
-
-	p->index_track = track_closestindex(t, vpos, p->index_track);
-
-	/* temp */
-	vec3f_copy(vpos, t->searchpoints[p->index_track]);
-	//printf("Closest track point: %f, %f, %f\n", vpos[VX], vpos[VY], vpos[VZ]);
-	/* end temp */
-
-	cart_update(&p->cart);
+	cart_update(&p->cart, t);
 }
 
 void aiplayer_update(struct aiplayer* p, struct track* t)
 {
-	vec3f vpos;
-
-	physx::PxVec3 pos = p->cart.vehicle->body->getGlobalPose().p;
-	vec3f_set(vpos, pos.x, pos.y, pos.z);
-
-	track_closestindex(t, vpos, p->index_track);
-
-	cart_update(&p->cart);
+	cart_update(&p->cart, t);
 }

@@ -21,13 +21,8 @@ static void render(struct game*);
 
 static void resetplayers(struct game* game)
 {
-	game->player.cart.vehicle->body->setGlobalPose(physx::PxTransform(physx::PxVec3(GAME_STARTINGPOS)));
-	game->player.cart.vehicle->body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
-	game->player.cart.vehicle->body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
-
-	game->aiplayer.cart.vehicle->body->setGlobalPose(physx::PxTransform(physx::PxVec3(GAME_AISTARTINGPOS)));
-	game->aiplayer.cart.vehicle->body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
-	game->aiplayer.cart.vehicle->body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+	cart_reset(&game->player.cart, &game->track);
+	cart_reset(&game->aiplayer.cart, &game->track);
 }
 
 
@@ -196,15 +191,18 @@ static void update(struct game* game)
 		}
 	}
 
+	player_update(&game->player, &game->track);
 	aiplayer_update(&game->aiplayer, &game->track);
 
 
 	// set closest point
-	vec3f_copy(game->closestpoint.buf_verts, game->track.searchpoints[game->player.index_track]);
+	vec3f_copy(game->closestpoint.buf_verts, game->track.searchpoints[game->player.cart.index_track]);
 	vec3f_set(game->closestpoint.buf_verts + 3, 1.f, 0.f, 0.f);
+	vec3f_copy(game->closestpoint.buf_verts + 6, game->player.cart.pos);
+	vec3f_set(game->closestpoint.buf_verts + 9, 1.f, 0.f, 0.f);
 	renderable_sendbuffer(&game->renderer, &game->closestpoint);
 
-	printf("%d/%d\n", game->player.index_track, game->track.num_searchpoints);
+	printf("%d/%d\n", game->player.cart.index_track, game->track.num_searchpoints);
 
 	player_updatecamera(&game->player);
 
@@ -390,13 +388,11 @@ int game_startup(struct game* game)
 	physicsmanager_addstatic_trianglestrip(&game->physicsmanager, game->track.r_track.num_verts, sizeof(float)*RENDER_VERTSIZE_BUMP_L, game->track.r_track.buf_verts);
 	
 	// initialize player objects
-	vec3f_set(pos, GAME_STARTINGPOS);
 	if (game->inputmanager.controllers[0].flags & INPUT_FLAG_ENABLED)
-		player_init(&game->player, &game->physicsmanager, &game->renderer, &game->inputmanager.controllers[0], pos);
+		player_init(&game->player, &game->physicsmanager, &game->renderer, &game->inputmanager.controllers[0], &game->track, 0);
 	else
-		player_init(&game->player, &game->physicsmanager, &game->renderer, &game->inputmanager.keyboard, pos);
-	vec3f_set(pos, GAME_AISTARTINGPOS);
-	aiplayer_init(&game->aiplayer, &game->physicsmanager, &game->renderer, pos);
+		player_init(&game->player, &game->physicsmanager, &game->renderer, &game->inputmanager.keyboard, &game->track, 0);
+	aiplayer_init(&game->aiplayer, &game->physicsmanager, &game->renderer, &game->track, 5);
 
 	// initialize debug camera
 	vec3f_set(pos, 0.f, 0.f, -30.f);
@@ -432,8 +428,8 @@ int game_startup(struct game* game)
 	audiomanager_playmusic(&game->audiomanager, game->bgm_test, -1);
 	
 	/* temp */
-	renderable_init(&game->closestpoint, RENDER_MODE_POINTS, RENDER_TYPE_WIRE_S, RENDER_FLAG_DYNAMIC);
-	renderable_allocate(&game->renderer, &game->closestpoint, 1);
+	renderable_init(&game->closestpoint,  RENDER_MODE_LINESTRIP, RENDER_TYPE_WIRE_S, RENDER_FLAG_DYNAMIC);
+	renderable_allocate(&game->renderer, &game->closestpoint, 2);
 	/* end temp */
 
 	game->flags = GAME_FLAG_INIT;

@@ -18,8 +18,6 @@ struct player
 {
 	struct cart cart;
 
-	int index_track;
-
 	struct camera camera;
 };
 
@@ -27,14 +25,12 @@ struct aiplayer
 {
 	struct cart cart;
 
-	int index_track;
-
 	struct controller controller;
 };
 
 
-void player_init(struct player* p, struct physicsmanager* pm, struct renderer* r, struct controller* controller, vec3f pos);
-void aiplayer_init(struct aiplayer* p, struct physicsmanager* pm, struct renderer* r, vec3f pos);
+void player_init(struct player* p, struct physicsmanager* pm, struct renderer* r, struct controller* controller, struct track* t, int index_track);
+void aiplayer_init(struct aiplayer* p, struct physicsmanager* pm, struct renderer* r, struct track* t, int index_track);
 
 void player_delete(struct player* p);
 void aiplayer_delete(struct aiplayer* p);

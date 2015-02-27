@@ -4,7 +4,6 @@
 
 #include	<stdio.h>				// printf
 #include	<fmod.h>
-#include <fmod_errors.h>
 
 #define	AUDIO_MAX_MUSIC		5
 #define	AUDIO_MAX_SFX		20

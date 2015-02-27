@@ -45,6 +45,8 @@ void track_init(struct track* t, vec3f up, struct physicsmanager* pm)
 	vec3f_set(t->r_track.material.spc, 0.8f, 0.8f, 0.8f);
 	t->r_track.material.shn = 100.f;
 
+	t->dist_boundary = TRACK_DEFAULT_DISTBOUND;
+
 	vec3f_copy(t->up, up);
 
 	t->flags = TRACK_FLAG_INIT;
@@ -63,7 +65,7 @@ void track_delete(struct track* t)
 	param:	t					track object
 	param:	pos					position in space to search around
 	param:	last				last known "closest" index (used so as to not search every point on the track)
-	return:	int					index of the closest track point
+	return:	unsigned			index of the closest track point
 */
 int track_closestindex(struct track* t, vec3f pos, int last)
 {
@@ -86,12 +88,12 @@ int track_closestindex(struct track* t, vec3f pos, int last)
 
 	// find ending index
 	e = last + TRACK_SEARCHSIZE;
-	if (e >= t->num_searchpoints)
+	if (e >= (int)t->num_searchpoints)
 	{
 		if (t->flags & TRACK_FLAG_LOOPED)
 			e -= t->num_searchpoints;
 		else
-			e = t->num_searchpoints - 1;
+			e = (int)t->num_searchpoints - 1;
 	}
 
 	while (i != e)
@@ -105,7 +107,7 @@ int track_closestindex(struct track* t, vec3f pos, int last)
 			l = i;
 		}
 
-		i = (i+1) % t->num_searchpoints;
+		i = (i+1) % (int)t->num_searchpoints;
 	}
 
 	return l;

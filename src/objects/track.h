@@ -12,6 +12,8 @@
 #define	TRACK_SEARCHDIVIDE		10
 #define	TRACK_SEARCHSIZE		10
 
+#define	TRACK_DEFAULT_DISTBOUND	40.f
+
 #define	TRACK_FLAG_INIT			0x00
 #define	TRACK_FLAG_LOOPED		0x01
 
@@ -42,6 +44,8 @@ struct track
 	physx::PxRigidStatic* p_track;
 
 	struct renderable r_track;
+
+	float dist_boundary;
 
 	vec3f up;
 

@@ -1,9 +1,8 @@
 #include	"cart.h"
 
-#include	"../math/vec3f.h"
-#include	"../physics/physics.h"
-#include	"../render/render.h"
+#include	"../objects/track.h"
 #include	"objloader.h"
+
 
 static float cart_pos[8][3] =
 {
@@ -47,16 +46,28 @@ static int cart_norindex[36] =
 	5, 5, 5, 5, 5, 5
 };
 
-using namespace physx;
 
-void cart_init(struct cart* c, physicsmanager* pm, vec3f pos)
+/*	initialize a cart object
+	param:	c				cart object to initialize (modified)
+	param:	pm				physics manager
+	param:	t				track object
+	param:	index_track		track point index on which to spawn cart
+*/
+void cart_init(struct cart* c, struct physicsmanager* pm, struct track* t, int index_track)
 {
-	vec3f dim;
+	vec3f dim, spawn;
 
 	c->pm = pm;
 
+	// find spawn location
+	vec3f_copy(c->pos, t->searchpoints[index_track]);
+	vec3f_copy(spawn, t->up);
+	vec3f_scale(spawn, CART_SPAWNHEIGHT);
+	vec3f_add(c->pos, spawn);
+
+	// create a new physics vehicle
 	vec3f_set(dim, CART_WIDTH/2.f, CART_HEIGHT/2.f, CART_LENGTH/2.f);
-	c->vehicle = physicsmanager_newvehicle(pm, pos, dim);
+	c->vehicle = physicsmanager_newvehicle(pm, c->pos, dim);
 
 	renderable_init(&c->r_cart, RENDER_MODE_TRIANGLES, RENDER_TYPE_MATS_L, RENDER_FLAG_NONE);
 
@@ -66,8 +77,13 @@ void cart_init(struct cart* c, physicsmanager* pm, vec3f pos)
 	c->r_cart.material.shn = 100.f;
 
 	c->controller = NULL;
+
+	c->index_track = index_track;
 }
 
+/*	delete a cart object
+	param:	c				cart object to delete
+*/
 void cart_delete(struct cart* c)
 {
 	physicsmanager_removevehicle(c->pm, c->vehicle);
@@ -75,10 +91,26 @@ void cart_delete(struct cart* c)
 }
 
 
-void cart_update(struct cart* c)
+/*	update a cart object
+	param:	c				cart object to update
+	param:	t				track object
+*/
+void cart_update(struct cart* c, struct track* t)
 {
-	vec3f force;
+	physx::PxVec3 pos;
+	vec3f force, dist;
 	float vel;
+
+	// update global cart position
+	pos = c->vehicle->body->getGlobalPose().p;
+	vec3f_set(c->pos, pos.x, pos.y, pos.z);
+
+	// update track index
+	c->index_track = track_closestindex(t, c->pos, c->index_track);
+
+	vec3f_subtractn(dist, c->pos, t->searchpoints[c->index_track]);
+	if (vec3f_length(dist) > t->dist_boundary)
+		cart_reset(c, t);
 
 	if (c->controller != NULL && c->controller->flags & INPUT_FLAG_ENABLED)
 	{
@@ -110,7 +142,31 @@ void cart_update(struct cart* c)
 }
 
 
-void cart_generatemesh(struct renderer* r, struct cart* c)
+/*	reset a cart by placing it back on the track
+	param:	c				cart object to reset
+	param:	t				track object
+*/
+void cart_reset(struct cart* c, struct track* t)
+{
+	vec3f spawn;
+
+	// find spawn location
+	vec3f_copy(c->pos, t->searchpoints[c->index_track]);
+	vec3f_copy(spawn, t->up);
+	vec3f_scale(spawn, CART_SPAWNHEIGHT);
+	vec3f_add(c->pos, spawn);
+
+	c->vehicle->body->setGlobalPose(physx::PxTransform(physx::PxVec3(c->pos[VX], c->pos[VY], c->pos[VZ])));
+	c->vehicle->body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+	c->vehicle->body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+}
+
+
+/*	generate a mesh for a cart
+	param:	c				cart object
+	param:	r				renderer
+*/
+void cart_generatemesh(struct cart* c, struct renderer* r)
 {
 	float* ptr;
 	int i;
