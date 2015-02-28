@@ -88,7 +88,7 @@ int audiomanager_newmusic(struct audiomanager* am, const char* filename)
 	{
 		if (!am->music[i].enabled)
 		{
-			FMOD_System_CreateStream(am->system, filename, FMOD_DEFAULT, 0, &am->music[i].track);
+			FMOD_System_CreateStream(am->system, filename, FMOD_LOOP_NORMAL, 0, &am->music[i].track);
 			am->music[i].enabled = true;
 
 			return i;
@@ -150,6 +150,8 @@ void audiomanager_stopmusic(struct audiomanager* am, int id)
 {
 	FMOD_Channel_Stop(am->music[id].channel);
 }
+
+
 /*	play next song
 	param:	am				audio manager
 	param:	prev_id				index to the sound object

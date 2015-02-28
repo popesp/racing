@@ -417,6 +417,7 @@ int game_startup(struct game* game)
 	game->song_1 = audiomanager_newmusic(&game->audiomanager, "res/music/Daft Punk & The Glitch Mob - Derezzed.mp3");
 	game->song_2 = audiomanager_newmusic(&game->audiomanager, "res/music/Erasure Always.mp3");
 	game->song_3 = audiomanager_newmusic(&game->audiomanager, "res/music/Full Force Forward.mp3");
+	game->song_4 = audiomanager_newmusic(&game->audiomanager, "res/music/Daft Punk & Boys Noize - End Of Line.mp3");
 	
 	
 	audiomanager_playmusic(&game->audiomanager, game->song_1, -1);

@@ -5,7 +5,7 @@
 #include	<stdio.h>				// printf
 #include	<fmod.h>
 
-#define	AUDIO_MAX_MUSIC		3
+#define	AUDIO_MAX_MUSIC		4
 #define	AUDIO_MAX_SFX		20
 
 #define	AUDIO_MUSICFILEPATH		"res/music"

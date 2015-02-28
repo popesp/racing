@@ -71,6 +71,7 @@ struct game
 	int song_1;
 	int song_2;
 	int song_3;
+	int song_4;
 
 	unsigned char flags;
 };
