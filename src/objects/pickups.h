@@ -11,10 +11,8 @@
 
 #define	PICKUP_COUNT		10
 
-
 struct physicsmanager;
 struct power;
-
 
 struct pickup{
 		

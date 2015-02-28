@@ -19,90 +19,13 @@ static void scroll(GLFWwindow*, double, double);
 static void update(struct game*);
 static void render(struct game*);
 
-static int amountAI =0;
-static bool winstate = false;
-
-static void checkwin(struct game* game){
-
-	int cp1 = game->track.num_pathpoints / 3;
-	int cp2 = game->track.num_pathpoints / 2;
-
-	if(game->player.vehicle->lap==GAME_WIN_LAP){
-		printf("Player has won the game!\nGame's over\n\n");
-
-		//reset laps
-		game->player.vehicle->lap=1;
-		for(int i=0; i<=amountAI;i++){
-			game->aiplayer[i].vehicle->lap=1;
-		}
-
-		winstate = false;
-	}
-
-	for(int i=0;i<=amountAI;i++){
-		if(game->aiplayer[i].vehicle->lap==GAME_WIN_LAP){
-			printf("AI %d has won the game!\nGame's over\n\n", i);
-
-			//reset laps
-			game->player.vehicle->lap=1;
-			for(int i=0; i<=amountAI;i++){
-				game->aiplayer[i].vehicle->lap=1;
-			}
-			winstate = false;
-		}
-	}
-
-	//player win logic
-	if(game->player.vehicle->checkpoint1==false && game->player.vehicle->index_track==cp1){
-		game->player.vehicle->checkpoint1=true;
-	}
-
-	if(game->player.vehicle->checkpoint2==false && game->player.vehicle->checkpoint1==true && game->player.vehicle->index_track==cp2){
-		game->player.vehicle->checkpoint2=true;
-	}
-
-	if(game->player.vehicle->checkpoint2==true && game->player.vehicle->index_track==cp1){
-		game->player.vehicle->checkpoint2=false;
-	}
-
-	if(game->player.vehicle->checkpoint2==true&&game->player.vehicle->checkpoint1==true&&game->player.vehicle->index_track==game->track.num_pathpoints-1){
-		game->player.vehicle->lap++;
-		printf("Player is on lap %d\n", game->player.vehicle->lap);
-		game->player.vehicle->checkpoint1=false;
-		game->player.vehicle->checkpoint2=false;
-	}
-
-	//AI win logic
-	for(int i=0;i<=amountAI;i++){
-		if(game->aiplayer[i].vehicle->checkpoint1==false && game->aiplayer[i].vehicle->index_track==cp1){
-			game->aiplayer[i].vehicle->checkpoint1=true;
-		}
-
-		if(game->aiplayer[i].vehicle->checkpoint2==false && game->aiplayer[i].vehicle->checkpoint1==true && game->aiplayer[i].vehicle->index_track==cp2){
-			game->aiplayer[i].vehicle->checkpoint2=true;
-		}
-
-		if(game->aiplayer[i].vehicle->checkpoint2==true && game->aiplayer[i].vehicle->index_track==cp1){
-			game->aiplayer[i].vehicle->checkpoint2=false;
-		}
-
-		if(game->aiplayer[i].vehicle->checkpoint2==true&&game->aiplayer[i].vehicle->checkpoint1==true&&game->aiplayer[i].vehicle->index_track==game->track.num_pathpoints-1){
-			game->aiplayer[i].vehicle->lap++;
-			printf("AI %d is on lap %d\n", i, game->aiplayer[i].vehicle->lap);
-			game->aiplayer[i].vehicle->checkpoint1=false;
-			game->aiplayer[i].vehicle->checkpoint2=false;
-		}
-	}
-}
-
 static void resetplayers(struct game* game)
 {
 	vehicle_reset(&game->vehiclemanager, game->player.vehicle);
 
-	for(int i=0;i<=amountAI;i++){
+	for(int i=0;i<=game->amountAI;i++){
 		vehicle_reset(&game->vehiclemanager, game->aiplayer[i].vehicle);
 	}
-	
 }
 
 static void resize(GLFWwindow* window, int width, int height)
@@ -166,35 +89,35 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 			break;
 
 		case GLFW_KEY_A:
-			amountAI++;
+			game->amountAI++;
 			
-			if(amountAI>AI_MAX_COUNT-1){
-				amountAI=AI_MAX_COUNT-1;
+			if(game->amountAI>AI_MAX_COUNT-1){
+				game->amountAI=AI_MAX_COUNT-1;
 			}
 			else{
 				vec3f offs;
 				vec3f_set(offs, 0.f, 0.f, 0.f);
-				aiplayer_init(&game->aiplayer[amountAI], &game->vehiclemanager, 5, offs);
-				printf("AI %d has been added to the game.\n", (amountAI));
+				aiplayer_init(&game->aiplayer[game->amountAI], &game->vehiclemanager, 5, offs);
+				printf("AI %d has been added to the game.\n", (game->amountAI));
 			}
 			break;
 
 		case GLFW_KEY_SPACE:
-			if(winstate==false){
+			if(game->winstate == GAME_WINSTATE_OFF){
 				printf("Game's win state is activated.\n\n\n");
 				printf("Player is on lap %d\n", game->player.vehicle->lap);
-				for(int i=0;i<=amountAI;i++){
+				for(int i=0;i<=game->amountAI;i++){
 					printf("AI %d is on lap %d\n", i, game->aiplayer[i].vehicle->lap);
 				}
-				winstate=true;
+				game->winstate = GAME_WINSTATE_ON;
 			}
 			break;
 
 		case GLFW_KEY_BACKSPACE:
-				for (int i=1;i<=amountAI;i++){
+				for (int i=1;i<=game->amountAI;i++){
 					aiplayer_delete(&game->aiplayer[i], &game->vehiclemanager);
 				}
-				amountAI=0;
+				game->amountAI=0;
 			break;
 
 		default:
@@ -250,7 +173,7 @@ static void update(struct game* game)
 	// update player and ai input
 	inputmanager_update(&game->inputmanager);
 
-	for(int i=0;i<=amountAI;i++){
+	for(int i=0;i<=game->amountAI;i++){
 		aiplayer_updateinput(&game->aiplayer[i]);
 	}
 	
@@ -338,7 +261,7 @@ static void render(struct game* game)
 	renderable_render(&game->renderer, &game->track.r_track, track_mw, global_wv, 0);
 
 	// render multiple AI's
-	for(int i=0;i<=amountAI;i++){
+	for(int i=0;i<=game->amountAI;i++){
 		physx::PxMat44 newworld(game->aiplayer[i].vehicle->body->getGlobalPose());
 		renderable_render(&game->renderer, &game->vehiclemanager.r_vehicle, (float*)&newworld, global_wv, 0);	
 	}
@@ -450,6 +373,7 @@ static int start_subsystems(struct game* game)
 	printf("Starting up audio manager...");
 	audiomanager_startup(&game->audiomanager);
 	printf("...done. Using FMOD version %d.\n", audiomanager_getlibversion(&game->audiomanager));
+
 	
 	return 1;
 }
@@ -532,14 +456,86 @@ int game_startup(struct game* game)
 	renderable_init(&game->closestpoint,  RENDER_MODE_LINESTRIP, RENDER_TYPE_WIRE_S, RENDER_FLAG_DYNAMIC);
 	renderable_allocate(&game->renderer, &game->closestpoint, 2);
 	/* end temp */
-
 	
-
+	game->amountAI = 0;
+	game->winstate = GAME_WINSTATE_OFF;
 	game->flags = GAME_FLAG_INIT;
 
 	return 1;
 }
 
+static void checkwin(struct game* game){
+
+	int cp1 = game->track.num_pathpoints / 3;
+	int cp2 = game->track.num_pathpoints / 2;
+
+	if(game->player.vehicle->lap==GAME_WIN_LAP){
+		printf("Player has won the game!\nGame's over\n\n");
+
+		//reset laps
+		game->player.vehicle->lap=1;
+		for(int i=0; i<=game->amountAI;i++){
+			game->aiplayer[i].vehicle->lap=1;
+		}
+
+		game->winstate = GAME_WINSTATE_OFF;
+	}
+
+	for(int i=0;i<=game->amountAI;i++){
+		if(game->aiplayer[i].vehicle->lap==GAME_WIN_LAP){
+			printf("AI %d has won the game!\nGame's over\n\n", i);
+
+			//reset laps
+			game->player.vehicle->lap=1;
+			for(int i=0; i<=game->amountAI;i++){
+				game->aiplayer[i].vehicle->lap=1;
+			}
+			game->winstate = GAME_WINSTATE_OFF;
+		}
+	}
+
+	//player win logic
+	if(game->player.vehicle->checkpoint1==false && game->player.vehicle->index_track==cp1){
+		game->player.vehicle->checkpoint1=true;
+	}
+
+	if(game->player.vehicle->checkpoint2==false && game->player.vehicle->checkpoint1==true && game->player.vehicle->index_track==cp2){
+		game->player.vehicle->checkpoint2=true;
+	}
+
+	if(game->player.vehicle->checkpoint2==true && game->player.vehicle->index_track==cp1){
+		game->player.vehicle->checkpoint2=false;
+	}
+
+	if(game->player.vehicle->checkpoint2==true&&game->player.vehicle->checkpoint1==true&&game->player.vehicle->index_track==game->track.num_pathpoints-1){
+		game->player.vehicle->lap++;
+		printf("Player is on lap %d\n", game->player.vehicle->lap);
+		game->player.vehicle->checkpoint1=false;
+		game->player.vehicle->checkpoint2=false;
+	}
+
+	//AI win logic
+	for(int i=0;i<=game->amountAI;i++){
+		if(game->aiplayer[i].vehicle->checkpoint1==false && game->aiplayer[i].vehicle->index_track==cp1){
+			game->aiplayer[i].vehicle->checkpoint1=true;
+		}
+
+		if(game->aiplayer[i].vehicle->checkpoint2==false && game->aiplayer[i].vehicle->checkpoint1==true && game->aiplayer[i].vehicle->index_track==cp2){
+			game->aiplayer[i].vehicle->checkpoint2=true;
+		}
+
+		if(game->aiplayer[i].vehicle->checkpoint2==true && game->aiplayer[i].vehicle->index_track==cp1){
+			game->aiplayer[i].vehicle->checkpoint2=false;
+		}
+
+		if(game->aiplayer[i].vehicle->checkpoint2==true&&game->aiplayer[i].vehicle->checkpoint1==true&&game->aiplayer[i].vehicle->index_track==game->track.num_pathpoints-1){
+			game->aiplayer[i].vehicle->lap++;
+			printf("AI %d is on lap %d\n", i, game->aiplayer[i].vehicle->lap);
+			game->aiplayer[i].vehicle->checkpoint1=false;
+			game->aiplayer[i].vehicle->checkpoint2=false;
+		}
+	}
+}
 
 void game_mainloop(struct game* game)
 {
@@ -583,7 +579,7 @@ void game_mainloop(struct game* game)
 		fps++;
 
 		// check if someone has won game
-		if(winstate==true){
+		if(game->winstate == GAME_WINSTATE_ON){
 			checkwin(game);
 		}
 	}
@@ -593,7 +589,7 @@ void game_shutdown(struct game* game)
 {
 	// delete players
 	player_delete(&game->player, &game->vehiclemanager);
-	for (int i=0;i<=amountAI;i++){
+	for (int i=0;i<=game->amountAI;i++){
 		aiplayer_delete(&game->aiplayer[i], &game->vehiclemanager);
 	}
 	

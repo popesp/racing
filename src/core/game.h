@@ -34,9 +34,11 @@
 #define	GAME_STARTINGPOS		-20.f, 1.5f, 0.f // TEMP
 #define	GAME_AISTARTINGPOS		-20.f, 1.5f, -20.f // TEMP
 
-#define	AI_MAX_COUNT			9	//MAX IS 9. buttons glitch over that.
+#define	AI_MAX_COUNT			9	//max is 9. buttons glitch over that.
 
 #define GAME_WIN_LAP			5
+#define GAME_WINSTATE_OFF		0x0
+#define GAME_WINSTATE_ON		0x1
 
 #define	GAME_FLAG_INIT			0x00
 #define	GAME_FLAG_TERMINATED	0x01
@@ -64,8 +66,6 @@ struct game
 	struct player player;
 	struct aiplayer aiplayer[AI_MAX_COUNT];
 
-	struct pickup pickup1;
-
 	struct camera cam_debug;
 
 	struct light track_lights[2];
@@ -80,7 +80,10 @@ struct game
 	int song_3;
 	int song_4;
 
+	int amountAI;
+
 	unsigned char flags;
+	unsigned char winstate;
 };
 
 int game_startup(struct game* game);
