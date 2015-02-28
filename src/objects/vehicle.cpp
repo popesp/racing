@@ -222,7 +222,10 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 			vec3f_negate(force);
 		
 		physx::PxRigidBodyExt::addLocalForceAtLocalPos(*v->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, -vm->dim[VZ]/2.f));
-
+		
+		if (v->controller->buttons[INPUT_BUTTON_BACK] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN)){
+			vehicle_reset(vm, v);
+		}
 		// firing a projectile
 		if (v->controller->buttons[INPUT_BUTTON_A] == (INPUT_STATE_DOWN | INPUT_STATE_CHANGED))
 		{
@@ -314,9 +317,6 @@ void vehiclemanager_update(struct vehiclemanager* vm)
 
 		physx::PxRigidBodyExt::addLocalForceAtLocalPos(*v->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, 0.f));
 
-		if (vm->vehicles->controller[0].buttons[INPUT_BUTTON_BACK] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN)){
-			vehicle_reset(vm, v);
-		}
 	}
 }
 
