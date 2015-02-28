@@ -6,8 +6,8 @@
 
 static void resetsound(struct sound* s)
 {
-	s->track = NULL;
-	s->channel = NULL;
+	s->track = 0;
+	s->channel = 0;
 	s->enabled = false;
 }
 
@@ -139,38 +139,6 @@ void audiomanager_playmusic(struct audiomanager* am, int id, int loops)
 	FMOD_Channel_SetPaused(am->music[id].channel, false);
 }
 
-
-
-/*	stop a music sound
-	param:	am				audio manager
-	param:	id				index to the sound object
-	
-*/
-void audiomanager_stopmusic(struct audiomanager* am, int id)
-{
-	FMOD_Channel_Stop(am->music[id].channel);
-}
-
-
-/*	play next song
-	param:	am				audio manager
-	param:	prev_id				index to the sound object
-	param:	loops			number of times to loop the song
-*/
-int audiomanager_playnexttrack(struct audiomanager* am, int prev_id, int loops)
-{
-	int next_track = prev_id+1;
-	if (next_track >= AUDIO_MAX_MUSIC)
-		next_track = 0;
-
-	audiomanager_stopmusic(am,prev_id);
-	audiomanager_playmusic(am,next_track,loops);
-
-	return next_track;
-}
-
-
-
 /*	play an sfx sound
 	param:	am				audio manager
 	param:	id				index to the sound object
@@ -182,6 +150,16 @@ void audiomanager_playsfx(struct audiomanager* am, int id)
 
 	// play the sound
 	FMOD_Channel_SetPaused(am->music[id].channel, false);
+}
+
+
+/*	stop a music sound
+	param:	am				audio manager
+	param:	id				index to the sound object
+*/
+void audiomanager_stopmusic(struct audiomanager* am, int id)
+{
+	FMOD_Channel_Stop(am->music[id].channel);
 }
 
 

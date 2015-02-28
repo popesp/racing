@@ -36,6 +36,16 @@
 
 #define	AI_MAX_COUNT			9	//max is 9. buttons glitch over that.
 
+#define	GAME_MUSIC_COUNT		4
+#define	GAME_MUSIC_1_ID			0
+#define	GAME_MUSIC_2_ID			1
+#define	GAME_MUSIC_3_ID			2
+#define	GAME_MUSIC_4_ID			3
+#define	GAME_MUSIC_1_FILENAME	"res/music/Erasure Always.mp3"
+#define	GAME_MUSIC_2_FILENAME	"res/music/Daft Punk & The Glitch Mob - Derezzed.mp3"
+#define	GAME_MUSIC_3_FILENAME	"res/music/Full Force Forward.mp3"
+#define	GAME_MUSIC_4_FILENAME	"res/music/Daft Punk & Boys Noize - End Of Line.mp3"
+
 #define GAME_WIN_LAP			5
 #define GAME_WINSTATE_OFF		0x0
 #define GAME_WINSTATE_ON		0x1
@@ -74,11 +84,8 @@ struct game
 	int tex_skybox;
 	int tex_vehicle;
 
-	int current_song;
-	int song_1;
-	int song_2;
-	int song_3;
-	int song_4;
+	int index_currentsong;
+	int songs[GAME_MUSIC_COUNT];
 
 	int amountAI;
 

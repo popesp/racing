@@ -2,17 +2,13 @@
 #define	AUDIO
 
 
-#include	<stdio.h>				// printf
 #include	<fmod.h>
 
-#define	AUDIO_MAX_MUSIC		4
-#define	AUDIO_MAX_SFX		20
 
-#define	AUDIO_MUSICFILEPATH		"res/music"
-
+#define	AUDIO_MAX_MUSIC		8
+#define	AUDIO_MAX_SFX		16
 
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
 struct sound
 {
 	FMOD_SOUND* track;
@@ -79,6 +75,13 @@ void audiomanager_playmusic(struct audiomanager* am, int id, int loops);
 void audiomanager_playsfx(struct audiomanager* am, int id);
 
 
+/*	stop a music sound
+	param:	am				audio manager
+	param:	id				index to the sound object
+*/
+void audiomanager_stopmusic(struct audiomanager* am, int id);
+
+
 /*	set the music volume
 	param:	am				audio manager
 	param:	volume			new music volume
@@ -103,11 +106,6 @@ void audiomanager_setmastervolume(struct audiomanager* am, float volume);
 	param:	id				index to the sound object
 */
 void audiomanager_togglemusic(struct audiomanager* am, int id);
-/*	play next song
-	param:	am				audio manager
-	param:	prev_id				index to the sound object
-	param:	loops			number of times to loop the song
-*/
-int audiomanager_playnexttrack(struct audiomanager* am, int prev_id, int loops);
+
 
 #endif

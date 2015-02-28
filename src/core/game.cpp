@@ -56,11 +56,11 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 			game->flags |= GAME_FLAG_TERMINATED;
 			break;
 
-			//pause music
 		case GLFW_KEY_P:
-			//audiomanager_togglemusic(&game->audiomanager, game->song_1);
-			game->current_song = audiomanager_playnexttrack(&game->audiomanager, game->current_song, -1);
-
+			// go to next track
+			audiomanager_stopmusic(&game->audiomanager, game->index_currentsong);
+			game->index_currentsong = (game->index_currentsong + 1) % GAME_MUSIC_COUNT;
+			audiomanager_playmusic(&game->audiomanager, game->index_currentsong, -1);
 			break;
 
 		case GLFW_KEY_Q:
@@ -443,14 +443,12 @@ int game_startup(struct game* game)
 	game->track.r_track.texture_ids[RENDER_TEXTURE_NORMAL] = game->tex_trackbump;
 	
 	// add background music
-	game->song_1 = audiomanager_newmusic(&game->audiomanager, "res/music/Erasure Always.mp3");
-	game->song_2 = audiomanager_newmusic(&game->audiomanager, "res/music/Daft Punk & The Glitch Mob - Derezzed.mp3");
-	game->song_3 = audiomanager_newmusic(&game->audiomanager, "res/music/Full Force Forward.mp3");
-	game->song_4 = audiomanager_newmusic(&game->audiomanager, "res/music/Daft Punk & Boys Noize - End Of Line.mp3");
-	
-	
-	audiomanager_playmusic(&game->audiomanager, game->song_1, -1);
-	game->current_song = game->song_1;
+	game->songs[GAME_MUSIC_1_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_1_FILENAME);
+	game->songs[GAME_MUSIC_2_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_2_FILENAME);
+	game->songs[GAME_MUSIC_3_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_3_FILENAME);
+	game->songs[GAME_MUSIC_4_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_4_FILENAME);
+	game->index_currentsong = 0;
+	audiomanager_playmusic(&game->audiomanager, game->songs[game->index_currentsong], -1);
 
 	/* temp */
 	renderable_init(&game->closestpoint,  RENDER_MODE_LINESTRIP, RENDER_TYPE_WIRE_S, RENDER_FLAG_DYNAMIC);
