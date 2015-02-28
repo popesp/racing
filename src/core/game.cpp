@@ -99,7 +99,15 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 			break;
 
 		case GLFW_KEY_A:
-			spawnai(game);
+			amountAI++;
+			if(amountAI>AI_MAX_COUNT){
+				amountAI=AI_MAX_COUNT;
+			}
+			else{
+				vec3f offs;
+				vec3f_set(offs, 0.f, 0.f, 0.f);
+				aiplayer_init(&game->aiplayer[amountAI], &game->vehiclemanager, 0, offs);
+			}
 			break;
 
 
@@ -214,25 +222,6 @@ static void update(struct game* game)
 	// check for window close messages
 	if (glfwWindowShouldClose(game->window.w))
 		game->flags |= GAME_FLAG_TERMINATED;
-}
-
-static void spawnai(struct game* game){
-	amountAI++;
-	if(amountAI>AI_MAX_COUNT){
-		amountAI=AI_MAX_COUNT;
-	}
-	else{
-
-		vec3f offs;
-		vec3f_set(offs, 0.f, 0.f, 0.f);
-		aiplayer_init(&game->aiplayer[amountAI], &game->vehiclemanager, 0, offs);
-
-		mat4f global_wv;
-
-
-		physx::PxMat44 newworld(game->aiplayer[amountAI].vehicle->body->getGlobalPose());
-		renderable_render(&game->renderer, &game->vehiclemanager.r_vehicle, (float*)&newworld, global_wv, 0);
-	}
 }
 
 static void render(struct game* game)

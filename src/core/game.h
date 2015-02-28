@@ -83,7 +83,6 @@ struct game
 	unsigned char flags;
 };
 
-void spawnai(struct game* game);
 int game_startup(struct game* game);
 void game_mainloop(struct game* game);
 void game_shutdown(struct game* game);
