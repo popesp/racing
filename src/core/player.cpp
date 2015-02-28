@@ -37,6 +37,8 @@ void aiplayer_init(struct aiplayer* p, struct vehiclemanager* vm, int index_trac
 	// initialize vehicle
 	p->vehicle = vehiclemanager_newvehicle(vm, index_track, offs);
 
+	p->track = vm->track;
+
 	p->controller.flags = INPUT_FLAG_ENABLED;
 
 	p->controller.num_buttons = INPUT_CONTROLLER_BUTTONS;
@@ -68,9 +70,24 @@ void aiplayer_delete(struct aiplayer* p, struct vehiclemanager* vm)
 
 void aiplayer_updateinput(struct aiplayer* p)
 {
+	vec3f next_point, right, diff;
+	int next_index;
+
+	physx::PxMat44 pose(p->vehicle->body->getGlobalPose());
+
 	resetcontroller(p);
 
-	p->controller.axes[INPUT_AXIS_TRIGGERS] = -1.f;
+	next_index = (p->vehicle->index_track + 1) % p->track->num_pathpoints;
+	vec3f_copy(next_point, p->track->pathpoints[next_index]);
+
+	vec3f_subtractn(diff, next_point, p->vehicle->pos);
+
+	vec3f_set(right, VEHICLE_RIGHT);
+	mat4f_transformvec3f(right, (float*)&pose);
+
+	p->controller.axes[INPUT_AXIS_LEFT_LR] = vec3f_dot(right, diff) * 2.f / vec3f_length(diff);
+
+	p->controller.axes[INPUT_AXIS_TRIGGERS] = -0.7f;
 }
 
 

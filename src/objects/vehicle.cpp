@@ -332,7 +332,6 @@ void vehicle_reset(struct vehiclemanager* vm, struct vehicle* v)
 	vec3f_add(v->pos, spawn);
 
 	// TODO: set the orientation of the vehicle to the track gradient
-
 	v->body->setGlobalPose(physx::PxTransform(physx::PxVec3(v->pos[VX], v->pos[VY], v->pos[VZ])));
 	v->body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
 	v->body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
