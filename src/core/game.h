@@ -34,7 +34,6 @@
 #define	GAME_STARTINGPOS		-20.f, 1.5f, 0.f // TEMP
 #define	GAME_AISTARTINGPOS		-20.f, 1.5f, -20.f // TEMP
 
-
 #define	AI_MAX_COUNT			8
 
 

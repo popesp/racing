@@ -60,6 +60,13 @@ struct vehicle
 
 	int index_track;
 
+	int lap;
+
+	//these are used to see if player vehicle is completing the race
+	bool checkpoint1;
+	bool checkpoint2;
+	bool checkpoint3;
+
 	unsigned char flags;
 };
 

@@ -5,8 +5,6 @@
 #include	"../render/render.h"
 #include	"../physics/physics.h"
 
-
-
 #define PICKUP_WIDTH		.8f
 #define PICKUP_HEIGHT		1.2f
 #define	PICKUP_LENGTH		0.1f
@@ -21,7 +19,6 @@ struct power;
 struct pickup{
 		
 	physx::PxRigidDynamic* body;
-
 		
 };
 
@@ -35,7 +32,7 @@ struct pickupmanager{
 };
 
 void pickup_init(struct pickup*, struct physicsmanager*, vec3f);
-void powerup_delete(struct pickup* pu);
+void pickup_delete(struct pickup* pu);
 
 
 #endif

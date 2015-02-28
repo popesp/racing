@@ -20,6 +20,80 @@ static void update(struct game*);
 static void render(struct game*);
 
 static int amountAI =0;
+static bool winstate = false;
+
+static void checkwin(struct game* game){
+
+	int cp1 = game->track.num_pathpoints / 3;
+	int cp2 = game->track.num_pathpoints / 2;
+
+	if(game->player.vehicle->lap==5){
+		printf("Player has won the game!\nGame's over\n\n");
+
+		//reset laps
+		game->player.vehicle->lap=1;
+		for(int i=0; i<=amountAI;i++){
+			game->aiplayer[i].vehicle->lap=1;
+		}
+
+		winstate = false;
+	}
+
+	for(int i=0;i<=amountAI;i++){
+		if(game->aiplayer[i].vehicle->lap==5){
+			printf("AI %d has won the game!\nGame's over\n\n", i);
+
+			//reset laps
+			game->player.vehicle->lap=1;
+			for(int i=0; i<=amountAI;i++){
+				game->aiplayer[i].vehicle->lap=1;
+			}
+			winstate = false;
+		}
+	}
+
+	//player win logic
+	if(game->player.vehicle->checkpoint1==false && game->player.vehicle->index_track==cp1){
+		game->player.vehicle->checkpoint1=true;
+	}
+
+	if(game->player.vehicle->checkpoint2==false && game->player.vehicle->checkpoint1==true && game->player.vehicle->index_track==cp2){
+		game->player.vehicle->checkpoint2=true;
+	}
+
+	if(game->player.vehicle->checkpoint2==true && game->player.vehicle->index_track==cp1){
+		game->player.vehicle->checkpoint2=false;
+	}
+
+	if(game->player.vehicle->checkpoint2==true&&game->player.vehicle->checkpoint1==true&&game->player.vehicle->index_track==game->track.num_pathpoints-1){
+		game->player.vehicle->lap++;
+		printf("Player is on lap %d\n", game->player.vehicle->lap);
+		game->player.vehicle->checkpoint1=false;
+		game->player.vehicle->checkpoint2=false;
+	}
+
+	//AI win logic
+	for(int i=0;i<=amountAI;i++){
+		if(game->aiplayer[i].vehicle->checkpoint1==false && game->aiplayer[i].vehicle->index_track==cp1){
+			game->aiplayer[i].vehicle->checkpoint1=true;
+		}
+
+		if(game->aiplayer[i].vehicle->checkpoint2==false && game->aiplayer[i].vehicle->checkpoint1==true && game->aiplayer[i].vehicle->index_track==cp2){
+			game->aiplayer[i].vehicle->checkpoint2=true;
+		}
+
+		if(game->aiplayer[i].vehicle->checkpoint2==true && game->aiplayer[i].vehicle->index_track==cp1){
+			game->aiplayer[i].vehicle->checkpoint2=false;
+		}
+
+		if(game->aiplayer[i].vehicle->checkpoint2==true&&game->aiplayer[i].vehicle->checkpoint1==true&&game->aiplayer[i].vehicle->index_track==game->track.num_pathpoints-1){
+			game->aiplayer[i].vehicle->lap++;
+			printf("AI %d is on lap %d\n", i, game->aiplayer[i].vehicle->lap);
+			game->aiplayer[i].vehicle->checkpoint1=false;
+			game->aiplayer[i].vehicle->checkpoint2=false;
+		}
+	}
+}
 
 static void resetplayers(struct game* game)
 {
@@ -66,7 +140,6 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 
 			break;
 
-
 		case GLFW_KEY_Q:
 			if (game->flags & GAME_FLAG_WIREFRAME)
 			{
@@ -92,11 +165,6 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 			resetplayers(game);
 			break;
 
-		case GLFW_KEY_F:
-			// reload the config file for cart
-			
-			break;
-
 		case GLFW_KEY_A:
 			amountAI++;
 			if(amountAI>AI_MAX_COUNT){
@@ -106,6 +174,17 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 				vec3f offs;
 				vec3f_set(offs, 0.f, 0.f, 0.f);
 				aiplayer_init(&game->aiplayer[amountAI], &game->vehiclemanager, 5, offs);
+			}
+			break;
+
+		case GLFW_KEY_SPACE:
+			if(winstate==false){
+				printf("Game's win state is activated.\n\n\n");
+				printf("Player is on lap %d\n", game->player.vehicle->lap);
+				for(int i=0;i<=amountAI;i++){
+					printf("AI %d is on lap %d\n", i, game->aiplayer[i].vehicle->lap);
+				}
+				winstate=true;
 			}
 			break;
 
@@ -166,7 +245,6 @@ static void update(struct game* game)
 		aiplayer_updateinput(&game->aiplayer[i]);
 	}
 	
-
 	// temporary debug button
 	if (game->inputmanager.controllers[GLFW_JOYSTICK_1].flags & INPUT_FLAG_ENABLED){
 		if (game->inputmanager.controllers[0].buttons[INPUT_BUTTON_Y] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
@@ -258,18 +336,9 @@ static void render(struct game* game)
 
 	// render carts
 	renderable_render(&game->renderer, &game->vehiclemanager.r_vehicle, (float*)&player_world, global_wv, 0);
-	
-	/*
-	if (game->player_proj_flag == 1) {
-		physx::PxMat44 player_proj_world(game->player_proj.proj->getGlobalPose());
-		renderable_render(&game->renderer, &game->player_proj.r_proj, (float*)&player_proj_world, global_wv, 0);
-	}
-	*/
-
 
 	glClear(GL_DEPTH_BUFFER_BIT);
 	renderable_render(&game->renderer, &game->closestpoint, track_mw, global_wv, 0);
-
 
 	glfwSwapBuffers(game->window.w);
 }
@@ -455,6 +524,8 @@ int game_startup(struct game* game)
 	renderable_allocate(&game->renderer, &game->closestpoint, 2);
 	/* end temp */
 
+	
+
 	game->flags = GAME_FLAG_INIT;
 
 	return 1;
@@ -497,9 +568,15 @@ void game_mainloop(struct game* game)
 			fps = ups = 0u;
 		}
 
+
 		// render as frequently as possible
 		render(game);
 		fps++;
+
+		// check if someone has won game
+		if(winstate==true){
+			checkwin(game);
+		}
 	}
 }
 

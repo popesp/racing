@@ -30,6 +30,13 @@ void player_init(struct player* p, struct vehiclemanager* vm, controller* contro
 	vec3f_set(up, 0.f, 1.f, 0.f);
 
 	camera_init(&p->camera, zero, zero, up);
+
+	//initialize lap
+	p->vehicle->lap = 1;
+	p->vehicle->checkpoint1 = false;
+	p->vehicle->checkpoint2 = false;
+	p->vehicle->checkpoint3 = false;
+
 }
 
 void aiplayer_init(struct aiplayer* p, struct vehiclemanager* vm, int index_track, vec3f offs)
@@ -51,6 +58,13 @@ void aiplayer_init(struct aiplayer* p, struct vehiclemanager* vm, int index_trac
 	p->vehicle->controller = &p->controller;
 
 	resetcontroller(p);
+
+	//initialize lap
+	p->vehicle->lap = 1;
+	p->vehicle->checkpoint1 = false;
+	p->vehicle->checkpoint2 = false;
+	p->vehicle->checkpoint3 = false;
+
 }
 
 
