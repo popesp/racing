@@ -31,7 +31,6 @@ static void resetplayers(struct game* game)
 	
 }
 
-//test
 static void resize(GLFWwindow* window, int width, int height)
 {
 	struct game* game;
@@ -106,10 +105,9 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 			else{
 				vec3f offs;
 				vec3f_set(offs, 0.f, 0.f, 0.f);
-				aiplayer_init(&game->aiplayer[amountAI], &game->vehiclemanager, 0, offs);
+				aiplayer_init(&game->aiplayer[amountAI], &game->vehiclemanager, 5, offs);
 			}
 			break;
-
 
 		default:
 			break;
@@ -228,9 +226,6 @@ static void render(struct game* game)
 {
 	mat4f global_wv, skybox_wv, track_mw, skybox_mw;
 	physx::PxMat44 player_world(game->player.vehicle->body->getGlobalPose());
-	physx::PxMat44 otherguy_world(game->aiplayer[0].vehicle->body->getGlobalPose());
-	
-
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -263,7 +258,6 @@ static void render(struct game* game)
 
 	// render carts
 	renderable_render(&game->renderer, &game->vehiclemanager.r_vehicle, (float*)&player_world, global_wv, 0);
-	renderable_render(&game->renderer, &game->vehiclemanager.r_vehicle, (float*)&otherguy_world, global_wv, 0);
 	
 	/*
 	if (game->player_proj_flag == 1) {
@@ -517,7 +511,6 @@ void game_shutdown(struct game* game)
 		aiplayer_delete(&game->aiplayer[i], &game->vehiclemanager);
 	}
 	
-
 	// delete world objects
 	track_delete(&game->track);
 	skybox_delete(&game->skybox);
