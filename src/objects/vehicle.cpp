@@ -324,6 +324,10 @@ void vehiclemanager_update(struct vehiclemanager* vm)
 		vec3f_scale(force, VEHICLE_DOWNFORCE * fabs(speed));
 
 		physx::PxRigidBodyExt::addLocalForceAtLocalPos(*v->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, 0.f));
+
+		if (vm->vehicles->controller[0].buttons[INPUT_BUTTON_BACK] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN)){
+			vehicle_reset(vm, v);
+		}
 	}
 }
 

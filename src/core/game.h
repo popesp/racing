@@ -67,7 +67,10 @@ struct game
 	int tex_skybox;
 	int tex_vehicle;
 
-	int bgm_test;
+	int current_song;
+	int song_1;
+	int song_2;
+	int song_3;
 
 	unsigned char flags;
 };

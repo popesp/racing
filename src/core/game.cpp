@@ -57,7 +57,9 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 
 			//pause music
 		case GLFW_KEY_P:
-			audiomanager_togglemusic(&game->audiomanager, game->bgm_test);
+			//audiomanager_togglemusic(&game->audiomanager, game->song_1);
+			game->current_song = audiomanager_playnexttrack(&game->audiomanager, game->current_song, -1);
+
 			break;
 
 
@@ -412,9 +414,14 @@ int game_startup(struct game* game)
 	game->track.r_track.texture_ids[RENDER_TEXTURE_NORMAL] = game->tex_trackbump;
 	
 	// add background music
-	game->bgm_test = audiomanager_newmusic(&game->audiomanager, "res/music/07.-dialed-in.mp3");
-	audiomanager_playmusic(&game->audiomanager, game->bgm_test, -1);
+	game->song_1 = audiomanager_newmusic(&game->audiomanager, "res/music/Daft Punk & The Glitch Mob - Derezzed.mp3");
+	game->song_2 = audiomanager_newmusic(&game->audiomanager, "res/music/Erasure Always.mp3");
+	game->song_3 = audiomanager_newmusic(&game->audiomanager, "res/music/Full Force Forward.mp3");
 	
+	
+	audiomanager_playmusic(&game->audiomanager, game->song_1, -1);
+	game->current_song = game->song_1;
+
 	/* temp */
 	renderable_init(&game->closestpoint,  RENDER_MODE_LINESTRIP, RENDER_TYPE_WIRE_S, RENDER_FLAG_DYNAMIC);
 	renderable_allocate(&game->renderer, &game->closestpoint, 2);

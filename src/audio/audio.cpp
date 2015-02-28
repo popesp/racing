@@ -2,8 +2,6 @@
 
 #include	<fmod.h>
 
-//#include	"../tinydir.h"
-//#include	"string.h"
 
 
 static void resetsound(struct sound* s)
@@ -141,6 +139,36 @@ void audiomanager_playmusic(struct audiomanager* am, int id, int loops)
 	FMOD_Channel_SetPaused(am->music[id].channel, false);
 }
 
+
+
+/*	stop a music sound
+	param:	am				audio manager
+	param:	id				index to the sound object
+	
+*/
+void audiomanager_stopmusic(struct audiomanager* am, int id)
+{
+	FMOD_Channel_Stop(am->music[id].channel);
+}
+/*	play next song
+	param:	am				audio manager
+	param:	prev_id				index to the sound object
+	param:	loops			number of times to loop the song
+*/
+int audiomanager_playnexttrack(struct audiomanager* am, int prev_id, int loops)
+{
+	int next_track = prev_id+1;
+	if (next_track >= AUDIO_MAX_MUSIC)
+		next_track = 0;
+
+	audiomanager_stopmusic(am,prev_id);
+	audiomanager_playmusic(am,next_track,loops);
+
+	return next_track;
+}
+
+
+
 /*	play an sfx sound
 	param:	am				audio manager
 	param:	id				index to the sound object
@@ -202,27 +230,6 @@ void audiomanager_togglemusic(struct audiomanager* am, int id)
 		FMOD_Channel_SetPaused(am->music[id].channel, true);
 }
 
-/*
-void audio_menu(struct audiomanager* am)
-{
-	
-	tinydir_dir dir;
-	tinydir_open(&dir, AUDIO_PATH);
 
-	while (dir.has_next)
-	{
-		tinydir_file file;
-		tinydir_readfile(&dir, &file);
 
-		if ( file.extension[0] == 'm'){
-			audiomanager_newsound(am, file.path);
-			printf("%s added to game sounds\n", file.name);
 
-		}
-
-		tinydir_next(&dir);
-	}
-
-	tinydir_close(&dir);
-}
-*/

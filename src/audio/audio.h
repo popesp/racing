@@ -5,10 +5,10 @@
 #include	<stdio.h>				// printf
 #include	<fmod.h>
 
-#define	AUDIO_MAX_MUSIC		5
+#define	AUDIO_MAX_MUSIC		3
 #define	AUDIO_MAX_SFX		20
 
-#define	AUDIO_FILEPATH		"res/music"
+#define	AUDIO_MUSICFILEPATH		"res/music"
 
 
 
@@ -103,6 +103,11 @@ void audiomanager_setmastervolume(struct audiomanager* am, float volume);
 	param:	id				index to the sound object
 */
 void audiomanager_togglemusic(struct audiomanager* am, int id);
-
+/*	play next song
+	param:	am				audio manager
+	param:	prev_id				index to the sound object
+	param:	loops			number of times to loop the song
+*/
+int audiomanager_playnexttrack(struct audiomanager* am, int prev_id, int loops);
 
 #endif
