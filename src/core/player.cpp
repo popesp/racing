@@ -80,6 +80,8 @@ void aiplayer_updateinput(struct aiplayer* p)
 	next_index = (p->vehicle->index_track + 3) % p->track->num_pathpoints;
 	vec3f_copy(next_point, p->track->pathpoints[next_index]);
 
+	// future point based on current speed
+
 	vec3f_subtractn(diff, next_point, p->vehicle->pos);
 
 	vec3f_set(right, VEHICLE_RIGHT);

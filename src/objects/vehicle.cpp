@@ -64,6 +64,11 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct renderer* r, struc
 	vec3f_subtractn(diff, max, min);
 	vec3f_scalen(vm->dim, diff, VEHICLE_MESHSCALE);
 
+	float temp;
+	temp = vm->dim[VX];
+	vm->dim[VX] = vm->dim[VZ];
+	vm->dim[VZ] = temp;
+
 	printf("%f, %f, %f\n", vm->dim[VX], vm->dim[VY], vm->dim[VZ]);
 
 	mat4f_scalemul(vm->r_vehicle.matrix_model, VEHICLE_MESHSCALE, VEHICLE_MESHSCALE, VEHICLE_MESHSCALE);
