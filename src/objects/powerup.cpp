@@ -48,7 +48,7 @@ static int proj_norindex[36] =
 
 
 void projectile_init(struct projectile* p, struct physicsmanager* pm,struct player* c) {
-	/*
+	
 	vec3f dim;
 	vec3f_set(dim, PROJECTILE_WIDTH/2.f, PROJECTILE_HEIGHT/2.f, PROJECTILE_LENGTH/2.f);
 
@@ -56,7 +56,7 @@ void projectile_init(struct projectile* p, struct physicsmanager* pm,struct play
 
 	vec3f pos;
 
-	physx::PxMat44 t_player(c->cart.vehicle->body->getGlobalPose());
+	physx::PxMat44 t_player(c->vehicle->body->getGlobalPose());
 	physx::PxVec3 targetpos = t_player.transform(physx::PxVec3(PROJ_TARGETPOS));
 			
 	float proj_x = targetpos.x;
@@ -64,7 +64,7 @@ void projectile_init(struct projectile* p, struct physicsmanager* pm,struct play
 	float proj_z = targetpos.z;
 	vec3f_set(pos, PROJ_TARGETPOS);
 
-	physx::PxTransform projtrans = c->cart.vehicle->body->getGlobalPose().transform(physx::PxTransform(PROJ_TARGETPOS));
+	physx::PxTransform projtrans = c->vehicle->body->getGlobalPose().transform(physx::PxTransform(PROJ_TARGETPOS));
 
 	p->proj = physics_adddynamic_box(pm, pos, dim);
 
@@ -83,19 +83,19 @@ void projectile_init(struct projectile* p, struct physicsmanager* pm,struct play
 	vec3f_set(p->r_proj.material.dif, 0.8f, 0.15f, 0.1f);
 	vec3f_set(p->r_proj.material.spc, 0.8f, 0.5f, 0.5f);
 	p->r_proj.material.shn = 100.f;
-	*/
+	
 }
 
 void projectile_delete(struct projectile* p, struct physicsmanager* pm)
 {
-	/*
+	
 	p->proj->release();
 	renderable_deallocate(&p->r_proj);
-	*/
+	
 }
 
 void projectile_generatemesh(struct renderer* r, struct projectile* p) {
-	/*
+	
 	float* ptr;
 	int i;
 
@@ -110,5 +110,5 @@ void projectile_generatemesh(struct renderer* r, struct projectile* p) {
 		vec3f_copy(ptr, proj_nor[proj_norindex[i]]);
 		ptr += RENDER_ATTRIBSIZE_NOR;
 	}
-	*/
+	
 }
