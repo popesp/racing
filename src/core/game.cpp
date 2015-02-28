@@ -91,6 +91,7 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 		case GLFW_KEY_A:
 			game->amountAI++;
 			
+			//glitches at max so decremented
 			if(game->amountAI>AI_MAX_COUNT-1){
 				game->amountAI=AI_MAX_COUNT-1;
 			}
@@ -111,13 +112,23 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 				}
 				game->winstate = GAME_WINSTATE_ON;
 			}
+			else{
+				//reset laps
+				printf("Game's win state is turned off.\n\n\n");
+				game->player.vehicle->lap=1;
+				for(int i=0; i<=game->amountAI;i++){
+					game->aiplayer[i].vehicle->lap=1;
+				}
+				game->winstate = GAME_WINSTATE_OFF;
+			}
 			break;
 
 		case GLFW_KEY_BACKSPACE:
-				for (int i=1;i<=game->amountAI;i++){
+				//removes all added AI
+				for (int i=0;i<=game->amountAI;i++){
 					aiplayer_delete(&game->aiplayer[i], &game->vehiclemanager);
 				}
-				game->amountAI=0;
+				game->amountAI=-1;
 			break;
 
 		default:
