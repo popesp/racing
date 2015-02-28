@@ -26,7 +26,7 @@ static void resetplayers(struct game* game)
 	vehicle_reset(&game->vehiclemanager, game->aiplayer.vehicle);
 }
 
-
+//test
 static void resize(GLFWwindow* window, int width, int height)
 {
 	struct game* game;
@@ -234,12 +234,15 @@ static void render(struct game* game)
 	// render carts
 	renderable_render(&game->renderer, &game->vehiclemanager.r_vehicle, (float*)&player_world, global_wv, 0);
 	renderable_render(&game->renderer, &game->vehiclemanager.r_vehicle, (float*)&otherguy_world, global_wv, 0);
+	
 	/*
 	if (game->player_proj_flag == 1) {
 		physx::PxMat44 player_proj_world(game->player_proj.proj->getGlobalPose());
 		renderable_render(&game->renderer, &game->player_proj.r_proj, (float*)&player_proj_world, global_wv, 0);
 	}
 	*/
+
+
 	glClear(GL_DEPTH_BUFFER_BIT);
 	renderable_render(&game->renderer, &game->closestpoint, track_mw, global_wv, 0);
 

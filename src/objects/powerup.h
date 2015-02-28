@@ -13,6 +13,9 @@
 
 #define	PROJ_TARGETPOS	0.f, 0.f, -2.0f
 
+#define	CART_FORWARD		0.f, 0.f, -1.f
+#define	CART_FORCE_FORWARD	30.f
+
 struct physicsmanager;
 
 struct projectile

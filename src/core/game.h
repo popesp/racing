@@ -33,6 +33,8 @@
 #define	GAME_STARTINGPOS		-20.f, 1.5f, 0.f // TEMP
 #define	GAME_AISTARTINGPOS		-20.f, 1.5f, -20.f // TEMP
 
+
+
 #define	GAME_FLAG_INIT			0x00
 #define	GAME_FLAG_TERMINATED	0x01
 #define	GAME_FLAG_WIREFRAME		0x02	// TEMP
