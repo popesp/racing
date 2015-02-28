@@ -8,6 +8,7 @@
 #include	"../objects/vehicle.h"
 #include	"../objects/skybox.h"
 #include	"../objects/track.h"
+#include	"../objects/pickups.h"
 #include	"../physics/physics.h"
 #include	"player.h"
 #include	"../render/render.h"
@@ -34,6 +35,8 @@
 #define	GAME_AISTARTINGPOS		-20.f, 1.5f, -20.f // TEMP
 
 
+#define	AI_MAX_COUNT			8
+
 
 #define	GAME_FLAG_INIT			0x00
 #define	GAME_FLAG_TERMINATED	0x01
@@ -59,7 +62,9 @@ struct game
 	struct renderable closestpoint; // temp
 
 	struct player player;
-	struct aiplayer aiplayer;
+	struct aiplayer aiplayer[AI_MAX_COUNT];
+
+	struct pickup pickup1;
 
 	struct camera cam_debug;
 
@@ -78,7 +83,7 @@ struct game
 	unsigned char flags;
 };
 
-
+void spawnai(struct game* game);
 int game_startup(struct game* game);
 void game_mainloop(struct game* game);
 void game_shutdown(struct game* game);

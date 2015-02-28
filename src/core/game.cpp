@@ -19,11 +19,16 @@ static void scroll(GLFWwindow*, double, double);
 static void update(struct game*);
 static void render(struct game*);
 
+static int amountAI =0;
 
 static void resetplayers(struct game* game)
 {
 	vehicle_reset(&game->vehiclemanager, game->player.vehicle);
-	vehicle_reset(&game->vehiclemanager, game->aiplayer.vehicle);
+
+	for(int i=0;i<=amountAI;i++){
+		vehicle_reset(&game->vehiclemanager, game->aiplayer[i].vehicle);
+	}
+	
 }
 
 //test
@@ -93,6 +98,11 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 			
 			break;
 
+		case GLFW_KEY_A:
+			spawnai(game);
+			break;
+
+
 		default:
 			break;
 		}
@@ -145,7 +155,11 @@ static void update(struct game* game)
 
 	// update player and ai input
 	inputmanager_update(&game->inputmanager);
-	aiplayer_updateinput(&game->aiplayer);
+
+	for(int i=0;i<=amountAI;i++){
+		aiplayer_updateinput(&game->aiplayer[i]);
+	}
+	
 
 	// temporary debug button
 	if (game->inputmanager.controllers[GLFW_JOYSTICK_1].flags & INPUT_FLAG_ENABLED){
@@ -202,12 +216,33 @@ static void update(struct game* game)
 		game->flags |= GAME_FLAG_TERMINATED;
 }
 
+static void spawnai(struct game* game){
+	amountAI++;
+	if(amountAI>AI_MAX_COUNT){
+		amountAI=AI_MAX_COUNT;
+	}
+	else{
+
+		vec3f offs;
+		vec3f_set(offs, 0.f, 0.f, 0.f);
+		aiplayer_init(&game->aiplayer[amountAI], &game->vehiclemanager, 0, offs);
+
+		mat4f global_wv;
+
+
+		physx::PxMat44 newworld(game->aiplayer[amountAI].vehicle->body->getGlobalPose());
+		renderable_render(&game->renderer, &game->vehiclemanager.r_vehicle, (float*)&newworld, global_wv, 0);
+	}
+}
+
 static void render(struct game* game)
 {
 	mat4f global_wv, skybox_wv, track_mw, skybox_mw;
 	physx::PxMat44 player_world(game->player.vehicle->body->getGlobalPose());
-	physx::PxMat44 otherguy_world(game->aiplayer.vehicle->body->getGlobalPose());
+	physx::PxMat44 otherguy_world(game->aiplayer[0].vehicle->body->getGlobalPose());
+	
 
+	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// get camera transform
@@ -230,6 +265,12 @@ static void render(struct game* game)
 	// render track
 	mat4f_identity(track_mw);
 	renderable_render(&game->renderer, &game->track.r_track, track_mw, global_wv, 0);
+
+	// render multiple AI's
+	for(int i=0;i<=amountAI;i++){
+		physx::PxMat44 newworld(game->aiplayer[i].vehicle->body->getGlobalPose());
+		renderable_render(&game->renderer, &game->vehiclemanager.r_vehicle, (float*)&newworld, global_wv, 0);	
+	}
 
 	// render carts
 	renderable_render(&game->renderer, &game->vehiclemanager.r_vehicle, (float*)&player_world, global_wv, 0);
@@ -387,7 +428,7 @@ int game_startup(struct game* game)
 		player_init(&game->player, &game->vehiclemanager, &game->inputmanager.controllers[0], 0, offs);
 	else
 		player_init(&game->player, &game->vehiclemanager, &game->inputmanager.keyboard, 0, offs);
-	aiplayer_init(&game->aiplayer, &game->vehiclemanager, 5, offs);
+	aiplayer_init(&game->aiplayer[0], &game->vehiclemanager, 5, offs);
 
 	// initialize debug camera
 	vec3f_set(pos, 0.f, 0.f, -30.f);
@@ -417,8 +458,8 @@ int game_startup(struct game* game)
 	game->track.r_track.texture_ids[RENDER_TEXTURE_NORMAL] = game->tex_trackbump;
 	
 	// add background music
-	game->song_1 = audiomanager_newmusic(&game->audiomanager, "res/music/Daft Punk & The Glitch Mob - Derezzed.mp3");
-	game->song_2 = audiomanager_newmusic(&game->audiomanager, "res/music/Erasure Always.mp3");
+	game->song_1 = audiomanager_newmusic(&game->audiomanager, "res/music/Erasure Always.mp3");
+	game->song_2 = audiomanager_newmusic(&game->audiomanager, "res/music/Daft Punk & The Glitch Mob - Derezzed.mp3");
 	game->song_3 = audiomanager_newmusic(&game->audiomanager, "res/music/Full Force Forward.mp3");
 	game->song_4 = audiomanager_newmusic(&game->audiomanager, "res/music/Daft Punk & Boys Noize - End Of Line.mp3");
 	
@@ -483,7 +524,10 @@ void game_shutdown(struct game* game)
 {
 	// delete players
 	player_delete(&game->player, &game->vehiclemanager);
-	aiplayer_delete(&game->aiplayer, &game->vehiclemanager);
+	for (int i=0;i<=amountAI;i++){
+		aiplayer_delete(&game->aiplayer[i], &game->vehiclemanager);
+	}
+	
 
 	// delete world objects
 	track_delete(&game->track);
