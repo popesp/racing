@@ -34,8 +34,9 @@
 #define	GAME_STARTINGPOS		-20.f, 1.5f, 0.f // TEMP
 #define	GAME_AISTARTINGPOS		-20.f, 1.5f, -20.f // TEMP
 
-#define	AI_MAX_COUNT			8
+#define	AI_MAX_COUNT			9	//MAX IS 9. buttons glitch over that.
 
+#define GAME_WIN_LAP			5
 
 #define	GAME_FLAG_INIT			0x00
 #define	GAME_FLAG_TERMINATED	0x01

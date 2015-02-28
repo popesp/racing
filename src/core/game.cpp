@@ -27,7 +27,7 @@ static void checkwin(struct game* game){
 	int cp1 = game->track.num_pathpoints / 3;
 	int cp2 = game->track.num_pathpoints / 2;
 
-	if(game->player.vehicle->lap==5){
+	if(game->player.vehicle->lap==GAME_WIN_LAP){
 		printf("Player has won the game!\nGame's over\n\n");
 
 		//reset laps
@@ -40,7 +40,7 @@ static void checkwin(struct game* game){
 	}
 
 	for(int i=0;i<=amountAI;i++){
-		if(game->aiplayer[i].vehicle->lap==5){
+		if(game->aiplayer[i].vehicle->lap==GAME_WIN_LAP){
 			printf("AI %d has won the game!\nGame's over\n\n", i);
 
 			//reset laps
@@ -167,13 +167,15 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 
 		case GLFW_KEY_A:
 			amountAI++;
-			if(amountAI>AI_MAX_COUNT){
-				amountAI=AI_MAX_COUNT;
+			
+			if(amountAI>AI_MAX_COUNT-1){
+				amountAI=AI_MAX_COUNT-1;
 			}
 			else{
 				vec3f offs;
 				vec3f_set(offs, 0.f, 0.f, 0.f);
 				aiplayer_init(&game->aiplayer[amountAI], &game->vehiclemanager, 5, offs);
+				printf("AI %d has been added to the game.\n", (amountAI));
 			}
 			break;
 
@@ -186,6 +188,13 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 				}
 				winstate=true;
 			}
+			break;
+
+		case GLFW_KEY_BACKSPACE:
+				for (int i=1;i<=amountAI;i++){
+					aiplayer_delete(&game->aiplayer[i], &game->vehiclemanager);
+				}
+				amountAI=0;
 			break;
 
 		default:

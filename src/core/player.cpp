@@ -51,7 +51,7 @@ void aiplayer_init(struct aiplayer* p, struct vehiclemanager* vm, int index_trac
 	p->controller.num_buttons = INPUT_CONTROLLER_BUTTONS;
 	p->controller.num_axes = INPUT_CONTROLLER_AXES;
 
-	p->controller.buttons = (unsigned char*)mem_alloc(sizeof(unsigned char) * INPUT_CONTROLLER_BUTTONS);
+	p->controller.buttons = (unsigned char*)mem_alloc(sizeof(unsigned char) * INPUT_CONTROLLER_BUTTONS+1);
 	p->controller.axes = (float*)mem_alloc(sizeof(float) * INPUT_CONTROLLER_AXES);
 
 	// connect controller to the cart
