@@ -77,7 +77,7 @@ void aiplayer_updateinput(struct aiplayer* p)
 
 	resetcontroller(p);
 
-	next_index = (p->vehicle->index_track + 1) % p->track->num_pathpoints;
+	next_index = (p->vehicle->index_track + 3) % p->track->num_pathpoints;
 	vec3f_copy(next_point, p->track->pathpoints[next_index]);
 
 	vec3f_subtractn(diff, next_point, p->vehicle->pos);
@@ -85,9 +85,9 @@ void aiplayer_updateinput(struct aiplayer* p)
 	vec3f_set(right, VEHICLE_RIGHT);
 	mat4f_transformvec3f(right, (float*)&pose);
 
-	p->controller.axes[INPUT_AXIS_LEFT_LR] = vec3f_dot(right, diff) * 2.f / vec3f_length(diff);
+	p->controller.axes[INPUT_AXIS_LEFT_LR] = vec3f_dot(right, diff) * 4.f / vec3f_length(diff);
 
-	p->controller.axes[INPUT_AXIS_TRIGGERS] = -0.7f;
+	p->controller.axes[INPUT_AXIS_TRIGGERS] = -0.8f;
 }
 
 
