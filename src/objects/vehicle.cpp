@@ -16,9 +16,8 @@
 */
 void vehiclemanager_startup(struct vehiclemanager* vm, struct renderer* r, struct texturemanager* tm, struct physicsmanager* pm, struct track* t, const char* mesh_filename, const char* tex_filename)
 {
-	vec3f min, max, avg, diff, dim;
+	vec3f min, max, avg, diff;
 	struct vehicle* v;
-	float scale;
 	int i;
 
 	vm->pm = pm;
@@ -61,20 +60,13 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct renderer* r, struc
 	vec3f_addn(avg, min, max);
 	vec3f_scale(avg, 0.5f);
 
-	// find scale ratios for each dimension
+	// find dimensions of model
 	vec3f_subtractn(diff, max, min);
-	vec3f_set(dim, VEHICLE_WIDTH / diff[VX], VEHICLE_HEIGHT / diff[VY], VEHICLE_LENGTH / diff[VZ]);
-	
-	printf("%f, %f, %f\n", diff[VX], diff[VY], diff[VZ]);
+	vec3f_scalen(vm->dim, diff, VEHICLE_MESHSCALE);
 
-	// find smallest ratio
-	scale = dim[VX];
-	if (dim[VY] < scale)
-		scale = dim[VY];
-	if (dim[VZ] < scale)
-		scale = dim[VZ];
+	printf("%f, %f, %f\n", vm->dim[VX], vm->dim[VY], vm->dim[VZ]);
 
-	mat4f_scalemul(vm->r_vehicle.matrix_model, scale, scale, scale);
+	mat4f_scalemul(vm->r_vehicle.matrix_model, VEHICLE_MESHSCALE, VEHICLE_MESHSCALE, VEHICLE_MESHSCALE);
 	mat4f_rotateymul(vm->r_vehicle.matrix_model, -1.57080f);
 	mat4f_translatemul(vm->r_vehicle.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
 
@@ -122,7 +114,7 @@ void vehiclemanager_shutdown(struct vehiclemanager* vm)
 struct vehicle* vehiclemanager_newvehicle(struct vehiclemanager* vm, int index_track, vec3f offs)
 {
 	struct vehicle* v;
-	vec3f dim, spawn;
+	vec3f spawn;
 	int i;
 
 	for (i = 0; i < VEHICLE_COUNT; i++)
@@ -141,11 +133,8 @@ struct vehicle* vehiclemanager_newvehicle(struct vehiclemanager* vm, int index_t
 	vec3f_add(v->pos, spawn);
 	vec3f_add(v->pos, offs);
 
-	// set vehicle dimensions
-	vec3f_set(dim, VEHICLE_WIDTH/2.f, VEHICLE_HEIGHT/2.f, VEHICLE_LENGTH/2.f);
-
 	// create a physics object and add it to the scene
-	v->body = physx::PxCreateDynamic(*vm->pm->sdk, physx::PxTransform(v->pos[VX], v->pos[VY], v->pos[VZ]), physx::PxBoxGeometry(dim[VX], dim[VY], dim[VZ]), *vm->pm->default_material, 1.f);
+	v->body = physx::PxCreateDynamic(*vm->pm->sdk, physx::PxTransform(v->pos[VX], v->pos[VY], v->pos[VZ]), physx::PxBoxGeometry(vm->dim[VX] * 0.5f, vm->dim[VY] * 0.5f, vm->dim[VZ] * 0.5f), *vm->pm->default_material, VEHICLE_DENSITY);
 	vm->pm->scene->addActor(*v->body);
 
 	// set damping forces
@@ -153,10 +142,10 @@ struct vehicle* vehiclemanager_newvehicle(struct vehiclemanager* vm, int index_t
 	v->body->setAngularDamping(VEHICLE_DAMP_ANGULAR);
 
 	// create the raycast origins in "model" space
-	vec3f_set(v->ray_origins[VEHICLE_RAYCAST_FRONTLEFT], -dim[VX] + VEHICLE_RAYCAST_WIDTHOFFSET, -dim[VY], -dim[VZ] + VEHICLE_RAYCAST_FRONTOFFSET);
-	vec3f_set(v->ray_origins[VEHICLE_RAYCAST_FRONTRIGHT], dim[VX] - VEHICLE_RAYCAST_WIDTHOFFSET, -dim[VY], -dim[VZ] + VEHICLE_RAYCAST_FRONTOFFSET);
-	vec3f_set(v->ray_origins[VEHICLE_RAYCAST_BACKLEFT], -dim[VX] + VEHICLE_RAYCAST_WIDTHOFFSET, -dim[VY], dim[VZ] - VEHICLE_RAYCAST_BACKOFFSET);
-	vec3f_set(v->ray_origins[VEHICLE_RAYCAST_BACKRIGHT], dim[VX] - VEHICLE_RAYCAST_WIDTHOFFSET, -dim[VY], dim[VZ] - VEHICLE_RAYCAST_BACKOFFSET);
+	vec3f_set(v->ray_origins[VEHICLE_RAYCAST_FRONTLEFT], -vm->dim[VX] * 0.5f + VEHICLE_RAYCAST_WIDTHOFFSET, -vm->dim[VY] * 0.5f, -vm->dim[VZ] * 0.5f + VEHICLE_RAYCAST_FRONTOFFSET);
+	vec3f_set(v->ray_origins[VEHICLE_RAYCAST_FRONTRIGHT], vm->dim[VX] * 0.5f - VEHICLE_RAYCAST_WIDTHOFFSET, -vm->dim[VY] * 0.5f, -vm->dim[VZ] * 0.5f + VEHICLE_RAYCAST_FRONTOFFSET);
+	vec3f_set(v->ray_origins[VEHICLE_RAYCAST_BACKLEFT], -vm->dim[VX] * 0.5f + VEHICLE_RAYCAST_WIDTHOFFSET, -vm->dim[VY] * 0.5f, vm->dim[VZ] * 0.5f - VEHICLE_RAYCAST_BACKOFFSET);
+	vec3f_set(v->ray_origins[VEHICLE_RAYCAST_BACKRIGHT], vm->dim[VX] * 0.5f - VEHICLE_RAYCAST_WIDTHOFFSET, -vm->dim[VY] * 0.5f, vm->dim[VZ] * 0.5f - VEHICLE_RAYCAST_BACKOFFSET);
 
 	// create the raycast directions in "model" space
 	vec3f_set(v->ray_dirs[VEHICLE_RAYCAST_FRONTLEFT], 0.f, -1.f, 0.f);
@@ -204,7 +193,7 @@ static float getspeed(struct vehicle* v)
 	return vec3f_dot(vel, forward);
 }
 
-static void vehicleinput(struct vehicle* v, float speed)
+static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float speed)
 {
 	vec3f force;
 
@@ -232,7 +221,7 @@ static void vehicleinput(struct vehicle* v, float speed)
 		if (v->controller->axes[INPUT_AXIS_TRIGGERS] > 0.1f && speed < 0.f)
 			vec3f_negate(force);
 		
-		physx::PxRigidBodyExt::addLocalForceAtLocalPos(*v->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, -VEHICLE_LENGTH/2.f));
+		physx::PxRigidBodyExt::addLocalForceAtLocalPos(*v->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, -vm->dim[VZ]/2.f));
 
 		// firing a projectile
 		if (v->controller->buttons[INPUT_BUTTON_A] == (INPUT_STATE_DOWN | INPUT_STATE_CHANGED))
@@ -292,7 +281,7 @@ void vehiclemanager_update(struct vehiclemanager* vm)
 		speed = getspeed(v);
 
 		// process controller input
-		vehicleinput(v, speed);
+		vehicleinput(vm, v, speed);
 
 		physx::PxMat44 transform(pose);
 
@@ -347,7 +336,6 @@ void vehicle_reset(struct vehiclemanager* vm, struct vehicle* v)
 	vec3f_add(v->pos, spawn);
 
 	// TODO: set the orientation of the vehicle to the track gradient
-
 	v->body->setGlobalPose(physx::PxTransform(physx::PxVec3(v->pos[VX], v->pos[VY], v->pos[VZ])));
 	v->body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
 	v->body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));

@@ -25,6 +25,8 @@ struct aiplayer
 {
 	struct vehicle* vehicle;
 
+	struct track* track;
+
 	struct controller controller;
 };
 

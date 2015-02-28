@@ -48,8 +48,6 @@ void physicsmanager_shutdown(struct physicsmanager* pm)
 	pm->scene->release();
 	pm->default_material->release();
 
-	PxCloseVehicleSDK();
-
 	pm->cooking->release();
 	pm->sdk->release();
 	pm->foundation->release();
