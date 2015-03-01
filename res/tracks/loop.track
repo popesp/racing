@@ -3,11 +3,11 @@ looped = true;
 
 point0 = pos(-20.0, 0.0, 0.0), tan(0.0, 0.0, -1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
 
-point1 = pos(-20.0, 0.0, -20.0), tan(0.0, 0.0, -1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
+point1 = pos(-40.0, 0.0, -20.0), tan(0.0, 0.0, -1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
 point2 = pos(-40.0, 0.0, -40.0), tan(0.0, 0.0, -1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
-point3 = pos(-40.0, 10.0, -50.0), tan(0.0, 1.0, -1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
-point4 = pos(-20.0, 25.0, -20.0), tan(0.0, 0.0, 1.0), angle(3.20), weight(50.0), width(12.0), subdivisions(20)
-point5 = pos(-20.0, 10.0, -10.0), tan(0.0, 1.0, -1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
+point3 = pos(-40.0, 10.0, -50.0), tan(0.0, 1.0, 0.1), angle(3.14159), weight(50.0), width(12.0), subdivisions(20)
+point4 = pos(-30.0, 25.0, -40.0), tan(0.0, 0.0, 1.0), angle(3.14159), weight(50.0), width(12.0), subdivisions(20)
+point5 = pos(-20.0, 10.0, -20.0), tan(0.0, -1.0, 0.1), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
 point6 = pos(-20.0, 0.0, -50.0), tan(0.0, 0.0, -1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
 
 
