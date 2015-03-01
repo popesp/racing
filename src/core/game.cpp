@@ -116,8 +116,10 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 				//reset laps
 				printf("Game's win state is turned off.\n\n\n");
 				game->player.vehicle->lap=1;
+				game->player.vehicle->checkpoint1 = game->player.vehicle->checkpoint2 = false;
 				for(int i=0; i<=game->amountAI;i++){
 					game->aiplayer[i].vehicle->lap=1;
+					game->aiplayer[i].vehicle->checkpoint1 = game->aiplayer[i].vehicle->checkpoint2 = false;
 				}
 				game->winstate = GAME_WINSTATE_OFF;
 			}
@@ -485,8 +487,10 @@ static void checkwin(struct game* game){
 
 		//reset laps
 		game->player.vehicle->lap=1;
+		game->player.vehicle->checkpoint1 = game->player.vehicle->checkpoint2 = false;
 		for(int i=0; i<=game->amountAI;i++){
 			game->aiplayer[i].vehicle->lap=1;
+			game->aiplayer[i].vehicle->checkpoint1 = game->aiplayer[i].vehicle->checkpoint2 = false;
 		}
 
 		game->winstate = GAME_WINSTATE_OFF;
@@ -498,8 +502,10 @@ static void checkwin(struct game* game){
 
 			//reset laps
 			game->player.vehicle->lap=1;
+			game->player.vehicle->checkpoint1 = game->player.vehicle->checkpoint2 = false;
 			for(int i=0; i<=game->amountAI;i++){
 				game->aiplayer[i].vehicle->lap=1;
+				game->aiplayer[i].vehicle->checkpoint1 = game->aiplayer[i].vehicle->checkpoint2 = false;
 			}
 			game->winstate = GAME_WINSTATE_OFF;
 		}
