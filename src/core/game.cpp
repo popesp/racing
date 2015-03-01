@@ -479,9 +479,11 @@ int game_startup(struct game* game)
 
 static void checkwin(struct game* game){
 
-	int cp1 = game->track.num_pathpoints / 3;
-	int cp2 = game->track.num_pathpoints / 2;
+	//set 2 checkpoints
+	unsigned int cp1 = game->track.num_pathpoints / 3;
+	unsigned int cp2 = game->track.num_pathpoints / 2;
 
+	//if player wins
 	if(game->player.vehicle->lap==GAME_WIN_LAP){
 		printf("Player has won the game!\nGame's over\n\n");
 
@@ -496,6 +498,7 @@ static void checkwin(struct game* game){
 		game->winstate = GAME_WINSTATE_OFF;
 	}
 
+	//if ai wins
 	for(int i=0;i<=game->amountAI;i++){
 		if(game->aiplayer[i].vehicle->lap==GAME_WIN_LAP){
 			printf("AI %d has won the game!\nGame's over\n\n", i);
@@ -511,20 +514,24 @@ static void checkwin(struct game* game){
 		}
 	}
 
+
+
+
+
 	//player win logic
-	if(game->player.vehicle->checkpoint1==false && game->player.vehicle->index_track==cp1){
+	if(game->player.vehicle->checkpoint1==false && (unsigned)game->player.vehicle->index_track==cp1){
 		game->player.vehicle->checkpoint1=true;
 	}
 
-	if(game->player.vehicle->checkpoint2==false && game->player.vehicle->checkpoint1==true && game->player.vehicle->index_track==cp2){
+	if(game->player.vehicle->checkpoint2==false && game->player.vehicle->checkpoint1==true && (unsigned)game->player.vehicle->index_track==cp2){
 		game->player.vehicle->checkpoint2=true;
 	}
 
-	if(game->player.vehicle->checkpoint2==true && game->player.vehicle->index_track==cp1){
+	if(game->player.vehicle->checkpoint2==true && (unsigned)game->player.vehicle->index_track==cp1){
 		game->player.vehicle->checkpoint2=false;
 	}
 
-	if(game->player.vehicle->checkpoint2==true&&game->player.vehicle->checkpoint1==true&&game->player.vehicle->index_track==game->track.num_pathpoints-1){
+	if(game->player.vehicle->checkpoint2==true&&game->player.vehicle->checkpoint1==true&& (unsigned)game->player.vehicle->index_track==game->track.num_pathpoints-1){
 		game->player.vehicle->lap++;
 		printf("Player is on lap %d\n", game->player.vehicle->lap);
 		game->player.vehicle->checkpoint1=false;
@@ -533,19 +540,19 @@ static void checkwin(struct game* game){
 
 	//AI win logic
 	for(int i=0;i<=game->amountAI;i++){
-		if(game->aiplayer[i].vehicle->checkpoint1==false && game->aiplayer[i].vehicle->index_track==cp1){
+		if(game->aiplayer[i].vehicle->checkpoint1==false && (unsigned)game->aiplayer[i].vehicle->index_track==cp1){
 			game->aiplayer[i].vehicle->checkpoint1=true;
 		}
 
-		if(game->aiplayer[i].vehicle->checkpoint2==false && game->aiplayer[i].vehicle->checkpoint1==true && game->aiplayer[i].vehicle->index_track==cp2){
+		if(game->aiplayer[i].vehicle->checkpoint2==false && game->aiplayer[i].vehicle->checkpoint1==true && (unsigned)game->aiplayer[i].vehicle->index_track==cp2){
 			game->aiplayer[i].vehicle->checkpoint2=true;
 		}
 
-		if(game->aiplayer[i].vehicle->checkpoint2==true && game->aiplayer[i].vehicle->index_track==cp1){
+		if(game->aiplayer[i].vehicle->checkpoint2==true && (unsigned)game->aiplayer[i].vehicle->index_track==cp1){
 			game->aiplayer[i].vehicle->checkpoint2=false;
 		}
 
-		if(game->aiplayer[i].vehicle->checkpoint2==true&&game->aiplayer[i].vehicle->checkpoint1==true&&game->aiplayer[i].vehicle->index_track==game->track.num_pathpoints-1){
+		if(game->aiplayer[i].vehicle->checkpoint2==true&&game->aiplayer[i].vehicle->checkpoint1==true&& (unsigned)game->aiplayer[i].vehicle->index_track==game->track.num_pathpoints-1){
 			game->aiplayer[i].vehicle->lap++;
 			printf("AI %d is on lap %d\n", i, game->aiplayer[i].vehicle->lap);
 			game->aiplayer[i].vehicle->checkpoint1=false;
