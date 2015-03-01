@@ -540,12 +540,49 @@ static void checkplace(struct game* game){
 
 		// IF MORE THAN ONE AI
 		if(game->amountAI > 0){
+			for(int j=0; j<=game->amountAI;j++){
 
+				//check index first
+				//AI has larger index than player
+				if(game->aiplayer[i].vehicle->index_track > game->player.vehicle->index_track){
+					game->aiplayer[i].vehicle->place = game->player.vehicle->place-1;
+					game->player.vehicle->place = game->aiplayer[i].vehicle->place+1;
+				}
+
+				//player has larger index
+				else if(game->aiplayer[i].vehicle->index_track < game->player.vehicle->index_track){
+					game->player.vehicle->place = game->aiplayer[i].vehicle->place-1;
+					game->aiplayer[i].vehicle->place = game->player.vehicle->place+1;
+				}
+
+				//same index player ahead
+				else if(game->aiplayer[i].vehicle->index_track == game->player.vehicle->index_track){
+					game->player.vehicle->place = game->aiplayer[i].vehicle->place-1;
+					game->aiplayer[i].vehicle->place = game->player.vehicle->place+1;
+				}
+
+								if(game->aiplayer[i].vehicle->index_track > game->aiplayer[j].vehicle->index_track){
+
+									game->aiplayer[i].vehicle->place = game->aiplayer[j].vehicle->place-1;
+									game->aiplayer[j].vehicle->place = game->aiplayer[i].vehicle->place+1;
+
+								}
+								else if(game->aiplayer[i].vehicle->index_track < game->aiplayer[j].vehicle->index_track){
+									game->aiplayer[j].vehicle->place = game->aiplayer[i].vehicle->place-1;
+									game->aiplayer[i].vehicle->place = game->aiplayer[j].vehicle->place+1;
+
+								}
+								
+
+
+										
+
+			}
 		}
 	}
 
-	//printf("Players place %d     AI[0] %d       AI[1] %d\n ", game->player.vehicle->place, game->aiplayer[0].vehicle->place, game->aiplayer[1].vehicle->place);
-	printf("Players place %d     AI[0] %d\n ", game->player.vehicle->place, game->aiplayer[0].vehicle->place);
+	printf("Player   %d    AI[0] %d     AI[1] %d    AI[2] %d\n", game->player.vehicle->place, game->aiplayer[0].vehicle->place, game->aiplayer[1].vehicle->place, game->aiplayer[2].vehicle->place);
+	//printf("Players place %d     AI[0] %d\n ", game->player.vehicle->place, game->aiplayer[0].vehicle->place);
 }
 
 static void checkwin(struct game* game){
