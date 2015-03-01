@@ -106,10 +106,16 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 		case GLFW_KEY_SPACE:
 			if(game->winstate == GAME_WINSTATE_OFF){
 				printf("Game's win state is activated.\n\n\n");
-				printf("Player is on lap %d\n", game->player.vehicle->lap);
+				//printf("Player is on lap %d\n", game->player.vehicle->lap);
+
+				//initialize places
+				game->player.vehicle->place=game->amountAI+2;
+				printf("Player is in %d\n", game->player.vehicle->place);
 				for(int i=0;i<=game->amountAI;i++){
-					printf("AI %d is on lap %d\n", i, game->aiplayer[i].vehicle->lap);
+					//printf("AI %d is on lap %d\n", i, game->aiplayer[i].vehicle->lap);
+					game->aiplayer[i].vehicle->place=game->amountAI+2;
 				}
+
 				game->winstate = GAME_WINSTATE_ON;
 			}
 			else{
@@ -477,6 +483,46 @@ int game_startup(struct game* game)
 	return 1;
 }
 
+static void checkplace(struct game* game){
+	
+
+	//first check laps
+	for(int i=0; i<=game->amountAI;i++){
+		game->aiplayer[i].vehicle->place=game->amountAI+2;
+		game->player.vehicle->place=game->amountAI+2;
+
+		//AI has larger lap
+		if(game->aiplayer[i].vehicle->lap > game->player.vehicle->lap){
+
+			game->aiplayer[i].vehicle->place = game->player.vehicle->place-1;
+			game->player.vehicle->place = game->aiplayer[i].vehicle->place+1;
+		}
+
+		//placer has larger lap
+		else if(game->aiplayer[i].vehicle->lap < game->player.vehicle->lap){
+			game->player.vehicle->place = game->aiplayer[i].vehicle->place-1;
+			game->aiplayer[i].vehicle->place = game->player.vehicle->place+1;
+		}
+
+		
+		else if(game->aiplayer[i].vehicle->lap == game->player.vehicle->lap){
+				//AI has larger index
+				if(game->aiplayer[i].vehicle->index_track > game->player.vehicle->index_track){
+
+					game->aiplayer[i].vehicle->place = game->player.vehicle->place-1;
+					game->player.vehicle->place = game->aiplayer[i].vehicle->place+1;
+				}
+
+				else if(game->aiplayer[i].vehicle->index_track < game->player.vehicle->index_track){
+					game->player.vehicle->place = game->aiplayer[i].vehicle->place-1;
+					game->aiplayer[i].vehicle->place = game->player.vehicle->place+1;
+				}
+		}
+	}
+
+	printf("Players place %d     AI[0] %d\n ", game->player.vehicle->place, game->aiplayer[0].vehicle->place);
+}
+
 static void checkwin(struct game* game){
 
 	//set 2 checkpoints
@@ -497,9 +543,10 @@ static void checkwin(struct game* game){
 
 		game->winstate = GAME_WINSTATE_OFF;
 	}
-
-	//if ai wins
+	
 	for(int i=0;i<=game->amountAI;i++){
+
+		//if ai wins
 		if(game->aiplayer[i].vehicle->lap==GAME_WIN_LAP){
 			printf("AI %d has won the game!\nGame's over\n\n", i);
 
@@ -513,9 +560,7 @@ static void checkwin(struct game* game){
 			game->winstate = GAME_WINSTATE_OFF;
 		}
 	}
-
-
-
+	
 
 
 	//player win logic
@@ -605,6 +650,7 @@ void game_mainloop(struct game* game)
 		// check if someone has won game
 		if(game->winstate == GAME_WINSTATE_ON){
 			checkwin(game);
+			checkplace(game);
 		}
 	}
 }

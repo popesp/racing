@@ -61,7 +61,7 @@ struct vehicle
 	int index_track;
 
 	int lap;
-	int place[VEHICLE_COUNT];
+	int place;
 
 	//these are used to see if player vehicle is completing the race
 	bool checkpoint1;
