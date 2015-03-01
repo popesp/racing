@@ -62,7 +62,10 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 			game->index_currentsong = (game->index_currentsong + 1) % GAME_MUSIC_COUNT;
 			audiomanager_playmusic(&game->audiomanager, game->index_currentsong, -1);
 			break;
-
+		case GLFW_KEY_O:
+			//pause song
+			audiomanager_togglemusic(&game->audiomanager, game->index_currentsong);
+			break;
 		case GLFW_KEY_Q:
 			if (game->flags & GAME_FLAG_WIREFRAME)
 			{
@@ -408,7 +411,7 @@ int game_startup(struct game* game)
 
 	// initialize track object
 	track_init(&game->track, up, &game->physicsmanager);
-	track_loadpointsfile(&game->track, "res/tracks/wipeout.track");
+	track_loadpointsfile(&game->track, "res/tracks/turn.track");
 	track_generate(&game->renderer, &game->track);
 	renderable_sendbuffer(&game->renderer, &game->track.r_track);
 
@@ -460,6 +463,16 @@ int game_startup(struct game* game)
 	game->songs[GAME_MUSIC_4_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_4_FILENAME);
 	game->index_currentsong = 0;
 	audiomanager_playmusic(&game->audiomanager, game->songs[game->index_currentsong], -1);
+
+	
+	// add sfx
+	game->sfx[GAME_SFX_1_ID] = audiomanager_newsfx(&game->audiomanager, GAME_SFX_1_FILENAME);
+	game->sfx[GAME_SFX_2_ID] = audiomanager_newsfx(&game->audiomanager, GAME_SFX_2_FILENAME);
+	game->sfx[GAME_SFX_3_ID] = audiomanager_newsfx(&game->audiomanager, GAME_SFX_3_FILENAME);
+	//audiomanager_playsfx(&game->audiomanager, GAME_SFX_2_ID);
+	//audiomanager_setsoundposition(&game->audiomanager, GAME_SFX_2_ID, game->player.vehicle->pos);
+	
+
 
 	/* temp */
 	renderable_init(&game->closestpoint,  RENDER_MODE_LINESTRIP, RENDER_TYPE_WIRE_S, RENDER_FLAG_DYNAMIC);

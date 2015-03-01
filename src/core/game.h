@@ -46,6 +46,15 @@
 #define	GAME_MUSIC_3_FILENAME	"res/music/Full Force Forward.mp3"
 #define	GAME_MUSIC_4_FILENAME	"res/music/Daft Punk & Boys Noize - End Of Line.mp3"
 
+#define	GAME_SFX_1_ID			0
+#define	GAME_SFX_2_ID			1
+#define	GAME_SFX_3_ID			2
+#define	GAME_SFX_1_FILENAME	"res/soundfx/143558__fight2flyphoto__bf-109-flyby.wav"
+#define	GAME_SFX_2_FILENAME	"res/soundfx/engine.wav"
+#define	GAME_SFX_3_FILENAME	"res/soundfx/crash.wav"
+
+
+
 #define GAME_WIN_LAP			5
 #define GAME_WINSTATE_OFF		0x0
 #define GAME_WINSTATE_ON		0x1
@@ -88,6 +97,7 @@ struct game
 
 	int index_currentsong;
 	int songs[GAME_MUSIC_COUNT];
+	int sfx[AUDIO_MAX_SFX];
 
 	int amountAI;
 
