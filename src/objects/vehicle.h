@@ -9,7 +9,7 @@
 #include	"../render/render.h"
 
 
-#define	VEHICLE_COUNT				10
+#define	VEHICLE_COUNT				152
 #define	VEHICLE_COUNT_RAYCASTS		4
 
 #define	VEHICLE_RAYCAST_FRONTLEFT	0
