@@ -8,7 +8,6 @@
 #include	"../objects/vehicle.h"
 #include	"../objects/skybox.h"
 #include	"../objects/track.h"
-#include	"../objects/pickups.h"
 #include	"../physics/physics.h"
 #include	"player.h"
 #include	"../render/render.h"

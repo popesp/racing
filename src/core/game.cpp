@@ -288,6 +288,13 @@ static void render(struct game* game)
 	// render carts
 	renderable_render(&game->renderer, &game->vehiclemanager.r_vehicle, (float*)&player_world, global_wv, 0);
 
+	// render place
+	if(game->flags == GAME_FLAG_INIT || game->flags == GAME_FLAG_WIREFRAME){
+		if(game->winstate == GAME_WINSTATE_ON){
+			
+		}
+	}
+
 	glClear(GL_DEPTH_BUFFER_BIT);
 	renderable_render(&game->renderer, &game->closestpoint, track_mw, global_wv, 0);
 
@@ -439,6 +446,8 @@ int game_startup(struct game* game)
 	vec3f_set(dir, 0.f, 0.f, -1.f);
 	camera_init(&game->cam_debug, pos, dir, up);
 
+
+
 	// initialize lights
 	vec3f_set(game->track_lights[0].pos, 0.f, 10.f, 0.f);
 	vec3f_set(game->track_lights[0].dif, 1.f, 1.f, 1.f);
@@ -578,7 +587,10 @@ static void checkplace(struct game* game){
 								}
 															
 			}
-			printf("Player   %d    AI[0] %d     AI[1] %d    AI[2] %d\n", game->player.vehicle->place, game->aiplayer[0].vehicle->place, game->aiplayer[1].vehicle->place, game->aiplayer[2].vehicle->place);
+
+			if(game->amountAI>1){
+				printf("Player   %d    AI[0] %d     AI[1] %d    AI[2] %d\n", game->player.vehicle->place, game->aiplayer[0].vehicle->place, game->aiplayer[1].vehicle->place, game->aiplayer[2].vehicle->place);
+			}
 		}
 	}
 }
