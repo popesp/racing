@@ -9,7 +9,7 @@
 #include	"../render/render.h"
 
 
-#define	VEHICLE_COUNT				152
+#define	VEHICLE_COUNT				152		// one higher than AI count to account for player
 #define	VEHICLE_COUNT_RAYCASTS		4
 
 #define	VEHICLE_RAYCAST_FRONTLEFT	0
@@ -61,6 +61,7 @@ struct vehicle
 	int index_track;
 
 	int lap;
+	int place;
 
 	//these are used to see if player vehicle is completing the race
 	bool checkpoint1;
