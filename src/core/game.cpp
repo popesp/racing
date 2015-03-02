@@ -535,12 +535,16 @@ static void checkplace(struct game* game){
 				}
 
 			}
+			printf("Players place %d     AI[0] %d\n ", game->player.vehicle->place, game->aiplayer[0].vehicle->place);
 		}
 		
 
 		// IF MORE THAN ONE AI
 		if(game->amountAI > 0){
 			for(int j=0; j<=game->amountAI;j++){
+
+
+				//FIXING INDEX BEFORE LAPS
 
 				//check index first
 				//AI has larger index than player
@@ -572,17 +576,11 @@ static void checkplace(struct game* game){
 									game->aiplayer[i].vehicle->place = game->aiplayer[j].vehicle->place+1;
 
 								}
-								
-
-
-										
-
+															
 			}
+			printf("Player   %d    AI[0] %d     AI[1] %d    AI[2] %d\n", game->player.vehicle->place, game->aiplayer[0].vehicle->place, game->aiplayer[1].vehicle->place, game->aiplayer[2].vehicle->place);
 		}
 	}
-
-	printf("Player   %d    AI[0] %d     AI[1] %d    AI[2] %d\n", game->player.vehicle->place, game->aiplayer[0].vehicle->place, game->aiplayer[1].vehicle->place, game->aiplayer[2].vehicle->place);
-	//printf("Players place %d     AI[0] %d\n ", game->player.vehicle->place, game->aiplayer[0].vehicle->place);
 }
 
 static void checkwin(struct game* game){
