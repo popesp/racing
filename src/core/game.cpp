@@ -416,7 +416,7 @@ int game_startup(struct game* game)
 	physicsmanager_addstatic_trianglestrip(&game->physicsmanager, game->track.r_track.num_verts, sizeof(float)*RENDER_VERTSIZE_BUMP_L, game->track.r_track.buf_verts);
 	
 	// start up the vehicle manager for the track
-	vehiclemanager_startup(&game->vehiclemanager, &game->renderer, &game->texturemanager, &game->physicsmanager, &game->track, "res/models/car/car.obj", "res/models/car/outUV.jpg");
+	vehiclemanager_startup(&game->vehiclemanager, &game->renderer, &game->texturemanager, &game->physicsmanager, &game->track, "res/models/car/car.obj", "res/models/car/carUV.png");
 
 	// initialize player objects
 	vec3f_set(offs, 0.f, 0.f, 0.f);
