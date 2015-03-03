@@ -301,7 +301,7 @@ static void render(struct game* game)
 	if(game->entitymanager.proj_flag == 1) {
 		//printf("%f %f %f\n", game->entitymanager.projectiles[0].proj->getGlobalPose().p.x,game->entitymanager.projectiles[0].proj->getGlobalPose().p.y,game->entitymanager.projectiles[0].proj->getGlobalPose().p.z);
 		physx::PxMat44 proj_world(game->vehiclemanager.em->projectiles[0].proj->getGlobalPose());// .projectiles[0].proj->getGlobalPose());
-		renderable_render(&game->renderer, &game->vehiclemanager.em->r_proj, (float*)&proj_world, global_wv, 0);
+		renderable_render(&game->renderer, &game->vehiclemanager.r_vehicle, (float*)&proj_world, global_wv, 0);
 	}
 
 	glClear(GL_DEPTH_BUFFER_BIT);

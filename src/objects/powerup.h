@@ -6,6 +6,8 @@
 #include	"../render/render.h"
 #include	"vehicle.h"
 #include	"../core/player.h"
+#include	"../render/objloader.h"
+#include	"../render/texture.h"
 
 #define PROJECTILE_WIDTH		1.2f
 #define PROJECTILE_LENGTH		0.6f
@@ -45,7 +47,7 @@ struct entitymanager
 	//struct mine mines[1];
 	//struct pickup pickups[1];
 };
-void entitymanager_startup(struct entitymanager* em, struct renderer* r, struct texturemanager* tm, struct physicsmanager* pm, struct track* t);
+void entitymanager_startup(struct entitymanager* em, struct renderer* r, struct texturemanager* tm, struct physicsmanager* pm, struct track* t, const char* mesh_filename);
 
 void projectile_init(struct projectile* p, struct physicsmanager* pm, struct vehicle* v);
 

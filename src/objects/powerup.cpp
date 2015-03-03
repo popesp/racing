@@ -46,7 +46,7 @@ static int proj_norindex[36] =
 	5, 5, 5, 5, 5, 5
 };
 
-void entitymanager_startup(struct entitymanager* em, struct renderer* r, struct texturemanager* tm, struct physicsmanager* pm, struct track* t) {
+void entitymanager_startup(struct entitymanager* em, struct renderer* r, struct texturemanager* tm, struct physicsmanager* pm, struct track* t, const char* mesh_filename) {
 
 	struct projectile* proj;
 
@@ -54,12 +54,13 @@ void entitymanager_startup(struct entitymanager* em, struct renderer* r, struct 
 	em->tm = tm;
 	em->track = t;
 	em->proj_flag = 0;
+
 	// initialize projectile mesh
 	renderable_init(&em->r_proj, RENDER_MODE_TRIANGLES, RENDER_TYPE_MATS_L, RENDER_FLAG_NONE);
 
-	vec3f_set(em->r_proj.material.amb, 0.8f, 0.15f, 0.1f);
-	vec3f_set(em->r_proj.material.dif, 0.8f, 0.15f, 0.1f);
-	vec3f_set(em->r_proj.material.spc, 0.8f, 0.5f, 0.5f);
+	vec3f_set(em->r_proj.material.amb, 1.8f, 0.15f, 0.1f);
+	vec3f_set(em->r_proj.material.dif, 1.8f, 0.15f, 0.1f);
+	vec3f_set(em->r_proj.material.spc, 1.8f, 0.5f, 0.5f);
 	em->r_proj.material.shn = 100.f;
 
 	projectile_generatemesh(r, em->r_proj);
