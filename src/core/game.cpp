@@ -246,6 +246,8 @@ static void update(struct game* game)
 
 	player_updatecamera(&game->player);
 
+	audiomanager_updatelistener(&game->audiomanager, game->track.pathpoints[game->player.vehicle->index_track] );
+	
 	// simulate
 	physicsmanager_update(&game->physicsmanager, GAME_SPU);
 
@@ -488,14 +490,18 @@ int game_startup(struct game* game)
 	game->songs[GAME_MUSIC_3_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_3_FILENAME);
 	game->songs[GAME_MUSIC_4_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_4_FILENAME);
 	game->index_currentsong = 0;
-	audiomanager_playmusic(&game->audiomanager, game->songs[game->index_currentsong], -1);
+	//audiomanager_playmusic(&game->audiomanager, game->songs[game->index_currentsong], -1);
 
 	
 	// add sfx
-	game->sfx[GAME_SFX_1_ID] = audiomanager_newsfx(&game->audiomanager, GAME_SFX_1_FILENAME);
-	game->sfx[GAME_SFX_2_ID] = audiomanager_newsfx(&game->audiomanager, GAME_SFX_2_FILENAME);
-	game->sfx[GAME_SFX_3_ID] = audiomanager_newsfx(&game->audiomanager, GAME_SFX_3_FILENAME);
-	//audiomanager_playsfx(&game->audiomanager, GAME_SFX_2_ID);
+	game->sfx[GAME_SFX_1_ID] = audiomanager_newsfx(&game->audiomanager, GAME_SFX_1_FILENAME, FMOD_DEFAULT);
+	game->sfx[GAME_SFX_2_ID] = audiomanager_newsfx(&game->audiomanager, GAME_SFX_2_FILENAME, FMOD_LOOP_NORMAL);
+	game->sfx[GAME_SFX_3_ID] = audiomanager_newsfx(&game->audiomanager, GAME_SFX_3_FILENAME, FMOD_DEFAULT);
+	audiomanager_setsfxvolume(&game->audiomanager,0.25f);
+	
+	audiomanager_playsfx(&game->audiomanager, GAME_SFX_1_ID, game->player.vehicle->pos);
+
+	audiomanager_playsfx(&game->audiomanager, GAME_SFX_2_ID, game->track.pathpoints[game->player.vehicle->index_track]);
 	//audiomanager_setsoundposition(&game->audiomanager, GAME_SFX_2_ID, game->player.vehicle->pos);
 	
 
