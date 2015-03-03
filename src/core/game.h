@@ -48,8 +48,8 @@
 #define	GAME_SFX_1_ID			0
 #define	GAME_SFX_2_ID			1
 #define	GAME_SFX_3_ID			2
-#define	GAME_SFX_1_FILENAME	"res/soundfx/143558__fight2flyphoto__bf-109-flyby.wav"
-#define	GAME_SFX_2_FILENAME	"res/soundfx/engine.wav"
+#define	GAME_SFX_1_FILENAME	"res/soundfx/aud-eng-start-base.wav"
+#define	GAME_SFX_2_FILENAME	"res/soundfx/aud-eng-loop-base.wav"
 #define	GAME_SFX_3_FILENAME	"res/soundfx/crash.wav"
 
 

@@ -3,13 +3,13 @@
 
 
 #include	<fmod.h>
-
 #include	"../math/vec3f.h"
 
 #define	AUDIO_MAX_MUSIC		8
 #define	AUDIO_MAX_SFX		3
 #define DISTANCEFACTOR       1.0f    // Units per meter.  I.e feet would = 3.28.  centimeters would = 100.
 
+#define INTERFACE_UPDATETIME  50      // 50ms update for interface
 
 struct sound
 {
@@ -58,9 +58,10 @@ int audiomanager_newmusic(struct audiomanager* am, const char* filename);
 /*	create a new sfx sound object
 	param:	am				audio manager
 	param:	filename		path to the audio file
+	param:  fmode			FMOD_DEFAULT for no loop or FMOD_LOOP_NORMAL for loop
 	return:	int				index to the sound object, or -1 if failure
 */
-int audiomanager_newsfx(struct audiomanager* am, const char* filename);
+int audiomanager_newsfx(struct audiomanager* am, const char* filename, FMOD_MODE fmode);
 
 
 /*	play a music sound
@@ -74,7 +75,7 @@ void audiomanager_playmusic(struct audiomanager* am, int id, int loops);
 	param:	am				audio manager
 	param:	id				index to the sound object
 */
-void audiomanager_playsfx(struct audiomanager* am, int id);
+void audiomanager_playsfx(struct audiomanager* am, int id, vec3f playerpos);
 
 
 /*	stop a music sound
@@ -110,4 +111,7 @@ void audiomanager_setmastervolume(struct audiomanager* am, float volume);
 void audiomanager_togglemusic(struct audiomanager* am, int id);
 
 void audiomanager_setsoundposition(struct audiomanager* am, int id, vec3f pos);
+
+void audiomanager_updatelistener(struct audiomanager* am, vec3f playerpos);
+
 #endif

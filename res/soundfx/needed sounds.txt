@@ -1,0 +1,9 @@
+Engine idle  - Ambient
+Engine rev   - Event - hold RT
+Engine boost - Event - use boost (A)
+
+Collision projectile - Event - physX detect
+Collision vehicle - Event - physX detect
+Collision track - Event - physX detect
+Collision explosion - Event - on projectile/mine destruction
+
