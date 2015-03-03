@@ -8,7 +8,6 @@
 #include	"../objects/vehicle.h"
 #include	"../objects/skybox.h"
 #include	"../objects/track.h"
-#include	"../objects/pickups.h"
 #include	"../physics/physics.h"
 #include	"player.h"
 #include	"../render/render.h"
@@ -34,7 +33,7 @@
 #define	GAME_STARTINGPOS		-20.f, 1.5f, 0.f // TEMP
 #define	GAME_AISTARTINGPOS		-20.f, 1.5f, -20.f // TEMP
 
-#define	AI_MAX_COUNT			9	//max is 9. buttons glitch over that.
+#define	AI_MAX_COUNT			151	//max is 9. buttons glitch over that.
 
 #define	GAME_MUSIC_COUNT		4
 #define	GAME_MUSIC_1_ID			0
@@ -45,6 +44,15 @@
 #define	GAME_MUSIC_2_FILENAME	"res/music/Daft Punk & The Glitch Mob - Derezzed.mp3"
 #define	GAME_MUSIC_3_FILENAME	"res/music/Full Force Forward.mp3"
 #define	GAME_MUSIC_4_FILENAME	"res/music/Daft Punk & Boys Noize - End Of Line.mp3"
+
+#define	GAME_SFX_1_ID			0
+#define	GAME_SFX_2_ID			1
+#define	GAME_SFX_3_ID			2
+#define	GAME_SFX_1_FILENAME	"res/soundfx/143558__fight2flyphoto__bf-109-flyby.wav"
+#define	GAME_SFX_2_FILENAME	"res/soundfx/engine.wav"
+#define	GAME_SFX_3_FILENAME	"res/soundfx/crash.wav"
+
+
 
 #define GAME_WIN_LAP			5
 #define GAME_WINSTATE_OFF		0x0
@@ -88,6 +96,7 @@ struct game
 
 	int index_currentsong;
 	int songs[GAME_MUSIC_COUNT];
+	int sfx[AUDIO_MAX_SFX];
 
 	int amountAI;
 

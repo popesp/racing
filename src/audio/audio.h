@@ -4,9 +4,11 @@
 
 #include	<fmod.h>
 
+#include	"../math/vec3f.h"
 
 #define	AUDIO_MAX_MUSIC		8
-#define	AUDIO_MAX_SFX		16
+#define	AUDIO_MAX_SFX		3
+#define DISTANCEFACTOR       1.0f    // Units per meter.  I.e feet would = 3.28.  centimeters would = 100.
 
 
 struct sound
@@ -107,5 +109,5 @@ void audiomanager_setmastervolume(struct audiomanager* am, float volume);
 */
 void audiomanager_togglemusic(struct audiomanager* am, int id);
 
-
+void audiomanager_setsoundposition(struct audiomanager* am, int id, vec3f pos);
 #endif

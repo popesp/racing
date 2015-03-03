@@ -25,10 +25,14 @@ void audiomanager_startup(struct audiomanager* am)
 	// initialize sound system
 	FMOD_System_Init(am->system, 100, FMOD_INIT_NORMAL, 0);
 
+	// Set the distance units. (meters/feet etc).
+    FMOD_System_Set3DSettings(am->system, 1.0, DISTANCEFACTOR, 1.0f);
+    
 	// create channel groups
 	FMOD_System_CreateChannelGroup(am->system, "music", &am->group_music);
 	FMOD_System_CreateChannelGroup(am->system, "sfx", &am->group_sfx);
 
+	
 	// initialize music sounds
 	for (i = 0; i < AUDIO_MAX_MUSIC; i++)
 		resetsound(&am->music[i]);
@@ -111,7 +115,7 @@ int audiomanager_newsfx(struct audiomanager* am, const char* filename)
 	{
 		if (!am->sfx[i].enabled)
 		{
-			FMOD_System_CreateSound(am->system, filename, FMOD_DEFAULT, 0, &am->sfx[i].track);
+			FMOD_System_CreateSound(am->system, filename, FMOD_LOOP_NORMAL, 0, &am->sfx[i].track);
 			am->sfx[i].enabled = true;
 
 			return i;
@@ -145,11 +149,11 @@ void audiomanager_playmusic(struct audiomanager* am, int id, int loops)
 */
 void audiomanager_playsfx(struct audiomanager* am, int id)
 {
-	FMOD_System_PlaySound(am->system, FMOD_CHANNEL_FREE, am->music[id].track, true, &am->music[id].channel);
-	FMOD_Channel_SetChannelGroup(am->music[id].channel, am->group_sfx);
+	FMOD_System_PlaySound(am->system, FMOD_CHANNEL_FREE, am->sfx[id].track, true, &am->sfx[id].channel);
+	FMOD_Channel_SetChannelGroup(am->sfx[id].channel, am->group_sfx);
 
 	// play the sound
-	FMOD_Channel_SetPaused(am->music[id].channel, false);
+	FMOD_Channel_SetPaused(am->sfx[id].channel, false);
 }
 
 
@@ -211,5 +215,15 @@ void audiomanager_togglemusic(struct audiomanager* am, int id)
 }
 
 
+  /*
+        Play sounds at certain positions
+    */
+void audiomanager_setsoundposition(struct audiomanager* am, int id,vec3f playerpos)
+{
+    FMOD_VECTOR pos = { playerpos[VX] * DISTANCEFACTOR, playerpos[VX] * DISTANCEFACTOR, playerpos[VX] * DISTANCEFACTOR };
+    FMOD_VECTOR vel = {  0.0f, 0.0f, 0.0f };
 
+    FMOD_Channel_Set3DAttributes(am->sfx[id].channel, &pos, &vel);
+    
+}
 
