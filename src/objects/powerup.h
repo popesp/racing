@@ -47,7 +47,7 @@ struct entitymanager
 	//struct mine mines[1];
 	//struct pickup pickups[1];
 };
-void entitymanager_startup(struct entitymanager* em, struct renderer* r, struct texturemanager* tm, struct physicsmanager* pm, struct track* t, const char* mesh_filename);
+void entitymanager_startup(struct entitymanager* em, struct renderer* r, struct texturemanager* tm, struct physicsmanager* pm, struct track* t);
 
 void projectile_init(struct projectile* p, struct physicsmanager* pm, struct vehicle* v);
 

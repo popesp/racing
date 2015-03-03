@@ -82,6 +82,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="collision.cpp" />
     <ClCompile Include="src\audio\audio.cpp" />
     <ClCompile Include="src\core\player.cpp" />
     <ClCompile Include="src\core\game.cpp" />
@@ -100,6 +101,7 @@
     <ClCompile Include="src\render\texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="collision.h" />
     <ClInclude Include="src\audio\audio.h" />
     <ClInclude Include="src\core\player.h" />
     <ClInclude Include="src\core\game.h" />

@@ -46,7 +46,7 @@ static int proj_norindex[36] =
 	5, 5, 5, 5, 5, 5
 };
 
-void entitymanager_startup(struct entitymanager* em, struct renderer* r, struct texturemanager* tm, struct physicsmanager* pm, struct track* t, const char* mesh_filename) {
+void entitymanager_startup(struct entitymanager* em, struct renderer* r, struct texturemanager* tm, struct physicsmanager* pm, struct track* t) {
 
 	struct projectile* proj;
 
@@ -64,20 +64,8 @@ void entitymanager_startup(struct entitymanager* em, struct renderer* r, struct 
 	em->r_proj.material.shn = 100.f;
 
 	projectile_generatemesh(r, em->r_proj);
+
 	renderable_sendbuffer(r, &em->r_proj);
-
-	/*renderable_init(&em->projectiles[0].r_proj, RENDER_MODE_TRIANGLES, RENDER_TYPE_MATS_L, RENDER_FLAG_NONE);
-	projectile_generatemesh(r, em->projectiles[0].r_proj);
-	renderable_sendbuffer(r, &em->projectiles[0].r_proj);*/
-
-	//em->projectiles[0].proj = NULL;
-
-			/* TODO: figure this shit out
-			projectile_init(&game->player_proj, &game->physicsmanager, &game->player);
-			projectile_generatemesh(&game->renderer, &game->player_proj);
-			game->player_proj.r_proj.lights[0] = &game->track_lights[0];
-			renderable_sendbuffer(&game->renderer, &game->player_proj.r_proj);
-			*/
 }
 
 void projectile_init(struct projectile* p, struct physicsmanager* pm,struct vehicle* v) {
