@@ -46,8 +46,40 @@ static int proj_norindex[36] =
 	5, 5, 5, 5, 5, 5
 };
 
+void entitymanager_startup(struct entitymanager* em, struct renderer* r, struct texturemanager* tm, struct physicsmanager* pm, struct track* t) {
 
-void projectile_init(struct projectile* p, struct physicsmanager* pm,struct player* c) {
+	struct projectile* proj;
+
+	em->pm = pm;
+	em->tm = tm;
+	em->track = t;
+	em->proj_flag = 0;
+	// initialize projectile mesh
+	renderable_init(&em->r_proj, RENDER_MODE_TRIANGLES, RENDER_TYPE_MATS_L, RENDER_FLAG_NONE);
+
+	vec3f_set(em->r_proj.material.amb, 0.8f, 0.15f, 0.1f);
+	vec3f_set(em->r_proj.material.dif, 0.8f, 0.15f, 0.1f);
+	vec3f_set(em->r_proj.material.spc, 0.8f, 0.5f, 0.5f);
+	em->r_proj.material.shn = 100.f;
+
+	projectile_generatemesh(r, em->r_proj);
+	renderable_sendbuffer(r, &em->r_proj);
+
+	/*renderable_init(&em->projectiles[0].r_proj, RENDER_MODE_TRIANGLES, RENDER_TYPE_MATS_L, RENDER_FLAG_NONE);
+	projectile_generatemesh(r, em->projectiles[0].r_proj);
+	renderable_sendbuffer(r, &em->projectiles[0].r_proj);*/
+
+	//em->projectiles[0].proj = NULL;
+
+			/* TODO: figure this shit out
+			projectile_init(&game->player_proj, &game->physicsmanager, &game->player);
+			projectile_generatemesh(&game->renderer, &game->player_proj);
+			game->player_proj.r_proj.lights[0] = &game->track_lights[0];
+			renderable_sendbuffer(&game->renderer, &game->player_proj.r_proj);
+			*/
+}
+
+void projectile_init(struct projectile* p, struct physicsmanager* pm,struct vehicle* v) {
 	
 	vec3f dim;
 	vec3f_set(dim, PROJECTILE_WIDTH/2.f, PROJECTILE_HEIGHT/2.f, PROJECTILE_LENGTH/2.f);
@@ -56,7 +88,7 @@ void projectile_init(struct projectile* p, struct physicsmanager* pm,struct play
 
 	vec3f pos;
 
-	physx::PxMat44 t_player(c->vehicle->body->getGlobalPose());
+	physx::PxMat44 t_player(v->body->getGlobalPose());
 	physx::PxVec3 targetpos = t_player.transform(physx::PxVec3(PROJ_TARGETPOS));
 			
 	float proj_x = targetpos.x;
@@ -64,7 +96,7 @@ void projectile_init(struct projectile* p, struct physicsmanager* pm,struct play
 	float proj_z = targetpos.z;
 	vec3f_set(pos, PROJ_TARGETPOS);
 
-	physx::PxTransform projtrans = c->vehicle->body->getGlobalPose().transform(physx::PxTransform(PROJ_TARGETPOS));
+	physx::PxTransform projtrans = v->body->getGlobalPose().transform(physx::PxTransform(PROJ_TARGETPOS));
 
 	p->proj = physics_adddynamic_box(pm, pos, dim);
 
@@ -73,17 +105,16 @@ void projectile_init(struct projectile* p, struct physicsmanager* pm,struct play
 	vec3f force;
 
 	vec3f_set(force, CART_FORWARD);
-	vec3f_scale(force, CART_FORCE_FORWARD * 100);
+	vec3f_scale(force, CART_FORCE_FORWARD * 1000);
 
 	physx::PxRigidBodyExt::addLocalForceAtLocalPos(*p->proj, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, 0.f));
 
-	renderable_init(&p->r_proj, RENDER_MODE_TRIANGLES, RENDER_TYPE_MATS_L, RENDER_FLAG_NONE);
+	/*renderable_init(&p->r_proj, RENDER_MODE_TRIANGLES, RENDER_TYPE_MATS_L, RENDER_FLAG_NONE);
 
 	vec3f_set(p->r_proj.material.amb, 0.8f, 0.15f, 0.1f);
 	vec3f_set(p->r_proj.material.dif, 0.8f, 0.15f, 0.1f);
 	vec3f_set(p->r_proj.material.spc, 0.8f, 0.5f, 0.5f);
-	p->r_proj.material.shn = 100.f;
-	
+	p->r_proj.material.shn = 100.f;*/
 }
 
 void projectile_delete(struct projectile* p, struct physicsmanager* pm)
@@ -94,14 +125,14 @@ void projectile_delete(struct projectile* p, struct physicsmanager* pm)
 	
 }
 
-void projectile_generatemesh(struct renderer* r, struct projectile* p) {
+void projectile_generatemesh(struct renderer* r, struct renderable r_proj) {
 	
 	float* ptr;
 	int i;
 
-	renderable_allocate(r, &p->r_proj, 36);
+	renderable_allocate(r, &r_proj, 36);
 
-	ptr = p->r_proj.buf_verts;
+	ptr = r_proj.buf_verts;
 
 	for (i = 0; i < 36; i++)
 	{

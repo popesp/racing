@@ -26,10 +26,31 @@ struct projectile
 	struct renderable r_proj;
 };
 
-void projectile_init(struct projectile* p, struct physicsmanager* pm, struct player* c);
+struct entitymanager
+{
+	struct physicsmanager* pm;
+	struct texturemanager* tm;
+	struct track* track;
+
+	struct renderable r_proj;
+	//struct renderable r_mine;
+	//struct renderable r_pickup;
+
+	vec3f dim;
+
+	int tex_diffuse;
+
+	struct projectile projectiles[1];
+	int proj_flag;
+	//struct mine mines[1];
+	//struct pickup pickups[1];
+};
+void entitymanager_startup(struct entitymanager* em, struct renderer* r, struct texturemanager* tm, struct physicsmanager* pm, struct track* t);
+
+void projectile_init(struct projectile* p, struct physicsmanager* pm, struct vehicle* v);
 
 void projectile_delete(struct projectile* p, struct physicsmanager* pm);
 
-void projectile_generatemesh(struct renderer* r, struct projectile* p);
+void projectile_generatemesh(struct renderer* r, struct renderable r_proj);
 
 #endif

@@ -14,12 +14,14 @@
 	param:	mesh_filename	filename for the vehicle mesh
 	param:	tex_filename	filename for the vehicle texture
 */
-void vehiclemanager_startup(struct vehiclemanager* vm, struct renderer* r, struct texturemanager* tm, struct physicsmanager* pm, struct track* t, const char* mesh_filename, const char* tex_filename)
+void vehiclemanager_startup(struct vehiclemanager* vm, struct renderer* r, struct texturemanager* tm, struct physicsmanager* pm, struct track* t, const char* mesh_filename, const char* tex_filename, struct entitymanager* em)
 {
 	vec3f min, max, avg, diff;
 	struct vehicle* v;
 	int i;
 
+
+	vm->em = em;
 	vm->pm = pm;
 	vm->tm = tm;
 	vm->track = t;
@@ -242,12 +244,13 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 			else
 				v->flags |= VEHICLE_FLAG_MISSILE;
 
-			/* TODO: figure this shit out
-			projectile_init(&game->player_proj, &game->physicsmanager, &game->player);
-			projectile_generatemesh(&game->renderer, &game->player_proj);
-			game->player_proj.r_proj.lights[0] = &game->track_lights[0];
-			renderable_sendbuffer(&game->renderer, &game->player_proj.r_proj);
-			*/
+			// TODO: figure this shit out
+			vm->em->proj_flag = 1;
+			projectile_init(&vm->em->projectiles[0], vm->pm, v);  	//&game->player_proj, &game->physicsmanager, &game->player);
+			//projectile_generatemesh(&vm->r, &game->player_proj);
+			//game->player_proj.r_proj.lights[0] = &game->track_lights[0];
+			//renderable_sendbuffer(&game->renderer, &game->player_proj.r_proj);
+			//*/
 		}
 	}
 }

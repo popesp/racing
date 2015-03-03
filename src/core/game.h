@@ -75,6 +75,7 @@ struct game
 	struct texturemanager texturemanager;
 	struct audiomanager audiomanager;
 
+	struct entitymanager entitymanager;
 	struct vehiclemanager vehiclemanager;
 
 	struct skybox skybox;

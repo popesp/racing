@@ -298,6 +298,12 @@ static void render(struct game* game)
 		}
 	}
 
+	if(game->entitymanager.proj_flag == 1) {
+		//printf("%f %f %f\n", game->entitymanager.projectiles[0].proj->getGlobalPose().p.x,game->entitymanager.projectiles[0].proj->getGlobalPose().p.y,game->entitymanager.projectiles[0].proj->getGlobalPose().p.z);
+		physx::PxMat44 proj_world(game->vehiclemanager.em->projectiles[0].proj->getGlobalPose());// .projectiles[0].proj->getGlobalPose());
+		renderable_render(&game->renderer, &game->vehiclemanager.em->r_proj, (float*)&proj_world, global_wv, 0);
+	}
+
 	glClear(GL_DEPTH_BUFFER_BIT);
 	renderable_render(&game->renderer, &game->closestpoint, track_mw, global_wv, 0);
 
@@ -433,8 +439,11 @@ int game_startup(struct game* game)
 	// send track mesh to physX
 	physicsmanager_addstatic_trianglestrip(&game->physicsmanager, game->track.r_track.num_verts, sizeof(float)*RENDER_VERTSIZE_BUMP_L, game->track.r_track.buf_verts);
 	
+	//start up the entity manager to manage powerups
+	entitymanager_startup(&game->entitymanager, &game->renderer, &game->texturemanager, &game->physicsmanager, &game->track);
+
 	// start up the vehicle manager for the track
-	vehiclemanager_startup(&game->vehiclemanager, &game->renderer, &game->texturemanager, &game->physicsmanager, &game->track, "res/models/car/car.obj", "res/models/car/carUV.png");
+	vehiclemanager_startup(&game->vehiclemanager, &game->renderer, &game->texturemanager, &game->physicsmanager, &game->track, "res/models/car/car.obj", "res/models/car/carUV.png", &game->entitymanager);
 
 	// initialize player objects
 	vec3f_set(offs, 0.f, 0.f, 0.f);
