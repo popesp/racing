@@ -4,6 +4,8 @@
 
 #include	"../math/mat4f.h"
 #include	"../math/vec3f.h"
+#include	"texture.h"
+#include	"window.h"
 
 
 #define	RENDER_ATTRIB_POS			0
@@ -79,10 +81,6 @@
 #define	RENDER_FLAG_DYNAMIC			0x01
 
 
-struct texturemanager;
-struct window;
-
-
 struct light
 {
 	vec3f pos;
@@ -112,7 +110,7 @@ struct renderable
 	struct material material;
 	float* ambient;
 
-	int texture_ids[RENDER_TEXTURE_TYPES];
+	struct texture* textures[RENDER_TEXTURE_TYPES];
 
 	mat4f matrix_model;
 
@@ -133,7 +131,6 @@ struct renderer
 	unsigned shader[RENDER_TYPE_COUNT];
 
 	struct window* window;
-	struct texturemanager* tm;
 
 	struct
 	{
@@ -215,10 +212,9 @@ void renderable_render(struct renderer* r, struct renderable* obj, mat4f modelwo
 
 /*	initialize renderer, including shader objects
 	param:	r				renderer struct to initialize (modified)
-	param:	tm				texture manager
 	param:	window			window to render to
 */
-unsigned renderer_init(struct renderer* r, struct texturemanager* tm, struct window* window);
+unsigned renderer_init(struct renderer* r, struct window* window);
 
 
 #endif

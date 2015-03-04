@@ -1,19 +1,16 @@
 #include	"physics.h"
 
-#include	<PxPhysicsAPI.h>
-#include	"../math/vec3f.h"
 #include	"../mem.h"
 #include	"../objects/vehicle.h"
 #include	"../render/render.h"
-#include	"collision.h"
+//#include	"collision.h"
 
 
 using namespace physx;
-	collision temp;
 
-/*	start up the physics manager
-	param:	pm				physics manager (modified)
-*/
+
+/*
+collision temp;
 
 PxFilterFlags myFilterShader(	
 	PxFilterObjectAttributes attributes0, PxFilterData filterData0, 
@@ -44,7 +41,13 @@ PxFilterFlags SampleSubmarineFilterShader(
 	
 	return PxFilterFlag::eDEFAULT;
 }
+*/
 
+
+
+/*	start up the physics manager
+	param:	pm				physics manager (modified)
+*/
 void physicsmanager_startup(struct physicsmanager* pm)
 {
 	PxTolerancesScale scale;
@@ -66,8 +69,9 @@ void physicsmanager_startup(struct physicsmanager* pm)
 
 	// create the scene for simulation
 	PxSceneDesc scenedesc(scale);
-
-	temp.customizeSceneDesc(&scenedesc);
+	scenedesc.gravity = PxVec3(PHYSICS_DEFAULT_GRAVITY);
+	scenedesc.cpuDispatcher = PxDefaultCpuDispatcherCreate(1);
+	scenedesc.filterShader = PxDefaultSimulationFilterShader;
 	pm->scene = pm->sdk->createScene(scenedesc);
 }
 

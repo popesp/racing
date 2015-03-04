@@ -81,7 +81,7 @@ unsigned audiomanager_getlibversion(struct audiomanager* am)
 void audiomanager_update(struct audiomanager* am, vec3f pos, vec3f dir, vec3f up)
 {
 	// change listener position and orientation
-	FMOD_System_Set3DListenerAttributes(am->system, 0, (FMOD_VECTOR*)pos, NULL, (FMOD_VECTOR*)dir, (FMOD_VECTOR*)up);
+	FMOD_System_Set3DListenerAttributes(am->system, 0, (FMOD_VECTOR*)pos, 0, (FMOD_VECTOR*)dir, (FMOD_VECTOR*)up);
 
 	// update system
 	FMOD_System_Update(am->system);
@@ -189,7 +189,7 @@ void audiomanager_setsfxposition(struct audiomanager* am, int id, vec3f pos)
 {
     FMOD_VECTOR position = {pos[VX], pos[VX], pos[VX]};
 
-    FMOD_Channel_Set3DAttributes(am->sfx[id].channel, &position, NULL);
+    FMOD_Channel_Set3DAttributes(am->sfx[id].channel, &position, 0);
 }
 
 

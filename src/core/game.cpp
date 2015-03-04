@@ -44,6 +44,7 @@ static void resize(GLFWwindow* window, int width, int height)
 static void keyboard(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	struct game* game;
+	int i;
 
 	(void)scancode;
 	(void)mods;
@@ -107,14 +108,11 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 			break;
 
 		case GLFW_KEY_SPACE:
-			int i;
-
 			// toggle win condition
-
 			if (game->flags & GAME_FLAG_WINCONDITION)
 			{
 				printf("Win condition deactivated.\n");
-
+				game->flags &= ~GAME_FLAG_WINCONDITION;
 			} else
 			{
 				printf("Win condition activated.\n");
@@ -128,29 +126,9 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 
 				game->flags |= GAME_FLAG_WINCONDITION;
 			}
-
-			if(game->winstate == GAME_WINSTATE_OFF){
-				printf("Game's win state is activated.\n\n\n");
-				printf("Player is on lap %d\n", game->player.vehicle->lap);
-				for(int i=0;i<=game->amountAI;i++){
-					printf("AI %d is on lap %d\n", i, game->aiplayer[i].vehicle->lap);
-				}
-				game->winstate = GAME_WINSTATE_ON;
-			}
-			else{
-				//reset laps
-				printf("Game's win state is turned off.\n\n\n");
-				game->player.vehicle->lap=1;
-				for(int i=0; i<=game->amountAI;i++){
-					game->aiplayer[i].vehicle->lap=1;
-				}
-				game->winstate = GAME_WINSTATE_OFF;
-			}
 			break;
 
 		case GLFW_KEY_BACKSPACE:
-			int i;
-
 			for (i = 0; i < game->num_aiplayers; i++)
 				aiplayer_delete(game->aiplayers + i, &game->vehiclemanager);
 			game->num_aiplayers = 0;
@@ -250,13 +228,6 @@ static void update(struct game* game)
 	// update the vehicles
 	vehiclemanager_update(&game->vehiclemanager);
 
-	// set closest point
-	vec3f_copy(game->closestpoint.buf_verts, game->track.pathpoints[game->player.vehicle->index_track]);
-	vec3f_set(game->closestpoint.buf_verts + 3, 1.f, 0.f, 0.f);
-	vec3f_copy(game->closestpoint.buf_verts + 6, game->player.vehicle->pos);
-	vec3f_set(game->closestpoint.buf_verts + 9, 1.f, 0.f, 0.f);
-	renderable_sendbuffer(&game->renderer, &game->closestpoint);
-
 	player_updatecamera(&game->player);
 
 	// simulate
@@ -306,9 +277,8 @@ static void render(struct game* game)
 		renderable_render(&game->renderer, &game->vehiclemanager.r_vehicle, (float*)&aiplayer_mw, global_wv, 0);	
 	}
 
-	// render closest point line
-	glClear(GL_DEPTH_BUFFER_BIT);
-	renderable_render(&game->renderer, &game->closestpoint, track_mw, global_wv, 0);
+	// render all game objects
+	entitymanager_render(&game->entitymanager, &game->renderer, global_wv);
 
 	glfwSwapBuffers(game->window.w);
 }
@@ -378,13 +348,8 @@ static int start_subsystems(struct game* game)
 	glfwSetMouseButtonCallback(game->window.w, &mouse);
 	glfwSetScrollCallback(game->window.w, &scroll);
 
-	// initialize texture manager
-	printf("Starting up texture manager...");
-	texturemanager_startup(&game->texturemanager);
-	printf("...done. Using FreeImage version %s\n", texturemanager_getlibversion(&game->texturemanager));
-
 	// initialize renderer
-	if (!renderer_init(&game->renderer, &game->texturemanager, &game->window))
+	if (!renderer_init(&game->renderer, &game->window))
 	{
 		PRINT_ERROR("Problem initializing the renderer.\n");
 		return 0;
@@ -429,21 +394,22 @@ int game_startup(struct game* game)
 	}
 
 	// initialize skybox
-	skybox_init(&game->skybox, &game->texturemanager, "res/images/night.jpg");
-	skybox_generatemesh(&game->renderer, &game->skybox);
-	renderable_sendbuffer(&game->renderer, &game->skybox.r_skybox);
+	skybox_init(&game->skybox, &game->renderer, "res/images/night.jpg");
 
 	// initialize track object
-	track_init(&game->track, up, &game->physicsmanager);
-	track_loadpointsfile(&game->track, "res/tracks/wipeout.track");
+	track_init(&game->track, &game->physicsmanager, up, "res/images/slate.jpg");
+	track_loadpointsfile(&game->track, "res/tracks/turn.track");
 	track_generate(&game->renderer, &game->track);
 	renderable_sendbuffer(&game->renderer, &game->track.r_track);
 
 	// send track mesh to physX
 	physicsmanager_addstatic_trianglestrip(&game->physicsmanager, game->track.r_track.num_verts, sizeof(float)*RENDER_VERTSIZE_BUMP_L, game->track.r_track.buf_verts);
 	
+	// start up the entity manager for the track
+	entitymanager_startup(&game->entitymanager, &game->physicsmanager, &game->renderer, &game->track);
+
 	// start up the vehicle manager for the track
-	vehiclemanager_startup(&game->vehiclemanager, &game->renderer, &game->texturemanager, &game->physicsmanager, &game->track, "res/models/car/car.obj", "res/models/car/outUV.jpg");
+	vehiclemanager_startup(&game->vehiclemanager, &game->physicsmanager, &game->entitymanager, &game->renderer, &game->track, "res/models/car/car.obj", "res/models/car/outUV.jpg");
 
 	// initialize player objects
 	vec3f_set(offs, 0.f, 0.f, 0.f);
@@ -475,12 +441,6 @@ int game_startup(struct game* game)
 	game->vehiclemanager.r_vehicle.lights[0] = game->track_lights + 0;
 	game->vehiclemanager.r_vehicle.lights[1] = game->track_lights + 1;
 	
-	// track normal map
-	game->tex_trackbump = texturemanager_newtexture(&game->texturemanager);
-	texture_loadfile(&game->texturemanager, game->tex_trackbump, "res/images/slate.jpg");
-	texture_upload(&game->texturemanager, game->tex_trackbump, RENDER_TEXTURE_NORMAL);
-	game->track.r_track.texture_ids[RENDER_TEXTURE_NORMAL] = game->tex_trackbump;
-	
 	// add background music
 	game->songs[GAME_MUSIC_1_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_1_FILENAME);
 	game->songs[GAME_MUSIC_2_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_2_FILENAME);
@@ -488,17 +448,12 @@ int game_startup(struct game* game)
 	game->songs[GAME_MUSIC_4_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_4_FILENAME);
 	game->index_currentsong = 0;
 	audiomanager_playmusic(&game->audiomanager, game->songs[game->index_currentsong], -1);
-
-	/* temp */
-	renderable_init(&game->closestpoint,  RENDER_MODE_LINESTRIP, RENDER_TYPE_WIRE_S, RENDER_FLAG_DYNAMIC);
-	renderable_allocate(&game->renderer, &game->closestpoint, 2);
-	/* end temp */
 	
 	game->flags = GAME_FLAG_INIT;
 
 	return 1;
 }
-
+/*
 static void checkwin(struct game* game){
 
 	int cp1 = game->track.num_pathpoints / 3;
@@ -571,7 +526,7 @@ static void checkwin(struct game* game){
 		}
 	}
 }
-
+*/
 void game_mainloop(struct game* game)
 {
 	double time, timer, elapsed;
@@ -608,15 +563,9 @@ void game_mainloop(struct game* game)
 			fps = ups = 0u;
 		}
 
-
 		// render as frequently as possible
 		render(game);
 		fps++;
-
-		// check if someone has won game
-		if(game->winstate == GAME_WINSTATE_ON){
-			checkwin(game);
-		}
 	}
 }
 
@@ -637,7 +586,6 @@ void game_shutdown(struct game* game)
 	audiomanager_shutdown(&game->audiomanager);
 	inputmanager_shutdown(&game->inputmanager);
 	physicsmanager_shutdown(&game->physicsmanager);
-	texturemanager_shutdown(&game->texturemanager);
 	
 	glfwDestroyWindow(game->window.w);
 	glfwTerminate();

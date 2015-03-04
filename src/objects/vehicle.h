@@ -3,11 +3,11 @@
 
 
 #include	"../core/input.h"
-#include	"../math/vec3f.h"
+#include	"../objects/entities.h"
 #include	"../objects/track.h"
 #include	"../physics/physics.h"
 #include	"../render/render.h"
-#include	"../objects/powerup.h"
+#include	"../render/texture.h"
 
 
 #define	VEHICLE_COUNT				152		// one higher than AI count to account for player
@@ -44,7 +44,6 @@
 
 #define	VEHICLE_FLAG_INIT			0x00
 #define	VEHICLE_FLAG_ENABLED		0x01
-#define	VEHICLE_FLAG_MISSILE		0x02
 
 
 struct vehicle
@@ -76,16 +75,12 @@ struct vehicle
 struct vehiclemanager
 {
 	struct physicsmanager* pm;
-	struct texturemanager* tm;
+	struct entitymanager* em;
 	struct track* track;
 
-	struct entitymanager* em;
-
 	struct renderable r_vehicle;
-
+	struct texture diffuse;
 	vec3f dim;
-
-	int tex_diffuse;
 
 	struct vehicle vehicles[VEHICLE_COUNT];
 };
@@ -93,14 +88,14 @@ struct vehiclemanager
 
 /*	start up the vehicle manager
 	param:	vm				vehicle manager
-	param:	r				renderer
-	param:	tm				texture manager
 	param:	pm				physics manager
+	param:	em				entity manager
+	param:	r				renderer
 	param:	t				track object
-	param:	mesh_filename	filename for the vehicle mesh
-	param:	tex_filename	filename for the vehicle texture
+	param:	file_mesh		filename for vehicle mesh
+	param:	file_diffuse	filename for vehicle diffuse texture
 */
-void vehiclemanager_startup(struct vehiclemanager* vm, struct renderer* r, struct texturemanager* tm, struct physicsmanager* pm, struct track* t, const char* mesh_filename, const char* tex_filename, struct entitymanager* em);
+void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm, struct entitymanager* em, struct renderer* r, struct track* t, const char* file_mesh, const char* file_diffuse);
 
 /*	shut down the vehicle manager
 	param:	vm				vehicle manager
@@ -118,9 +113,10 @@ struct vehicle* vehiclemanager_newvehicle(struct vehiclemanager* vm, int index_t
 
 /*	remove a vehicle
 	param:	vm				vehicle manager
-	param:	v				vehicle to remove
+	param:	v				vehicle pointer
 */
 void vehiclemanager_removevehicle(struct vehiclemanager* vm, struct vehicle* v);
+
 
 /*	update vehicles
 	param:	vm				vehicle manager
