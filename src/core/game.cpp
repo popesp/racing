@@ -234,7 +234,10 @@ static void update(struct game* game)
 	physicsmanager_update(&game->physicsmanager, GAME_SPU);
 
 	if(game->flags == GAME_FLAG_WINCONDITION){
-		checkwin(game);}
+		checkwin(game);
+		checkplace(game);
+	}
+
 	// check for window close messages
 	if (glfwWindowShouldClose(game->window.w))
 		game->flags |= GAME_FLAG_TERMINATED;
