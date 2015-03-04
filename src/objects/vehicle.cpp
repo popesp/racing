@@ -110,7 +110,7 @@ struct vehicle* vehiclemanager_newvehicle(struct vehiclemanager* vm, int index_t
 	v = vm->vehicles + i;
 
 	// find spawn location
-	vec3f_copy(v->pos, vm->track->pathpoints[index_track]);
+	vec3f_copy(v->pos, vm->track->pathpoints[index_track].pos);
 	vec3f_copy(spawn, vm->track->up);
 	vec3f_scale(spawn, VEHICLE_SPAWNHEIGHT);
 	vec3f_add(v->pos, spawn);
@@ -241,7 +241,7 @@ void vehiclemanager_update(struct vehiclemanager* vm)
 		v->index_track = track_closestindex(vm->track, v->pos, v->index_track);
 
 		// reset vehicle if it leaves the track
-		vec3f_subtractn(dist, v->pos, vm->track->pathpoints[v->index_track]);
+		vec3f_subtractn(dist, v->pos, vm->track->pathpoints[v->index_track].pos);
 		if (vec3f_length(dist) > vm->track->dist_boundary)
 			vehicle_reset(vm, v);
 
@@ -296,16 +296,36 @@ void vehiclemanager_update(struct vehiclemanager* vm)
 
 void vehicle_reset(struct vehiclemanager* vm, struct vehicle* v)
 {
-	vec3f spawn;
+	vec3f nor, bin, tan, spawn;
+	mat4f basis;
+
+	// find negated tangent
+	vec3f_copy(tan, vm->track->pathpoints[v->index_track].tan);
+	vec3f_negate(tan);
+
+	vec3f_cross(bin, vm->track->up, tan);
+	vec3f_normalize(bin);
+
+	vec3f_cross(nor, tan, bin);
 
 	// find spawn location
-	vec3f_copy(v->pos, vm->track->pathpoints[v->index_track]);
+	vec3f_copy(v->pos, vm->track->pathpoints[v->index_track].pos);
 	vec3f_copy(spawn, vm->track->up);
 	vec3f_scale(spawn, VEHICLE_SPAWNHEIGHT);
 	vec3f_add(v->pos, spawn);
 
+	// find the change of basis matrix
+	mat4f_identity(basis);
+	vec3f_copy(basis + C0, bin);
+	vec3f_copy(basis + C1, nor);
+	vec3f_copy(basis + C2, tan);
+	vec3f_copy(basis + C3, v->pos); // translation
+
+	// rotate to the track angle
+	mat4f_rotatezmul(basis, -vm->track->pathpoints[v->index_track].angle);
+
 	// TODO: set the orientation of the vehicle to the track gradient
-	v->body->setGlobalPose(physx::PxTransform(physx::PxVec3(v->pos[VX], v->pos[VY], v->pos[VZ])));
+	v->body->setGlobalPose(physx::PxTransform((physx::PxMat44)basis));
 	v->body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
 	v->body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
 }

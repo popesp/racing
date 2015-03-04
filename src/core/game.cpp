@@ -228,6 +228,9 @@ static void update(struct game* game)
 	// update the vehicles
 	vehiclemanager_update(&game->vehiclemanager);
 
+	// update the game objects
+	entitymanager_update(&game->entitymanager);
+
 	player_updatecamera(&game->player);
 
 	// simulate

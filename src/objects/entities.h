@@ -13,6 +13,8 @@
 #define	ENTITY_MISSILE_SPEED		80.f
 #define	ENTITY_MISSILE_SIZE			1.f
 
+#define	ENTITY_MISSILE_DESPAWNTIME	300
+
 #define	ENTITY_MISSILE_SPAWNDIST	1.f
 
 #define	ENTITY_MISSILE_FLAG_ENABLED	0x01
@@ -24,6 +26,8 @@ struct missile
 	physx::PxRigidDynamic* body;
 
 	struct vehicle* owner;
+
+	unsigned timer;
 
 	unsigned char flags;
 };
@@ -47,6 +51,8 @@ struct entitymanager
 
 void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, struct renderer* r, struct track* t);
 void entitymanager_shutdown(struct entitymanager* em);
+
+void entitymanager_update(struct entitymanager* em);
 
 struct missile* entitymanager_newmissile(struct entitymanager* em, struct vehicle* v, vec3f dim);
 void entitymanager_removemissile(struct entitymanager* em, struct missile* m);

@@ -33,14 +33,20 @@ struct track_point
 	float width;
 };
 
+struct path_point
+{
+	vec3f pos;
+	vec3f tan;
+	float angle;
+};
+
 struct track
 {
 	unsigned num_points;
 	struct track_point* points;
 
 	unsigned num_pathpoints;
-	vec3f* pathpoints;
-	float* pathangles;
+	struct path_point* pathpoints;
 
 	physx::PxRigidStatic* p_track;
 
