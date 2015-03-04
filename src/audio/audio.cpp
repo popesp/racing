@@ -9,7 +9,7 @@ static void resetsound(struct sound* s)
 }
 
 
-*	start up the audio manager
+/*	start up the audio manager
 	param:	am				audio manager (modified)
 */
 void audiomanager_startup(struct audiomanager* am)
@@ -35,7 +35,7 @@ void audiomanager_startup(struct audiomanager* am)
 		resetsound(&am->sfx[i]);
 }
 
-*	shut down the audio manager
+/*	shut down the audio manager
 	param:	am				audio manager (modified)
 */
 void audiomanager_shutdown(struct audiomanager* am)
@@ -58,7 +58,7 @@ void audiomanager_shutdown(struct audiomanager* am)
 	FMOD_System_Release(am->system);
 }
 
-*	get the FMOD version number
+/*	get the FMOD version number
 	param:	am				audio manager
 	return:	unsigned		version number
 */
@@ -72,7 +72,7 @@ unsigned audiomanager_getlibversion(struct audiomanager* am)
 }
 
 
-*	update the audio manager
+/*	update the audio manager
 	param:	am				audio manager
 	param:	pos				listener position
 	param:	dir				listener direction
@@ -88,7 +88,7 @@ void audiomanager_update(struct audiomanager* am, vec3f pos, vec3f dir, vec3f up
 }
 
 
-*	create a new music sound object
+/*	create a new music sound object
 	param:	am				audio manager
 	param:	filename		path to the audio file
 	return:	int				index to the sound object, or -1 if failure
@@ -111,7 +111,7 @@ int audiomanager_newmusic(struct audiomanager* am, const char* filename)
 	return -1;
 }
 
-*	create a new sfx sound object
+/*	create a new sfx sound object
 	param:	am				audio manager
 	param:	filename		path to the audio file
 	return:	int				index to the sound object, or -1 if failure
@@ -135,7 +135,7 @@ int audiomanager_newsfx(struct audiomanager* am, const char* filename, FMOD_MODE
 }
 
 
-*	play a music sound
+/*	play a music sound
 	param:	am				audio manager
 	param:	id				index to the sound object
 	param:	loops			number of times to loop the song
@@ -152,7 +152,7 @@ void audiomanager_playmusic(struct audiomanager* am, int id, int loops)
 	FMOD_Channel_SetPaused(am->music[id].channel, false);
 }
 
-*	play an sfx sound
+/*	play an sfx sound
 	param:	am				audio manager
 	param:	id				index to the sound object
 	param:	pos				position to play the sound effect
@@ -170,7 +170,7 @@ void audiomanager_playsfx(struct audiomanager* am, int id, vec3f pos)
 }
 
 
-*	stop a music sound
+/*	stop a music sound
 	param:	am				audio manager
 	param:	id				index to the sound object
 */
@@ -180,7 +180,7 @@ void audiomanager_stopmusic(struct audiomanager* am, int id)
 }
 
 
-*	set the position in 3d space of a sound effect
+/*	set the position in 3d space of a sound effect
 	param:	am				audio manager
 	param:	id				index to the sound object
 	param:	pos				new position
@@ -193,7 +193,7 @@ void audiomanager_setsfxposition(struct audiomanager* am, int id, vec3f pos)
 }
 
 
-*	set the music volume
+/*	set the music volume
 	param:	am				audio manager
 	param:	volume			new music volume
 */
@@ -202,7 +202,7 @@ void audiomanager_setmusicvolume(struct audiomanager* am, float volume)
 	FMOD_ChannelGroup_SetVolume(am->group_music, volume);
 }
 
-*	set the sfx volume
+/*	set the sfx volume
 	param:	am				audio manager
 	param:	volume			new sfx volume
 */
@@ -211,7 +211,7 @@ void audiomanager_setsfxvolume(struct audiomanager* am, float volume)
 	FMOD_ChannelGroup_SetVolume(am->group_sfx, volume);
 }
 
-*	set the master volume
+/*	set the master volume
 	param:	am				audio manager
 	param:	volume			new master volume
 */
@@ -224,7 +224,7 @@ void audiomanager_setmastervolume(struct audiomanager* am, float volume)
 }
 
 
-*	toggle a music sound's paused state
+/*	toggle a music sound's paused state
 	param:	am				audio manager
 	param:	id				index to the sound object
 */
