@@ -101,6 +101,9 @@
     <ClCompile Include="src\objects\entities.cpp">
       <Filter>src\objects</Filter>
     </ClCompile>
+    <ClCompile Include="src\core\win.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\debug.h">
@@ -171,6 +174,9 @@
     </ClInclude>
     <ClInclude Include="src\objects\entities.h">
       <Filter>headers\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\win.h">
+      <Filter>headers\core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

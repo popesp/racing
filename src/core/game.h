@@ -4,6 +4,7 @@
 
 #include	"../audio/audio.h"
 #include	"input.h"
+#include	"win.h"
 #include	"../objects/camera.h"
 #include	"../objects/entities.h"
 #include	"../objects/vehicle.h"
