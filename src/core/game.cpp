@@ -60,11 +60,11 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 			game->flags |= GAME_FLAG_TERMINATED;
 			break;
 
-		case GLFW_KEY_M:
+		case GLFW_KEY_M:/*
 			// go to next track
 			audiomanager_stopmusic(&game->audiomanager, game->index_currentsong);
 			game->index_currentsong = (game->index_currentsong + 1) % GAME_MUSIC_COUNT;
-			audiomanager_playmusic(&game->audiomanager, game->index_currentsong, -1);
+			audiomanager_playmusic(&game->audiomanager, game->index_currentsong, -1);*/
 			break;
 
 		case GLFW_KEY_Q:
@@ -233,6 +233,8 @@ static void update(struct game* game)
 	// simulate
 	physicsmanager_update(&game->physicsmanager, GAME_SPU);
 
+	if(game->flags == GAME_FLAG_WINCONDITION){
+		checkwin(game);}
 	// check for window close messages
 	if (glfwWindowShouldClose(game->window.w))
 		game->flags |= GAME_FLAG_TERMINATED;
@@ -373,10 +375,11 @@ static int start_subsystems(struct game* game)
 	}
 
 	// initialize audio manager
+	/*
 	printf("Starting up audio manager...");
 	audiomanager_startup(&game->audiomanager);
 	printf("...done. Using FMOD version %d.\n", audiomanager_getlibversion(&game->audiomanager));
-
+	*/
 	
 	return 1;
 }
@@ -440,7 +443,7 @@ int game_startup(struct game* game)
 	game->track.r_track.lights[1] = game->track_lights + 1;
 	game->vehiclemanager.r_vehicle.lights[0] = game->track_lights + 0;
 	game->vehiclemanager.r_vehicle.lights[1] = game->track_lights + 1;
-	
+	/*
 	// add background music
 	game->songs[GAME_MUSIC_1_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_1_FILENAME);
 	game->songs[GAME_MUSIC_2_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_2_FILENAME);
@@ -448,85 +451,12 @@ int game_startup(struct game* game)
 	game->songs[GAME_MUSIC_4_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_4_FILENAME);
 	game->index_currentsong = 0;
 	audiomanager_playmusic(&game->audiomanager, game->songs[game->index_currentsong], -1);
-	
+	*/
 	game->flags = GAME_FLAG_INIT;
 
 	return 1;
 }
-/*
-static void checkwin(struct game* game){
 
-	int cp1 = game->track.num_pathpoints / 3;
-	int cp2 = game->track.num_pathpoints / 2;
-
-	if(game->player.vehicle->lap==GAME_WIN_LAP){
-		printf("Player has won the game!\nGame's over\n\n");
-
-		//reset laps
-		game->player.vehicle->lap=1;
-		for(int i=0; i<=game->amountAI;i++){
-			game->aiplayer[i].vehicle->lap=1;
-		}
-
-		game->winstate = GAME_WINSTATE_OFF;
-	}
-
-	for(int i=0;i<=game->amountAI;i++){
-		if(game->aiplayer[i].vehicle->lap==GAME_WIN_LAP){
-			printf("AI %d has won the game!\nGame's over\n\n", i);
-
-			//reset laps
-			game->player.vehicle->lap=1;
-			for(int i=0; i<=game->amountAI;i++){
-				game->aiplayer[i].vehicle->lap=1;
-			}
-			game->winstate = GAME_WINSTATE_OFF;
-		}
-	}
-
-	//player win logic
-	if(game->player.vehicle->checkpoint1==false && game->player.vehicle->index_track==cp1){
-		game->player.vehicle->checkpoint1=true;
-	}
-
-	if(game->player.vehicle->checkpoint2==false && game->player.vehicle->checkpoint1==true && game->player.vehicle->index_track==cp2){
-		game->player.vehicle->checkpoint2=true;
-	}
-
-	if(game->player.vehicle->checkpoint2==true && game->player.vehicle->index_track==cp1){
-		game->player.vehicle->checkpoint2=false;
-	}
-
-	if(game->player.vehicle->checkpoint2==true&&game->player.vehicle->checkpoint1==true&&game->player.vehicle->index_track==game->track.num_pathpoints-1){
-		game->player.vehicle->lap++;
-		printf("Player is on lap %d\n", game->player.vehicle->lap);
-		game->player.vehicle->checkpoint1=false;
-		game->player.vehicle->checkpoint2=false;
-	}
-
-	//AI win logic
-	for(int i=0;i<=game->amountAI;i++){
-		if(game->aiplayer[i].vehicle->checkpoint1==false && game->aiplayer[i].vehicle->index_track==cp1){
-			game->aiplayer[i].vehicle->checkpoint1=true;
-		}
-
-		if(game->aiplayer[i].vehicle->checkpoint2==false && game->aiplayer[i].vehicle->checkpoint1==true && game->aiplayer[i].vehicle->index_track==cp2){
-			game->aiplayer[i].vehicle->checkpoint2=true;
-		}
-
-		if(game->aiplayer[i].vehicle->checkpoint2==true && game->aiplayer[i].vehicle->index_track==cp1){
-			game->aiplayer[i].vehicle->checkpoint2=false;
-		}
-
-		if(game->aiplayer[i].vehicle->checkpoint2==true&&game->aiplayer[i].vehicle->checkpoint1==true&&game->aiplayer[i].vehicle->index_track==game->track.num_pathpoints-1){
-			game->aiplayer[i].vehicle->lap++;
-			printf("AI %d is on lap %d\n", i, game->aiplayer[i].vehicle->lap);
-			game->aiplayer[i].vehicle->checkpoint1=false;
-			game->aiplayer[i].vehicle->checkpoint2=false;
-		}
-	}
-}
-*/
 void game_mainloop(struct game* game)
 {
 	double time, timer, elapsed;
@@ -566,6 +496,7 @@ void game_mainloop(struct game* game)
 		// render as frequently as possible
 		render(game);
 		fps++;
+
 	}
 }
 
@@ -583,7 +514,7 @@ void game_shutdown(struct game* game)
 	skybox_delete(&game->skybox);
 
 	// shut down all the game subsytems
-	audiomanager_shutdown(&game->audiomanager);
+	//audiomanager_shutdown(&game->audiomanager);
 	inputmanager_shutdown(&game->inputmanager);
 	physicsmanager_shutdown(&game->physicsmanager);
 	
