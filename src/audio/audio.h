@@ -5,11 +5,10 @@
 #include	<fmod.h>
 #include	"../math/vec3f.h"
 
-#define	AUDIO_MAX_MUSIC		8
-#define	AUDIO_MAX_SFX		3
-#define DISTANCEFACTOR       1.0f    // Units per meter.  I.e feet would = 3.28.  centimeters would = 100.
 
-#define INTERFACE_UPDATETIME  50      // 50ms update for interface
+#define	AUDIO_MUSIC_COUNT		8
+#define	AUDIO_SFX_COUNT			3
+
 
 struct sound
 {
@@ -26,8 +25,8 @@ struct audiomanager
 	FMOD_CHANNELGROUP* group_music;
 	FMOD_CHANNELGROUP* group_sfx;
 
-	struct sound music[AUDIO_MAX_MUSIC];
-	struct sound sfx[AUDIO_MAX_SFX];
+	struct sound music[AUDIO_MUSIC_COUNT];
+	struct sound sfx[AUDIO_SFX_COUNT];
 };
 
 
@@ -46,6 +45,15 @@ void audiomanager_shutdown(struct audiomanager* am);
 	return:	unsigned		version number
 */
 unsigned audiomanager_getlibversion(struct audiomanager* am);
+
+
+/*	update the audio manager
+	param:	am				audio manager
+	param:	pos				listener position
+	param:	dir				listener direction
+	param:	up				listener 'up' vector
+*/
+void audiomanager_update(struct audiomanager* am, vec3f pos, vec3f dir, vec3f up);
 
 
 /*	create a new music sound object
@@ -85,6 +93,14 @@ void audiomanager_playsfx(struct audiomanager* am, int id, vec3f playerpos);
 void audiomanager_stopmusic(struct audiomanager* am, int id);
 
 
+/*	set the position in 3d space of a sound effect
+	param:	am				audio manager
+	param:	id				index to the sound object
+	param:	pos				new position
+*/
+void audiomanager_setsfxposition(struct audiomanager* am, int id, vec3f pos);
+
+
 /*	set the music volume
 	param:	am				audio manager
 	param:	volume			new music volume
@@ -110,8 +126,5 @@ void audiomanager_setmastervolume(struct audiomanager* am, float volume);
 */
 void audiomanager_togglemusic(struct audiomanager* am, int id);
 
-void audiomanager_setsoundposition(struct audiomanager* am, int id, vec3f pos);
-
-void audiomanager_updatelistener(struct audiomanager* am, vec3f playerpos);
 
 #endif
