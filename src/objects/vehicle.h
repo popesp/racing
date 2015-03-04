@@ -7,9 +7,10 @@
 #include	"../objects/track.h"
 #include	"../physics/physics.h"
 #include	"../render/render.h"
+#include	"../objects/powerup.h"
 
 
-#define	VEHICLE_COUNT				10
+#define	VEHICLE_COUNT				152		// one higher than AI count to account for player
 #define	VEHICLE_COUNT_RAYCASTS		4
 
 #define	VEHICLE_RAYCAST_FRONTLEFT	0
@@ -61,6 +62,7 @@ struct vehicle
 	int index_track;
 
 	int lap;
+	int place;
 
 	//these are used to see if player vehicle is completing the race
 	bool checkpoint1;
@@ -76,6 +78,8 @@ struct vehiclemanager
 	struct physicsmanager* pm;
 	struct texturemanager* tm;
 	struct track* track;
+
+	struct entitymanager* em;
 
 	struct renderable r_vehicle;
 
@@ -96,7 +100,7 @@ struct vehiclemanager
 	param:	mesh_filename	filename for the vehicle mesh
 	param:	tex_filename	filename for the vehicle texture
 */
-void vehiclemanager_startup(struct vehiclemanager* vm, struct renderer* r, struct texturemanager* tm, struct physicsmanager* pm, struct track* t, const char* mesh_filename, const char* tex_filename);
+void vehiclemanager_startup(struct vehiclemanager* vm, struct renderer* r, struct texturemanager* tm, struct physicsmanager* pm, struct track* t, const char* mesh_filename, const char* tex_filename, struct entitymanager* em);
 
 /*	shut down the vehicle manager
 	param:	vm				vehicle manager

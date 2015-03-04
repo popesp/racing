@@ -8,7 +8,6 @@
 #include	"../objects/vehicle.h"
 #include	"../objects/skybox.h"
 #include	"../objects/track.h"
-#include	"../objects/pickups.h"
 #include	"../physics/physics.h"
 #include	"player.h"
 #include	"../render/render.h"
@@ -31,7 +30,14 @@
 
 #define	GAME_POINTSIZE			10.f
 
+<<<<<<< HEAD
 #define	GAME_AIPLAYER_COUNT		(VEHICLE_COUNT - 1)
+=======
+#define	GAME_STARTINGPOS		-20.f, 1.5f, 0.f // TEMP
+#define	GAME_AISTARTINGPOS		-20.f, 1.5f, -20.f // TEMP
+
+#define	AI_MAX_COUNT			151	//max is 9. buttons glitch over that.
+>>>>>>> 796ab3a0a6146d1e889aa68daa51ee5d5634429a
 
 #define	GAME_MUSIC_COUNT		4
 #define	GAME_MUSIC_1_ID			0
@@ -43,7 +49,22 @@
 #define	GAME_MUSIC_3_FILENAME	"res/music/Full Force Forward.mp3"
 #define	GAME_MUSIC_4_FILENAME	"res/music/Daft Punk & Boys Noize - End Of Line.mp3"
 
+<<<<<<< HEAD
 #define GAME_WINCONDITION_LAPS	5
+=======
+#define	GAME_SFX_1_ID			0
+#define	GAME_SFX_2_ID			1
+#define	GAME_SFX_3_ID			2
+#define	GAME_SFX_1_FILENAME	"res/soundfx/aud-eng-start-base.wav"
+#define	GAME_SFX_2_FILENAME	"res/soundfx/aud-eng-loop-base.wav"
+#define	GAME_SFX_3_FILENAME	"res/soundfx/crash.wav"
+
+
+
+#define GAME_WIN_LAP			5
+#define GAME_WINSTATE_OFF		0x0
+#define GAME_WINSTATE_ON		0x1
+>>>>>>> 796ab3a0a6146d1e889aa68daa51ee5d5634429a
 
 #define GAME_PICKUP_COUNT		5
 
@@ -69,6 +90,7 @@ struct game
 	struct texturemanager texturemanager;
 	struct audiomanager audiomanager;
 
+	struct entitymanager entitymanager;
 	struct vehiclemanager vehiclemanager;
 
 	struct skybox skybox;
@@ -91,6 +113,7 @@ struct game
 
 	int index_currentsong;
 	int songs[GAME_MUSIC_COUNT];
+	int sfx[AUDIO_MAX_SFX];
 
 	unsigned char flags;
 };

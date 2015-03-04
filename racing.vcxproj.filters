@@ -98,6 +98,9 @@
     <ClCompile Include="src\objects\pickups.cpp">
       <Filter>src\objects</Filter>
     </ClCompile>
+    <ClCompile Include="src\physics\collision.cpp">
+      <Filter>src\physics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\debug.h">
@@ -165,6 +168,9 @@
     </ClInclude>
     <ClInclude Include="src\objects\pickups.h">
       <Filter>headers\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\physics\collision.h">
+      <Filter>headers\physics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
