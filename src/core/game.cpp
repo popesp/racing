@@ -67,6 +67,11 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 			audiomanager_playmusic(&game->audiomanager, game->index_currentsong, -1);
 			break;
 
+		case GLFW_KEY_P:
+			// pause the music
+			audiomanager_togglemusic(&game->audiomanager, game->index_currentsong);
+			break;
+
 		case GLFW_KEY_Q:
 			if (game->flags & GAME_FLAG_WIREFRAME)
 			{
@@ -224,6 +229,8 @@ static void update(struct game* game)
 		game->player.vehicle->controller = NULL;
 	} else
 		game->player.vehicle->controller = &game->inputmanager.controllers[GLFW_JOYSTICK_1];
+
+	audiomanager_update(&game->audiomanager, game->player.camera.pos, game->player.camera.dir, game->player.camera.up);
 
 	// update the vehicles
 	vehiclemanager_update(&game->vehiclemanager);
@@ -412,7 +419,7 @@ int game_startup(struct game* game)
 	entitymanager_startup(&game->entitymanager, &game->physicsmanager, &game->renderer, &game->track);
 
 	// start up the vehicle manager for the track
-	vehiclemanager_startup(&game->vehiclemanager, &game->physicsmanager, &game->entitymanager, &game->renderer, &game->track, "res/models/car/car.obj", "res/models/car/carUV.png");
+	vehiclemanager_startup(&game->vehiclemanager, &game->physicsmanager, &game->entitymanager, &game->audiomanager, &game->renderer, &game->track, "res/models/car/car.obj", "res/models/car/carUV.png");
 
 	// initialize player objects
 	vec3f_set(offs, 0.f, 0.f, 0.f);

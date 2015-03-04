@@ -1,10 +1,11 @@
 #include	"vehicle.h"
 
 #include	<float.h>
+#include	"../audio/audio.h"
 #include	"../render/objloader.h"
 
 
-void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm, struct entitymanager* em, struct renderer* r, struct track* t, const char* file_mesh, const char* file_diffuse)
+void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm, struct entitymanager* em, struct audiomanager* am, struct renderer* r, struct track* t, const char* file_mesh, const char* file_diffuse)
 {
 	vec3f min, max, avg, diff;
 	struct vehicle* v;
@@ -13,6 +14,7 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 
 	vm->em = em;
 	vm->pm = pm;
+	vm->am = am;
 	vm->track = t;
 
 	// initialize vehicle mesh
@@ -69,6 +71,9 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 	texture_loadfile(&vm->diffuse, file_diffuse);
 	texture_upload(&vm->diffuse, RENDER_TEXTURE_DIFFUSE);
 	vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->diffuse;
+
+	// create sound for missiles
+	vm->sfx_missile = audiomanager_newsfx(am, "res/soundfx/crash.wav");
 
 	// initialize vehicle array
 	for (i = 0; i < VEHICLE_COUNT; i++)
@@ -208,7 +213,10 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 
 		// firing a projectile
 		if (v->controller->buttons[INPUT_BUTTON_A] == (INPUT_STATE_DOWN | INPUT_STATE_CHANGED))
+		{
 			entitymanager_newmissile(vm->em, v, vm->dim);
+			audiomanager_playsfx(vm->am, vm->sfx_missile, v->pos);
+		}
 	}
 }
 

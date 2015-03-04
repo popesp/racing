@@ -76,11 +76,14 @@ struct vehiclemanager
 {
 	struct physicsmanager* pm;
 	struct entitymanager* em;
+	struct audiomanager* am;
 	struct track* track;
 
 	struct renderable r_vehicle;
 	struct texture diffuse;
 	vec3f dim;
+
+	int sfx_missile;
 
 	struct vehicle vehicles[VEHICLE_COUNT];
 };
@@ -90,12 +93,13 @@ struct vehiclemanager
 	param:	vm				vehicle manager
 	param:	pm				physics manager
 	param:	em				entity manager
+	param:	am				audio manager
 	param:	r				renderer
 	param:	t				track object
 	param:	file_mesh		filename for vehicle mesh
 	param:	file_diffuse	filename for vehicle diffuse texture
 */
-void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm, struct entitymanager* em, struct renderer* r, struct track* t, const char* file_mesh, const char* file_diffuse);
+void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm, struct entitymanager* em, struct audiomanager* am, struct renderer* r, struct track* t, const char* file_mesh, const char* file_diffuse);
 
 /*	shut down the vehicle manager
 	param:	vm				vehicle manager
