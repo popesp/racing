@@ -8,7 +8,7 @@ static void resetsound(struct sound* s)
 	s->enabled = false;
 }
 
-
+//
 /*	start up the audio manager
 	param:	am				audio manager (modified)
 */
