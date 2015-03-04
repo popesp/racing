@@ -378,11 +378,11 @@ static int start_subsystems(struct game* game)
 	}
 
 	// initialize audio manager
-	/*
+	
 	printf("Starting up audio manager...");
 	audiomanager_startup(&game->audiomanager);
 	printf("...done. Using FMOD version %d.\n", audiomanager_getlibversion(&game->audiomanager));
-	*/
+	
 	
 	return 1;
 }
@@ -446,7 +446,7 @@ int game_startup(struct game* game)
 	game->track.r_track.lights[1] = game->track_lights + 1;
 	game->vehiclemanager.r_vehicle.lights[0] = game->track_lights + 0;
 	game->vehiclemanager.r_vehicle.lights[1] = game->track_lights + 1;
-	/*
+	
 	// add background music
 	game->songs[GAME_MUSIC_1_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_1_FILENAME);
 	game->songs[GAME_MUSIC_2_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_2_FILENAME);
@@ -454,7 +454,7 @@ int game_startup(struct game* game)
 	game->songs[GAME_MUSIC_4_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_4_FILENAME);
 	game->index_currentsong = 0;
 	audiomanager_playmusic(&game->audiomanager, game->songs[game->index_currentsong], -1);
-	*/
+	
 	game->flags = GAME_FLAG_INIT;
 
 	return 1;
@@ -517,7 +517,7 @@ void game_shutdown(struct game* game)
 	skybox_delete(&game->skybox);
 
 	// shut down all the game subsytems
-	//audiomanager_shutdown(&game->audiomanager);
+	audiomanager_shutdown(&game->audiomanager);
 	inputmanager_shutdown(&game->inputmanager);
 	physicsmanager_shutdown(&game->physicsmanager);
 	
