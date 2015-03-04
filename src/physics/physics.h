@@ -22,6 +22,9 @@ struct physicsmanager
 	physx::PxScene* scene;
 };
 
+using namespace physx;
+
+PxFilterFlags myFilterShader(PxFilterObjectAttributes attributes0, PxFilterData filterData0, PxFilterObjectAttributes attributes1, PxFilterData filterData1, PxPairFlags& pairFlags, const void* constantBlock, PxU32 constantBlockSize);
 
 /*	start up the physics manager
 	param:	pm				physics manager (modified)

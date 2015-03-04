@@ -82,7 +82,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="collision.cpp" />
     <ClCompile Include="src\audio\audio.cpp" />
     <ClCompile Include="src\core\player.cpp" />
     <ClCompile Include="src\core\game.cpp" />
@@ -94,6 +93,7 @@
     <ClCompile Include="src\objects\powerup.cpp" />
     <ClCompile Include="src\objects\skybox.cpp" />
     <ClCompile Include="src\objects\track.cpp" />
+    <ClCompile Include="src\physics\collision.cpp" />
     <ClCompile Include="src\physics\physics.cpp" />
     <ClCompile Include="src\render\objloader.cpp" />
     <ClCompile Include="src\render\render.cpp" />
@@ -101,7 +101,6 @@
     <ClCompile Include="src\render\texture.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="collision.h" />
     <ClInclude Include="src\audio\audio.h" />
     <ClInclude Include="src\core\player.h" />
     <ClInclude Include="src\core\game.h" />
@@ -120,6 +119,7 @@
     <ClInclude Include="src\objects\powerup.h" />
     <ClInclude Include="src\objects\skybox.h" />
     <ClInclude Include="src\objects\track.h" />
+    <ClInclude Include="src\physics\collision.h" />
     <ClInclude Include="src\physics\physics.h" />
     <ClInclude Include="src\render\objloader.h" />
     <ClInclude Include="src\render\render.h" />

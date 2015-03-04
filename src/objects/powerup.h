@@ -9,9 +9,9 @@
 #include	"../render/objloader.h"
 #include	"../render/texture.h"
 
-#define PROJECTILE_WIDTH		1.2f
-#define PROJECTILE_LENGTH		0.6f
-#define PROJECTILE_HEIGHT		2.f
+#define PROJECTILE_WIDTH		0.5f
+#define PROJECTILE_LENGTH		1.f
+#define PROJECTILE_HEIGHT		0.5f
 
 #define	PROJ_TARGETPOS	0.f, 0.f, -2.0f
 
@@ -22,10 +22,10 @@ struct physicsmanager;
 
 struct projectile
 {
-	struct physicsmanager* pm;
+	//struct physicsmanager* pm;
 	physx::PxRigidDynamic* proj;
 
-	struct renderable r_proj;
+	//struct renderable r_proj;
 };
 
 struct entitymanager
@@ -53,6 +53,6 @@ void projectile_init(struct projectile* p, struct physicsmanager* pm, struct veh
 
 void projectile_delete(struct projectile* p, struct physicsmanager* pm);
 
-void projectile_generatemesh(struct renderer* r, struct renderable r_proj);
+void projectile_generatemesh(struct renderer* r, struct renderable* r_proj);
 
 #endif

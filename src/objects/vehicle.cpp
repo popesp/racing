@@ -245,12 +245,13 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 				v->flags |= VEHICLE_FLAG_MISSILE;
 
 			// TODO: figure this shit out
-			vm->em->proj_flag = 1;
-			projectile_init(&vm->em->projectiles[0], vm->pm, v);  	//&game->player_proj, &game->physicsmanager, &game->player);
-			//projectile_generatemesh(&vm->r, &game->player_proj);
-			//game->player_proj.r_proj.lights[0] = &game->track_lights[0];
-			//renderable_sendbuffer(&game->renderer, &game->player_proj.r_proj);
-			//*/
+			if (vm->em->proj_flag == 1) {
+				projectile_delete(&vm->em->projectiles[0], vm->pm);
+			}
+			else {
+				vm->em->proj_flag = 1;
+			}
+			projectile_init(&vm->em->projectiles[0], vm->pm, v);
 		}
 	}
 }

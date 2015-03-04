@@ -63,7 +63,7 @@ void entitymanager_startup(struct entitymanager* em, struct renderer* r, struct 
 	vec3f_set(em->r_proj.material.spc, 1.8f, 0.5f, 0.5f);
 	em->r_proj.material.shn = 100.f;
 
-	projectile_generatemesh(r, em->r_proj);
+	projectile_generatemesh(r, &em->r_proj);
 
 	renderable_sendbuffer(r, &em->r_proj);
 }
@@ -73,7 +73,7 @@ void projectile_init(struct projectile* p, struct physicsmanager* pm,struct vehi
 	vec3f dim;
 	vec3f_set(dim, PROJECTILE_WIDTH/2.f, PROJECTILE_HEIGHT/2.f, PROJECTILE_LENGTH/2.f);
 
-	p->pm = pm;
+	//p->pm = pm;
 
 	vec3f pos;
 
@@ -88,40 +88,31 @@ void projectile_init(struct projectile* p, struct physicsmanager* pm,struct vehi
 	physx::PxTransform projtrans = v->body->getGlobalPose().transform(physx::PxTransform(PROJ_TARGETPOS));
 
 	p->proj = physics_adddynamic_box(pm, pos, dim);
-
+	p->proj->setActorFlag(PxActorFlag::eDISABLE_GRAVITY, true);
 	p->proj->setGlobalPose(projtrans);
 
 	vec3f force;
 
 	vec3f_set(force, CART_FORWARD);
-	vec3f_scale(force, CART_FORCE_FORWARD * 1000);
+	vec3f_scale(force, CART_FORCE_FORWARD * 50);
 
 	physx::PxRigidBodyExt::addLocalForceAtLocalPos(*p->proj, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, 0.f));
-
-	/*renderable_init(&p->r_proj, RENDER_MODE_TRIANGLES, RENDER_TYPE_MATS_L, RENDER_FLAG_NONE);
-
-	vec3f_set(p->r_proj.material.amb, 0.8f, 0.15f, 0.1f);
-	vec3f_set(p->r_proj.material.dif, 0.8f, 0.15f, 0.1f);
-	vec3f_set(p->r_proj.material.spc, 0.8f, 0.5f, 0.5f);
-	p->r_proj.material.shn = 100.f;*/
 }
 
 void projectile_delete(struct projectile* p, struct physicsmanager* pm)
 {
-	
 	p->proj->release();
-	renderable_deallocate(&p->r_proj);
-	
+	//renderable_deallocate(&p->r_proj);	
 }
 
-void projectile_generatemesh(struct renderer* r, struct renderable r_proj) {
+void projectile_generatemesh(struct renderer* r, struct renderable* r_proj) {
 	
 	float* ptr;
 	int i;
 
-	renderable_allocate(r, &r_proj, 36);
+	renderable_allocate(r, r_proj, 36);
 
-	ptr = r_proj.buf_verts;
+	ptr = r_proj->buf_verts;
 
 	for (i = 0; i < 36; i++)
 	{
