@@ -18,6 +18,7 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct renderer* r, struc
 {
 	vec3f min, max, avg, diff;
 	struct vehicle* v;
+	float temp;
 	int i;
 
 	vm->pm = pm;
@@ -64,12 +65,10 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct renderer* r, struc
 	vec3f_subtractn(diff, max, min);
 	vec3f_scalen(vm->dim, diff, VEHICLE_MESHSCALE);
 
-	float temp;
+	// swap x and z to get the correct vehicle dimensions
 	temp = vm->dim[VX];
 	vm->dim[VX] = vm->dim[VZ];
 	vm->dim[VZ] = temp;
-
-	printf("%f, %f, %f\n", vm->dim[VX], vm->dim[VY], vm->dim[VZ]);
 
 	mat4f_scalemul(vm->r_vehicle.matrix_model, VEHICLE_MESHSCALE, VEHICLE_MESHSCALE, VEHICLE_MESHSCALE);
 	mat4f_rotateymul(vm->r_vehicle.matrix_model, -1.57080f);
@@ -228,12 +227,11 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 		
 		physx::PxRigidBodyExt::addLocalForceAtLocalPos(*v->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, -vm->dim[VZ]/2.f));
 		
-		
+		// reset button
 		if (v->controller->buttons[INPUT_BUTTON_BACK] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN)){
 			vehicle_reset(vm, v);
 		}
 
-		
 		// firing a projectile
 		if (v->controller->buttons[INPUT_BUTTON_A] == (INPUT_STATE_DOWN | INPUT_STATE_CHANGED))
 		{

@@ -31,10 +31,7 @@
 
 #define	GAME_POINTSIZE			10.f
 
-#define	GAME_STARTINGPOS		-20.f, 1.5f, 0.f // TEMP
-#define	GAME_AISTARTINGPOS		-20.f, 1.5f, -20.f // TEMP
-
-#define	AI_MAX_COUNT			9	//max is 9. buttons glitch over that.
+#define	GAME_AIPLAYER_COUNT		(VEHICLE_COUNT - 1)
 
 #define	GAME_MUSIC_COUNT		4
 #define	GAME_MUSIC_1_ID			0
@@ -46,9 +43,7 @@
 #define	GAME_MUSIC_3_FILENAME	"res/music/Full Force Forward.mp3"
 #define	GAME_MUSIC_4_FILENAME	"res/music/Daft Punk & Boys Noize - End Of Line.mp3"
 
-#define GAME_WIN_LAP			5
-#define GAME_WINSTATE_OFF		0x0
-#define GAME_WINSTATE_ON		0x1
+#define GAME_WINCONDITION_LAPS	5
 
 #define GAME_PICKUP_COUNT		5
 
@@ -56,7 +51,14 @@
 #define	GAME_FLAG_TERMINATED	0x01
 #define	GAME_FLAG_WIREFRAME		0x02	// TEMP
 #define	GAME_FLAG_DEBUGCAM		0x04
+#define	GAME_FLAG_PAUSED		0x08
+#define	GAME_FLAG_WINCONDITION	0x10
 
+
+struct gamestate
+{
+
+};
 
 struct game
 {
@@ -76,7 +78,8 @@ struct game
 	struct renderable closestpoint; // temp
 
 	struct player player;
-	struct aiplayer aiplayer[AI_MAX_COUNT];
+	int num_aiplayers;
+	struct aiplayer aiplayers[GAME_AIPLAYER_COUNT];
 
 	struct camera cam_debug;
 
@@ -89,14 +92,13 @@ struct game
 	int index_currentsong;
 	int songs[GAME_MUSIC_COUNT];
 
-	int amountAI;
-
 	unsigned char flags;
-	unsigned char winstate;
 };
+
 
 int game_startup(struct game* game);
 void game_mainloop(struct game* game);
 void game_shutdown(struct game* game);
+
 
 #endif

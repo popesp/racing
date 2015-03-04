@@ -11,6 +11,7 @@
 #include	"../render/objloader.h"
 
 
+static void resetplayers(struct game*);
 static void resize(GLFWwindow*, int, int);
 static void keyboard(GLFWwindow*, int, int, int, int);
 static void cursor(GLFWwindow*, double, double);
@@ -19,13 +20,15 @@ static void scroll(GLFWwindow*, double, double);
 static void update(struct game*);
 static void render(struct game*);
 
+
 static void resetplayers(struct game* game)
 {
+	int i;
+
 	vehicle_reset(&game->vehiclemanager, game->player.vehicle);
 
-	for(int i=0;i<=game->amountAI;i++){
-		vehicle_reset(&game->vehiclemanager, game->aiplayer[i].vehicle);
-	}
+	for (i = 0; i < game->num_aiplayers; i++)
+		vehicle_reset(&game->vehiclemanager, game->aiplayers[i].vehicle);
 }
 
 static void resize(GLFWwindow* window, int width, int height)
@@ -56,7 +59,7 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 			game->flags |= GAME_FLAG_TERMINATED;
 			break;
 
-		case GLFW_KEY_P:
+		case GLFW_KEY_M:
 			// go to next track
 			audiomanager_stopmusic(&game->audiomanager, game->index_currentsong);
 			game->index_currentsong = (game->index_currentsong + 1) % GAME_MUSIC_COUNT;
@@ -89,21 +92,43 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 			break;
 
 		case GLFW_KEY_A:
-			game->amountAI++;
-			
-			//glitches at max so decremented
-			if(game->amountAI>AI_MAX_COUNT-1){
-				game->amountAI=AI_MAX_COUNT-1;
-			}
-			else{
-				vec3f offs;
+			vec3f offs;
+
+			// if max ai count has not been reached, add a new ai player
+			game->num_aiplayers++;
+			if (game->num_aiplayers > GAME_AIPLAYER_COUNT)
+				game->num_aiplayers = GAME_AIPLAYER_COUNT;
+			else
+			{
 				vec3f_set(offs, 0.f, 0.f, 0.f);
-				aiplayer_init(&game->aiplayer[game->amountAI], &game->vehiclemanager, 5, offs);
-				printf("AI %d has been added to the game.\n", (game->amountAI));
+				aiplayer_init(game->aiplayers + (game->num_aiplayers - 1), &game->vehiclemanager, 5, offs);
+				printf("Computer-%d has joined the game.\n", game->num_aiplayers);
 			}
 			break;
 
 		case GLFW_KEY_SPACE:
+			int i;
+
+			// toggle win condition
+
+			if (game->flags & GAME_FLAG_WINCONDITION)
+			{
+				printf("Win condition deactivated.\n");
+
+			} else
+			{
+				printf("Win condition activated.\n");
+				printf("Player is on lap %d\n", game->player.vehicle->lap);
+
+				for (i = 0; i < game->num_aiplayers; i++)
+				{
+					game->aiplayers[i].vehicle->lap = 1;
+					printf("Computer-%d is on lap %d\n", i+1, game->aiplayers[i].vehicle->lap);
+				}
+
+				game->flags |= GAME_FLAG_WINCONDITION;
+			}
+
 			if(game->winstate == GAME_WINSTATE_OFF){
 				printf("Game's win state is activated.\n\n\n");
 				printf("Player is on lap %d\n", game->player.vehicle->lap);
@@ -124,11 +149,11 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 			break;
 
 		case GLFW_KEY_BACKSPACE:
-				//removes all added AI
-				for (int i=0;i<=game->amountAI;i++){
-					aiplayer_delete(&game->aiplayer[i], &game->vehiclemanager);
-				}
-				game->amountAI=-1;
+			int i;
+
+			for (i = 0; i < game->num_aiplayers; i++)
+				aiplayer_delete(game->aiplayers + i, &game->vehiclemanager);
+			game->num_aiplayers = 0;
 			break;
 
 		default:
@@ -177,16 +202,15 @@ static void scroll(GLFWwindow* window, double xoffset, double yoffset)
 static void update(struct game* game)
 {
 	vec3f move, up;
+	int i;
 
 	// check for callback events
 	glfwPollEvents();
 
 	// update player and ai input
 	inputmanager_update(&game->inputmanager);
-
-	for(int i=0;i<=game->amountAI;i++){
-		aiplayer_updateinput(&game->aiplayer[i]);
-	}
+	for(i = 0; i < game->num_aiplayers; i++)
+		aiplayer_updateinput(&game->aiplayers[i]);
 	
 	// temporary debug button
 	if (game->inputmanager.controllers[GLFW_JOYSTICK_1].flags & INPUT_FLAG_ENABLED){
@@ -221,7 +245,7 @@ static void update(struct game* game)
 		// disable cart controls if debug camera is enabled
 		game->player.vehicle->controller = NULL;
 	} else
-		game->player.vehicle->controller = &game->inputmanager.controllers[0];
+		game->player.vehicle->controller = &game->inputmanager.controllers[GLFW_JOYSTICK_1];
 
 	// update the vehicles
 	vehiclemanager_update(&game->vehiclemanager);
@@ -245,8 +269,10 @@ static void update(struct game* game)
 
 static void render(struct game* game)
 {
-	mat4f global_wv, skybox_wv, track_mw, skybox_mw;
-	physx::PxMat44 player_world(game->player.vehicle->body->getGlobalPose());
+	physx::PxMat44 player_mw, aiplayer_mw;
+	mat4f global_wv, skybox_wv;
+	mat4f track_mw, skybox_mw;
+	int i;
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -256,7 +282,7 @@ static void render(struct game* game)
 	else
 		camera_gettransform(&game->player.camera, global_wv);
 
-	// remove translation from camera transform
+	// remove translation from camera transform for the skybox
 	mat4f_copy(skybox_wv, global_wv);
 	vec3f_set(skybox_wv + C3, 0.f, 0.f, 0.f);
 	skybox_wv[R3 + C3] = 1.f;
@@ -271,15 +297,16 @@ static void render(struct game* game)
 	mat4f_identity(track_mw);
 	renderable_render(&game->renderer, &game->track.r_track, track_mw, global_wv, 0);
 
-	// render multiple AI's
-	for(int i=0;i<=game->amountAI;i++){
-		physx::PxMat44 newworld(game->aiplayer[i].vehicle->body->getGlobalPose());
-		renderable_render(&game->renderer, &game->vehiclemanager.r_vehicle, (float*)&newworld, global_wv, 0);	
+	// render players
+	player_mw = physx::PxMat44(game->player.vehicle->body->getGlobalPose());
+	renderable_render(&game->renderer, &game->vehiclemanager.r_vehicle, (float*)&player_mw, global_wv, 0);
+	for(i = 0; i < game->num_aiplayers; i++)
+	{
+		aiplayer_mw = physx::PxMat44(game->aiplayers[i].vehicle->body->getGlobalPose());
+		renderable_render(&game->renderer, &game->vehiclemanager.r_vehicle, (float*)&aiplayer_mw, global_wv, 0);	
 	}
 
-	// render carts
-	renderable_render(&game->renderer, &game->vehiclemanager.r_vehicle, (float*)&player_world, global_wv, 0);
-
+	// render closest point line
 	glClear(GL_DEPTH_BUFFER_BIT);
 	renderable_render(&game->renderer, &game->closestpoint, track_mw, global_wv, 0);
 
@@ -424,7 +451,8 @@ int game_startup(struct game* game)
 		player_init(&game->player, &game->vehiclemanager, &game->inputmanager.controllers[0], 0, offs);
 	else
 		player_init(&game->player, &game->vehiclemanager, &game->inputmanager.keyboard, 0, offs);
-	aiplayer_init(&game->aiplayer[0], &game->vehiclemanager, 5, offs);
+	aiplayer_init(&game->aiplayers[0], &game->vehiclemanager, 5, offs);
+	game->num_aiplayers = 1;
 
 	// initialize debug camera
 	vec3f_set(pos, 0.f, 0.f, -30.f);
@@ -466,8 +494,6 @@ int game_startup(struct game* game)
 	renderable_allocate(&game->renderer, &game->closestpoint, 2);
 	/* end temp */
 	
-	game->amountAI = 0;
-	game->winstate = GAME_WINSTATE_OFF;
 	game->flags = GAME_FLAG_INIT;
 
 	return 1;
@@ -596,11 +622,12 @@ void game_mainloop(struct game* game)
 
 void game_shutdown(struct game* game)
 {
+	int i;
+
 	// delete players
 	player_delete(&game->player, &game->vehiclemanager);
-	for (int i=0;i<=game->amountAI;i++){
-		aiplayer_delete(&game->aiplayer[i], &game->vehiclemanager);
-	}
+	for (i = 0; i < game->num_aiplayers; i++)
+		aiplayer_delete(&game->aiplayers[i], &game->vehiclemanager);
 	
 	// delete world objects
 	track_delete(&game->track);
