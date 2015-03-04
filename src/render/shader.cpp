@@ -6,6 +6,7 @@
 #include	"../error.h"	// PRINT_ERROR
 #include	"../mem.h"		// calloc, free
 
+
 /*	create an OpenGL shader object, load source and compile
 	param:	filename		file path to load shader source from
 	param:	type			type of shader; either SHADER_VERTEX or SHADER_FRAGMENT

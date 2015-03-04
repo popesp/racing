@@ -8,17 +8,12 @@
 struct skybox
 {
 	struct renderable r_skybox;
-
-	struct texturemanager* tm;
-
-	int texture;
+	struct texture diffuse;
 };
 
 
-void skybox_init(struct skybox* sb, struct texturemanager* tm, const char* filename);
+void skybox_init(struct skybox* sb, struct renderer* r, const char* file_diffuse);
 void skybox_delete(struct skybox* sb);
-
-void skybox_generatemesh(struct renderer* r, struct skybox* sb);
 
 
 #endif

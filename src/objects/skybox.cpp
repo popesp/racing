@@ -1,7 +1,5 @@
 #include	"skybox.h"
 
-#include	"../render/texture.h"
-
 
 static vec3f skybox_pos[8] =
 {
@@ -36,34 +34,17 @@ static float skybox_uv[36][2] =
 };
 
 
-void skybox_init(struct skybox* sb, struct texturemanager* tm, const char* filename)
-{
-	renderable_init(&sb->r_skybox, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_S, RENDER_FLAG_NONE);
-
-	sb->tm = tm;
-
-	sb->texture = texturemanager_newtexture(tm);
-	texture_loadfile(tm, sb->texture, filename);
-	texture_upload(tm, sb->texture, RENDER_TEXTURE_DIFFUSE);
-	sb->r_skybox.texture_ids[RENDER_TEXTURE_DIFFUSE] = sb->texture;
-}
-
-void skybox_delete(struct skybox* sb)
-{
-	renderable_deallocate(&sb->r_skybox);
-	texturemanager_removetexture(sb->tm, sb->texture);
-}
-
-
-void skybox_generatemesh(struct renderer* r, struct skybox* sb)
+void skybox_init(struct skybox* sb, struct renderer* r, const char* file_diffuse)
 {
 	float* ptr;
 	int i;
 
+	renderable_init(&sb->r_skybox, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_S, RENDER_FLAG_NONE);
 	renderable_allocate(r, &sb->r_skybox, 36);
 
 	ptr = sb->r_skybox.buf_verts;
 
+	// generate skybox
 	for (i = 0; i < 36; i++)
 	{
 		vec3f_copy(ptr, skybox_pos[skybox_posindex[i]]);
@@ -73,4 +54,18 @@ void skybox_generatemesh(struct renderer* r, struct skybox* sb)
 		ptr[1] = skybox_uv[i][1];
 		ptr += RENDER_ATTRIBSIZE_TEX;
 	}
+
+	renderable_sendbuffer(r, &sb->r_skybox);
+
+	// load texture file for the skybox
+	texture_init(&sb->diffuse);
+	texture_loadfile(&sb->diffuse, file_diffuse);
+	texture_upload(&sb->diffuse, RENDER_TEXTURE_DIFFUSE);
+	sb->r_skybox.textures[RENDER_TEXTURE_DIFFUSE] = &sb->diffuse;
+}
+
+void skybox_delete(struct skybox* sb)
+{
+	renderable_deallocate(&sb->r_skybox);
+	texture_delete(&sb->diffuse);
 }

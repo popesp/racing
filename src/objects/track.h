@@ -45,6 +45,7 @@ struct track
 	physx::PxRigidStatic* p_track;
 
 	struct renderable r_track;
+	struct texture normal;
 
 	float dist_boundary;
 
@@ -54,7 +55,7 @@ struct track
 };
 
 
-void track_init(struct track*, vec3f, struct physicsmanager*);
+void track_init(struct track* t, struct physicsmanager* pm, vec3f up, const char* file_normal);
 void track_delete(struct track*);
 
 

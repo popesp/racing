@@ -86,9 +86,6 @@
     <ClCompile Include="src\core\player.cpp">
       <Filter>src\core</Filter>
     </ClCompile>
-    <ClCompile Include="src\objects\powerup.cpp">
-      <Filter>src\objects</Filter>
-    </ClCompile>
     <ClCompile Include="src\render\objloader.cpp">
       <Filter>src\render</Filter>
     </ClCompile>
@@ -96,6 +93,12 @@
       <Filter>src\objects</Filter>
     </ClCompile>
     <ClCompile Include="src\objects\pickups.cpp">
+      <Filter>src\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\primitives.cpp">
+      <Filter>src\render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\objects\entities.cpp">
       <Filter>src\objects</Filter>
     </ClCompile>
   </ItemGroup>
@@ -151,9 +154,6 @@
     <ClInclude Include="src\core\player.h">
       <Filter>headers\core</Filter>
     </ClInclude>
-    <ClInclude Include="src\objects\powerup.h">
-      <Filter>headers\objects</Filter>
-    </ClInclude>
     <ClInclude Include="src\render\objloader.h">
       <Filter>headers\render</Filter>
     </ClInclude>
@@ -164,6 +164,12 @@
       <Filter>headers\objects</Filter>
     </ClInclude>
     <ClInclude Include="src\objects\pickups.h">
+      <Filter>headers\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\primitives.h">
+      <Filter>headers\render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\objects\entities.h">
       <Filter>headers\objects</Filter>
     </ClInclude>
   </ItemGroup>

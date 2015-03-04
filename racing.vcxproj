@@ -88,13 +88,14 @@
     <ClCompile Include="src\core\input.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\objects\camera.cpp" />
+    <ClCompile Include="src\objects\entities.cpp" />
     <ClCompile Include="src\objects\pickups.cpp" />
     <ClCompile Include="src\objects\vehicle.cpp" />
-    <ClCompile Include="src\objects\powerup.cpp" />
     <ClCompile Include="src\objects\skybox.cpp" />
     <ClCompile Include="src\objects\track.cpp" />
     <ClCompile Include="src\physics\physics.cpp" />
     <ClCompile Include="src\render\objloader.cpp" />
+    <ClCompile Include="src\render\primitives.cpp" />
     <ClCompile Include="src\render\render.cpp" />
     <ClCompile Include="src\render\shader.cpp" />
     <ClCompile Include="src\render\texture.cpp" />
@@ -113,13 +114,14 @@
       <DeploymentContent>false</DeploymentContent>
     </ClInclude>
     <ClInclude Include="src\objects\camera.h" />
+    <ClInclude Include="src\objects\entities.h" />
     <ClInclude Include="src\objects\pickups.h" />
     <ClInclude Include="src\objects\vehicle.h" />
-    <ClInclude Include="src\objects\powerup.h" />
     <ClInclude Include="src\objects\skybox.h" />
     <ClInclude Include="src\objects\track.h" />
     <ClInclude Include="src\physics\physics.h" />
     <ClInclude Include="src\render\objloader.h" />
+    <ClInclude Include="src\render\primitives.h" />
     <ClInclude Include="src\render\render.h" />
     <ClInclude Include="src\render\shader.h" />
     <ClInclude Include="src\render\texture.h" />

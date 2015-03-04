@@ -4,12 +4,8 @@
 #include	<GLFW/glfw3.h>		// GL
 #include	<stdio.h>			// sprintf
 #include	<string.h>			// strlen, strcpy
-#include	"../math/mat4f.h"	// invertn, multiplyn
-#include	"../math/vec3f.h"	// set, scalen
 #include	"../mem.h"			// calloc, free
 #include	"shader.h"			// create, program, link, delete
-#include	"texture.h"
-#include	"window.h"			// window.projection
 
 
 // enables and initializes vertex attribute
@@ -109,7 +105,7 @@ void renderable_init(struct renderable* obj, unsigned char mode, unsigned char t
 	obj->ambient = NULL;
 
 	for (i = 0; i < RENDER_TEXTURE_TYPES; i++)
-		obj->texture_ids[i] = 0;
+		obj->textures[i] = NULL;
 
 	// set model transformation to the identity
 	mat4f_identity(obj->matrix_model);
@@ -208,7 +204,7 @@ void renderable_render(struct renderer* r, struct renderable* obj, mat4f modelwo
 		glUniform1iv(r->uniforms_txtr_s.tex_diffuse, 1, &unit);
 
 		glActiveTexture(GL_TEXTURE0 + (unsigned)unit);
-		glBindTexture(GL_TEXTURE_2D, r->tm->textures[obj->texture_ids[RENDER_TEXTURE_DIFFUSE]].gl_id);
+		glBindTexture(GL_TEXTURE_2D, obj->textures[RENDER_TEXTURE_DIFFUSE]->gl_id);
 
 		break;
 
@@ -306,7 +302,7 @@ void renderable_render(struct renderer* r, struct renderable* obj, mat4f modelwo
 		glUniform1iv(r->uniforms_txtr_l.tex_diffuse, 1, &unit);
 
 		glActiveTexture(GL_TEXTURE0 + RENDER_TEXTURE_NORMAL);
-		glBindTexture(GL_TEXTURE_2D, r->tm->textures[obj->texture_ids[RENDER_TEXTURE_DIFFUSE]].gl_id);
+		glBindTexture(GL_TEXTURE_2D, obj->textures[RENDER_TEXTURE_DIFFUSE]->gl_id);
 
 		// material uniforms
 		glUniform3fv(r->uniforms_txtr_l.material[RENDER_MATERIAL_AMB], 1, obj->material.amb);
@@ -361,7 +357,7 @@ void renderable_render(struct renderer* r, struct renderable* obj, mat4f modelwo
 		glUniform1iv(r->uniforms_bump_l.tex_normal, 1, &unit);
 
 		glActiveTexture(GL_TEXTURE0 + RENDER_TEXTURE_NORMAL);
-		glBindTexture(GL_TEXTURE_2D, r->tm->textures[obj->texture_ids[RENDER_TEXTURE_NORMAL]].gl_id);
+		glBindTexture(GL_TEXTURE_2D, obj->textures[RENDER_TEXTURE_NORMAL]->gl_id);
 
 		// material uniforms
 		glUniform3fv(r->uniforms_bump_l.material[RENDER_MATERIAL_AMB], 1, obj->material.amb);
@@ -381,12 +377,7 @@ void renderable_render(struct renderer* r, struct renderable* obj, mat4f modelwo
 }
 
 
-/*	initialize renderer, including shader objects
-	param:	r				renderer struct to initialize (modified)
-	param:	tm				texture manager
-	param:	window			window to render to
-*/
-unsigned renderer_init(struct renderer* r, struct texturemanager* tm, struct window* window)
+unsigned renderer_init(struct renderer* r, struct window* window)
 {
 	unsigned vert_wire_s, frag_wire_s;
 	unsigned vert_txtr_s, frag_txtr_s;
@@ -472,7 +463,6 @@ unsigned renderer_init(struct renderer* r, struct texturemanager* tm, struct win
 
 	// register window pointer
 	r->window = window;
-	r->tm = tm;
 
 
 	// get wireframe uniform locations

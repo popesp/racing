@@ -2,33 +2,22 @@
 
 #include	<float.h>
 #include	"../render/objloader.h"
-#include	"../render/texture.h"
 
 
-/*	start up the vehicle manager
-	param:	vm				vehicle manager
-	param:	r				renderer
-	param:	tm				texture manager
-	param:	pm				physics manager
-	param:	t				track object
-	param:	mesh_filename	filename for the vehicle mesh
-	param:	tex_filename	filename for the vehicle texture
-*/
-void vehiclemanager_startup(struct vehiclemanager* vm, struct renderer* r, struct texturemanager* tm, struct physicsmanager* pm, struct track* t, const char* mesh_filename, const char* tex_filename, struct entitymanager* em)
+void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm, struct entitymanager* em, struct renderer* r, struct track* t, const char* file_mesh, const char* file_diffuse)
 {
 	vec3f min, max, avg, diff;
 	struct vehicle* v;
-	int i;
-
+	float temp;
+	unsigned i;
 
 	vm->em = em;
 	vm->pm = pm;
-	vm->tm = tm;
 	vm->track = t;
 
 	// initialize vehicle mesh
 	renderable_init(&vm->r_vehicle, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
-	objloader_load(mesh_filename, r, &vm->r_vehicle);
+	objloader_load(file_mesh, r, &vm->r_vehicle);
 	renderable_sendbuffer(r, &vm->r_vehicle);
 
 	// find the limits of the loaded mesh
@@ -66,22 +55,20 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct renderer* r, struc
 	vec3f_subtractn(diff, max, min);
 	vec3f_scalen(vm->dim, diff, VEHICLE_MESHSCALE);
 
-	float temp;
+	// swap x and z to get the correct vehicle dimensions
 	temp = vm->dim[VX];
 	vm->dim[VX] = vm->dim[VZ];
 	vm->dim[VZ] = temp;
-
-	printf("%f, %f, %f\n", vm->dim[VX], vm->dim[VY], vm->dim[VZ]);
 
 	mat4f_scalemul(vm->r_vehicle.matrix_model, VEHICLE_MESHSCALE, VEHICLE_MESHSCALE, VEHICLE_MESHSCALE);
 	mat4f_rotateymul(vm->r_vehicle.matrix_model, -1.57080f);
 	mat4f_translatemul(vm->r_vehicle.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
 
 	// initialize vehicle texture
-	vm->tex_diffuse = texturemanager_newtexture(tm);
-	texture_loadfile(tm, vm->tex_diffuse, tex_filename);
-	texture_upload(tm, vm->tex_diffuse, RENDER_TEXTURE_DIFFUSE);
-	vm->r_vehicle.texture_ids[RENDER_TEXTURE_DIFFUSE] = vm->tex_diffuse;
+	texture_init(&vm->diffuse);
+	texture_loadfile(&vm->diffuse, file_diffuse);
+	texture_upload(&vm->diffuse, RENDER_TEXTURE_DIFFUSE);
+	vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->diffuse;
 
 	// initialize vehicle array
 	for (i = 0; i < VEHICLE_COUNT; i++)
@@ -89,16 +76,11 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct renderer* r, struc
 		v = vm->vehicles + i;
 
 		v->body = NULL;
-
 		v->controller = NULL;
-
 		v->flags = VEHICLE_FLAG_INIT;
 	}
 }
 
-/*	shut down the vehicle manager
-	param:	vm				vehicle manager
-*/
 void vehiclemanager_shutdown(struct vehiclemanager* vm)
 {
 	int i;
@@ -108,16 +90,10 @@ void vehiclemanager_shutdown(struct vehiclemanager* vm)
 			vm->vehicles[i].body->release();
 
 	renderable_deallocate(&vm->r_vehicle);
-	texturemanager_removetexture(vm->tm, vm->tex_diffuse);
+	texture_delete(&vm->diffuse);
 }
 
 
-/*	create a new vehicle
-	param:	vm				vehicle manager
-	param:	index_track		index into the track path on which to spawn the vehicle
-	param:	offs			offset from the spawn point
-	return:	struct vehicle*	pointer to the new vehicle object
-*/
 struct vehicle* vehiclemanager_newvehicle(struct vehiclemanager* vm, int index_track, vec3f offs)
 {
 	struct vehicle* v;
@@ -167,10 +143,6 @@ struct vehicle* vehiclemanager_newvehicle(struct vehiclemanager* vm, int index_t
 	return v;
 }
 
-/*	remove a vehicle
-	param:	vm				vehicle manager
-	param:	v				vehicle to remove
-*/
 void vehiclemanager_removevehicle(struct vehiclemanager* vm, struct vehicle* v)
 {
 	int i;
@@ -179,7 +151,6 @@ void vehiclemanager_removevehicle(struct vehiclemanager* vm, struct vehicle* v)
 		if (v == vm->vehicles + i)
 		{
 			vm->vehicles[i].body->release();
-			vm->vehicles[i].controller = NULL;
 			vm->vehicles[i].flags = VEHICLE_FLAG_INIT;
 		}
 }
@@ -230,34 +201,17 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 		
 		physx::PxRigidBodyExt::addLocalForceAtLocalPos(*v->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, -vm->dim[VZ]/2.f));
 		
-		
+		// reset button
 		if (v->controller->buttons[INPUT_BUTTON_BACK] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN)){
 			vehicle_reset(vm, v);
 		}
 
-		
 		// firing a projectile
 		if (v->controller->buttons[INPUT_BUTTON_A] == (INPUT_STATE_DOWN | INPUT_STATE_CHANGED))
-		{
-			if (v->flags & VEHICLE_FLAG_MISSILE);
-				// delete projectile
-			else
-				v->flags |= VEHICLE_FLAG_MISSILE;
-
-			// TODO: figure this shit out
-			vm->em->proj_flag = 1;
-			projectile_init(&vm->em->projectiles[0], vm->pm, v);  	//&game->player_proj, &game->physicsmanager, &game->player);
-			//projectile_generatemesh(&vm->r, &game->player_proj);
-			//game->player_proj.r_proj.lights[0] = &game->track_lights[0];
-			//renderable_sendbuffer(&game->renderer, &game->player_proj.r_proj);
-			//*/
-		}
+			entitymanager_newmissile(vm->em, v, vm->dim);
 	}
 }
 
-/*	update vehicles
-	param:	vm				vehicle manager
-*/
 void vehiclemanager_update(struct vehiclemanager* vm)
 {
 	physx::PxRaycastBuffer hit;
@@ -295,12 +249,13 @@ void vehiclemanager_update(struct vehiclemanager* vm)
 		speed = getspeed(v);
 
 		//monitors for flips
+		/*
 		if(speed<0.002 && speed>-0.0005 && speed!=0){
 			if(v->ray_touch[0]==false && v->ray_touch[1]==false && v->ray_touch[2]==false && v->ray_touch[3]==false){
 				vehicle_reset(vm, v);
 			}
 		}
-
+		*/
 		// process controller input
 		vehicleinput(vm, v, speed);
 
@@ -339,10 +294,6 @@ void vehiclemanager_update(struct vehiclemanager* vm)
 }
 
 
-/*	reset a vehicle onto the track
-	param:	vm				vehicle manager
-	param:	v				vehicle to reset
-*/
 void vehicle_reset(struct vehiclemanager* vm, struct vehicle* v)
 {
 	vec3f spawn;
