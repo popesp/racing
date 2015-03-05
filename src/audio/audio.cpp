@@ -88,10 +88,10 @@ void audiomanager_update(struct audiomanager* am, vec3f pos, vec3f dir, vec3f up
 	FMOD_VECTOR position, velocity, direction, upvec;
 	FMOD_System_Get3DListenerAttributes(am->system, 0, &position, &velocity, &direction, &upvec);
 
-	printf("Position: %f, %f, %f\n", position.x, position.y, position.z);
-	printf("Velocity: %f, %f, %f\n", velocity.x, velocity.y, velocity.z);
-	printf("Direction: %f, %f, %f\n", direction.x, direction.y, direction.z);
-	printf("Up: %f, %f, %f\n", upvec.x, upvec.y, upvec.z);
+	//printf("Position: %f, %f, %f\n", position.x, position.y, position.z);
+	//printf("Velocity: %f, %f, %f\n", velocity.x, velocity.y, velocity.z);
+	//printf("Direction: %f, %f, %f\n", direction.x, direction.y, direction.z);
+	//printf("Up: %f, %f, %f\n", upvec.x, upvec.y, upvec.z);
 
 	// update system
 	FMOD_System_Update(am->system);
@@ -168,19 +168,22 @@ void audiomanager_playmusic(struct audiomanager* am, int id, int loops)
 	param:	pos				position to play the sound effect
 	param:	loops			number of times to loop the sound effect
 */
-void audiomanager_playsfx(struct audiomanager* am, int id, vec3f pos, int loops)
+FMOD_CHANNEL* audiomanager_playsfx(struct audiomanager* am, int id, vec3f pos, int loops)
 {
-	FMOD_System_PlaySound(am->system, FMOD_CHANNEL_FREE, am->sfx[id].track, true, &am->sfx[id].channel);
-	FMOD_Channel_SetChannelGroup(am->sfx[id].channel, am->group_sfx);
+	FMOD_CHANNEL* channel;
+	FMOD_System_PlaySound(am->system, FMOD_CHANNEL_FREE, am->sfx[id].track, true, &channel);
+	FMOD_Channel_SetChannelGroup(channel, am->group_sfx);
 
 	// position the sound effect in space
 	audiomanager_setsfxposition(am, id, pos);
 
 	// set loop count
-	FMOD_Channel_SetLoopCount(am->sfx[id].channel, loops);
+	FMOD_Channel_SetLoopCount(channel, loops);
 
 	// play the sound
-	FMOD_Channel_SetPaused(am->sfx[id].channel, false);
+	FMOD_Channel_SetPaused(channel, false);
+
+	return channel;
 }
 
 

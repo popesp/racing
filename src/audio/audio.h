@@ -84,7 +84,7 @@ void audiomanager_playmusic(struct audiomanager* am, int id, int loops);
 	param:	pos				position to play the sound effect
 	param:	loops			number of times to loop the sound effect
 */
-void audiomanager_playsfx(struct audiomanager* am, int id, vec3f pos, int loops);
+FMOD_CHANNEL* audiomanager_playsfx(struct audiomanager* am, int id, vec3f pos, int loops);
 
 
 /*	stop a music sound
