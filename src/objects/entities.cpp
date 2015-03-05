@@ -49,6 +49,8 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 {
 	struct missile* m;
 	struct pickup* pu;
+	struct mine* x;
+
 	float* ptr;
 	int i;
 
@@ -61,8 +63,12 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 	renderable_init(&em->r_pickup, RENDER_MODE_TRIANGLES, RENDER_TYPE_MATS_L, RENDER_FLAG_NONE);
 	renderable_allocate(r, &em->r_pickup, 36);
 
+	renderable_init(&em->r_mine, RENDER_MODE_TRIANGLES, RENDER_TYPE_MATS_L, RENDER_FLAG_NONE);
+	renderable_allocate(r, &em->r_mine, 36);
+
 	vec3f_set(em->dim_missile, 1.f, 1.f, 1.f);
 	vec3f_set(em->dim_pickup, 1.f, 1.f, 1.f);
+	vec3f_set(em->dim_mine,1.f,1.f,1.f);
 
 	// generate cube for missile renderable
 	ptr = em->r_missile.buf_verts;
@@ -82,14 +88,26 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 		ptr += RENDER_ATTRIBSIZE_NOR;
 	}
 
+	ptr = em->r_mine.buf_verts;
+	for(i=0;i<36;i++){
+		vec3f_copy(ptr, entity_pos[entity_posindex[i]]);
+		ptr += RENDER_ATTRIBSIZE_POS;
+		vec3f_copy(ptr, entity_nor[entity_norindex[i]]);
+		ptr += RENDER_ATTRIBSIZE_NOR;
+	}
+
 	renderable_sendbuffer(r, &em->r_missile);
 	renderable_sendbuffer(r, &em->r_pickup);
+	renderable_sendbuffer(r, &em->r_mine);
 
 	vec3f_set(em->dim_missile, ENTITY_MISSILE_SIZE, ENTITY_MISSILE_SIZE, ENTITY_MISSILE_SIZE);
 	mat4f_scalemul(em->r_missile.matrix_model, ENTITY_MISSILE_SIZE*0.5f, ENTITY_MISSILE_SIZE*0.5f, ENTITY_MISSILE_SIZE*0.5f);
 
 	vec3f_set(em->dim_pickup, ENTITY_PICKUP_WIDTH, ENTITY_PICKUP_HEIGHT, ENTITY_PICKUP_LENGTH);
 	mat4f_scalemul(em->r_pickup.matrix_model, ENTITY_PICKUP_WIDTH*0.5f, ENTITY_PICKUP_HEIGHT*0.5f, ENTITY_PICKUP_LENGTH*0.5f);
+
+	vec3f_set(em->dim_mine, ENTITY_MINE_WIDTH, ENTITY_MINE_HEIGHT, ENTITY_MINE_LENGTH);
+	mat4f_scalemul(em->r_mine.matrix_model, ENTITY_MINE_WIDTH*0.5f, ENTITY_MINE_HEIGHT*0.5f, ENTITY_MINE_LENGTH*0.5f);
 
 	// initialize material properties
 	vec3f_set(em->r_missile.material.amb, 1.8f, 0.15f, 0.1f);
@@ -101,6 +119,11 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 	vec3f_set(em->r_pickup.material.dif, 1.8f, 0.15f, 0.1f);
 	vec3f_set(em->r_pickup.material.spc, 1.8f, 0.5f, 0.5f);
 	em->r_pickup.material.shn = 100.f;
+
+	vec3f_set(em->r_mine.material.amb, 1.8f, 0.15f, 0.1f);
+	vec3f_set(em->r_mine.material.dif, 1.8f, 0.15f, 0.1f);
+	vec3f_set(em->r_mine.material.spc, 1.8f, 0.5f, 0.5f);
+	em->r_mine.material.shn = 100.f;
 
 	// initialize missile array
 	for (i = 0; i < ENTITY_MISSILE_COUNT; i++)
@@ -121,6 +144,14 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 		pu->flags = ENTITY_PICKUP_FLAG_INIT;
 	}
 
+	for(i=0;i<ENTITY_MINE_COUNT;i++){
+		x = em->mines+i;
+
+		x->body = NULL;
+		x->owner = NULL;
+		x->flags = ENTITY_MINE_FLAG_INIT;
+	}
+
 	em->sfx_missile = audiomanager_newsfx(am, SFX_MISSLE_FILENAME);
 }
 
@@ -138,10 +169,35 @@ void entitymanager_shutdown(struct entitymanager* em)
 		}
 	}
 
+	for(i=0;i<ENTITY_MINE_COUNT;i++){
+		if (em->mines[i].flags & ENTITY_MINE_FLAG_ENABLED){
+			em->mines[i].body->release();
+		}
+	}
+
 	renderable_deallocate(&em->r_missile);
 	renderable_deallocate(&em->r_pickup);
+	renderable_deallocate(&em->r_mine);
 }
 
+void entitymanager_render(struct entitymanager* em, struct renderer* r, mat4f worldview)
+{
+	int i;
+
+	for (i = 0; i < ENTITY_MISSILE_COUNT; i++)
+		if (em->missiles[i].flags & ENTITY_MISSILE_FLAG_ENABLED)
+			renderable_render(r, &em->r_missile, (float*)&physx::PxMat44(em->missiles[i].body->getGlobalPose()), worldview, 0);
+
+	for(i=0; i<ENTITY_MINE_COUNT;i++){
+		if (em->mines[i].flags & ENTITY_MINE_FLAG_ENABLED){
+			renderable_render(r, &em->r_mine, (float*)&physx::PxMat44(em->mines[i].body->getGlobalPose()), worldview, 0);
+		}
+	}
+
+	for (i = 0; i < ENTITY_PICKUP_COUNT; i++)
+		if (em->pickups[i].flags & ENTITY_PICKUP_FLAG_ENABLED)
+			renderable_render(r, &em->r_pickup, (float*)&physx::PxMat44(em->pickups[i].body->getGlobalPose()), worldview, 0);
+}
 
 void entitymanager_update(struct entitymanager* em)
 {
@@ -217,20 +273,6 @@ void entitymanager_removemissile(struct entitymanager* em, struct missile* m)
 		}
 }
 
-
-void entitymanager_render(struct entitymanager* em, struct renderer* r, mat4f worldview)
-{
-	int i;
-
-	for (i = 0; i < ENTITY_MISSILE_COUNT; i++)
-		if (em->missiles[i].flags & ENTITY_MISSILE_FLAG_ENABLED)
-			renderable_render(r, &em->r_missile, (float*)&physx::PxMat44(em->missiles[i].body->getGlobalPose()), worldview, 0);
-
-	for (i = 0; i < ENTITY_PICKUP_COUNT; i++)
-		if (em->pickups[i].flags & ENTITY_PICKUP_FLAG_ENABLED)
-			renderable_render(r, &em->r_pickup, (float*)&physx::PxMat44(em->pickups[i].body->getGlobalPose()), worldview, 0);
-}
-
 /*
 struct pickup* entitymanager_attachpickup(struct entity* em, vec3f dim, struct vehicle* v){
 	
@@ -287,6 +329,46 @@ void entitymanager_removepickup(struct entitymanager* em, struct pickup* pu){
 		if(pu==em->pickups+i){
 			em->pickups[i].body->release();
 			em->pickups[i].flags = ENTITY_PICKUP_FLAG_INIT;
+		}
+	}
+}
+
+struct mine* entitymanager_newmine(struct entitymanager* em, vec3f dim, struct vehicle* v){
+	physx::PxTransform pose;
+	physx::PxMat44 mat_pose;
+	struct mine* x;
+	int i;
+
+	for (i = 0; i < ENTITY_MINE_COUNT; i++)
+		if (!(em->mines[i].flags & ENTITY_MINE_FLAG_ENABLED))
+			break;
+
+	if (i == ENTITY_MINE_COUNT)
+		return NULL;
+
+	x = em->mines + i;
+
+	// find spawn location
+	pose = v->body->getGlobalPose().transform(physx::PxTransform(0.f, 0.f, -(dim[VZ]*0.5f - ENTITY_MINE_SPAWNDIST)));
+	mat_pose = physx::PxMat44(pose);
+
+	// create a physics object and add it to the scene
+	x->body = physx::PxCreateDynamic(*em->pm->sdk, pose, physx::PxBoxGeometry(em->dim_mine[VX] * 0.5f, em->dim_mine[VY] * 0.5f, em->dim_mine[VZ] * 0.5f), *em->pm->default_material, ENTITY_MINE_DENSITY);
+	em->pm->scene->addActor(*x->body);
+
+	x->owner = v;
+	x->flags = ENTITY_MINE_FLAG_ENABLED;
+
+	return x;
+}
+
+void entitymanager_removemine(struct entitymanager* em, struct mine* x){
+	int i;
+
+	for(i=0;i<ENTITY_MINE_COUNT;i++){
+		if(x==em->mines+i){
+			em->mines[i].body->release();
+			em->mines[i].flags = ENTITY_MINE_FLAG_INIT;
 		}
 	}
 }
