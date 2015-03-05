@@ -45,7 +45,7 @@ struct missile
 	physx::PxRigidDynamic* body;
 
 	struct vehicle* owner;
-
+	vec3f pos;
 	unsigned timer;
 
 	unsigned char flags;
@@ -54,6 +54,7 @@ struct missile
 struct entitymanager
 {
 	struct physicsmanager* pm;
+	struct audiomanager* am;
 	struct track* track;
 
 	struct renderable r_missile;
@@ -63,13 +64,15 @@ struct entitymanager
 	vec3f dim_missile;
 	vec3f dim_pickup;
 
+	int sfx_missile;
+	
 	struct missile missiles[ENTITY_MISSILE_COUNT];
 	//struct mine mines[1];
 	struct pickup pickups[ENTITY_PICKUP_COUNT];
 };
 
 
-void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, struct renderer* r, struct track* t);
+void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, struct renderer* r,struct audiomanager* am, struct track* t);
 void entitymanager_shutdown(struct entitymanager* em);
 
 void entitymanager_update(struct entitymanager* em);

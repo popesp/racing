@@ -73,7 +73,7 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 	vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->diffuse;
 
 	// create sound for missiles
-	vm->sfx_missile = audiomanager_newsfx(am, SFX_MISSLE_FILENAME);
+	
 	vm->sfx_enginestart = audiomanager_newsfx(am, SFX_ENGSTART_FILENAME);
 	vm->sfx_engineloop = audiomanager_newsfx(am, SFX_ENGLOOP_FILENAME);
 
@@ -116,6 +116,7 @@ struct vehicle* vehiclemanager_newvehicle(struct vehiclemanager* vm, int index_t
 
 	v = vm->vehicles + i;
 
+	v->vm = vm;
 	// find spawn location
 	vec3f_copy(v->pos, vm->track->pathpoints[index_track].pos);
 	vec3f_copy(spawn, vm->track->up);
@@ -147,19 +148,24 @@ struct vehicle* vehiclemanager_newvehicle(struct vehiclemanager* vm, int index_t
 
 	v->flags = VEHICLE_FLAG_ENABLED;
 
-	FMOD_CHANNEL* channel = audiomanager_playsfx(vm->am,vm->sfx_enginestart,v->pos,0);
-	FMOD_Channel_SetCallback(channel, eng_started);
+	v->engine_channel = audiomanager_playsfx(vm->am,vm->sfx_enginestart,v->pos,0);
+	FMOD_Channel_SetCallback(v->engine_channel, eng_started);
+	FMOD_Channel_SetUserData(v->engine_channel, v);
 
 
 	return v;
 }
 FMOD_RESULT F_CALLBACK eng_started(FMOD_CHANNEL *channel, FMOD_CHANNEL_CALLBACKTYPE type, void* commanddata1, void* commanddata2)
 {
+	 struct vehicle* v;
+	 FMOD_Channel_GetUserData(channel, (void**)&v);
 	//audiomanager_playsfx(vm->am,vm->sfx_engineloop,v->pos,0);
 	if (type == FMOD_CHANNEL_CALLBACKTYPE_END) {
 		printf("END\n");
+		v->engine_channel = audiomanager_playsfx(v->vm->am,v->vm->sfx_engineloop,v->pos,-1);
+
 	}
-	return FMOD_OK;
+return FMOD_OK;
 }
 
 void vehiclemanager_removevehicle(struct vehiclemanager* vm, struct vehicle* v)
@@ -229,7 +235,7 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 		if (v->controller->buttons[INPUT_BUTTON_A] == (INPUT_STATE_DOWN | INPUT_STATE_CHANGED))
 		{
 			entitymanager_newmissile(vm->em, v, vm->dim);
-			audiomanager_playsfx(vm->am, vm->sfx_missile, v->pos, 0);
+			//audiomanager_playsfx(vm->am, vm->sfx_missile, v->pos, 0);
 		}
 	}
 }
@@ -311,7 +317,8 @@ void vehiclemanager_update(struct vehiclemanager* vm)
 		vec3f_scale(force, VEHICLE_DOWNFORCE * fabs(speed));
 
 		physx::PxRigidBodyExt::addLocalForceAtLocalPos(*v->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, 0.f));
-
+		
+		audiomanager_setsoundposition(v->engine_channel, v->pos);
 	}
 }
 

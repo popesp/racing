@@ -59,7 +59,8 @@ struct vehicle
 	bool ray_touch[VEHICLE_COUNT_RAYCASTS];
 
 	struct controller* controller;
-
+	struct vehiclemanager* vm;
+	FMOD_CHANNEL* engine_channel;
 	vec3f pos;
 
 	int index_track;
@@ -87,7 +88,6 @@ struct vehiclemanager
 	struct texture diffuse;
 	vec3f dim;
 
-	int sfx_missile;
 	int sfx_enginestart;
 	int sfx_engineloop;
 
