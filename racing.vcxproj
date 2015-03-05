@@ -94,6 +94,7 @@
     <ClCompile Include="src\objects\vehicle.cpp" />
     <ClCompile Include="src\objects\skybox.cpp" />
     <ClCompile Include="src\objects\track.cpp" />
+    <ClCompile Include="src\physics\collision.cpp" />
     <ClCompile Include="src\physics\physics.cpp" />
     <ClCompile Include="src\render\objloader.cpp" />
     <ClCompile Include="src\render\primitives.cpp" />
@@ -121,6 +122,7 @@
     <ClInclude Include="src\objects\vehicle.h" />
     <ClInclude Include="src\objects\skybox.h" />
     <ClInclude Include="src\objects\track.h" />
+    <ClInclude Include="src\physics\collision.h" />
     <ClInclude Include="src\physics\physics.h" />
     <ClInclude Include="src\render\objloader.h" />
     <ClInclude Include="src\render\primitives.h" />
