@@ -226,9 +226,9 @@ void entitymanager_render(struct entitymanager* em, struct renderer* r, mat4f wo
 		if (em->missiles[i].flags & ENTITY_MISSILE_FLAG_ENABLED)
 			renderable_render(r, &em->r_missile, (float*)&physx::PxMat44(em->missiles[i].body->getGlobalPose()), worldview, 0);
 
-	for (i = 0; i < ENTITY_MISSILE_COUNT; i++)
-		if (em->missiles[i].flags & ENTITY_MISSILE_FLAG_ENABLED)
-			renderable_render(r, &em->r_missile, (float*)&physx::PxMat44(em->missiles[i].body->getGlobalPose()), worldview, 0);
+	for (i = 0; i < ENTITY_PICKUP_COUNT; i++)
+		if (em->pickups[i].flags & ENTITY_PICKUP_FLAG_ENABLED)
+			renderable_render(r, &em->r_pickup, (float*)&physx::PxMat44(em->pickups[i].body->getGlobalPose()), worldview, 0);
 }
 
 /*
