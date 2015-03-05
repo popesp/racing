@@ -8,42 +8,6 @@
 using namespace physx;
 
 
-/*
-collision temp;
-
-PxFilterFlags myFilterShader(	
-	PxFilterObjectAttributes attributes0, PxFilterData filterData0, 
-	PxFilterObjectAttributes attributes1, PxFilterData filterData1,
-	PxPairFlags& pairFlags, const void* constantBlock, PxU32 constantBlockSize) {
-
-		return PxFilterFlag::eDEFAULT;
-}
-
-PxFilterFlags SampleSubmarineFilterShader(	
-	PxFilterObjectAttributes attributes0, PxFilterData filterData0, 
-	PxFilterObjectAttributes attributes1, PxFilterData filterData1,
-	PxPairFlags& pairFlags, const void* constantBlock, PxU32 constantBlockSize)
-{
-	// let triggers through
-	if(PxFilterObjectIsTrigger(attributes0) || PxFilterObjectIsTrigger(attributes1))
-	{
-		pairFlags = PxPairFlag::eTRIGGER_DEFAULT;
-		return PxFilterFlag::eDEFAULT;
-	}
-	// generate contacts for all that were not filtered above
-	pairFlags = PxPairFlag::eCONTACT_DEFAULT;
-
-	// trigger the contact callback for pairs (A,B) where 
-	// the filtermask of A contains the ID of B and vice versa.
-	if((filterData0.word0 & filterData1.word1) && (filterData1.word0 & filterData0.word1))
-		pairFlags |= PxPairFlag::eNOTIFY_TOUCH_FOUND;
-	
-	return PxFilterFlag::eDEFAULT;
-}
-*/
-
-
-
 /*	start up the physics manager
 	param:	pm				physics manager (modified)
 */
@@ -70,7 +34,7 @@ void physicsmanager_startup(struct physicsmanager* pm)
 	PxSceneDesc scenedesc(scale);
 	scenedesc.gravity = PxVec3(PHYSICS_DEFAULT_GRAVITY);
 	scenedesc.cpuDispatcher = PxDefaultCpuDispatcherCreate(1);
-	scenedesc.filterShader = PxDefaultSimulationFilterShader;
+	scenedesc.filterShader = OurFilterShader;
 	scenedesc.simulationEventCallback = pm->collisions;
 	pm->scene = pm->sdk->createScene(scenedesc);
 }
