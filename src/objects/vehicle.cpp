@@ -215,7 +215,7 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 		if (v->controller->buttons[INPUT_BUTTON_A] == (INPUT_STATE_DOWN | INPUT_STATE_CHANGED))
 		{
 			entitymanager_newmissile(vm->em, v, vm->dim);
-			audiomanager_playsfx(vm->am, vm->sfx_missile, v->pos);
+			audiomanager_playsfx(vm->am, vm->sfx_missile, v->pos, 0);
 		}
 	}
 }

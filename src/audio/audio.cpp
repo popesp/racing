@@ -134,7 +134,7 @@ int audiomanager_newsfx(struct audiomanager* am, const char* filename)
 	{
 		if (!am->sfx[i].enabled)
 		{
-			FMOD_System_CreateSound(am->system, filename, FMOD_3D, 0, &am->sfx[i].track);
+			FMOD_System_CreateSound(am->system, filename, (FMOD_3D | FMOD_LOOP_NORMAL), 0, &am->sfx[i].track);
 			am->sfx[i].enabled = true;
 
 			return i;
@@ -166,14 +166,18 @@ void audiomanager_playmusic(struct audiomanager* am, int id, int loops)
 	param:	am				audio manager
 	param:	id				index to the sound object
 	param:	pos				position to play the sound effect
+	param:	loops			number of times to loop the sound effect
 */
-void audiomanager_playsfx(struct audiomanager* am, int id, vec3f pos)
+void audiomanager_playsfx(struct audiomanager* am, int id, vec3f pos, int loops)
 {
 	FMOD_System_PlaySound(am->system, FMOD_CHANNEL_FREE, am->sfx[id].track, true, &am->sfx[id].channel);
 	FMOD_Channel_SetChannelGroup(am->sfx[id].channel, am->group_sfx);
 
 	// position the sound effect in space
 	audiomanager_setsfxposition(am, id, pos);
+
+	// set loop count
+	FMOD_Channel_SetLoopCount(am->sfx[id].channel, loops);
 
 	// play the sound
 	FMOD_Channel_SetPaused(am->sfx[id].channel, false);
@@ -197,7 +201,7 @@ void audiomanager_stopmusic(struct audiomanager* am, int id)
 */
 void audiomanager_setsfxposition(struct audiomanager* am, int id, vec3f pos)
 {
-    FMOD_VECTOR position = {pos[VX], pos[VX], pos[VX]};
+    FMOD_VECTOR position = {pos[VX], pos[VY], pos[VZ]};
 
     FMOD_Channel_Set3DAttributes(am->sfx[id].channel, &position, 0);
 }
