@@ -1,5 +1,5 @@
 #include	"entities.h"
-
+#include	"../render/objloader.h"
 
 static float entity_pos[8][3] =
 {
@@ -45,49 +45,140 @@ static int entity_norindex[36] =
 
 
 
-void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, struct renderer* r,struct audiomanager* am, struct track* t)
+void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, struct renderer* r,struct audiomanager* am, struct track* t, const char* pickup_file_mesh, const char* pickup_file_diffuse, const char* missile_file_mesh, const char* missile_file_diffuse)
 {
 	struct missile* m;
 	struct pickup* pu;
 	struct mine* x;
 
+	float temp;
+	vec3f min, max, avg, diff;
 	float* ptr;
 	int i;
 
 	em->pm = pm;
 	em->track = t;
 
-	renderable_init(&em->r_missile, RENDER_MODE_TRIANGLES, RENDER_TYPE_MATS_L, RENDER_FLAG_NONE);
-	renderable_allocate(r, &em->r_missile, 36);
+	renderable_init(&em->r_missile, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
+	objloader_load(missile_file_mesh, r, &em->r_missile);
+	renderable_sendbuffer(r, &em->r_missile);
 
-	renderable_init(&em->r_pickup, RENDER_MODE_TRIANGLES, RENDER_TYPE_MATS_L, RENDER_FLAG_NONE);
-	renderable_allocate(r, &em->r_pickup, 36);
+	renderable_init(&em->r_pickup, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
+	objloader_load(pickup_file_mesh, r, &em->r_pickup);
+	renderable_sendbuffer(r, &em->r_pickup);
 
 	renderable_init(&em->r_mine, RENDER_MODE_TRIANGLES, RENDER_TYPE_MATS_L, RENDER_FLAG_NONE);
 	renderable_allocate(r, &em->r_mine, 36);
 
-	vec3f_set(em->dim_missile, 1.f, 1.f, 1.f);
-	vec3f_set(em->dim_pickup, 1.f, 1.f, 1.f);
 	vec3f_set(em->dim_mine,1.f,1.f,1.f);
 
-	// generate cube for missile renderable
-	ptr = em->r_missile.buf_verts;
-	for (i = 0; i < 36; i++)
+	/////////////////////////////////////////////////////////////////////////
+	//PICKUP
+	// find the limits of the loaded mesh
+	vec3f_set(min, FLT_MAX, FLT_MAX, FLT_MAX);
+	vec3f_set(max, -FLT_MAX, -FLT_MAX, -FLT_MAX);
+
+	for (i = 0; i < em->r_pickup.num_verts; i++)
 	{
-		vec3f_copy(ptr, entity_pos[entity_posindex[i]]);
-		ptr += RENDER_ATTRIBSIZE_POS;
-		vec3f_copy(ptr, entity_nor[entity_norindex[i]]);
-		ptr += RENDER_ATTRIBSIZE_NOR;
-	}
+		vec3f temp;
 
-	ptr = em->r_pickup.buf_verts;
-	for(i=0;i<36;i++){
-		vec3f_copy(ptr, entity_pos[entity_posindex[i]]);
-		ptr += RENDER_ATTRIBSIZE_POS;
-		vec3f_copy(ptr, entity_nor[entity_norindex[i]]);
-		ptr += RENDER_ATTRIBSIZE_NOR;
-	}
+		// retrieve vertex from buffer
+		vec3f_copy(temp, em->r_pickup.buf_verts + i*r->vertsize[em->r_pickup.type]);
 
+		// check for min and max vector positions
+		if (temp[VX] < min[VX])
+			min[VX] = temp[VX];
+		if (temp[VX] > max[VX])
+			max[VX] = temp[VX];
+
+		if (temp[VY] < min[VY])
+			min[VY] = temp[VY];
+		if (temp[VY] > max[VY])
+			max[VY] = temp[VY];
+
+		if (temp[VZ] < min[VZ])
+			min[VZ] = temp[VZ];
+		if (temp[VZ] > max[VZ])
+			max[VZ] = temp[VZ];
+	}
+	// find center point of model
+	vec3f_addn(avg, min, max);
+	vec3f_scale(avg, 0.5f);
+
+	// find dimensions of model
+	vec3f_subtractn(diff, max, min);
+	vec3f_scalen(em->dim_pickup, diff, PICKUP_MESHSCALE);
+
+	// swap x and z to get the correct vehicle dimensions
+	temp = em->dim_pickup[VX];
+	em->dim_pickup[VX] = em->dim_pickup[VZ];
+	em->dim_pickup[VZ] = temp;
+
+	mat4f_scalemul(em->r_pickup.matrix_model, PICKUP_MESHSCALE, PICKUP_MESHSCALE, PICKUP_MESHSCALE);
+	mat4f_rotateymul(em->r_pickup.matrix_model, -1.57080f);
+	mat4f_translatemul(em->r_pickup.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
+
+	// initialize pickup texture
+	texture_init(&em->diffuse_pickup);
+	texture_loadfile(&em->diffuse_pickup, pickup_file_diffuse);
+	texture_upload(&em->diffuse_pickup, RENDER_TEXTURE_DIFFUSE);
+	em->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_pickup;
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	//MISSILE
+	// find the limits of the loaded mesh
+	vec3f_set(min, FLT_MAX, FLT_MAX, FLT_MAX);
+	vec3f_set(max, -FLT_MAX, -FLT_MAX, -FLT_MAX);
+
+	for (i = 0; i < em->r_missile.num_verts; i++)
+	{
+		vec3f temp;
+
+		// retrieve vertex from buffer
+		vec3f_copy(temp, em->r_missile.buf_verts + i*r->vertsize[em->r_missile.type]);
+
+		// check for min and max vector positions
+		if (temp[VX] < min[VX])
+			min[VX] = temp[VX];
+		if (temp[VX] > max[VX])
+			max[VX] = temp[VX];
+
+		if (temp[VY] < min[VY])
+			min[VY] = temp[VY];
+		if (temp[VY] > max[VY])
+			max[VY] = temp[VY];
+
+		if (temp[VZ] < min[VZ])
+			min[VZ] = temp[VZ];
+		if (temp[VZ] > max[VZ])
+			max[VZ] = temp[VZ];
+	}
+	// find center point of model
+	vec3f_addn(avg, min, max);
+	vec3f_scale(avg, 0.5f);
+
+	// find dimensions of model
+	vec3f_subtractn(diff, max, min);
+	vec3f_scalen(em->dim_missile, diff, MISSILE_MESHSCALE);
+
+	// swap x and z to get the correct vehicle dimensions
+	temp = em->dim_missile[VX];
+	em->dim_missile[VX] = em->dim_missile[VZ];
+	em->dim_missile[VZ] = temp;
+
+	mat4f_scalemul(em->r_missile.matrix_model, MISSILE_MESHSCALE, MISSILE_MESHSCALE, MISSILE_MESHSCALE);
+	mat4f_rotateymul(em->r_missile.matrix_model, -0.f);
+	mat4f_translatemul(em->r_missile.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
+
+	// initialize missile texture
+	texture_init(&em->diffuse_missile);
+	texture_loadfile(&em->diffuse_missile, missile_file_diffuse);
+	texture_upload(&em->diffuse_missile, RENDER_TEXTURE_DIFFUSE);
+	em->r_missile.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_missile;
+
+	/////////////////////////////////////////////////////////////////////////
+	//MINE STUFF
+	/////////////////////////////////////////////////////////////////////////
 	ptr = em->r_mine.buf_verts;
 	for(i=0;i<36;i++){
 		vec3f_copy(ptr, entity_pos[entity_posindex[i]]);
@@ -96,34 +187,22 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 		ptr += RENDER_ATTRIBSIZE_NOR;
 	}
 
-	renderable_sendbuffer(r, &em->r_missile);
-	renderable_sendbuffer(r, &em->r_pickup);
 	renderable_sendbuffer(r, &em->r_mine);
-
-	vec3f_set(em->dim_missile, ENTITY_MISSILE_SIZE, ENTITY_MISSILE_SIZE, ENTITY_MISSILE_SIZE);
-	mat4f_scalemul(em->r_missile.matrix_model, ENTITY_MISSILE_SIZE*0.5f, ENTITY_MISSILE_SIZE*0.5f, ENTITY_MISSILE_SIZE*0.5f);
-
-	vec3f_set(em->dim_pickup, ENTITY_PICKUP_WIDTH, ENTITY_PICKUP_HEIGHT, ENTITY_PICKUP_LENGTH);
-	mat4f_scalemul(em->r_pickup.matrix_model, ENTITY_PICKUP_WIDTH*0.5f, ENTITY_PICKUP_HEIGHT*0.5f, ENTITY_PICKUP_LENGTH*0.5f);
 
 	vec3f_set(em->dim_mine, ENTITY_MINE_WIDTH, ENTITY_MINE_HEIGHT, ENTITY_MINE_LENGTH);
 	mat4f_scalemul(em->r_mine.matrix_model, ENTITY_MINE_WIDTH*0.5f, ENTITY_MINE_HEIGHT*0.5f, ENTITY_MINE_LENGTH*0.5f);
-
-	// initialize material properties
-	vec3f_set(em->r_missile.material.amb, 1.8f, 0.15f, 0.1f);
-	vec3f_set(em->r_missile.material.dif, 1.8f, 0.15f, 0.1f);
-	vec3f_set(em->r_missile.material.spc, 1.8f, 0.5f, 0.5f);
-	em->r_missile.material.shn = 100.f;
-
-	vec3f_set(em->r_pickup.material.amb, 1.8f, 0.15f, 0.1f);
-	vec3f_set(em->r_pickup.material.dif, 1.8f, 0.15f, 0.1f);
-	vec3f_set(em->r_pickup.material.spc, 1.8f, 0.5f, 0.5f);
-	em->r_pickup.material.shn = 100.f;
 
 	vec3f_set(em->r_mine.material.amb, 1.8f, 0.15f, 0.1f);
 	vec3f_set(em->r_mine.material.dif, 1.8f, 0.15f, 0.1f);
 	vec3f_set(em->r_mine.material.spc, 1.8f, 0.5f, 0.5f);
 	em->r_mine.material.shn = 100.f;
+
+
+
+
+
+
+
 
 	// initialize missile array
 	for (i = 0; i < ENTITY_MISSILE_COUNT; i++)
@@ -135,7 +214,7 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 		m->flags = ENTITY_MISSILE_FLAG_INIT;
 	}
 
-	//init pickup array
+	// pickup array
 	for(i=0;i<ENTITY_PICKUP_COUNT;i++){
 		pu = em->pickups+i;
 
@@ -144,6 +223,7 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 		pu->flags = ENTITY_PICKUP_FLAG_INIT;
 	}
 
+	// mine array
 	for(i=0;i<ENTITY_MINE_COUNT;i++){
 		x = em->mines+i;
 

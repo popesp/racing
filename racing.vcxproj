@@ -90,7 +90,6 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\objects\camera.cpp" />
     <ClCompile Include="src\objects\entities.cpp" />
-    <ClCompile Include="src\objects\pickups.cpp" />
     <ClCompile Include="src\objects\vehicle.cpp" />
     <ClCompile Include="src\objects\skybox.cpp" />
     <ClCompile Include="src\objects\track.cpp" />
@@ -118,7 +117,6 @@
     </ClInclude>
     <ClInclude Include="src\objects\camera.h" />
     <ClInclude Include="src\objects\entities.h" />
-    <ClInclude Include="src\objects\pickups.h" />
     <ClInclude Include="src\objects\vehicle.h" />
     <ClInclude Include="src\objects\skybox.h" />
     <ClInclude Include="src\objects\track.h" />

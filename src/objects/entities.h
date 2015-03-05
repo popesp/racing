@@ -40,6 +40,9 @@
 #define ENTITY_MINE_FLAG_INIT		0x00
 #define ENTITY_MINE_FLAG_ENABLED	0x01
 
+#define	PICKUP_MESHSCALE			0.2f
+#define MISSILE_MESHSCALE			0.2f
+
 struct pickup{
 	physx::PxRigidDynamic* body;
 
@@ -81,6 +84,10 @@ struct entitymanager
 	vec3f dim_pickup;
 	vec3f dim_mine;
 
+	struct texture diffuse_pickup;
+	struct texture diffuse_missile;
+	struct texture diffuse_mine;
+
 	int sfx_missile;
 	
 	struct missile missiles[ENTITY_MISSILE_COUNT];
@@ -89,7 +96,7 @@ struct entitymanager
 };
 
 
-void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, struct renderer* r,struct audiomanager* am, struct track* t);
+void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, struct renderer* r,struct audiomanager* am, struct track* t, const char* pickup_file_mesh, const char* pickup_file_diffuse, const char* missile_file_mesh, const char* missile_file_diffuse);
 void entitymanager_shutdown(struct entitymanager* em);
 
 void entitymanager_update(struct entitymanager* em);
