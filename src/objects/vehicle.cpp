@@ -73,7 +73,9 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 	vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->diffuse;
 
 	// create sound for missiles
-	vm->sfx_missile = audiomanager_newsfx(am, "res/soundfx/crash.wav");
+	vm->sfx_missile = audiomanager_newsfx(am, SFX_MISSLE_FILENAME);
+	vm->sfx_enginestart = audiomanager_newsfx(am, SFX_ENGSTART_FILENAME);
+	vm->sfx_engineloop = audiomanager_newsfx(am, SFX_ENGLOOP_FILENAME);
 
 	// initialize vehicle array
 	for (i = 0; i < VEHICLE_COUNT; i++)
@@ -145,7 +147,19 @@ struct vehicle* vehiclemanager_newvehicle(struct vehiclemanager* vm, int index_t
 
 	v->flags = VEHICLE_FLAG_ENABLED;
 
+	FMOD_CHANNEL* channel = audiomanager_playsfx(vm->am,vm->sfx_enginestart,v->pos,0);
+	FMOD_Channel_SetCallback(channel, eng_started);
+
+
 	return v;
+}
+FMOD_RESULT F_CALLBACK eng_started(FMOD_CHANNEL *channel, FMOD_CHANNEL_CALLBACKTYPE type, void* commanddata1, void* commanddata2)
+{
+	//audiomanager_playsfx(vm->am,vm->sfx_engineloop,v->pos,0);
+	if (type == FMOD_CHANNEL_CALLBACKTYPE_END) {
+		printf("END\n");
+	}
+	return FMOD_OK;
 }
 
 void vehiclemanager_removevehicle(struct vehiclemanager* vm, struct vehicle* v)

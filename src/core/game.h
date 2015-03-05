@@ -48,12 +48,6 @@
 
 #define GAME_WINCONDITION_LAPS	5
 
-#define	GAME_SFX_1_ID			0
-#define	GAME_SFX_2_ID			1
-#define	GAME_SFX_3_ID			2
-#define	GAME_SFX_1_FILENAME		"res/soundfx/aud-eng-start-base.wav"
-#define	GAME_SFX_2_FILENAME		"res/soundfx/aud-eng-loop-base.wav"
-#define	GAME_SFX_3_FILENAME		"res/soundfx/crash.wav"
 
 #define GAME_PICKUP_COUNT		5
 

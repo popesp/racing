@@ -1,7 +1,7 @@
 #ifndef VEHICLE
 #define	VEHICLE
 
-
+#include	"../audio/audio.h"
 #include	"../core/input.h"
 #include	"../objects/entities.h"
 #include	"../objects/track.h"
@@ -46,6 +46,10 @@
 #define	VEHICLE_FLAG_ENABLED		0x01
 
 
+#define	SFX_ENGSTART_FILENAME		"res/soundfx/aud-eng-start-base.wav"
+#define	SFX_ENGLOOP_FILENAME		"res/soundfx/aud-eng-loop-base.wav"
+#define	SFX_MISSLE_FILENAME		"res/soundfx/crash.wav"
+
 struct vehicle
 {
 	physx::PxRigidDynamic* body;
@@ -84,6 +88,8 @@ struct vehiclemanager
 	vec3f dim;
 
 	int sfx_missile;
+	int sfx_enginestart;
+	int sfx_engineloop;
 
 	struct vehicle vehicles[VEHICLE_COUNT];
 };
@@ -134,5 +140,6 @@ void vehiclemanager_update(struct vehiclemanager* vm);
 */
 void vehicle_reset(struct vehiclemanager* vm, struct vehicle* v);
 
+FMOD_RESULT F_CALLBACK eng_started(FMOD_CHANNEL *channel, FMOD_CHANNEL_CALLBACKTYPE type, void* commanddata1, void* commanddata2);
 
 #endif
