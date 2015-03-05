@@ -105,7 +105,8 @@ void entitymanager_shutdown(struct entitymanager* em)
 void entitymanager_update(struct entitymanager* em)
 {
 	int i;
-
+	physx::PxTransform pose;
+	
 	for (i = 0; i < ENTITY_MISSILE_COUNT; i++)
 		if (em->missiles[i].flags & ENTITY_MISSILE_FLAG_ENABLED)
 		{
@@ -113,7 +114,14 @@ void entitymanager_update(struct entitymanager* em)
 
 			if (em->missiles[i].timer == 0)
 				entitymanager_removemissile(em, em->missiles + i);
+		
+			pose = em->missiles[i].body->getGlobalPose();
+			
+			// update vehicle position
+			vec3f_set(em->missiles[i].pos, pose.p.x, pose.p.y, pose.p.z);
 		}
+		
+
 }
 
 
@@ -153,6 +161,9 @@ struct missile* entitymanager_newmissile(struct entitymanager* em, struct vehicl
 	m->timer = ENTITY_MISSILE_DESPAWNTIME;
 
 	m->flags = ENTITY_MISSILE_FLAG_ENABLED;
+
+	audiomanager_playsfx(em->am, em->sfx_missile, m->pos, -1);
+
 
 	return m;
 }
