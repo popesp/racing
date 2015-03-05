@@ -59,8 +59,6 @@ struct vehicle
 	bool ray_touch[VEHICLE_COUNT_RAYCASTS];
 
 	struct controller* controller;
-	struct vehiclemanager* vm;
-	FMOD_CHANNEL* engine_channel;
 
 	vec3f pos;
 
