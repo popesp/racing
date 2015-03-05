@@ -231,6 +231,10 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 			entitymanager_newmissile(vm->em, v, vm->dim);
 			audiomanager_playsfx(vm->am, vm->sfx_missile, v->pos, 0);
 		}
+
+		// spawn a pickup
+		if (v->controller->buttons[INPUT_BUTTON_B] == (INPUT_STATE_DOWN | INPUT_STATE_CHANGED))
+			entitymanager_newpickup(vm->em, vm->dim);
 	}
 }
 
