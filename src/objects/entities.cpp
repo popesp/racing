@@ -139,7 +139,7 @@ struct missile* entitymanager_newmissile(struct entitymanager* em, struct vehicl
 	vec3f_set(zero, 0.f, 0.f, 0.f);
 
 	m->body = physx::PxCreateDynamic(*em->pm->sdk, pose, physx::PxBoxGeometry(em->dim_missile[VX] * 0.5f, em->dim_missile[VY] * 0.5f, em->dim_missile[VZ] * 0.5f), *em->pm->default_material, ENTITY_MISSILE_DENSITY);
-	m->body->setActorFlag(PxActorFlag::eDISABLE_GRAVITY, true);
+	m->body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, true);
 	em->pm->scene->addActor(*m->body);
 
 	vec3f_set(vel, 0.f, 0.f, -1.f);

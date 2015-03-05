@@ -3,7 +3,6 @@
 #include	"../mem.h"
 #include	"../objects/vehicle.h"
 #include	"../render/render.h"
-//#include	"collision.h"
 
 
 using namespace physx;
@@ -72,6 +71,7 @@ void physicsmanager_startup(struct physicsmanager* pm)
 	scenedesc.gravity = PxVec3(PHYSICS_DEFAULT_GRAVITY);
 	scenedesc.cpuDispatcher = PxDefaultCpuDispatcherCreate(1);
 	scenedesc.filterShader = PxDefaultSimulationFilterShader;
+	scenedesc.simulationEventCallback = pm->collisions;
 	pm->scene = pm->sdk->createScene(scenedesc);
 }
 

@@ -104,7 +104,7 @@
     <ClCompile Include="src\core\win.cpp">
       <Filter>src\core</Filter>
     </ClCompile>
-    <ClCompile Include="src\physics\collision.cpp">
+    <ClCompile Include="src\physics\collisions.cpp">
       <Filter>src\physics</Filter>
     </ClCompile>
   </ItemGroup>
@@ -181,7 +181,7 @@
     <ClInclude Include="src\core\win.h">
       <Filter>headers\core</Filter>
     </ClInclude>
-    <ClInclude Include="src\physics\collision.h">
+    <ClInclude Include="src\physics\collisions.h">
       <Filter>headers\physics</Filter>
     </ClInclude>
   </ItemGroup>

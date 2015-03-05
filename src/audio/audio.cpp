@@ -6,7 +6,6 @@
 static void resetsound(struct sound* s)
 {
 	s->track = 0;
-	s->channel = 0;
 	s->enabled = false;
 }
 
@@ -85,14 +84,6 @@ void audiomanager_update(struct audiomanager* am, vec3f pos, vec3f dir, vec3f up
 	// change listener position and orientation
 	FMOD_System_Set3DListenerAttributes(am->system, 0, (FMOD_VECTOR*)pos, 0, (FMOD_VECTOR*)dir, (FMOD_VECTOR*)up);
 
-	FMOD_VECTOR position, velocity, direction, upvec;
-	FMOD_System_Get3DListenerAttributes(am->system, 0, &position, &velocity, &direction, &upvec);
-
-	//printf("Position: %f, %f, %f\n", position.x, position.y, position.z);
-	//printf("Velocity: %f, %f, %f\n", velocity.x, velocity.y, velocity.z);
-	//printf("Direction: %f, %f, %f\n", direction.x, direction.y, direction.z);
-	//printf("Up: %f, %f, %f\n", upvec.x, upvec.y, upvec.z);
-
 	// update system
 	FMOD_System_Update(am->system);
 }
@@ -149,17 +140,22 @@ int audiomanager_newsfx(struct audiomanager* am, const char* filename)
 	param:	am				audio manager
 	param:	id				index to the sound object
 	param:	loops			number of times to loop the song
+	return:	FMOD_CHANNEL*	pointer to sund channel
 */
-void audiomanager_playmusic(struct audiomanager* am, int id, int loops)
+FMOD_CHANNEL* audiomanager_playmusic(struct audiomanager* am, int id, int loops)
 {
-	FMOD_System_PlaySound(am->system, FMOD_CHANNEL_FREE, am->music[id].track, true, &am->music[id].channel);
-	FMOD_Channel_SetChannelGroup(am->music[id].channel, am->group_music);
+	FMOD_CHANNEL* channel;
+
+	FMOD_System_PlaySound(am->system, FMOD_CHANNEL_FREE, am->music[id].track, true, &channel);
+	FMOD_Channel_SetChannelGroup(channel, am->group_music);
 
 	// set loop count
-	FMOD_Channel_SetLoopCount(am->music[id].channel, loops);
+	FMOD_Channel_SetLoopCount(channel, loops);
 	
 	// play the sound
-	FMOD_Channel_SetPaused(am->music[id].channel, false);
+	FMOD_Channel_SetPaused(channel, false);
+
+	return channel;
 }
 
 /*	play an sfx sound
@@ -167,15 +163,17 @@ void audiomanager_playmusic(struct audiomanager* am, int id, int loops)
 	param:	id				index to the sound object
 	param:	pos				position to play the sound effect
 	param:	loops			number of times to loop the sound effect
+	return:	FMOD_CHANNEL*	pointer to sound channel
 */
 FMOD_CHANNEL* audiomanager_playsfx(struct audiomanager* am, int id, vec3f pos, int loops)
 {
 	FMOD_CHANNEL* channel;
+
 	FMOD_System_PlaySound(am->system, FMOD_CHANNEL_FREE, am->sfx[id].track, true, &channel);
 	FMOD_Channel_SetChannelGroup(channel, am->group_sfx);
 
 	// position the sound effect in space
-	audiomanager_setsfxposition(am, id, pos);
+	audiomanager_setsoundposition(channel, pos);
 
 	// set loop count
 	FMOD_Channel_SetLoopCount(channel, loops);
@@ -188,25 +186,23 @@ FMOD_CHANNEL* audiomanager_playsfx(struct audiomanager* am, int id, vec3f pos, i
 
 
 /*	stop a music sound
-	param:	am				audio manager
-	param:	id				index to the sound object
+	param:	channel			sound channel
 */
-void audiomanager_stopmusic(struct audiomanager* am, int id)
+void audiomanager_stopsound(FMOD_CHANNEL* channel)
 {
-	FMOD_Channel_Stop(am->music[id].channel);
+	FMOD_Channel_Stop(channel);
 }
 
 
 /*	set the position in 3d space of a sound effect
-	param:	am				audio manager
-	param:	id				index to the sound object
+	param:	channel			sound channel
 	param:	pos				new position
 */
-void audiomanager_setsfxposition(struct audiomanager* am, int id, vec3f pos)
+void audiomanager_setsoundposition(FMOD_CHANNEL* channel, vec3f pos)
 {
     FMOD_VECTOR position = {pos[VX], pos[VY], pos[VZ]};
 
-    FMOD_Channel_Set3DAttributes(am->sfx[id].channel, &position, 0);
+    FMOD_Channel_Set3DAttributes(channel, &position, 0);
 }
 
 
@@ -242,17 +238,16 @@ void audiomanager_setmastervolume(struct audiomanager* am, float volume)
 
 
 /*	toggle a music sound's paused state
-	param:	am				audio manager
-	param:	id				index to the sound object
+	param:	channel			sound channel
 */
-void audiomanager_togglemusic(struct audiomanager* am, int id)
+void audiomanager_togglesound(FMOD_CHANNEL* channel)
 {
     FMOD_BOOL state;
    
-    FMOD_Channel_GetPaused(am->music[id].channel, &state);
+    FMOD_Channel_GetPaused(channel, &state);
 
 	if (state)
-		FMOD_Channel_SetPaused(am->music[id].channel, false);
+		FMOD_Channel_SetPaused(channel, false);
 	else
-		FMOD_Channel_SetPaused(am->music[id].channel, true);
+		FMOD_Channel_SetPaused(channel, true);
 }

@@ -31,6 +31,8 @@ void player_init(struct player* p, struct vehiclemanager* vm, controller* contro
 
 	camera_init(&p->camera, zero, zero, up);
 
+	
+
 	//initialize lap
 	p->vehicle->lap = 1;
 	p->vehicle->checkpoint1 = false;
