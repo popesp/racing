@@ -66,10 +66,9 @@ int audiomanager_newmusic(struct audiomanager* am, const char* filename);
 /*	create a new sfx sound object
 	param:	am				audio manager
 	param:	filename		path to the audio file
-	param:  fmode			FMOD_DEFAULT for no loop or FMOD_LOOP_NORMAL for loop
 	return:	int				index to the sound object, or -1 if failure
 */
-int audiomanager_newsfx(struct audiomanager* am, const char* filename, FMOD_MODE fmode);
+int audiomanager_newsfx(struct audiomanager* am, const char* filename);
 
 
 /*	play a music sound
@@ -82,8 +81,9 @@ void audiomanager_playmusic(struct audiomanager* am, int id, int loops);
 /*	play an sfx sound
 	param:	am				audio manager
 	param:	id				index to the sound object
+	param:	pos				position to play the sound effect
 */
-void audiomanager_playsfx(struct audiomanager* am, int id, vec3f playerpos);
+void audiomanager_playsfx(struct audiomanager* am, int id, vec3f pos);
 
 
 /*	stop a music sound

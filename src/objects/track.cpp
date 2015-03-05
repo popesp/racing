@@ -34,7 +34,6 @@ void track_init(struct track* t, struct physicsmanager* pm, vec3f up, const char
 
 	t->num_pathpoints = 0;
 	t->pathpoints = NULL;
-	t->pathangles = NULL;
 
 	t->p_track = NULL;
 
@@ -104,7 +103,7 @@ int track_closestindex(struct track* t, vec3f pos, int last)
 
 	while (i != e)
 	{
-		vec3f_subtractn(diff, pos, t->pathpoints[i]);
+		vec3f_subtractn(diff, pos, t->pathpoints[i].pos);
 		d = vec3f_length(diff);
 
 		if (d < least)
@@ -382,8 +381,7 @@ void track_generate(struct renderer* r, struct track* t)
 
 	// allocate space for the search points (underlying track spline, independent from rendered/physical mesh)
 	t->num_pathpoints = n * (TRACK_SEARCHDIVIDE + 1);
-	t->pathpoints = (vec3f*)mem_calloc(t->num_pathpoints, sizeof(vec3f));
-	t->pathangles = (float*)mem_calloc(t->num_pathpoints, sizeof(float));
+	t->pathpoints = (struct path_point*)mem_calloc(t->num_pathpoints, sizeof(struct path_point));
 
 	// temporary vertex buffer
 	verts = (float*)mem_calloc(2 * (2 * TRACK_SEGMENT_VERTCOUNT - 1)*s, RENDER_VERTSIZE_BUMP_L * sizeof(float));
@@ -407,8 +405,9 @@ void track_generate(struct renderer* r, struct track* t)
 		for (j = 0, d = 0.f; j < TRACK_SEARCHDIVIDE + 1; j++, d += 1.f / (float)(TRACK_SEARCHDIVIDE + 1))
 		{
 			curvepoint(t, i, d, &p);
-			vec3f_copy(t->pathpoints[i*(TRACK_SEARCHDIVIDE+1) + j], p.pos);
-			t->pathangles[i*(TRACK_SEARCHDIVIDE+1) + j] = p.angle;
+			vec3f_copy(t->pathpoints[i*(TRACK_SEARCHDIVIDE+1) + j].pos, p.pos);
+			vec3f_copy(t->pathpoints[i*(TRACK_SEARCHDIVIDE+1) + j].tan, p.tan);
+			t->pathpoints[i*(TRACK_SEARCHDIVIDE+1) + j].angle = p.angle;
 		}
 	}
 

@@ -1,5 +1,7 @@
 #include	"audio.h"
 
+#include	<stdio.h>	// temp
+
 
 static void resetsound(struct sound* s)
 {
@@ -83,6 +85,14 @@ void audiomanager_update(struct audiomanager* am, vec3f pos, vec3f dir, vec3f up
 	// change listener position and orientation
 	FMOD_System_Set3DListenerAttributes(am->system, 0, (FMOD_VECTOR*)pos, 0, (FMOD_VECTOR*)dir, (FMOD_VECTOR*)up);
 
+	FMOD_VECTOR position, velocity, direction, upvec;
+	FMOD_System_Get3DListenerAttributes(am->system, 0, &position, &velocity, &direction, &upvec);
+
+	printf("Position: %f, %f, %f\n", position.x, position.y, position.z);
+	printf("Velocity: %f, %f, %f\n", velocity.x, velocity.y, velocity.z);
+	printf("Direction: %f, %f, %f\n", direction.x, direction.y, direction.z);
+	printf("Up: %f, %f, %f\n", upvec.x, upvec.y, upvec.z);
+
 	// update system
 	FMOD_System_Update(am->system);
 }
@@ -116,7 +126,7 @@ int audiomanager_newmusic(struct audiomanager* am, const char* filename)
 	param:	filename		path to the audio file
 	return:	int				index to the sound object, or -1 if failure
 */
-int audiomanager_newsfx(struct audiomanager* am, const char* filename, FMOD_MODE fmode)
+int audiomanager_newsfx(struct audiomanager* am, const char* filename)
 {
 	int i;
 
@@ -124,7 +134,7 @@ int audiomanager_newsfx(struct audiomanager* am, const char* filename, FMOD_MODE
 	{
 		if (!am->sfx[i].enabled)
 		{
-			FMOD_System_CreateSound(am->system, filename, fmode, 0, &am->sfx[i].track);
+			FMOD_System_CreateSound(am->system, filename, FMOD_3D, 0, &am->sfx[i].track);
 			am->sfx[i].enabled = true;
 
 			return i;

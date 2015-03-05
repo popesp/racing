@@ -102,6 +102,21 @@ void entitymanager_shutdown(struct entitymanager* em)
 }
 
 
+void entitymanager_update(struct entitymanager* em)
+{
+	int i;
+
+	for (i = 0; i < ENTITY_MISSILE_COUNT; i++)
+		if (em->missiles[i].flags & ENTITY_MISSILE_FLAG_ENABLED)
+		{
+			em->missiles[i].timer--;
+
+			if (em->missiles[i].timer == 0)
+				entitymanager_removemissile(em, em->missiles + i);
+		}
+}
+
+
 struct missile* entitymanager_newmissile(struct entitymanager* em, struct vehicle* v, vec3f dim)
 {
 	physx::PxTransform pose;
@@ -134,6 +149,8 @@ struct missile* entitymanager_newmissile(struct entitymanager* em, struct vehicl
 	m->body->setLinearVelocity(physx::PxVec3(vel[VX], vel[VY], vel[VZ]));
 
 	m->owner = v;
+
+	m->timer = ENTITY_MISSILE_DESPAWNTIME;
 
 	m->flags = ENTITY_MISSILE_FLAG_ENABLED;
 

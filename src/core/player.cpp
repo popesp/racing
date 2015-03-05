@@ -92,7 +92,7 @@ void aiplayer_updateinput(struct aiplayer* p)
 	resetcontroller(p);
 
 	next_index = (p->vehicle->index_track + 3) % (int)p->track->num_pathpoints;
-	vec3f_copy(next_point, p->track->pathpoints[next_index]);
+	vec3f_copy(next_point, p->track->pathpoints[next_index].pos);
 
 	// future point based on current speed
 
@@ -104,7 +104,7 @@ void aiplayer_updateinput(struct aiplayer* p)
 	p->controller.axes[INPUT_AXIS_LEFT_LR] = vec3f_dot(right, diff) * 4.f / vec3f_length(diff);
 
 	//-0.8f 2fast4me
-	p->controller.axes[INPUT_AXIS_TRIGGERS] = -0.4f;
+	p->controller.axes[INPUT_AXIS_TRIGGERS] = -0.8f;
 }
 
 
