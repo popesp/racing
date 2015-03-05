@@ -62,14 +62,14 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 
 		case GLFW_KEY_M:
 			// go to next track
-			audiomanager_stopmusic(&game->audiomanager, game->index_currentsong);
+			audiomanager_stopsound(game->currentchannel);
 			game->index_currentsong = (game->index_currentsong + 1) % GAME_MUSIC_COUNT;
-			audiomanager_playmusic(&game->audiomanager, game->index_currentsong, -1);
+			game->currentchannel = audiomanager_playmusic(&game->audiomanager, game->index_currentsong, -1);
 			break;
 
 		case GLFW_KEY_P:
 			// pause the music
-			audiomanager_togglemusic(&game->audiomanager, game->index_currentsong);
+			audiomanager_togglesound(game->currentchannel);
 			break;
 
 		case GLFW_KEY_Q:
@@ -463,7 +463,7 @@ int game_startup(struct game* game)
 	game->songs[GAME_MUSIC_3_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_3_FILENAME);
 	game->songs[GAME_MUSIC_4_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_4_FILENAME);
 	game->index_currentsong = 0;
-	audiomanager_playmusic(&game->audiomanager, game->songs[game->index_currentsong], -1);
+	game->currentchannel = audiomanager_playmusic(&game->audiomanager, game->songs[game->index_currentsong], -1);
 	
 	game->flags = GAME_FLAG_INIT;
 
