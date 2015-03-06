@@ -422,7 +422,7 @@ int game_startup(struct game* game)
 	physicsmanager_addstatic_trianglestrip(&game->physicsmanager, game->track.r_track.num_verts, sizeof(float)*RENDER_VERTSIZE_BUMP_L, game->track.r_track.buf_verts);
 	
 	// start up the entity manager for the track
-	entitymanager_startup(&game->entitymanager, &game->physicsmanager, &game->renderer,&game->audiomanager, &game->track, "res/models/powerup/powerup.obj", "res/models/powerup/powerup_rocketUV.png", "res/models/Projectile/rocket.obj", "res/models/Projectile/rocket_tex.png");
+	entitymanager_startup(&game->entitymanager, &game->physicsmanager, &game->renderer,&game->audiomanager, &game->track);
 
 	// start up the vehicle manager for the track
 	vehiclemanager_startup(&game->vehiclemanager, &game->physicsmanager, &game->entitymanager, &game->audiomanager, &game->renderer, &game->track, "res/models/car/car.obj", "res/models/car/carUV.png");

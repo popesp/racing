@@ -1,51 +1,8 @@
 #include	"entities.h"
 #include	"../render/objloader.h"
 
-static float entity_pos[8][3] =
-{
-	{-1.f, -1.f, -1.f},
-	{-1.f, 1.f, -1.f},
-	{1.f, 1.f, -1.f},
-	{1.f, -1.f, -1.f},
-	{1.f, 1.f, 1.f},
-	{-1.f, 1.f, 1.f},
-	{-1.f, -1.f, 1.f},
-	{1.f, -1.f, 1.f}
-};
 
-static float entity_nor[6][3] =
-{
-	{-1.f, 0.f, 0.f},
-	{1.f, 0.f, 0.f},
-	{0.f, -1.f, 0.f},
-	{0.f, 1.f, 0.f},
-	{0.f, 0.f, -1.f},
-	{0.f, 0.f, 1.f}
-};
-
-static int entity_posindex[36] =
-{
-	0, 6, 5, 0, 5, 1,
-	0, 3, 7, 0, 7, 6,
-	0, 1, 2, 0, 2, 3,
-	4, 7, 3, 4, 3, 2,
-	4, 2, 1, 4, 1, 5,
-	4, 5, 6, 4, 6, 7
-};
-
-static int entity_norindex[36] =
-{
-	0, 0, 0, 0, 0, 0,
-	2, 2, 2, 2, 2, 2,
-	4, 4, 4, 4, 4, 4,
-	1, 1, 1, 1, 1, 1,
-	3, 3, 3, 3, 3, 3,
-	5, 5, 5, 5, 5, 5
-};
-
-
-
-void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, struct renderer* r,struct audiomanager* am, struct track* t, const char* pickup_file_mesh, const char* pickup_file_diffuse, const char* missile_file_mesh, const char* missile_file_diffuse)
+void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, struct renderer* r,struct audiomanager* am, struct track* t)
 {
 	struct missile* m;
 	struct pickup* pu;
@@ -53,24 +10,22 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 
 	float temp;
 	vec3f min, max, avg, diff;
-	float* ptr;
 	int i;
 
 	em->pm = pm;
 	em->track = t;
 
 	renderable_init(&em->r_missile, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
-	objloader_load(missile_file_mesh, r, &em->r_missile);
+	objloader_load(MISSILE_OBJ, r, &em->r_missile);
 	renderable_sendbuffer(r, &em->r_missile);
 
 	renderable_init(&em->r_pickup, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
-	objloader_load(pickup_file_mesh, r, &em->r_pickup);
+	objloader_load(PICKUP_OBJ, r, &em->r_pickup);
 	renderable_sendbuffer(r, &em->r_pickup);
 
-	renderable_init(&em->r_mine, RENDER_MODE_TRIANGLES, RENDER_TYPE_MATS_L, RENDER_FLAG_NONE);
-	renderable_allocate(r, &em->r_mine, 36);
-
-	vec3f_set(em->dim_mine,1.f,1.f,1.f);
+	renderable_init(&em->r_mine, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
+	objloader_load(MINE_OBJ, r, &em->r_mine);
+	renderable_sendbuffer(r, &em->r_mine);
 
 	/////////////////////////////////////////////////////////////////////////
 	//PICKUP
@@ -78,7 +33,7 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 	vec3f_set(min, FLT_MAX, FLT_MAX, FLT_MAX);
 	vec3f_set(max, -FLT_MAX, -FLT_MAX, -FLT_MAX);
 
-	for (i = 0; i < em->r_pickup.num_verts; i++)
+	for (i = 0; (unsigned)i < em->r_pickup.num_verts; i++)
 	{
 		vec3f temp;
 
@@ -120,9 +75,10 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 
 	// initialize pickup texture
 	texture_init(&em->diffuse_pickup);
-	texture_loadfile(&em->diffuse_pickup, pickup_file_diffuse);
+	texture_loadfile(&em->diffuse_pickup, PICKUP_MISSILE_TEXTURE);
 	texture_upload(&em->diffuse_pickup, RENDER_TEXTURE_DIFFUSE);
 	em->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_pickup;
+
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	//MISSILE
@@ -130,7 +86,7 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 	vec3f_set(min, FLT_MAX, FLT_MAX, FLT_MAX);
 	vec3f_set(max, -FLT_MAX, -FLT_MAX, -FLT_MAX);
 
-	for (i = 0; i < em->r_missile.num_verts; i++)
+	for (i = 0; (unsigned)i < em->r_missile.num_verts; i++)
 	{
 		vec3f temp;
 
@@ -172,37 +128,61 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 
 	// initialize missile texture
 	texture_init(&em->diffuse_missile);
-	texture_loadfile(&em->diffuse_missile, missile_file_diffuse);
+	texture_loadfile(&em->diffuse_missile, MISSILE_TEXTURE);
 	texture_upload(&em->diffuse_missile, RENDER_TEXTURE_DIFFUSE);
 	em->r_missile.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_missile;
 
 	/////////////////////////////////////////////////////////////////////////
 	//MINE STUFF
 	/////////////////////////////////////////////////////////////////////////
-	ptr = em->r_mine.buf_verts;
-	for(i=0;i<36;i++){
-		vec3f_copy(ptr, entity_pos[entity_posindex[i]]);
-		ptr += RENDER_ATTRIBSIZE_POS;
-		vec3f_copy(ptr, entity_nor[entity_norindex[i]]);
-		ptr += RENDER_ATTRIBSIZE_NOR;
+	vec3f_set(min, FLT_MAX, FLT_MAX, FLT_MAX);
+	vec3f_set(max, -FLT_MAX, -FLT_MAX, -FLT_MAX);
+
+	for (i = 0; (unsigned)i < em->r_mine.num_verts; i++)
+	{
+		vec3f temp;
+
+		// retrieve vertex from buffer
+		vec3f_copy(temp, em->r_mine.buf_verts + i*r->vertsize[em->r_mine.type]);
+
+		// check for min and max vector positions
+		if (temp[VX] < min[VX])
+			min[VX] = temp[VX];
+		if (temp[VX] > max[VX])
+			max[VX] = temp[VX];
+
+		if (temp[VY] < min[VY])
+			min[VY] = temp[VY];
+		if (temp[VY] > max[VY])
+			max[VY] = temp[VY];
+
+		if (temp[VZ] < min[VZ])
+			min[VZ] = temp[VZ];
+		if (temp[VZ] > max[VZ])
+			max[VZ] = temp[VZ];
 	}
+	// find center point of model
+	vec3f_addn(avg, min, max);
+	vec3f_scale(avg, 0.5f);
 
-	renderable_sendbuffer(r, &em->r_mine);
+	// find dimensions of model
+	vec3f_subtractn(diff, max, min);
+	vec3f_scalen(em->dim_mine, diff, MINE_MESHSCALE);
 
-	vec3f_set(em->dim_mine, ENTITY_MINE_WIDTH, ENTITY_MINE_HEIGHT, ENTITY_MINE_LENGTH);
-	mat4f_scalemul(em->r_mine.matrix_model, ENTITY_MINE_WIDTH*0.5f, ENTITY_MINE_HEIGHT*0.5f, ENTITY_MINE_LENGTH*0.5f);
+	// swap x and z to get the correct vehicle dimensions
+	temp = em->dim_mine[VX];
+	em->dim_mine[VX] = em->dim_mine[VZ];
+	em->dim_mine[VZ] = temp;
 
-	vec3f_set(em->r_mine.material.amb, 1.8f, 0.15f, 0.1f);
-	vec3f_set(em->r_mine.material.dif, 1.8f, 0.15f, 0.1f);
-	vec3f_set(em->r_mine.material.spc, 1.8f, 0.5f, 0.5f);
-	em->r_mine.material.shn = 100.f;
+	mat4f_scalemul(em->r_mine.matrix_model, MINE_MESHSCALE, MINE_MESHSCALE, MINE_MESHSCALE);
+	mat4f_rotateymul(em->r_mine.matrix_model, -1.57080f);
+	mat4f_translatemul(em->r_mine.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
 
-
-
-
-
-
-
+	// initialize pickup texture
+	texture_init(&em->diffuse_mine);
+	texture_loadfile(&em->diffuse_mine, MINE_TEXTURE);
+	texture_upload(&em->diffuse_mine, RENDER_TEXTURE_DIFFUSE);
+	em->r_mine.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_mine;
 
 	// initialize missile array
 	for (i = 0; i < ENTITY_MISSILE_COUNT; i++)
@@ -367,7 +347,6 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f dim){
 	physx::PxTransform pose;
 	physx::PxMat44 mat_pose;
 	struct pickup* pu;
-	vec3f zero, vel;
 	vec3f spawn;
 	int i;
 

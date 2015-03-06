@@ -42,6 +42,17 @@
 
 #define	PICKUP_MESHSCALE			0.2f
 #define MISSILE_MESHSCALE			0.2f
+#define MINE_MESHSCALE				0.1f
+
+#define PICKUP_OBJ					"res/models/powerup/powerup.obj"
+#define PICKUP_MISSILE_TEXTURE		"res/models/powerup/powerup_rocketUV.png"
+#define	PICKUP_MINE_TEXTURE			"res/models/powerup/powerup_mineUV.png"
+
+#define	MINE_OBJ					"res/models/mine/mine.obj"
+#define	MINE_TEXTURE				"res/models/mine/mineUV.png"
+
+#define	MISSILE_OBJ					"res/models/Projectile/rocket.obj"
+#define	MISSILE_TEXTURE				"res/models/Projectile/rocket_tex.png"
 
 struct pickup{
 	physx::PxRigidDynamic* body;
@@ -96,7 +107,7 @@ struct entitymanager
 };
 
 
-void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, struct renderer* r,struct audiomanager* am, struct track* t, const char* pickup_file_mesh, const char* pickup_file_diffuse, const char* missile_file_mesh, const char* missile_file_diffuse);
+void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, struct renderer* r,struct audiomanager* am, struct track* t);
 void entitymanager_shutdown(struct entitymanager* em);
 
 void entitymanager_update(struct entitymanager* em);
