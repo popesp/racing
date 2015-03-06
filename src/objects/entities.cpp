@@ -75,9 +75,12 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 
 	// initialize pickup texture
 	texture_init(&em->diffuse_pickup);
-	texture_loadfile(&em->diffuse_pickup, PICKUP_MISSILE_TEXTURE);
+	texture_loadfile(&em->diffuse_pickup, PICKUP_MINE_TEXTURE);
 	texture_upload(&em->diffuse_pickup, RENDER_TEXTURE_DIFFUSE);
-	em->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_pickup;
+
+	texture_init(&em->diffuse_pickup2);
+	texture_loadfile(&em->diffuse_pickup2, PICKUP_MISSILE_TEXTURE);
+	texture_upload(&em->diffuse_pickup2, RENDER_TEXTURE_DIFFUSE);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -243,7 +246,7 @@ void entitymanager_shutdown(struct entitymanager* em)
 void entitymanager_render(struct entitymanager* em, struct renderer* r, mat4f worldview)
 {
 	int i;
-
+	//aiplayer_mw = physx::PxMat44(game->aiplayers[i].vehicle->body->getGlobalPose());
 	for (i = 0; i < ENTITY_MISSILE_COUNT; i++)
 		if (em->missiles[i].flags & ENTITY_MISSILE_FLAG_ENABLED)
 			renderable_render(r, &em->r_missile, (float*)&physx::PxMat44(em->missiles[i].body->getGlobalPose()), worldview, 0);
@@ -352,10 +355,10 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f dim){
 
 	//assign a random spawnpoint
 	unsigned int max = em->track->num_pathpoints;
-	unsigned int randomspot = 10+(rand()%(unsigned int)(max-10+1));
+	unsigned int randomspot = rand()%max;
 
 	for (i = 0; i < ENTITY_PICKUP_COUNT; i++)
-		if (!(em->pickups[i].flags & ENTITY_MISSILE_FLAG_ENABLED))
+		if (!(em->pickups[i].flags & ENTITY_PICKUP_FLAG_ENABLED))
 			break;
 
 	if (i == ENTITY_PICKUP_COUNT)
@@ -363,6 +366,11 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f dim){
 
 	pu = em->pickups + i;
 
+	if(randomspot%2 ==1){
+		em->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_pickup2;
+	}else{
+		em->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_pickup;
+	}
 
 	// find spawn location
 	vec3f_copy(pu->pos, em->track->pathpoints[randomspot].pos);

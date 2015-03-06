@@ -45,10 +45,12 @@
 #define	VEHICLE_FLAG_INIT			0x00
 #define	VEHICLE_FLAG_ENABLED		0x01
 
+#define VEHICLE_OBJ					"res/models/car/car.obj"
+#define VEHICLE_TEXTURE				"res/models/car/carUV.png"
 
 #define	SFX_ENGSTART_FILENAME		"res/soundfx/aud-eng-start-base.wav"
 #define	SFX_ENGLOOP_FILENAME		"res/soundfx/aud-eng-loop-base.wav"
-#define	SFX_MISSLE_FILENAME		"res/soundfx/crash.wav"
+#define	SFX_MISSLE_FILENAME			"res/soundfx/crash.wav"
 
 struct vehicle
 {
@@ -105,7 +107,7 @@ struct vehiclemanager
 	param:	file_mesh		filename for vehicle mesh
 	param:	file_diffuse	filename for vehicle diffuse texture
 */
-void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm, struct entitymanager* em, struct audiomanager* am, struct renderer* r, struct track* t, const char* file_mesh, const char* file_diffuse);
+void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm, struct entitymanager* em, struct audiomanager* am, struct renderer* r, struct track* t);
 
 /*	shut down the vehicle manager
 	param:	vm				vehicle manager

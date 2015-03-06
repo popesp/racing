@@ -5,7 +5,7 @@
 #include	"../render/objloader.h"
 
 
-void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm, struct entitymanager* em, struct audiomanager* am, struct renderer* r, struct track* t, const char* file_mesh, const char* file_diffuse)
+void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm, struct entitymanager* em, struct audiomanager* am, struct renderer* r, struct track* t)
 {
 	vec3f min, max, avg, diff;
 	struct vehicle* v;
@@ -19,7 +19,7 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 
 	// initialize vehicle mesh
 	renderable_init(&vm->r_vehicle, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
-	objloader_load(file_mesh, r, &vm->r_vehicle);
+	objloader_load(VEHICLE_OBJ, r, &vm->r_vehicle);
 	renderable_sendbuffer(r, &vm->r_vehicle);
 
 	// find the limits of the loaded mesh
@@ -68,7 +68,7 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 
 	// initialize vehicle texture
 	texture_init(&vm->diffuse);
-	texture_loadfile(&vm->diffuse, file_diffuse);
+	texture_loadfile(&vm->diffuse, VEHICLE_TEXTURE);
 	texture_upload(&vm->diffuse, RENDER_TEXTURE_DIFFUSE);
 	vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->diffuse;
 

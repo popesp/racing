@@ -96,6 +96,7 @@ struct entitymanager
 	vec3f dim_mine;
 
 	struct texture diffuse_pickup;
+	struct texture diffuse_pickup2;
 	struct texture diffuse_missile;
 	struct texture diffuse_mine;
 
