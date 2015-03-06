@@ -1,11 +1,12 @@
 #include	"vehicle.h"
 
 #include	<float.h>
+#include	<time.h>
 #include	"../audio/audio.h"
 #include	"../render/objloader.h"
 
 
-void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm, struct entitymanager* em, struct audiomanager* am, struct renderer* r, struct track* t, const char* file_mesh, const char* file_diffuse)
+void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm, struct entitymanager* em, struct audiomanager* am, struct renderer* r, struct track* t)
 {
 	vec3f min, max, avg, diff;
 	struct vehicle* v;
@@ -17,9 +18,17 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 	vm->am = am;
 	vm->track = t;
 
+	int seed = static_cast<int>(time(0));
+	srand(seed);
+
+	printf("%d\n",seed%2);
 	// initialize vehicle mesh
 	renderable_init(&vm->r_vehicle, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
-	objloader_load(file_mesh, r, &vm->r_vehicle);
+	if(seed%2==1){
+		objloader_load(VEHICLE_OBJ, r, &vm->r_vehicle);
+	}else{
+		objloader_load(VEHICLE_OBJ2, r, &vm->r_vehicle);
+	}
 	renderable_sendbuffer(r, &vm->r_vehicle);
 
 	// find the limits of the loaded mesh
@@ -68,11 +77,20 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 
 	// initialize vehicle texture
 	texture_init(&vm->diffuse);
-	texture_loadfile(&vm->diffuse, file_diffuse);
+	texture_loadfile(&vm->diffuse, VEHICLE_TEXTURE);
 	texture_upload(&vm->diffuse, RENDER_TEXTURE_DIFFUSE);
-	vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->diffuse;
 
-	// create sound for missiles
+	texture_init(&vm->diffuse2);
+	texture_loadfile(&vm->diffuse2, VEHICLE_TEXTURE2);
+	texture_upload(&vm->diffuse2, RENDER_TEXTURE_DIFFUSE);
+	
+	if(seed % 2==1){
+		vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->diffuse;
+	}else{
+		vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->diffuse2;
+	}
+
+	// create sound for engine
 	
 	vm->sfx_enginestart = audiomanager_newsfx(am, SFX_ENGSTART_FILENAME);
 	vm->sfx_engineloop = audiomanager_newsfx(am, SFX_ENGLOOP_FILENAME);
@@ -161,7 +179,7 @@ FMOD_RESULT F_CALLBACK eng_started(FMOD_CHANNEL *channel, FMOD_CHANNEL_CALLBACKT
 	 FMOD_Channel_GetUserData(channel, (void**)&v);
 	//audiomanager_playsfx(vm->am,vm->sfx_engineloop,v->pos,0);
 	if (type == FMOD_CHANNEL_CALLBACKTYPE_END) {
-		printf("END\n");
+		printf("engine startup END\n");
 		v->engine_channel = audiomanager_playsfx(v->vm->am,v->vm->sfx_engineloop,v->pos,-1);
 
 	}
@@ -287,6 +305,7 @@ void vehiclemanager_update(struct vehiclemanager* vm)
 		//monitors for flips
 		
 		if(speed<0.0001 && speed>-0.0005 && speed!=0){
+			//printf("%f\n", speed);
 			if(v->ray_touch[0]==false && v->ray_touch[1]==false && v->ray_touch[2]==false && v->ray_touch[3]==false){
 				vehicle_reset(vm, v);
 			}

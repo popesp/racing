@@ -425,7 +425,7 @@ int game_startup(struct game* game)
 	entitymanager_startup(&game->entitymanager, &game->physicsmanager, &game->renderer,&game->audiomanager, &game->track);
 
 	// start up the vehicle manager for the track
-	vehiclemanager_startup(&game->vehiclemanager, &game->physicsmanager, &game->entitymanager, &game->audiomanager, &game->renderer, &game->track, "res/models/car/car.obj", "res/models/car/carUV.png");
+	vehiclemanager_startup(&game->vehiclemanager, &game->physicsmanager, &game->entitymanager, &game->audiomanager, &game->renderer, &game->track);
 
 	// initialize player objects
 	vec3f_set(offs, 0.f, 0.f, 0.f);

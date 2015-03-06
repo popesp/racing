@@ -32,7 +32,7 @@ void track_init(struct track* t, struct physicsmanager* pm, vec3f up, const char
 	t->num_points = 0;
 	t->points = NULL;
 
-	t->num_pathpoints = 0;
+	t->num_pathpoints = 100;
 	t->pathpoints = NULL;
 
 	t->p_track = NULL;

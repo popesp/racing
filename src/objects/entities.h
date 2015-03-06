@@ -41,7 +41,7 @@
 #define ENTITY_MINE_FLAG_ENABLED	0x01
 
 #define	PICKUP_MESHSCALE			0.2f
-#define MISSILE_MESHSCALE			0.2f
+#define MISSILE_MESHSCALE			0.35f
 #define MINE_MESHSCALE				0.1f
 
 #define PICKUP_OBJ					"res/models/powerup/powerup.obj"
@@ -67,12 +67,12 @@ struct pickup{
 struct missile
 {
 	physx::PxRigidDynamic* body;
-
-	struct vehicle* owner;
 	vec3f pos;
+	struct vehicle* owner;
 	unsigned timer;
-
 	unsigned char flags;
+
+	FMOD_CHANNEL* missle_channel;
 };
 
 struct mine{
@@ -96,6 +96,7 @@ struct entitymanager
 	vec3f dim_mine;
 
 	struct texture diffuse_pickup;
+	struct texture diffuse_pickup2;
 	struct texture diffuse_missile;
 	struct texture diffuse_mine;
 

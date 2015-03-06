@@ -28,7 +28,7 @@
 
 #define	VEHICLE_DENSITY				0.8f
 
-#define	VEHICLE_SPAWNHEIGHT			1.5f
+#define	VEHICLE_SPAWNHEIGHT			1.f
 
 #define	VEHICLE_UP					0.f, 1.f, 0.f
 #define	VEHICLE_DOWN				0.f, -1.f, 0.f
@@ -45,10 +45,14 @@
 #define	VEHICLE_FLAG_INIT			0x00
 #define	VEHICLE_FLAG_ENABLED		0x01
 
+#define VEHICLE_OBJ					"res/models/car/car.obj"
+#define VEHICLE_OBJ2				"res/models/car/car2.obj"
+#define VEHICLE_TEXTURE				"res/models/car/carUV.png"
+#define VEHICLE_TEXTURE2			"res/models/car/carUV2.png"
 
 #define	SFX_ENGSTART_FILENAME		"res/soundfx/aud-eng-start-base.wav"
 #define	SFX_ENGLOOP_FILENAME		"res/soundfx/aud-eng-loop-base.wav"
-#define	SFX_MISSLE_FILENAME		"res/soundfx/crash.wav"
+#define	SFX_MISSLE_FILENAME			"res/soundfx/crash.wav"
 
 struct vehicle
 {
@@ -74,6 +78,8 @@ struct vehicle
 
 	int haspickup;
 
+
+
 	unsigned char flags;
 };
 
@@ -86,6 +92,7 @@ struct vehiclemanager
 
 	struct renderable r_vehicle;
 	struct texture diffuse;
+	struct texture diffuse2;
 	vec3f dim;
 
 	int sfx_enginestart;
@@ -105,7 +112,7 @@ struct vehiclemanager
 	param:	file_mesh		filename for vehicle mesh
 	param:	file_diffuse	filename for vehicle diffuse texture
 */
-void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm, struct entitymanager* em, struct audiomanager* am, struct renderer* r, struct track* t, const char* file_mesh, const char* file_diffuse);
+void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm, struct entitymanager* em, struct audiomanager* am, struct renderer* r, struct track* t);
 
 /*	shut down the vehicle manager
 	param:	vm				vehicle manager
