@@ -28,7 +28,7 @@
 
 #define	VEHICLE_DENSITY				0.8f
 
-#define	VEHICLE_SPAWNHEIGHT			1.5f
+#define	VEHICLE_SPAWNHEIGHT			1.f
 
 #define	VEHICLE_UP					0.f, 1.f, 0.f
 #define	VEHICLE_DOWN				0.f, -1.f, 0.f

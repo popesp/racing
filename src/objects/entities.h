@@ -41,7 +41,7 @@
 #define ENTITY_MINE_FLAG_ENABLED	0x01
 
 #define	PICKUP_MESHSCALE			0.2f
-#define MISSILE_MESHSCALE			0.2f
+#define MISSILE_MESHSCALE			0.35f
 #define MINE_MESHSCALE				0.1f
 
 #define PICKUP_OBJ					"res/models/powerup/powerup.obj"

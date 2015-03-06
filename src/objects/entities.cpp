@@ -1,6 +1,6 @@
 #include	"entities.h"
 #include	"../render/objloader.h"
-
+#include	<time.h>
 
 void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, struct renderer* r,struct audiomanager* am, struct track* t)
 {
@@ -126,7 +126,7 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 	em->dim_missile[VZ] = temp;
 
 	mat4f_scalemul(em->r_missile.matrix_model, MISSILE_MESHSCALE, MISSILE_MESHSCALE, MISSILE_MESHSCALE);
-	mat4f_rotateymul(em->r_missile.matrix_model, -0.f);
+	mat4f_rotateymul(em->r_missile.matrix_model, 3.f);
 	mat4f_translatemul(em->r_missile.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
 
 	// initialize missile texture
@@ -353,9 +353,12 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f dim){
 	vec3f spawn;
 	int i;
 
+
 	//assign a random spawnpoint
 	unsigned int max = em->track->num_pathpoints;
-	unsigned int randomspot = rand()%max;
+
+	unsigned int seed = static_cast<unsigned int>(time(0))%max;
+	srand(seed);
 
 	for (i = 0; i < ENTITY_PICKUP_COUNT; i++)
 		if (!(em->pickups[i].flags & ENTITY_PICKUP_FLAG_ENABLED))
@@ -366,14 +369,14 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f dim){
 
 	pu = em->pickups + i;
 
-	if(randomspot%2 ==1){
+	if(seed%2 ==1){
 		em->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_pickup2;
 	}else{
 		em->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_pickup;
 	}
 
 	// find spawn location
-	vec3f_copy(pu->pos, em->track->pathpoints[randomspot].pos);
+	vec3f_copy(pu->pos, em->track->pathpoints[seed].pos);
 	vec3f_copy(spawn, em->track->up);
 	vec3f_scale(spawn, ENTITY_PICKUP_SPAWNHEIGHT);
 	vec3f_add(pu->pos, spawn);
