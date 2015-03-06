@@ -429,6 +429,7 @@ struct mine* entitymanager_newmine(struct entitymanager* em, vec3f dim, struct v
 
 	// create a physics object and add it to the scene
 	x->body = physx::PxCreateDynamic(*em->pm->sdk, pose, physx::PxBoxGeometry(em->dim_mine[VX] * 0.5f, em->dim_mine[VY] * 0.5f, em->dim_mine[VZ] * 0.5f), *em->pm->default_material, ENTITY_MINE_DENSITY);
+	x->body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, true);
 	em->pm->scene->addActor(*x->body);
 
 	x->owner = v;
