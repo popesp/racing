@@ -1,6 +1,7 @@
 #include	"vehicle.h"
 
 #include	<float.h>
+#include <time.h>
 #include	"../audio/audio.h"
 #include	"../render/objloader.h"
 
@@ -17,9 +18,17 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 	vm->am = am;
 	vm->track = t;
 
+	int seed = static_cast<int>(time(0));
+	srand(seed);
+
+	printf("%d\n",seed%2);
 	// initialize vehicle mesh
 	renderable_init(&vm->r_vehicle, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
-	objloader_load(VEHICLE_OBJ, r, &vm->r_vehicle);
+	if(seed%2==1){
+		objloader_load(VEHICLE_OBJ, r, &vm->r_vehicle);
+	}else{
+		objloader_load(VEHICLE_OBJ2, r, &vm->r_vehicle);
+	}
 	renderable_sendbuffer(r, &vm->r_vehicle);
 
 	// find the limits of the loaded mesh
@@ -70,7 +79,16 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 	texture_init(&vm->diffuse);
 	texture_loadfile(&vm->diffuse, VEHICLE_TEXTURE);
 	texture_upload(&vm->diffuse, RENDER_TEXTURE_DIFFUSE);
-	vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->diffuse;
+
+	texture_init(&vm->diffuse2);
+	texture_loadfile(&vm->diffuse2, VEHICLE_TEXTURE2);
+	texture_upload(&vm->diffuse2, RENDER_TEXTURE_DIFFUSE);
+	
+	if(seed % 2==1){
+		vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->diffuse;
+	}else{
+		vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->diffuse2;
+	}
 
 	// create sound for missiles
 	

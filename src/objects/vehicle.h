@@ -46,7 +46,9 @@
 #define	VEHICLE_FLAG_ENABLED		0x01
 
 #define VEHICLE_OBJ					"res/models/car/car.obj"
+#define VEHICLE_OBJ2				"res/models/car/car2.obj"
 #define VEHICLE_TEXTURE				"res/models/car/carUV.png"
+#define VEHICLE_TEXTURE2			"res/models/car/carUV2.png"
 
 #define	SFX_ENGSTART_FILENAME		"res/soundfx/aud-eng-start-base.wav"
 #define	SFX_ENGLOOP_FILENAME		"res/soundfx/aud-eng-loop-base.wav"
@@ -76,6 +78,8 @@ struct vehicle
 
 	int haspickup;
 
+
+
 	unsigned char flags;
 };
 
@@ -88,6 +92,7 @@ struct vehiclemanager
 
 	struct renderable r_vehicle;
 	struct texture diffuse;
+	struct texture diffuse2;
 	vec3f dim;
 
 	int sfx_enginestart;
