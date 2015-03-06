@@ -1,7 +1,7 @@
 #ifndef VEHICLE
 #define	VEHICLE
 
-
+#include	"../audio/audio.h"
 #include	"../core/input.h"
 #include	"../objects/entities.h"
 #include	"../objects/track.h"
@@ -46,6 +46,10 @@
 #define	VEHICLE_FLAG_ENABLED		0x01
 
 
+#define	SFX_ENGSTART_FILENAME		"res/soundfx/aud-eng-start-base.wav"
+#define	SFX_ENGLOOP_FILENAME		"res/soundfx/aud-eng-loop-base.wav"
+#define	SFX_MISSLE_FILENAME		"res/soundfx/crash.wav"
+
 struct vehicle
 {
 	physx::PxRigidDynamic* body;
@@ -55,7 +59,8 @@ struct vehicle
 	bool ray_touch[VEHICLE_COUNT_RAYCASTS];
 
 	struct controller* controller;
-
+	struct vehiclemanager* vm;
+	FMOD_CHANNEL* engine_channel;
 	vec3f pos;
 
 	int index_track;
@@ -76,11 +81,15 @@ struct vehiclemanager
 {
 	struct physicsmanager* pm;
 	struct entitymanager* em;
+	struct audiomanager* am;
 	struct track* track;
 
 	struct renderable r_vehicle;
 	struct texture diffuse;
 	vec3f dim;
+
+	int sfx_enginestart;
+	int sfx_engineloop;
 
 	struct vehicle vehicles[VEHICLE_COUNT];
 };
@@ -90,12 +99,13 @@ struct vehiclemanager
 	param:	vm				vehicle manager
 	param:	pm				physics manager
 	param:	em				entity manager
+	param:	am				audio manager
 	param:	r				renderer
 	param:	t				track object
 	param:	file_mesh		filename for vehicle mesh
 	param:	file_diffuse	filename for vehicle diffuse texture
 */
-void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm, struct entitymanager* em, struct renderer* r, struct track* t, const char* file_mesh, const char* file_diffuse);
+void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm, struct entitymanager* em, struct audiomanager* am, struct renderer* r, struct track* t, const char* file_mesh, const char* file_diffuse);
 
 /*	shut down the vehicle manager
 	param:	vm				vehicle manager
@@ -130,5 +140,6 @@ void vehiclemanager_update(struct vehiclemanager* vm);
 */
 void vehicle_reset(struct vehiclemanager* vm, struct vehicle* v);
 
+FMOD_RESULT F_CALLBACK eng_started(FMOD_CHANNEL *channel, FMOD_CHANNEL_CALLBACKTYPE type, void* commanddata1, void* commanddata2);
 
 #endif

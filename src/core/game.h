@@ -4,6 +4,7 @@
 
 #include	"../audio/audio.h"
 #include	"input.h"
+#include	"win.h"
 #include	"../objects/camera.h"
 #include	"../objects/entities.h"
 #include	"../objects/vehicle.h"
@@ -45,16 +46,7 @@
 #define	GAME_MUSIC_3_FILENAME	"res/music/Full Force Forward.mp3"
 #define	GAME_MUSIC_4_FILENAME	"res/music/Daft Punk & Boys Noize - End Of Line.mp3"
 
-#define GAME_WINCONDITION_LAPS	5
-
-#define	GAME_SFX_1_ID			0
-#define	GAME_SFX_2_ID			1
-#define	GAME_SFX_3_ID			2
-#define	GAME_SFX_1_FILENAME		"res/soundfx/aud-eng-start-base.wav"
-#define	GAME_SFX_2_FILENAME		"res/soundfx/aud-eng-loop-base.wav"
-#define	GAME_SFX_3_FILENAME		"res/soundfx/crash.wav"
-
-#define GAME_PICKUP_COUNT		5
+#define GAME_WINCONDITION_LAPS	3
 
 #define	GAME_FLAG_INIT			0x00
 #define	GAME_FLAG_TERMINATED	0x01
@@ -86,6 +78,7 @@ struct game
 
 	struct light track_lights[2];
 
+	FMOD_CHANNEL* currentchannel;
 	int index_currentsong;
 	int songs[GAME_MUSIC_COUNT];
 

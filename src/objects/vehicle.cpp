@@ -1,10 +1,11 @@
 #include	"vehicle.h"
 
 #include	<float.h>
+#include	"../audio/audio.h"
 #include	"../render/objloader.h"
 
 
-void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm, struct entitymanager* em, struct renderer* r, struct track* t, const char* file_mesh, const char* file_diffuse)
+void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm, struct entitymanager* em, struct audiomanager* am, struct renderer* r, struct track* t, const char* file_mesh, const char* file_diffuse)
 {
 	vec3f min, max, avg, diff;
 	struct vehicle* v;
@@ -13,6 +14,7 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 
 	vm->em = em;
 	vm->pm = pm;
+	vm->am = am;
 	vm->track = t;
 
 	// initialize vehicle mesh
@@ -70,6 +72,11 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 	texture_upload(&vm->diffuse, RENDER_TEXTURE_DIFFUSE);
 	vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->diffuse;
 
+	// create sound for missiles
+	
+	vm->sfx_enginestart = audiomanager_newsfx(am, SFX_ENGSTART_FILENAME);
+	vm->sfx_engineloop = audiomanager_newsfx(am, SFX_ENGLOOP_FILENAME);
+
 	// initialize vehicle array
 	for (i = 0; i < VEHICLE_COUNT; i++)
 	{
@@ -109,8 +116,9 @@ struct vehicle* vehiclemanager_newvehicle(struct vehiclemanager* vm, int index_t
 
 	v = vm->vehicles + i;
 
+	v->vm = vm;
 	// find spawn location
-	vec3f_copy(v->pos, vm->track->pathpoints[index_track]);
+	vec3f_copy(v->pos, vm->track->pathpoints[index_track].pos);
 	vec3f_copy(spawn, vm->track->up);
 	vec3f_scale(spawn, VEHICLE_SPAWNHEIGHT);
 	vec3f_add(v->pos, spawn);
@@ -140,7 +148,24 @@ struct vehicle* vehiclemanager_newvehicle(struct vehiclemanager* vm, int index_t
 
 	v->flags = VEHICLE_FLAG_ENABLED;
 
+	v->engine_channel = audiomanager_playsfx(vm->am,vm->sfx_enginestart,v->pos,0);
+	FMOD_Channel_SetCallback(v->engine_channel, eng_started);
+	FMOD_Channel_SetUserData(v->engine_channel, v);
+
+
 	return v;
+}
+FMOD_RESULT F_CALLBACK eng_started(FMOD_CHANNEL *channel, FMOD_CHANNEL_CALLBACKTYPE type, void* commanddata1, void* commanddata2)
+{
+	 struct vehicle* v;
+	 FMOD_Channel_GetUserData(channel, (void**)&v);
+	//audiomanager_playsfx(vm->am,vm->sfx_engineloop,v->pos,0);
+	if (type == FMOD_CHANNEL_CALLBACKTYPE_END) {
+		printf("END\n");
+		v->engine_channel = audiomanager_playsfx(v->vm->am,v->vm->sfx_engineloop,v->pos,-1);
+
+	}
+return FMOD_OK;
 }
 
 void vehiclemanager_removevehicle(struct vehiclemanager* vm, struct vehicle* v)
@@ -208,7 +233,18 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 
 		// firing a projectile
 		if (v->controller->buttons[INPUT_BUTTON_A] == (INPUT_STATE_DOWN | INPUT_STATE_CHANGED))
+		{
 			entitymanager_newmissile(vm->em, v, vm->dim);
+			//audiomanager_playsfx(vm->am, vm->sfx_missile, v->pos, 0);
+		}
+
+		//spawn pickup
+		if (v->controller->buttons[INPUT_BUTTON_B] == (INPUT_STATE_DOWN | INPUT_STATE_CHANGED))
+			entitymanager_newpickup(vm->em, vm->dim);
+
+		//spawn mine
+		if (v->controller->buttons[INPUT_BUTTON_X] == (INPUT_STATE_DOWN | INPUT_STATE_CHANGED))
+			entitymanager_newmine(vm->em, vm->dim, v);
 	}
 }
 
@@ -241,7 +277,7 @@ void vehiclemanager_update(struct vehiclemanager* vm)
 		v->index_track = track_closestindex(vm->track, v->pos, v->index_track);
 
 		// reset vehicle if it leaves the track
-		vec3f_subtractn(dist, v->pos, vm->track->pathpoints[v->index_track]);
+		vec3f_subtractn(dist, v->pos, vm->track->pathpoints[v->index_track].pos);
 		if (vec3f_length(dist) > vm->track->dist_boundary)
 			vehicle_reset(vm, v);
 
@@ -249,13 +285,13 @@ void vehiclemanager_update(struct vehiclemanager* vm)
 		speed = getspeed(v);
 
 		//monitors for flips
-		/*
-		if(speed<0.002 && speed>-0.0005 && speed!=0){
+		
+		if(speed<0.0001 && speed>-0.0005 && speed!=0){
 			if(v->ray_touch[0]==false && v->ray_touch[1]==false && v->ray_touch[2]==false && v->ray_touch[3]==false){
 				vehicle_reset(vm, v);
 			}
 		}
-		*/
+		
 		// process controller input
 		vehicleinput(vm, v, speed);
 
@@ -289,23 +325,44 @@ void vehiclemanager_update(struct vehiclemanager* vm)
 		vec3f_scale(force, VEHICLE_DOWNFORCE * fabs(speed));
 
 		physx::PxRigidBodyExt::addLocalForceAtLocalPos(*v->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, 0.f));
-
+		
+		audiomanager_setsoundposition(v->engine_channel, v->pos);
 	}
 }
 
 
 void vehicle_reset(struct vehiclemanager* vm, struct vehicle* v)
 {
-	vec3f spawn;
+	vec3f nor, bin, tan, spawn;
+	mat4f basis;
+
+	// find negated tangent
+	vec3f_copy(tan, vm->track->pathpoints[v->index_track].tan);
+	vec3f_negate(tan);
+
+	vec3f_cross(bin, vm->track->up, tan);
+	vec3f_normalize(bin);
+
+	vec3f_cross(nor, tan, bin);
 
 	// find spawn location
-	vec3f_copy(v->pos, vm->track->pathpoints[v->index_track]);
+	vec3f_copy(v->pos, vm->track->pathpoints[v->index_track].pos);
 	vec3f_copy(spawn, vm->track->up);
 	vec3f_scale(spawn, VEHICLE_SPAWNHEIGHT);
 	vec3f_add(v->pos, spawn);
 
+	// find the change of basis matrix
+	mat4f_identity(basis);
+	vec3f_copy(basis + C0, bin);
+	vec3f_copy(basis + C1, nor);
+	vec3f_copy(basis + C2, tan);
+	vec3f_copy(basis + C3, v->pos); // translation
+
+	// rotate to the track angle
+	mat4f_rotatezmul(basis, -vm->track->pathpoints[v->index_track].angle);
+
 	// TODO: set the orientation of the vehicle to the track gradient
-	v->body->setGlobalPose(physx::PxTransform(physx::PxVec3(v->pos[VX], v->pos[VY], v->pos[VZ])));
+	v->body->setGlobalPose(physx::PxTransform((physx::PxMat44)basis));
 	v->body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
 	v->body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
 }
