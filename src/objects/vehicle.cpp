@@ -304,8 +304,8 @@ void vehiclemanager_update(struct vehiclemanager* vm)
 
 		//monitors for flips
 		
-		if(speed<0.0001 && speed>-0.0005 && speed!=0 && speed>=0.000001){
-			printf("%f\n", speed);
+		if(speed<0.0001 && speed>-0.0005 && speed!=0){
+			//printf("%f\n", speed);
 			if(v->ray_touch[0]==false && v->ray_touch[1]==false && v->ray_touch[2]==false && v->ray_touch[3]==false){
 				vehicle_reset(vm, v);
 			}
