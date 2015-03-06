@@ -1,5 +1,5 @@
-# racing
-CPSC 585
+# Warped Steel
+Winter 2015, CPSC 585 - Games Programming
 
 Keyboard controls
 -----------------
