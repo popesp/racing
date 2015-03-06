@@ -67,12 +67,12 @@ struct pickup{
 struct missile
 {
 	physx::PxRigidDynamic* body;
-
-	struct vehicle* owner;
 	vec3f pos;
+	struct vehicle* owner;
 	unsigned timer;
-
 	unsigned char flags;
+
+	FMOD_CHANNEL* missle_channel;
 };
 
 struct mine{

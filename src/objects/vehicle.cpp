@@ -90,7 +90,7 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 		vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->diffuse2;
 	}
 
-	// create sound for missiles
+	// create sound for engine
 	
 	vm->sfx_enginestart = audiomanager_newsfx(am, SFX_ENGSTART_FILENAME);
 	vm->sfx_engineloop = audiomanager_newsfx(am, SFX_ENGLOOP_FILENAME);
@@ -179,7 +179,7 @@ FMOD_RESULT F_CALLBACK eng_started(FMOD_CHANNEL *channel, FMOD_CHANNEL_CALLBACKT
 	 FMOD_Channel_GetUserData(channel, (void**)&v);
 	//audiomanager_playsfx(vm->am,vm->sfx_engineloop,v->pos,0);
 	if (type == FMOD_CHANNEL_CALLBACKTYPE_END) {
-		printf("END\n");
+		printf("engine startup END\n");
 		v->engine_channel = audiomanager_playsfx(v->vm->am,v->vm->sfx_engineloop,v->pos,-1);
 
 	}

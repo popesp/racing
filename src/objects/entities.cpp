@@ -215,6 +215,7 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 		x->flags = ENTITY_MINE_FLAG_INIT;
 	}
 
+	// create sound for missles
 	em->sfx_missile = audiomanager_newsfx(am, SFX_MISSLE_FILENAME);
 }
 
@@ -271,13 +272,17 @@ void entitymanager_update(struct entitymanager* em)
 		{
 			em->missiles[i].timer--;
 
-			if (em->missiles[i].timer == 0)
+			if (em->missiles[i].timer == 0){
 				entitymanager_removemissile(em, em->missiles + i);
+				continue;
+			}
 
-			//pose = em->missiles[i].body->getGlobalPose();
+			pose = em->missiles[i].body->getGlobalPose();
 
 			// update missle position
-			//vec3f_set(em->missiles[i].pos, pose.p.x, pose.p.y, pose.p.z);
+			vec3f_set(em->missiles[i].pos, pose.p.x, pose.p.y, pose.p.z);
+			
+			//audiomanager_setsoundposition(em->missiles[i].missle_channel, em->missiles[i].pos);
 		}
 }
 
@@ -319,7 +324,7 @@ struct missile* entitymanager_newmissile(struct entitymanager* em, struct vehicl
 
 	m->flags = ENTITY_MISSILE_FLAG_ENABLED;
 
-	//audiomanager_playsfx(em->am, em->sfx_missile, m->pos, -1);
+	//audiomanager_playsfx(em->am, em->sfx_missile, m->pos, 0);
 
 	return m;
 }
