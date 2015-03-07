@@ -9,6 +9,7 @@
 #include	"../math/mat4f.h"		// identity TEMPORARY
 #include	"../math/vec3f.h"		// set TEMPORARY
 #include	"../render/objloader.h"
+#include	"../physics/physics.h"		// startup, shutdown
 
 
 static void resetplayers(struct game*);
@@ -247,6 +248,19 @@ static void update(struct game* game)
 		checkwin(game);
 		checkplace(game);
 	}
+
+	
+	//update pickup position if has
+	for(i = 0; i < ENTITY_PICKUP_COUNT; i++){
+		if(game->entitymanager.pickups[i].owner!=NULL){
+
+			physx::PxMat44 owner_vehicle(game->entitymanager.pickups[i].owner->body->getGlobalPose());
+			physx::PxVec3 powerpos = owner_vehicle.transform(physx::PxVec3(-.3f, -.1f, 1.1f));
+			
+			game->entitymanager.pickups[i].body->setGlobalPose(physx::PxTransform(physx::PxVec3(powerpos)));
+		}
+	}
+
 
 	// check for window close messages
 	if (glfwWindowShouldClose(game->window.w))
