@@ -123,7 +123,7 @@ void track_loadpointsfile(struct track* t, const char* filename)
 {
 	FILE* file;
 	char s[64];
-	int p;
+	int p=0;
 
 	if (fopen_s(&file, filename, "rb"))
 	{
@@ -165,7 +165,7 @@ void track_loadpointsfile(struct track* t, const char* filename)
 			}
 		} else if (!strncmp(s, "point", 5))
 		{
-			sscanf(s, "point%d", &p);
+			sscanf(s, "point");
 
 			fscanf(file, "pos(%f, %f, %f), ", t->points[p].pos + VX, t->points[p].pos + VY, t->points[p].pos + VZ);
 			fscanf(file, "tan(%f, %f, %f), ", t->points[p].tan + VX, t->points[p].tan + VY, t->points[p].tan + VZ);
@@ -175,6 +175,7 @@ void track_loadpointsfile(struct track* t, const char* filename)
 			fscanf(file, "weight(%f), ", &t->points[p].weight);
 			fscanf(file, "width(%f), ", &t->points[p].width);
 			fscanf(file, "subdivisions(%d), ", &t->points[p].subdivisions);
+			p++;
 		}
 	}
 

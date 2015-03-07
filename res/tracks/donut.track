@@ -1,7 +1,7 @@
 npoints = 4;
 looped = true;
 
-point0 = pos(-20.0, 0.0, 0.0), tan(0.0, 0.0, -1.0), angle(0.0), weight(50.0), width(10.0), subdivisions(20)
-point1 = pos(0.0, 0.0, -20.0), tan(1.0, 0.0, 0.0), angle(0.0), weight(50.0), width(10.0), subdivisions(20)
-point2 = pos(20.0, 0.0, 0.0), tan(0.0, 0.0, 1.0), angle(0.0), weight(50.0), width(10.0), subdivisions(20)
-point3 = pos(0.0, 0.0, 20.0), tan(-1.0, 0.0, 0.0), angle(0.0), weight(50.0), width(10.0), subdivisions(20)
+point = pos(-20.0, 0.0, 0.0), tan(0.0, 0.0, -1.0), angle(0.0), weight(50.0), width(10.0), subdivisions(20)
+point = pos(0.0, 0.0, -20.0), tan(1.0, 0.0, 0.0), angle(0.0), weight(50.0), width(10.0), subdivisions(20)
+point = pos(20.0, 0.0, 0.0), tan(0.0, 0.0, 1.0), angle(0.0), weight(50.0), width(10.0), subdivisions(20)
+point = pos(0.0, 0.0, 20.0), tan(-1.0, 0.0, 0.0), angle(0.0), weight(50.0), width(10.0), subdivisions(20)
