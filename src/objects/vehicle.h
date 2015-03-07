@@ -52,7 +52,7 @@
 
 #define	SFX_ENGSTART_FILENAME		"res/soundfx/aud-eng-start-base.wav"
 #define	SFX_ENGLOOP_FILENAME		"res/soundfx/aud-eng-loop-base.wav"
-#define	SFX_MISSLE_FILENAME			"res/soundfx/crash.wav"
+#define	SFX_MISSLE_FILENAME			"res/soundfx/rocket-boost-engine-loop.wav"
 
 struct vehicle
 {

@@ -83,11 +83,12 @@ FMOD_CHANNEL* audiomanager_playmusic(struct audiomanager* am, int id, int loops)
 	param:	id				index to the sound object
 	param:	pos				position to play the sound effect
 	param:	loops			number of times to loop the sound effect
+	param:	vol				set sfx specific volume
 	return:	FMOD_CHANNEL*	pointer to sound channel
 */
-FMOD_CHANNEL* audiomanager_playsfx(struct audiomanager* am, int id, vec3f pos, int loops);
+FMOD_CHANNEL* audiomanager_playsfx(struct audiomanager* am, int id, vec3f pos, int loops, float vol = 1.0);
 
-
+void audiomanager_getdefaults(struct audiomanager* am, int id);
 /*	stop a sound
 	param:	channel			sound channel
 */
@@ -112,6 +113,13 @@ void audiomanager_setmusicvolume(struct audiomanager* am, float volume);
 	param:	volume			new sfx volume
 */
 void audiomanager_setsfxvolume(struct audiomanager* am, float volume);
+
+
+/*	set the individual sfx volume
+	param:	channel			specific sfx channel
+	param:	volume			new sfx volume
+*/
+void audiomanager_setsfx_channelvolume(FMOD_CHANNEL* channel, float volume);
 
 /*	set the master volume
 	param:	am				audio manager

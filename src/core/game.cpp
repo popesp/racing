@@ -414,7 +414,7 @@ int game_startup(struct game* game)
 
 	// initialize track object
 	track_init(&game->track, &game->physicsmanager, up, "res/images/slate.jpg");
-	track_loadpointsfile(&game->track, "res/tracks/turn.track");
+	track_loadpointsfile(&game->track, "res/tracks/bigturn.track");
 	track_generate(&game->renderer, &game->track);
 	renderable_sendbuffer(&game->renderer, &game->track.r_track);
 
@@ -464,7 +464,7 @@ int game_startup(struct game* game)
 	game->songs[GAME_MUSIC_4_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_4_FILENAME);
 	game->index_currentsong = 0;
 	game->currentchannel = audiomanager_playmusic(&game->audiomanager, game->songs[game->index_currentsong], -1);
-	
+	audiomanager_setmusicvolume(&game->audiomanager,0.5);
 	game->flags = GAME_FLAG_INIT;
 
 	return 1;

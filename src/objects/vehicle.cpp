@@ -14,6 +14,9 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 	unsigned i;
 
 	vm->em = em;
+	
+	vm->em->am = am;
+
 	vm->pm = pm;
 	vm->am = am;
 	vm->track = t;
@@ -166,10 +169,12 @@ struct vehicle* vehiclemanager_newvehicle(struct vehiclemanager* vm, int index_t
 
 	v->flags = VEHICLE_FLAG_ENABLED;
 
-	v->engine_channel = audiomanager_playsfx(vm->am,vm->sfx_enginestart,v->pos,0);
+	v->engine_channel = audiomanager_playsfx(vm->am,vm->sfx_enginestart,v->pos,0,0.25);
 	FMOD_Channel_SetCallback(v->engine_channel, eng_started);
 	FMOD_Channel_SetUserData(v->engine_channel, v);
-
+	/*float vol;
+	FMOD_Channel_GetVolume(v->engine_channel, &vol);
+	printf("%f", vol);*/
 
 	return v;
 }
@@ -180,7 +185,8 @@ FMOD_RESULT F_CALLBACK eng_started(FMOD_CHANNEL *channel, FMOD_CHANNEL_CALLBACKT
 	//audiomanager_playsfx(vm->am,vm->sfx_engineloop,v->pos,0);
 	if (type == FMOD_CHANNEL_CALLBACKTYPE_END) {
 		printf("engine startup END\n");
-		v->engine_channel = audiomanager_playsfx(v->vm->am,v->vm->sfx_engineloop,v->pos,-1);
+		v->engine_channel = audiomanager_playsfx(v->vm->am,v->vm->sfx_engineloop,v->pos,-1,0.25);
+		
 
 	}
 return FMOD_OK;

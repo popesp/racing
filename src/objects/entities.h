@@ -5,7 +5,7 @@
 #include	"../objects/track.h"
 #include	"../objects/vehicle.h"
 #include	"../physics/physics.h"
-
+#include	"../audio/audio.h"
 
 #define	ENTITY_MISSILE_COUNT		32
 #define ENTITY_PICKUP_COUNT			100
