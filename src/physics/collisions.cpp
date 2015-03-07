@@ -33,13 +33,13 @@ physx::PxFilterFlags OurFilterShader(physx::PxFilterObjectAttributes attributes0
 
 	// trigger the contact callback for pairs (A,B) where 
 	// the filtermask of A contains the ID of B and vice versa.
-	if(filterData0.word0 == FilterGroup::eProjectile && filterData1.word0 == FilterGroup::eVehicle) {
+	if((filterData0.word0 == FilterGroup::eProjectile && filterData1.word0 == FilterGroup::eVehicle)||(filterData1.word0 == FilterGroup::eProjectile && filterData0.word0 == FilterGroup::eVehicle)) {
 		pairFlags |= PxPairFlag::eNOTIFY_TOUCH_FOUND;
 	}
-	else if(filterData0.word0 == FilterGroup::eMine && filterData1.word0 == FilterGroup::eVehicle) {
+	else if((filterData0.word0 == FilterGroup::eMine && filterData1.word0 == FilterGroup::eVehicle)||(filterData1.word0 == FilterGroup::eMine && filterData0.word0 == FilterGroup::eVehicle)) {
 		pairFlags |= PxPairFlag::eNOTIFY_TOUCH_FOUND;
 	}
-	else if(filterData0.word0 == FilterGroup::ePickup && filterData1.word0 == FilterGroup::eVehicle) {
+	else if((filterData0.word0 == FilterGroup::ePickup && filterData1.word0 == FilterGroup::eVehicle)||(filterData1.word0 == FilterGroup::ePickup && filterData0.word0 == FilterGroup::eVehicle)) {
 		pairFlags |= PxPairFlag::eNOTIFY_TOUCH_FOUND;
 	}
 	
