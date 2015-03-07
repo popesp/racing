@@ -286,7 +286,6 @@ void entitymanager_update(struct entitymanager* em)
 		}
 }
 
-
 struct missile* entitymanager_newmissile(struct entitymanager* em, struct vehicle* v, vec3f dim)
 {
 	physx::PxTransform pose;
@@ -304,14 +303,16 @@ struct missile* entitymanager_newmissile(struct entitymanager* em, struct vehicl
 
 	m = em->missiles + i;
 
-	pose = v->body->getGlobalPose().transform(physx::PxTransform(0.f, 0.f, -(dim[VZ]*0.5f + ENTITY_MISSILE_SPAWNDIST)));
+	pose = v->body->getGlobalPose().transform(physx::PxTransform(0.f, 0.f, -(dim[VZ]*1.5f + ENTITY_MISSILE_SPAWNDIST)));
 	mat_pose = physx::PxMat44(pose);
 	vec3f_set(zero, 0.f, 0.f, 0.f);
 
 	m->body = physx::PxCreateDynamic(*em->pm->sdk, pose, physx::PxBoxGeometry(em->dim_missile[VX] * 0.5f, em->dim_missile[VY] * 0.5f, em->dim_missile[VZ] * 0.5f), *em->pm->default_material, ENTITY_MISSILE_DENSITY);
 	m->body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, true);
-	em->pm->scene->addActor(*m->body);
+	setupFiltering(m->body, FilterGroup::eProjectile, FilterGroup::eProjectile);
 
+
+	em->pm->scene->addActor(*m->body);
 	vec3f_set(vel, 0.f, 0.f, -1.f);
 	mat4f_transformvec3f(vel, (float*)&mat_pose);
 	vec3f_scale(vel, ENTITY_MISSILE_SPEED);
@@ -389,7 +390,8 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f dim){
 
 	// create a physics object and add it to the scene
 	pu->body = physx::PxCreateDynamic(*em->pm->sdk, physx::PxTransform(pu->pos[VX], pu->pos[VY], pu->pos[VZ]), physx::PxBoxGeometry(em->dim_pickup[VX] * 0.5f, em->dim_pickup[VY] * 0.5f, em->dim_pickup[VZ] * 0.5f), *em->pm->default_material, ENTITY_PICKUP_DENSITY);
-	pu->body->setActorFlag(physx::PxActorFlag::eDISABLE_SIMULATION, true);
+	//pu->body->setActorFlag(physx::PxActorFlag::eDISABLE_SIMULATION, true);
+	setupFiltering(pu->body, FilterGroup::ePickup, FilterGroup::ePickup);
 	em->pm->scene->addActor(*pu->body);
 
 	pu->flags = ENTITY_PICKUP_FLAG_ENABLED;
@@ -430,6 +432,7 @@ struct mine* entitymanager_newmine(struct entitymanager* em, vec3f dim, struct v
 	// create a physics object and add it to the scene
 	x->body = physx::PxCreateDynamic(*em->pm->sdk, pose, physx::PxBoxGeometry(em->dim_mine[VX] * 0.5f, em->dim_mine[VY] * 0.5f, em->dim_mine[VZ] * 0.5f), *em->pm->default_material, ENTITY_MINE_DENSITY);
 	x->body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, true);
+	setupFiltering(x->body, FilterGroup::eMine, FilterGroup::eMine);
 	em->pm->scene->addActor(*x->body);
 
 	x->owner = v;

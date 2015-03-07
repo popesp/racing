@@ -6,23 +6,24 @@
 
 
 //Filter groups for collisions
-/*
+
 struct FilterGroup
 {
 	enum Enum
 	{
-		eGround			= (1 << 0),
+		ePickup			= (1 << 0),
 		eVehicle		= (1 << 1),
-		eMINE			= (1 << 2),
+		eMine			= (1 << 2),
 		eProjectile		= (1 << 3),
 		//eHEIGHTFIELD	= (1 << 4),
 	};
 };
-*/
+
 
 
 physx::PxFilterFlags OurFilterShader(physx::PxFilterObjectAttributes attributes0, physx::PxFilterData filterData0, physx::PxFilterObjectAttributes attributes1, physx::PxFilterData filterData1, physx::PxPairFlags& pairFlags, const void* constantBlock, physx::PxU32 constantBlockSize);
 
+void setupFiltering(physx::PxRigidActor* actor, physx::PxU32 filterGroup, physx::PxU32 filterMask);
 
 class CustomCollisions : public physx::PxSimulationEventCallback
 {
