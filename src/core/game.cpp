@@ -410,7 +410,7 @@ int game_startup(struct game* game)
 	}
 
 	// initialize skybox
-	skybox_init(&game->skybox, &game->renderer, "res/images/night.jpg");
+	skybox_init(&game->skybox, &game->renderer);
 
 	// initialize track object
 	track_init(&game->track, &game->physicsmanager, up, "res/images/slate.jpg");
