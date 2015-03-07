@@ -230,6 +230,7 @@ void entitymanager_shutdown(struct entitymanager* em)
 
 	for(i=0;i<ENTITY_PICKUP_COUNT;i++){
 		if (em->pickups[i].flags & ENTITY_PICKUP_FLAG_ENABLED){
+			em->pickups[i].body->setActorFlag(physx::PxActorFlag::eDISABLE_SIMULATION, false);
 			em->pickups[i].body->release();
 		}
 	}
@@ -348,15 +349,17 @@ void entitymanager_removemissile(struct entitymanager* em, struct missile* m)
 		}
 }
 
-/*
-struct pickup* entitymanager_attachpickup(struct entity* em, vec3f dim, struct vehicle* v){
-	
-	struct pickup* pu;
+
+void entitymanager_attachpickup(struct vehicle* v, struct pickup* pu,struct entitymanager* em){
 
 	pu->owner = v;
+	//em->pm->scene->addActor(*pu->body);
+
+	em->pm->scene->removeActor(*pu->body);
+	
 	
 }
-*/
+
 
 struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f dim){
 	physx::PxTransform pose;
@@ -402,6 +405,7 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f dim){
 	em->pm->scene->addActor(*pu->body);
 
 	pu->flags = ENTITY_PICKUP_FLAG_ENABLED;
+	pu->owner = NULL;
 
 	return pu;
 }

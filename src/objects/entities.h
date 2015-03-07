@@ -120,10 +120,10 @@ void entitymanager_update(struct entitymanager* em);
 
 struct missile* entitymanager_newmissile(struct entitymanager* em, struct vehicle* v, vec3f dim);
 void entitymanager_removemissile(struct entitymanager* em, struct missile* m);
-//void missileHit(physx::PxRigidBody* v);
 
 void entitymanager_render(struct entitymanager* em, struct renderer* r, mat4f worldview);
 
+void entitymanager_attachpickup(struct vehicle* v, struct pickup* pu, struct entitymanager* em);
 struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f offs);
 void entitymanager_removepickup(struct entitymanager* em, struct pickup* pu);
 
