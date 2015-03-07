@@ -64,6 +64,7 @@ void renderable_init(struct renderable* obj, unsigned char mode, unsigned char t
 		attrib(RENDER_ATTRIB_COL, RENDER_ATTRIBSIZE_COL, RENDER_VERTSIZE_WIRE_S, RENDER_ATTRIBSIZE_POS);
 		break;
 
+	case RENDER_TYPE_TEXT:
 	case RENDER_TYPE_TXTR_S:
 		attrib(RENDER_ATTRIB_POS, RENDER_ATTRIBSIZE_POS, RENDER_VERTSIZE_TXTR_S, 0);
 		attrib(RENDER_ATTRIB_TEX, RENDER_ATTRIBSIZE_TEX, RENDER_VERTSIZE_TXTR_S, RENDER_ATTRIBSIZE_POS);
@@ -208,6 +209,19 @@ void renderable_render(struct renderer* r, struct renderable* obj, mat4f modelwo
 
 		break;
 
+	case RENDER_TYPE_TEXT:
+		// MVP matrix
+		glUniformMatrix4fv(r->uniforms_text.transform, 1, GL_FALSE, mvp);
+
+		// texture uniforms
+		unit = RENDER_TEXTURE_DIFFUSE;
+		glUniform1iv(r->uniforms_text.tex_diffuse, 1, &unit);
+
+		glActiveTexture(GL_TEXTURE0 + (unsigned)unit);
+		glBindTexture(GL_TEXTURE_2D, obj->textures[RENDER_TEXTURE_DIFFUSE]->gl_id); 
+	//****not sure if this shit is right
+
+		break;
 	case RENDER_TYPE_MATS_L:
 		// MVP matrix and eye position uniforms
 		glUniformMatrix4fv(r->uniforms_mats_l.transform, 1, GL_FALSE, mvp);
@@ -384,6 +398,7 @@ unsigned renderer_init(struct renderer* r, struct window* window)
 	unsigned vert_mats_l, frag_mats_l;
 	unsigned vert_txtr_l, frag_txtr_l;
 	unsigned vert_bump_l, frag_bump_l;
+	unsigned vert_text, frag_text;
 	char uniform[16];
 	unsigned i, len;
 
@@ -408,6 +423,10 @@ unsigned renderer_init(struct renderer* r, struct window* window)
 		return 0;
 	if (!(frag_bump_l = shader_create(RENDER_SHADER_FRAG_BUMP_L, SHADER_FRAGMENT)))
 		return 0;
+	if (!(vert_text = shader_create(RENDER_SHADER_VERT_TXTR_S, SHADER_VERTEX)))
+		return 0;
+	if (!(frag_text = shader_create(RENDER_SHADER_FRAG_TXTR_S, SHADER_FRAGMENT)))
+		return 0;
 
 	// create shader programs
 	r->id_gl_wire_s = shader_program(vert_wire_s, frag_wire_s);
@@ -415,6 +434,7 @@ unsigned renderer_init(struct renderer* r, struct window* window)
 	r->id_gl_mats_l = shader_program(vert_mats_l, frag_mats_l);
 	r->id_gl_txtr_l = shader_program(vert_txtr_l, frag_txtr_l);
 	r->id_gl_bump_l = shader_program(vert_bump_l, frag_bump_l);
+	r->id_gl_text = shader_program(vert_text, frag_text);
 
 	// bind attribute locations
 	glBindAttribLocation(r->id_gl_wire_s, RENDER_ATTRIB_POS, "vertpos");
@@ -422,6 +442,9 @@ unsigned renderer_init(struct renderer* r, struct window* window)
 
 	glBindAttribLocation(r->id_gl_txtr_s, RENDER_ATTRIB_POS, "vertpos");
 	glBindAttribLocation(r->id_gl_txtr_s, RENDER_ATTRIB_TEX, "verttex");
+
+	glBindAttribLocation(r->id_gl_text, RENDER_ATTRIB_POS, "vertpos");
+	glBindAttribLocation(r->id_gl_text, RENDER_ATTRIB_TEX, "verttex");
 
 	glBindAttribLocation(r->id_gl_mats_l, RENDER_ATTRIB_POS, "vertpos");
 	glBindAttribLocation(r->id_gl_mats_l, RENDER_ATTRIB_NOR, "vertnor");
@@ -446,6 +469,8 @@ unsigned renderer_init(struct renderer* r, struct window* window)
 		return 0;
 	if (!shader_link(r->id_gl_bump_l))
 		return 0;
+	if (!shader_link(r->id_gl_text))
+		return 0;
 
 	// assign vertex sizes to each render type
 	r->vertsize[RENDER_TYPE_WIRE_S] = RENDER_VERTSIZE_WIRE_S;
@@ -460,6 +485,7 @@ unsigned renderer_init(struct renderer* r, struct window* window)
 	r->shader[RENDER_TYPE_MATS_L] = r->id_gl_mats_l;
 	r->shader[RENDER_TYPE_TXTR_L] = r->id_gl_txtr_l;
 	r->shader[RENDER_TYPE_BUMP_L] = r->id_gl_bump_l;
+	r->shader[RENDER_TYPE_TEXT] = r->id_gl_text;
 
 	// register window pointer
 	r->window = window;
@@ -473,6 +499,11 @@ unsigned renderer_init(struct renderer* r, struct window* window)
 	r->uniforms_txtr_s.transform = glGetUniformLocation(r->id_gl_txtr_s, "transform");
 
 	r->uniforms_txtr_s.tex_diffuse = glGetUniformLocation(r->id_gl_txtr_s, "tex_diffuse");
+
+
+
+	r->uniforms_text.transform = glGetUniformLocation(r->id_gl_text, "transform");
+	r->uniforms_text.tex_diffuse = glGetUniformLocation(r->id_gl_text, "tex_diffuse");
 
 
 	// get solid uniform locations
@@ -565,6 +596,8 @@ unsigned renderer_init(struct renderer* r, struct window* window)
 	shader_delete(frag_txtr_l);
 	shader_delete(vert_bump_l);
 	shader_delete(frag_bump_l);
+	shader_delete(vert_text);
+	shader_delete(frag_text);
 
 	return 1;
 }

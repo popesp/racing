@@ -25,12 +25,13 @@
 #define	RENDER_MODE_TRIANGLESTRIP	2
 #define	RENDER_MODE_TRIANGLES		3
 
-#define	RENDER_TYPE_COUNT			5
+#define	RENDER_TYPE_COUNT			6
 #define	RENDER_TYPE_WIRE_S			0
 #define	RENDER_TYPE_TXTR_S			1
 #define	RENDER_TYPE_MATS_L			2
 #define	RENDER_TYPE_TXTR_L			3
 #define	RENDER_TYPE_BUMP_L			4
+#define RENDER_TYPE_TEXT			5
 
 #define	RENDER_VERTSIZE_WIRE_S		(RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_COL)
 #define	RENDER_VERTSIZE_TXTR_S		(RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_TEX)
@@ -126,6 +127,7 @@ struct renderer
 	unsigned id_gl_mats_l;
 	unsigned id_gl_txtr_l;
 	unsigned id_gl_bump_l;
+	unsigned id_gl_text;
 
 	unsigned vertsize[RENDER_TYPE_COUNT];
 	unsigned shader[RENDER_TYPE_COUNT];
@@ -142,6 +144,12 @@ struct renderer
 		int transform;
 		int tex_diffuse;
 	} uniforms_txtr_s;
+
+	struct
+	{
+		int transform;
+		int tex_diffuse;
+	} uniforms_text;
 
 	struct
 	{

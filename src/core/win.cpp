@@ -6,13 +6,12 @@ void checkwin(struct game* game){
 	unsigned int cp1 = game->track.num_pathpoints / 3;
 	unsigned int cp2 = game->track.num_pathpoints / 2;
 
-
 	if(game->player.vehicle->lap==GAME_WINCONDITION_LAPS){
 		printf("Player has won the game!\nGame's over\n\n");
 
 		//reset laps
 		game->player.vehicle->lap=1;
-		for(int i=0; i<game->num_aiplayers;i++){
+		for(int i=0; i<game->num_aiplayers-1;i++){
 			game->aiplayers[i].vehicle->lap=1;
 		}
 
@@ -22,7 +21,7 @@ void checkwin(struct game* game){
 	for(int i=0;i<=game->num_aiplayers-1;i++){
 		//printf("%d\n", game->aiplayers[i].vehicle->lap);
 		if(game->aiplayers[i].vehicle->lap==GAME_WINCONDITION_LAPS){
-			printf("AI %d has won the game!\nGame's over\n\n", i);
+			printf("Computer-%d has won the game!\nGame's over\n\n", i);
 
 			//reset laps
 			game->player.vehicle->lap=1;
