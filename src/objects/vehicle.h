@@ -6,6 +6,7 @@
 #include	"../objects/entities.h"
 #include	"../objects/track.h"
 #include	"../physics/physics.h"
+#include	"../physics/collisions.h"
 #include	"../render/render.h"
 #include	"../render/texture.h"
 

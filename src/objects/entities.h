@@ -5,6 +5,7 @@
 #include	"../objects/track.h"
 #include	"../objects/vehicle.h"
 #include	"../physics/physics.h"
+#include	"../physics/collisions.h"
 #include	"../audio/audio.h"
 
 #define	ENTITY_MISSILE_COUNT		32
