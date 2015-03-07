@@ -63,6 +63,8 @@ struct pickup{
 	unsigned char flags;
 
 	vec3f pos;
+
+	int hit;
 };
 
 struct missile
@@ -72,6 +74,7 @@ struct missile
 	struct vehicle* owner;
 	unsigned timer;
 	unsigned char flags;
+	int hit;
 
 	FMOD_CHANNEL* missle_channel;
 };
@@ -80,6 +83,7 @@ struct mine{
 	physx::PxRigidDynamic* body;
 	struct vehicle* owner;
 	unsigned char flags;
+	int hit;
 };
 
 struct entitymanager

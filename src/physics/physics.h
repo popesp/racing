@@ -20,6 +20,8 @@ struct physicsmanager
 	physx::PxCooking* cooking;
 	physx::PxMaterial* default_material;
 
+	int vehicles_hit[200];
+
 	CustomCollisions* collisions;
 
 	physx::PxScene* scene;

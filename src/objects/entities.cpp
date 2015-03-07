@@ -312,7 +312,7 @@ struct missile* entitymanager_newmissile(struct entitymanager* em, struct vehicl
 	m->body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, true);
 	setupFiltering(m->body, FilterGroup::eProjectile, FilterGroup::eProjectile);
 	m->body->setRigidBodyFlag(physx::PxRigidBodyFlag::eENABLE_CCD, true);
-
+	m->body->userData = m;
 	em->pm->scene->addActor(*m->body);
 	vec3f_set(vel, 0.f, 0.f, -1.f);
 	mat4f_transformvec3f(vel, (float*)&mat_pose);
@@ -365,7 +365,6 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f dim){
 	vec3f spawn;
 	int i;
 
-
 	//assign a random spawnpoint
 	unsigned int max = em->track->num_pathpoints;
 
@@ -399,6 +398,7 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f dim){
 	//pu->body->setActorFlag(physx::PxActorFlag::eDISABLE_SIMULATION, true);
 	setupFiltering(pu->body, FilterGroup::ePickup, FilterGroup::ePickup);
 	pu->body->setRigidBodyFlag(physx::PxRigidBodyFlag::eENABLE_CCD, true);
+	pu->body->userData = pu;
 	em->pm->scene->addActor(*pu->body);
 
 	pu->flags = ENTITY_PICKUP_FLAG_ENABLED;
@@ -441,6 +441,7 @@ struct mine* entitymanager_newmine(struct entitymanager* em, vec3f dim, struct v
 	x->body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, true);
 	setupFiltering(x->body, FilterGroup::eMine, FilterGroup::eMine);
 	x->body->setRigidBodyFlag(physx::PxRigidBodyFlag::eENABLE_CCD, true);
+	x->body->userData = x;
 	em->pm->scene->addActor(*x->body);
 
 	x->owner = v;

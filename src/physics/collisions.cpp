@@ -1,4 +1,6 @@
 #include	"collisions.h"
+#include	"../objects/vehicle.h"
+#include	"../objects/entities.h"
 
 using namespace physx;
 
@@ -45,9 +47,9 @@ physx::PxFilterFlags OurFilterShader(physx::PxFilterObjectAttributes attributes0
 	
 	return PxFilterFlag::eDEFAULT;
 }
-void missileHit(physx::PxRigidBody* v) {
-
-	physx::PxRigidBodyExt::addForceAtLocalPos(*v, physx::PxVec3(0, 10, 0), physx::PxVec3(0, 0, 0));
+void missileHit(struct vehicle* v) {
+	//printf("Poop %d \n", v->index_in_vm);
+	//physx::PxRigidBodyExt::addForceAtLocalPos(*v->body, physx::PxVec3(0, 10, 0), physx::PxVec3(0, 0, 0));
 
 }
 void CustomCollisions::onContact(const physx::PxContactPairHeader& pairHeader, const physx::PxContactPair* pairs, physx::PxU32 nbPairs)
@@ -76,21 +78,44 @@ void CustomCollisions::onContact(const physx::PxContactPairHeader& pairHeader, c
 
 			if(filterData0.word0 == FilterGroup::eProjectile) {
 				printf("Projectile collision confirmed\n");
+
 				physx::PxActor* vehicleActor = pairHeader.actors[1];
-				physx::PxRigidBody* body = (physx::PxRigidBody*)vehicleActor->userData;
-				//physx::PxRigidBodyExt::addForceAtLocalPos(*body, PxVec3(0, 10, 0), PxVec3(0, 0, 0));
-				//missileHit(body);
+				struct vehicle* v = (struct vehicle*)vehicleActor->userData;
+				v->hit_flag = 1;
+
+				physx::PxActor* missileActor = pairHeader.actors[0];
+				struct missile* m = (struct missile*)missileActor->userData;
+				m->hit = 1;
 			}
 			else if(filterData1.word0 == FilterGroup::eProjectile) {
 				printf("Projectile collision confirmed\n");
 				physx::PxActor* vehicleActor = pairHeader.actors[0];
-				physx::PxRigidBody* body = (physx::PxRigidBody*)vehicleActor->userData;
+				struct vehicle* v = (struct vehicle*)vehicleActor->userData;
+				v->hit_flag = 1;
+
+				physx::PxActor* missileActor = pairHeader.actors[1];
+				struct missile* m = (struct missile*)missileActor->userData;
+				m->hit = 1;
 			}
 			else if(filterData0.word0 == FilterGroup::eMine) {
 				printf("Mine collision confirmed\n");
+				physx::PxActor* vehicleActor = pairHeader.actors[1];
+				struct vehicle* v = (struct vehicle*)vehicleActor->userData;
+				v->hit_flag = 1;
+
+				physx::PxActor* mineActor = pairHeader.actors[0];
+				struct mine* x = (struct mine*)mineActor->userData;
+				x->hit = 1;
 			}
 			else if(filterData1.word0 == FilterGroup::eMine) {
 				printf("Mine collision confirmed\n");
+				physx::PxActor* vehicleActor = pairHeader.actors[0];
+				struct vehicle* v = (struct vehicle*)vehicleActor->userData;
+				v->hit_flag = 1;
+
+				physx::PxActor* mineActor = pairHeader.actors[1];
+				struct mine* x = (struct mine*)mineActor->userData;
+				x->hit = 1;
 			}
 			else if(filterData0.word0 == FilterGroup::ePickup) {
 				printf("Pickup collision confirmed\n");

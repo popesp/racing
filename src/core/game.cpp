@@ -9,6 +9,7 @@
 #include	"../math/mat4f.h"		// identity TEMPORARY
 #include	"../math/vec3f.h"		// set TEMPORARY
 #include	"../render/objloader.h"
+#include	"../objects/entities.h"
 
 
 static void resetplayers(struct game*);
@@ -241,7 +242,34 @@ static void update(struct game* game)
 	player_updatecamera(&game->player);
 
 	// simulate
+	for (int h = 0; h < 152; h++) {
+		game->vehiclemanager.vehicles[h].hit_flag = 0;
+	}
+	for (int y = 0; y < ENTITY_MISSILE_COUNT; y++) {
+		game->vehiclemanager.em->missiles[y].hit = 0;
+	}
+	for (int y = 0; y < ENTITY_MINE_COUNT; y++) {
+		game->vehiclemanager.em->mines[y].hit = 0;
+	}
+
 	physicsmanager_update(&game->physicsmanager, GAME_SPU);
+
+	//Check what custom collisions happened for each vehicle/entity and deal with them appropriately
+	for (int y = 0; y < 152; y++) {
+		if (game->vehiclemanager.vehicles[y].hit_flag == 1) {
+			physx::PxRigidBodyExt::addForceAtLocalPos(*game->vehiclemanager.vehicles[y].body, physx::PxVec3(0, 5000, 0), physx::PxVec3(0,0,0));
+		}
+	}
+	for (int y = 0; y < ENTITY_MISSILE_COUNT; y++) {
+		if (game->vehiclemanager.em->missiles[y].hit == 1) {
+			entitymanager_removemissile(game->vehiclemanager.em, &game->vehiclemanager.em->missiles[y]);
+		}
+	}
+	for (int y = 0; y < ENTITY_MISSILE_COUNT; y++) {
+		if (game->vehiclemanager.em->mines[y].hit == 1) {
+			entitymanager_removemine(game->vehiclemanager.em, &game->vehiclemanager.em->mines[y]);
+		}
+	}
 
 	if(game->flags == GAME_FLAG_WINCONDITION){
 		checkwin(game);

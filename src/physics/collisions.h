@@ -3,7 +3,6 @@
 
 
 #include	<PxPhysicsAPI.h>
-//#include	"../objects/entities.h"
 
 
 //Filter groups for collisions

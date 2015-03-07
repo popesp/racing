@@ -79,7 +79,7 @@ struct vehicle
 
 	int haspickup;
 
-
+	int hit_flag;
 
 	unsigned char flags;
 };
