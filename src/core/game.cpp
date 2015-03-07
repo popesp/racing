@@ -260,6 +260,7 @@ static void update(struct game* game)
 	//Check what custom collisions happened for each vehicle/entity and deal with them appropriately
 	for (int y = 0; y < 152; y++) {
 		if (game->vehiclemanager.vehicles[y].hit_flag == 1) {
+			game->vehiclemanager.vehicles[y].body->clearForce();
 			physx::PxRigidBodyExt::addForceAtLocalPos(*game->vehiclemanager.vehicles[y].body, physx::PxVec3(0, 5000, 0), physx::PxVec3(0,0,0));
 		}
 	}
@@ -271,6 +272,11 @@ static void update(struct game* game)
 	for (int y = 0; y < ENTITY_MISSILE_COUNT; y++) {
 		if (game->vehiclemanager.em->mines[y].hit == 1) {
 			entitymanager_removemine(game->vehiclemanager.em, &game->vehiclemanager.em->mines[y]);
+		}
+	}
+	for (int y = 0; y < ENTITY_PICKUP_COUNT; y++) {
+		if (game->vehiclemanager.em->pickups[y].hit == 1) {
+			entitymanager_attachpickup(game->vehiclemanager.em->pickups[y].temp, &game->vehiclemanager.em->pickups[y],game->vehiclemanager.em);
 		}
 	}
 

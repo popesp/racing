@@ -119,9 +119,24 @@ void CustomCollisions::onContact(const physx::PxContactPairHeader& pairHeader, c
 			}
 			else if(filterData0.word0 == FilterGroup::ePickup) {
 				printf("Pickup collision confirmed\n");
+				physx::PxActor* vehicleActor = pairHeader.actors[1];
+				struct vehicle* v = (struct vehicle*)vehicleActor->userData;
+				v->haspickup = 1;
+
+				physx::PxActor* pickupActor = pairHeader.actors[0];
+				struct pickup* pu = (struct pickup*)pickupActor->userData;
+				pu->hit = 1;
 			}
 			else if(filterData1.word0 == FilterGroup::ePickup) {
 				printf("Pickup collision confirmed\n");
+				physx::PxActor* vehicleActor = pairHeader.actors[0];
+				struct vehicle* v = (struct vehicle*)vehicleActor->userData;
+				v->haspickup = 1;
+
+				physx::PxActor* pickupActor = pairHeader.actors[1];
+				struct pickup* pu = (struct pickup*)pickupActor->userData;
+				pu->hit = 1;
+				pu->temp = v;
 			}
 
 

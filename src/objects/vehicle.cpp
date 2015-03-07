@@ -106,6 +106,7 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 		v->body = NULL;
 		v->controller = NULL;
 		v->flags = VEHICLE_FLAG_INIT;
+		v->haspickup = 0;
 	}
 }
 
@@ -267,7 +268,7 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 		//spawn pickup
 		if (v->controller->buttons[INPUT_BUTTON_B] == (INPUT_STATE_DOWN | INPUT_STATE_CHANGED))
 
-			entitymanager_attachpickup(v,entitymanager_newpickup(vm->em, vm->dim), vm->em);
+			entitymanager_newpickup(vm->em, vm->dim);
 			
 
 		//spawn mine

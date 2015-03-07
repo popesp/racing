@@ -59,6 +59,7 @@ struct pickup{
 	physx::PxRigidDynamic* body;
 
 	struct vehicle* owner;
+	struct vehicle* temp;
 
 	unsigned char flags;
 
