@@ -34,31 +34,22 @@ physx::PxFilterFlags OurFilterShader(physx::PxFilterObjectAttributes attributes0
 	// trigger the contact callback for pairs (A,B) where 
 	// the filtermask of A contains the ID of B and vice versa.
 	if(filterData0.word0 == FilterGroup::eProjectile && filterData1.word0 == FilterGroup::eVehicle) {
-		//pairFlags |= PxPairFlag::eNOTIFY_TOUCH_FOUND;
-		printf("Projectile with Vehicle Collision\n");
+		pairFlags |= PxPairFlag::eNOTIFY_TOUCH_FOUND;
 	}
 	else if(filterData0.word0 == FilterGroup::eMine && filterData1.word0 == FilterGroup::eVehicle) {
-		//pairFlags |= PxPairFlag::eNOTIFY_TOUCH_FOUND;
-		printf("Mine with Vehicle Collision\n");
+		pairFlags |= PxPairFlag::eNOTIFY_TOUCH_FOUND;
 	}
 	else if(filterData0.word0 == FilterGroup::ePickup && filterData1.word0 == FilterGroup::eVehicle) {
-		//pairFlags |= PxPairFlag::eNOTIFY_TOUCH_FOUND;
-		printf("Pickup with Vehicle Collision\n");
+		pairFlags |= PxPairFlag::eNOTIFY_TOUCH_FOUND;
 	}
 	
 	return PxFilterFlag::eDEFAULT;
-
-	//pairFlags = physx::PxPairFlag::eCONTACT_DEFAULT;
-	//return physx::PxFilterFlag::eDEFAULT;
-	//pairFlags = physx::PxPairFlag::eTRIGGER_DEFAULT;
-	//return physx::PxFilterFlag::eDEFAULT;
 }
 
 void CustomCollisions::onContact(const physx::PxContactPairHeader& pairHeader, const physx::PxContactPair* pairs, physx::PxU32 nbPairs)
 {
 	unsigned i;
 
-	printf("Entered contact callback\n");
 	for(i = 0; i < nbPairs; i++)
 	{
 		
@@ -67,8 +58,40 @@ void CustomCollisions::onContact(const physx::PxContactPairHeader& pairHeader, c
 		if(cp.events & PxPairFlag::eNOTIFY_TOUCH_FOUND)
 		{
 
-			printf("Here\n");
+			const physx::PxU32 numShapes0 = pairHeader.actors[0]->getNbShapes();
+			physx::PxShape** shapes0 = (physx::PxShape**)malloc(sizeof(physx::PxShape*)*numShapes0);
+			pairHeader.actors[0]->getShapes(shapes0, numShapes0);
+			physx::PxShape* shape0 = shapes0[i];
+			physx::PxFilterData filterData0 = shape0->getSimulationFilterData();
 
+			const physx::PxU32 numShapes1 = pairHeader.actors[0]->getNbShapes();
+			physx::PxShape** shapes1 = (physx::PxShape**)malloc(sizeof(physx::PxShape*)*numShapes1);
+			pairHeader.actors[0]->getShapes(shapes1, numShapes1);
+			physx::PxShape* shape1 = shapes1[i];
+			physx::PxFilterData filterData1 = shape1->getSimulationFilterData();
+
+			if(filterData0.word0 == FilterGroup::eProjectile) {
+				printf("Projectile collision confirmed\n");
+			}
+			else if(filterData1.word0 == FilterGroup::eProjectile) {
+				printf("Projectile collision confirmed\n");
+			}
+			else if(filterData0.word0 == FilterGroup::eMine) {
+				printf("Mine collision confirmed\n");
+			}
+			else if(filterData1.word0 == FilterGroup::eMine) {
+				printf("Mine collision confirmed\n");
+			}
+			else if(filterData0.word0 == FilterGroup::ePickup) {
+				printf("Pickup collision confirmed\n");
+			}
+			else if(filterData1.word0 == FilterGroup::ePickup) {
+				printf("Pickup collision confirmed\n");
+			}
+
+
+			free(shapes0);
+			free(shapes1);
 			//Find if it's a projectile, deal with its collision, below is a sample from the submarine snippet
 			/*
 			if((pairHeader.actors[0] == mSubmarineActor) || (pairHeader.actors[1] == mSubmarineActor))
