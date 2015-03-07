@@ -21,6 +21,8 @@ void physicsmanager_startup(struct physicsmanager* pm)
 	// initialize the top-level physics object
 	pm->sdk = PxCreateBasePhysics(PX_PHYSICS_VERSION, *pm->foundation, scale, false);
 
+	pm->collisions = new CustomCollisions();
+
 	// initialize mesh cooking object
 	PxCookingParams params(scale);
 	params.meshWeldTolerance = 0.01f;
@@ -36,6 +38,7 @@ void physicsmanager_startup(struct physicsmanager* pm)
 	scenedesc.cpuDispatcher = PxDefaultCpuDispatcherCreate(1);
 	scenedesc.filterShader = OurFilterShader;
 	scenedesc.simulationEventCallback = pm->collisions;
+	scenedesc.flags |= PxSceneFlag::eENABLE_CCD;
 	pm->scene = pm->sdk->createScene(scenedesc);
 }
 

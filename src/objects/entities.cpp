@@ -311,7 +311,7 @@ struct missile* entitymanager_newmissile(struct entitymanager* em, struct vehicl
 	m->body = physx::PxCreateDynamic(*em->pm->sdk, pose, physx::PxBoxGeometry(em->dim_missile[VX] * 0.5f, em->dim_missile[VY] * 0.5f, em->dim_missile[VZ] * 0.5f), *em->pm->default_material, ENTITY_MISSILE_DENSITY);
 	m->body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, true);
 	setupFiltering(m->body, FilterGroup::eProjectile, FilterGroup::eProjectile);
-
+	m->body->setRigidBodyFlag(physx::PxRigidBodyFlag::eENABLE_CCD, true);
 
 	em->pm->scene->addActor(*m->body);
 	vec3f_set(vel, 0.f, 0.f, -1.f);
@@ -398,6 +398,7 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f dim){
 	pu->body = physx::PxCreateDynamic(*em->pm->sdk, physx::PxTransform(pu->pos[VX], pu->pos[VY], pu->pos[VZ]), physx::PxBoxGeometry(em->dim_pickup[VX] * 0.5f, em->dim_pickup[VY] * 0.5f, em->dim_pickup[VZ] * 0.5f), *em->pm->default_material, ENTITY_PICKUP_DENSITY);
 	//pu->body->setActorFlag(physx::PxActorFlag::eDISABLE_SIMULATION, true);
 	setupFiltering(pu->body, FilterGroup::ePickup, FilterGroup::ePickup);
+	pu->body->setRigidBodyFlag(physx::PxRigidBodyFlag::eENABLE_CCD, true);
 	em->pm->scene->addActor(*pu->body);
 
 	pu->flags = ENTITY_PICKUP_FLAG_ENABLED;
@@ -439,6 +440,7 @@ struct mine* entitymanager_newmine(struct entitymanager* em, vec3f dim, struct v
 	x->body = physx::PxCreateDynamic(*em->pm->sdk, pose, physx::PxBoxGeometry(em->dim_mine[VX] * 0.5f, em->dim_mine[VY] * 0.5f, em->dim_mine[VZ] * 0.5f), *em->pm->default_material, ENTITY_MINE_DENSITY);
 	x->body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, true);
 	setupFiltering(x->body, FilterGroup::eMine, FilterGroup::eMine);
+	x->body->setRigidBodyFlag(physx::PxRigidBodyFlag::eENABLE_CCD, true);
 	em->pm->scene->addActor(*x->body);
 
 	x->owner = v;
