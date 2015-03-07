@@ -45,7 +45,11 @@ physx::PxFilterFlags OurFilterShader(physx::PxFilterObjectAttributes attributes0
 	
 	return PxFilterFlag::eDEFAULT;
 }
+void missileHit(physx::PxRigidBody* v) {
 
+	physx::PxRigidBodyExt::addForceAtLocalPos(*v, physx::PxVec3(0, 10, 0), physx::PxVec3(0, 0, 0));
+
+}
 void CustomCollisions::onContact(const physx::PxContactPairHeader& pairHeader, const physx::PxContactPair* pairs, physx::PxU32 nbPairs)
 {
 	unsigned i;
@@ -72,9 +76,15 @@ void CustomCollisions::onContact(const physx::PxContactPairHeader& pairHeader, c
 
 			if(filterData0.word0 == FilterGroup::eProjectile) {
 				printf("Projectile collision confirmed\n");
+				physx::PxActor* vehicleActor = pairHeader.actors[1];
+				physx::PxRigidBody* body = (physx::PxRigidBody*)vehicleActor->userData;
+				//physx::PxRigidBodyExt::addForceAtLocalPos(*body, PxVec3(0, 10, 0), PxVec3(0, 0, 0));
+				//missileHit(body);
 			}
 			else if(filterData1.word0 == FilterGroup::eProjectile) {
 				printf("Projectile collision confirmed\n");
+				physx::PxActor* vehicleActor = pairHeader.actors[0];
+				physx::PxRigidBody* body = (physx::PxRigidBody*)vehicleActor->userData;
 			}
 			else if(filterData0.word0 == FilterGroup::eMine) {
 				printf("Mine collision confirmed\n");

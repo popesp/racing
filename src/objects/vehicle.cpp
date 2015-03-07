@@ -148,6 +148,7 @@ struct vehicle* vehiclemanager_newvehicle(struct vehiclemanager* vm, int index_t
 	v->body = physx::PxCreateDynamic(*vm->pm->sdk, physx::PxTransform(v->pos[VX], v->pos[VY], v->pos[VZ]), physx::PxBoxGeometry(vm->dim[VX] * 0.5f, vm->dim[VY] * 0.5f, vm->dim[VZ] * 0.5f), *vm->pm->default_material, VEHICLE_DENSITY);
 	setupFiltering(v->body, FilterGroup::eVehicle, FilterGroup::eVehicle);
 	v->body->setRigidBodyFlag(physx::PxRigidBodyFlag::eENABLE_CCD, true);
+	v->body->userData = v->body;
 	vm->pm->scene->addActor(*v->body);
 
 	// set damping forces

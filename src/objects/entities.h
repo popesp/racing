@@ -116,6 +116,7 @@ void entitymanager_update(struct entitymanager* em);
 
 struct missile* entitymanager_newmissile(struct entitymanager* em, struct vehicle* v, vec3f dim);
 void entitymanager_removemissile(struct entitymanager* em, struct missile* m);
+//void missileHit(physx::PxRigidBody* v);
 
 void entitymanager_render(struct entitymanager* em, struct renderer* r, mat4f worldview);
 
