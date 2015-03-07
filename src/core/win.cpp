@@ -12,7 +12,7 @@ void checkwin(struct game* game){
 
 		//reset laps
 		game->player.vehicle->lap=1;
-		for(int i=0; i<=game->num_aiplayers;i++){
+		for(int i=0; i<game->num_aiplayers;i++){
 			game->aiplayers[i].vehicle->lap=1;
 		}
 
