@@ -18,6 +18,7 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 
 	em->timerspawn1=0;
 	em->timerspawn2=0;
+	em->timerspawn3=0;
 
 	renderable_init(&em->r_missile, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
 	objloader_load(MISSILE_OBJ, r, &em->r_missile);
@@ -244,6 +245,17 @@ void entitymanager_update(struct entitymanager* em, struct vehiclemanager* vm)
 	}
 
 
+	if(em->pickupatspawn3==false){
+		em->timerspawn3--;
+		//printf("%d\n",em->timerspawn2);
+		if(em->timerspawn3==0){
+			entitymanager_newpickup(em, vm->track->pathpoints[PICKUP_SPAWN_LOC3].pos); 
+			em->pickupatspawn3=true;
+			em->timerspawn3 = PICKUP_TIMERS;
+		}
+	}
+
+
 	//Check what custom collisions happened for each vehicle/entity and deal with them appropriately
 	for (i = 0; i < VEHICLE_COUNT; i++) {
 		if (vm->vehicles[i].hit_flag == 1) {
@@ -369,6 +381,9 @@ void entitymanager_attachpickup(struct vehicle* v, struct pickup* pu,struct enti
 		else if((em->pickups+i)==pu && pu->holdingpu2==true){
 			em->pickupatspawn2=false;
 		}
+		else if((em->pickups+i)==pu && pu->holdingpu3==true){
+			em->pickupatspawn3=false;
+		}
 	}
 
 	pu->owner = v;
@@ -418,6 +433,7 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f pos){
 	// logic for attaching timers for respawning pickups
 	pu->holdingpu1=false;
 	pu->holdingpu2=false;
+	pu->holdingpu3=false;
 	if(em->timerspawn1==0){
 		pu->holdingpu1=true;
 		em->timerspawn1=PICKUP_TIMERS;
@@ -425,6 +441,10 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f pos){
 	else if(em->timerspawn2==0){
 		pu->holdingpu2=true;
 		em->timerspawn2=PICKUP_TIMERS;
+	}
+	else if(em->timerspawn3==0){
+		pu->holdingpu3=true;
+		em->timerspawn3=PICKUP_TIMERS;
 	}
 
 	// find the limits of the loaded mesh

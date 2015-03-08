@@ -17,6 +17,8 @@
 #define	TRACK_FLAG_INIT			0x00
 #define	TRACK_FLAG_LOOPED		0x01
 
+#define TRACK_NUMPOINTS			3000
+
 #define TRACK_TEXT_SLATE		"res/images/slate.jpg"
 
 struct physicsmanager;

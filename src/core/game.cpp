@@ -495,11 +495,16 @@ int game_startup(struct game* game)
 	audiomanager_setmusicvolume(&game->audiomanager,0.5);
 	game->flags = GAME_FLAG_INIT;
 
+
+	//spawn the tracks pickups
 	entitymanager_newpickup(&game->entitymanager,game->track.pathpoints[PICKUP_SPAWN_LOC1].pos);
 	game->entitymanager.pickupatspawn1=true;
 	
 	entitymanager_newpickup(&game->entitymanager,game->track.pathpoints[PICKUP_SPAWN_LOC2].pos);
 	game->entitymanager.pickupatspawn2=true;
+
+	entitymanager_newpickup(&game->entitymanager,game->track.pathpoints[PICKUP_SPAWN_LOC3].pos);
+	game->entitymanager.pickupatspawn3=true;
 
 
 	return 1;

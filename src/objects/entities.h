@@ -60,6 +60,7 @@
 
 #define PICKUP_SPAWN_LOC1			90
 #define PICKUP_SPAWN_LOC2			40
+#define PICKUP_SPAWN_LOC3			120
 
 
 struct pickup{
@@ -75,7 +76,7 @@ struct pickup{
 
 	int hit, set;
 
-	bool holdingpu1, holdingpu2;
+	bool holdingpu1, holdingpu2, holdingpu3;
 
 	struct texture diffuse_pickupMINE;
 	struct texture diffuse_pickupMISSILE;
@@ -129,6 +130,9 @@ struct entitymanager
 
 	bool pickupatspawn2;
 	int timerspawn2;
+
+	bool pickupatspawn3;
+	int timerspawn3;
 
 	struct missile missiles[ENTITY_MISSILE_COUNT];
 	struct mine mines[ENTITY_MINE_COUNT];
