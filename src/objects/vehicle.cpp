@@ -95,7 +95,7 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 			//srand(seed);
 			//entitymanager_newpickup(vm->em, vm->dim, vm->track->pathpoints[seed].pos);
 
-			//entitymanager_newpickup(vm->em, vm->track->pathpoints[0].pos);
+			entitymanager_newpickup(vm->em, vm->track->pathpoints[0].pos);
 		}
 			
 

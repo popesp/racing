@@ -9,7 +9,7 @@
 #include	"../audio/audio.h"
 
 #define	ENTITY_MISSILE_COUNT		32
-#define ENTITY_PICKUP_COUNT			17
+#define ENTITY_PICKUP_COUNT			170
 #define ENTITY_MINE_COUNT			1000
 
 #define	ENTITY_MISSILE_DENSITY		1.f

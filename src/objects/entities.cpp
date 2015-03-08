@@ -156,7 +156,9 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 		objloader_load(PICKUP_OBJ, em->r, &pu->r_pickup);
 		renderable_sendbuffer(em->r, &pu->r_pickup);
 
-
+		texture_init(&pu->diffuse_pickupMINE);
+		texture_init(&pu->diffuse_pickupMISSILE);
+		texture_init(&pu->diffuse_pickupSPEED);
 	}
 
 	// mine array
@@ -275,7 +277,7 @@ void entitymanager_update(struct entitymanager* em, struct vehiclemanager* vm)
 	}
 	for (i = 0; i < ENTITY_PICKUP_COUNT; i++) {
 		if (vm->em->pickups[i].hit > -1) {
-			printf("index: %d\n", vm->em->pickups[i].hit);
+			//printf("index: %d\n", vm->em->pickups[i].hit);
 			entitymanager_attachpickup(&vm->vehicles[vm->em->pickups[i].hit] , &vm->em->pickups[i],vm->em);
 			/////
 			//pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickup;
@@ -499,33 +501,39 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f pos){
 	pu->avg[VY] = avg[VY];
 	pu->avg[VZ] = avg[VZ];
 		// initialize pickup textures, doing it here so no memory leaks
-		texture_init(&pu->diffuse_pickupMINE);
-		texture_loadfile(&pu->diffuse_pickupMINE, PICKUP_MINE_TEXTURE);
-		texture_upload(&pu->diffuse_pickupMINE, RENDER_TEXTURE_DIFFUSE);
+		
+		
 
-		texture_init(&pu->diffuse_pickupMISSILE);
-		texture_loadfile(&pu->diffuse_pickupMISSILE, PICKUP_MISSILE_TEXTURE);
-		texture_upload(&pu->diffuse_pickupMISSILE, RENDER_TEXTURE_DIFFUSE);
+		
+		
 
-		texture_init(&pu->diffuse_pickupSPEED);
-		texture_loadfile(&pu->diffuse_pickupSPEED, PICKUP_SPEED_TEXTURE);
-		texture_upload(&pu->diffuse_pickupSPEED, RENDER_TEXTURE_DIFFUSE);
+		
+		
 
 	int seed = static_cast<int>(time(0));
 	srand(seed);
 	seed = seed%3;
 	if(seed==1){
 		//Missile
+
+		texture_loadfile(&pu->diffuse_pickupMISSILE, PICKUP_MISSILE_TEXTURE);
+		texture_upload(&pu->diffuse_pickupMISSILE, RENDER_TEXTURE_DIFFUSE);
 		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickupMISSILE;
 		pu->typepickup=1;
 	}
 	else if(seed==2){
 		//Mine
+
+		texture_loadfile(&pu->diffuse_pickupMINE, PICKUP_MINE_TEXTURE);
+		texture_upload(&pu->diffuse_pickupMINE, RENDER_TEXTURE_DIFFUSE);
 		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickupMINE;
 		pu->typepickup=0;
 	}
 	else{
 		//Speed
+
+		texture_loadfile(&pu->diffuse_pickupSPEED, PICKUP_SPEED_TEXTURE);
+		texture_upload(&pu->diffuse_pickupSPEED, RENDER_TEXTURE_DIFFUSE);
 		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickupSPEED;
 		pu->typepickup=2;
 	}
@@ -557,7 +565,7 @@ void entitymanager_removepickup(struct entitymanager* em, struct pickup* pu){
 		if(pu==em->pickups+i){
 
 			//mat4f_translatemul(em->pickups[i].r_pickup.matrix_model, 1/-pu->avg[VX], 1/-pu->avg[VY], 1/-pu->avg[VZ]);
-			//mat4f_rotateymul(em->pickups[i].r_pickup.matrix_model, 1/-1.57080f);
+			mat4f_rotateymul(em->pickups[i].r_pickup.matrix_model, 1/-1.57080f);
 			mat4f_scalemul(em->pickups[i].r_pickup.matrix_model, 1/PICKUP_MESHSCALE, 1/PICKUP_MESHSCALE, 1/PICKUP_MESHSCALE);
 			
 			em->pickups[i].body->release();
