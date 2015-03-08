@@ -42,8 +42,14 @@
 #define ENTITY_MINE_FLAG_ENABLED	0x01
 
 #define	PICKUP_MESHSCALE			0.2f
+#define	PICKUP_ATTACHED_MESHSCALE	0.4f
 #define MISSILE_MESHSCALE			0.35f
 #define MINE_MESHSCALE				0.1f
+
+#define PICKUP_ATTACHED_OBJ					"res/models/powerup/power_up_attached/powerup_attached.obj"
+#define PICKUP_ATTACHED_MISSILE_TEXTURE		"res/models/powerup/power_up_attached/powerup_attached_rocket.png"
+#define	PICKUP_ATTACHED_MINE_TEXTURE		"res/models/powerup/power_up_attached/powerup_attached_mine.png"
+#define	PICKUP_ATTACHED_SPEED_TEXTURE		"res/models/powerup/power_up_attached/powerup_attached_speed.png"
 
 #define PICKUP_OBJ					"res/models/powerup/powerup.obj"
 #define PICKUP_MISSILE_TEXTURE		"res/models/powerup/powerup_rocketUV.png"

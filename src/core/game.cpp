@@ -264,7 +264,7 @@ static void update(struct game* game)
 	for(i = 0; i < ENTITY_PICKUP_COUNT; i++){
 		if(game->entitymanager.pickups[i].owner!=NULL){
 			physx::PxMat44 owner_vehicle(game->entitymanager.pickups[i].owner->body->getGlobalPose());
-			game->entitymanager.pickups[i].powerpos = owner_vehicle.transform(physx::PxVec3(-.3f, -.1f, 1.1f));
+			game->entitymanager.pickups[i].powerpos = owner_vehicle.transform(physx::PxVec3(-.3f, -.1f, 1.5f));
 			game->entitymanager.pickups[i].body->setGlobalPose(physx::PxTransform(physx::PxVec3(game->entitymanager.pickups[i].powerpos)));
 
 			//physx::PxMat44 owner_angle()
