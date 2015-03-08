@@ -124,7 +124,7 @@ void entitymanager_removemissile(struct entitymanager* em, struct missile* m);
 void entitymanager_render(struct entitymanager* em, struct renderer* r, mat4f worldview);
 
 void entitymanager_attachpickup(struct vehicle* v, struct pickup* pu, struct entitymanager* em);
-struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f offs);
+struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f offs, vec3f pos);
 void entitymanager_removepickup(struct entitymanager* em, struct pickup* pu);
 
 struct mine* entitymanager_newmine(struct entitymanager* em, vec3f dim, struct vehicle* v);

@@ -310,9 +310,12 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 		}
 
 		//spawn pickup
-		if (v->controller->buttons[INPUT_BUTTON_B] == (INPUT_STATE_DOWN | INPUT_STATE_CHANGED))
+		if (v->controller->buttons[INPUT_BUTTON_B] == (INPUT_STATE_DOWN | INPUT_STATE_CHANGED)){
 
-			entitymanager_newpickup(vm->em, vm->dim);
+			unsigned int seed = static_cast<unsigned int>(time(0))% 100;
+			srand(seed);
+			entitymanager_newpickup(vm->em, vm->dim, vm->track->pathpoints[seed].pos);
+		}
 			
 
 		//spawn mine
