@@ -404,6 +404,9 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f dim, vec3
 	mat4f_rotateymul(pu->r_pickup.matrix_model, -1.57080f);
 	mat4f_translatemul(pu->r_pickup.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
 
+	pu->avg[VX] = avg[VX];
+	pu->avg[VY] = avg[VY];
+	pu->avg[VZ] = avg[VZ];
 		// initialize pickup textures, doing it here so no memory leaks
 		texture_init(&pu->diffuse_pickup);
 		texture_loadfile(&pu->diffuse_pickup, PICKUP_MINE_TEXTURE);
@@ -462,6 +465,13 @@ void entitymanager_removepickup(struct entitymanager* em, struct pickup* pu){
 
 	for(i=0;i<ENTITY_PICKUP_COUNT; i++){
 		if(pu==em->pickups+i){
+			
+			physx::PxMat44 owner_vehicle(em->pickups[i].owner->body->getGlobalPose());
+			em->pickups[i].powerpos = owner_vehicle.transform(physx::PxVec3(.3f, .1f, -1.1f));
+			em->pickups[i].body->setGlobalPose(physx::PxTransform(physx::PxVec3(em->pickups[i].powerpos)));
+
+			mat4f_translatemul(pu->r_pickup.matrix_model, 1/-pu->avg[VX], 1/-pu->avg[VY], 1/-pu->avg[VZ]);
+			mat4f_rotateymul(pu->r_pickup.matrix_model, 1/-1.57080f);
 			mat4f_scalemul(em->pickups[i].r_pickup.matrix_model, 1/PICKUP_MESHSCALE, 1/PICKUP_MESHSCALE, 1/PICKUP_MESHSCALE);
 			
 			em->pickups[i].body->release();
@@ -491,7 +501,7 @@ struct mine* entitymanager_newmine(struct entitymanager* em, vec3f dim, struct v
 
 	// create a physics object and add it to the scene
 	x->body = physx::PxCreateDynamic(*em->pm->sdk, pose, physx::PxBoxGeometry(em->dim_mine[VX] * 0.5f, em->dim_mine[VY] * 0.5f, em->dim_mine[VZ] * 0.5f), *em->pm->default_material, ENTITY_MINE_DENSITY);
-	x->body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, true);
+	//x->body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, true);
 	setupFiltering(x->body, FilterGroup::eMine, FilterGroup::eMine);
 	x->body->setRigidBodyFlag(physx::PxRigidBodyFlag::eENABLE_CCD, true);
 	x->body->userData = x;

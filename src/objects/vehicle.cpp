@@ -57,31 +57,32 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 			//0=mine, 1=missile, 2=speed
 			if (v->haspickup == 0) {
 				entitymanager_newmine(vm->em, vm->dim, v);
-				v->haspickup = 0;
+				v->haspickup = 100;
 				for(int u = 0; u < ENTITY_PICKUP_COUNT; u++) {
 					if (vm->em->pickups[u].owner == v) {
-						vm->em->pickups[u].owner = NULL;
+						
 						entitymanager_removepickup(vm->em, &vm->em->pickups[u]);
+						vm->em->pickups[u].owner = NULL;
 					}
 				}
 			}
 			else if (v->haspickup == 1) {
 				entitymanager_newmissile(vm->em, v, vm->dim);
-				v->haspickup = 0;
+				v->haspickup = 100;
 				for(int u = 0; u < ENTITY_PICKUP_COUNT; u++) {
 					if (vm->em->pickups[u].owner == v) {
-						vm->em->pickups[u].owner = NULL;
 						entitymanager_removepickup(vm->em, &vm->em->pickups[u]);
+						vm->em->pickups[u].owner = NULL;
 					}
 				}
 			}
 			else if (v->haspickup == 2) {
 				v->boost = 180;
-				v->haspickup = 0;
+				v->haspickup = 100;
 				for(int u = 0; u < ENTITY_PICKUP_COUNT; u++) {
 					if (vm->em->pickups[u].owner == v) {
-						vm->em->pickups[u].owner = NULL;
 						entitymanager_removepickup(vm->em, &vm->em->pickups[u]);
+						vm->em->pickups[u].owner = NULL;
 					}
 				}
 			}
@@ -125,7 +126,6 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 	int seed = static_cast<int>(time(0));
 	srand(seed);
 
-	printf("%d\n",seed%2);
 	// initialize vehicle mesh
 	renderable_init(&vm->r_vehicle, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
 	if(seed%2==1){
@@ -207,7 +207,7 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 		v->body = NULL;
 		v->controller = NULL;
 		v->flags = VEHICLE_FLAG_INIT;
-		v->haspickup = 0;
+		v->haspickup = 100;
 		v->index_in_vm = i;
 		v->boost = 0;
 	}

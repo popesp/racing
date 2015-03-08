@@ -63,7 +63,9 @@ struct pickup{
 
 	unsigned char flags;
 
-	vec3f pos;
+	vec3f pos, avg;
+
+	physx::PxVec3 powerpos;
 
 	int hit;
 
