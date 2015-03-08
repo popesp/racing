@@ -29,7 +29,7 @@
 #define	ENTITY_MISSILE_DESPAWNTIME	300
 
 #define	ENTITY_MISSILE_SPAWNDIST	1.f
-#define	ENTITY_PICKUP_SPAWNHEIGHT	0.f
+#define	ENTITY_PICKUP_SPAWNHEIGHT	1.2f
 #define ENTITY_MINE_SPAWNDIST		5.f
 
 #define	ENTITY_MISSILE_FLAG_ENABLED	0x01
@@ -56,6 +56,8 @@
 #define	MISSILE_OBJ					"res/models/Projectile/rocket.obj"
 #define	MISSILE_TEXTURE				"res/models/Projectile/rocket_tex.png"
 
+#define PICKUP_TIMERS				500
+
 struct pickup{
 	physx::PxRigidDynamic* body;
 
@@ -68,6 +70,8 @@ struct pickup{
 	physx::PxVec3 powerpos;
 
 	int hit, set;
+
+	bool holdingpu1;
 
 	struct texture diffuse_pickup;
 	struct texture diffuse_pickup2;
@@ -115,7 +119,11 @@ struct entitymanager
 	struct texture diffuse_mine;
 
 	int sfx_missile;
-	
+
+
+	bool pickupatspawn1;
+	int timerspawn1;
+
 	struct missile missiles[ENTITY_MISSILE_COUNT];
 	struct mine mines[ENTITY_MINE_COUNT];
 	struct pickup pickups[ENTITY_PICKUP_COUNT];
@@ -133,7 +141,7 @@ void entitymanager_removemissile(struct entitymanager* em, struct missile* m);
 void entitymanager_render(struct entitymanager* em, struct renderer* r, mat4f worldview);
 
 void entitymanager_attachpickup(struct vehicle* v, struct pickup* pu, struct entitymanager* em);
-struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f offs, vec3f pos);
+struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f pos);
 void entitymanager_removepickup(struct entitymanager* em, struct pickup* pu);
 
 struct mine* entitymanager_newmine(struct entitymanager* em, vec3f dim, struct vehicle* v);

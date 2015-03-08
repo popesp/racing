@@ -495,8 +495,8 @@ int game_startup(struct game* game)
 	audiomanager_setmusicvolume(&game->audiomanager,0.5);
 	game->flags = GAME_FLAG_INIT;
 
-	entitymanager_newpickup(&game->entitymanager, game->vehiclemanager.dim, game->track.pathpoints[100].pos);
-	
+	entitymanager_newpickup(&game->entitymanager,game->track.pathpoints[100].pos);
+	game->entitymanager.pickupatspawn1=true;
 	
 
 	return 1;

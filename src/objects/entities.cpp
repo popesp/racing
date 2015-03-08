@@ -16,6 +16,8 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 	em->track = t;
 	em->r = r;
 
+	em->timerspawn1=0;
+
 	renderable_init(&em->r_missile, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
 	objloader_load(MISSILE_OBJ, r, &em->r_missile);
 	renderable_sendbuffer(r, &em->r_missile);
@@ -219,6 +221,15 @@ void entitymanager_update(struct entitymanager* em, struct vehiclemanager* vm)
 	int i;
 	physx::PxTransform pose;
 
+	if(em->pickupatspawn1==false){
+		em->timerspawn1--;
+		printf("%d\n",em->timerspawn1);
+		if(em->timerspawn1==0){
+			entitymanager_newpickup(em, vm->track->pathpoints[100].pos); 
+			em->pickupatspawn1=true;
+			em->timerspawn1 = PICKUP_TIMERS;
+		}
+	}
 
 	//Check what custom collisions happened for each vehicle/entity and deal with them appropriately
 	for (i = 0; i < VEHICLE_COUNT; i++) {
@@ -334,6 +345,13 @@ void entitymanager_removemissile(struct entitymanager* em, struct missile* m)
 
 void entitymanager_attachpickup(struct vehicle* v, struct pickup* pu,struct entitymanager* em){
 
+	for(int i=0;i<ENTITY_PICKUP_COUNT; i++){
+		if((em->pickups+i)==pu && pu->holdingpu1==true){
+			em->pickupatspawn1=false;
+			printf("pickup was taken\n");
+		}
+	}
+
 	pu->owner = v;
 
 	em->pm->scene->removeActor(*pu->body);
@@ -343,7 +361,7 @@ void entitymanager_attachpickup(struct vehicle* v, struct pickup* pu,struct enti
 }
 
 
-struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f dim, vec3f pos){
+struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f pos){
 	physx::PxTransform pose;
 	physx::PxMat44 mat_pose;
 	struct pickup* pu;
@@ -360,6 +378,13 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f dim, vec3
 
 	pu = em->pickups + i;
 	
+	printf("pickup %d\n", i);
+	pu->holdingpu1=false;
+	if(em->timerspawn1==0){
+		pu->holdingpu1=true;
+		em->timerspawn1=PICKUP_TIMERS;
+	}
+
 	// find the limits of the loaded mesh
 	vec3f_set(min, FLT_MAX, FLT_MAX, FLT_MAX);
 	vec3f_set(max, -FLT_MAX, -FLT_MAX, -FLT_MAX);
@@ -446,9 +471,8 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f dim, vec3
 	// find spawn location
 	vec3f_copy(pu->pos, pos);
 	vec3f_copy(spawn, em->track->up);
-	//vec3f_scale(spawn, ENTITY_PICKUP_SPAWNHEIGHT);
+	vec3f_scale(spawn, ENTITY_PICKUP_SPAWNHEIGHT);
 	vec3f_add(pu->pos, spawn);
-	//vec3f_add(pu->pos, dim);
 
 	// create a physics object and add it to the scene
 	pu->body = physx::PxCreateDynamic(*em->pm->sdk, physx::PxTransform(pu->pos[VX], pu->pos[VY], pu->pos[VZ]), physx::PxBoxGeometry(pu->dim_pickup[VX] * 0.5f, pu->dim_pickup[VY] * 0.5f, pu->dim_pickup[VZ] * 0.5f), *em->pm->default_material, ENTITY_PICKUP_DENSITY);
@@ -457,6 +481,7 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f dim, vec3
 	pu->body->userData = pu;
 	em->pm->scene->addActor(*pu->body);
 
+	//vec3f_negate(pu->pos, spawn);
 	pu->flags = ENTITY_PICKUP_FLAG_ENABLED;
 	pu->owner = NULL;
 
@@ -468,13 +493,9 @@ void entitymanager_removepickup(struct entitymanager* em, struct pickup* pu){
 
 	for(i=0;i<ENTITY_PICKUP_COUNT; i++){
 		if(pu==em->pickups+i){
-			
-			//physx::PxMat44 owner_vehicle(em->pickups[i].owner->body->getGlobalPose());
-			//em->pickups[i].powerpos = owner_vehicle.transform(physx::PxVec3(.3f, .1f, -1.1f));
-			//em->pickups[i].body->setGlobalPose(physx::PxTransform(physx::PxVec3(em->pickups[i].powerpos)));
 
-			mat4f_translatemul(em->pickups[i].r_pickup.matrix_model, 1/-pu->avg[VX], 1/-pu->avg[VY], 1/-pu->avg[VZ]);
-			mat4f_rotateymul(em->pickups[i].r_pickup.matrix_model, 1/-1.57080f);
+			//mat4f_translatemul(em->pickups[i].r_pickup.matrix_model, 1/-pu->avg[VX], 1/-pu->avg[VY], 1/-pu->avg[VZ]);
+			//mat4f_rotateymul(em->pickups[i].r_pickup.matrix_model, 1/-1.57080f);
 			mat4f_scalemul(em->pickups[i].r_pickup.matrix_model, 1/PICKUP_MESHSCALE, 1/PICKUP_MESHSCALE, 1/PICKUP_MESHSCALE);
 			
 			em->pickups[i].body->release();
