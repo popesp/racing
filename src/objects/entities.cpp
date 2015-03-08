@@ -778,6 +778,11 @@ void entitymanager_newblimp(struct vehicle* v,struct entitymanager* em, vec3f po
 
 	b->flags = ENTITY_MINE_FLAG_ENABLED;
 }
+//struct blimp* entitymanager_newblimp(struct vehicle* v, struct blimp* b,struct entitymanager* em){
+//	vec3f spawn,min, max, avg, diff;
+//	int i;
+//	float temp;
+//}
 
 void entitymanager_removeblimp(struct entitymanager* em, struct blimp* b){
 	int i;
