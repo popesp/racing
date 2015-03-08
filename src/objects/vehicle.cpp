@@ -122,10 +122,11 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 
 	int seed = static_cast<int>(time(0));
 	srand(seed);
+	seed= seed*89;
 
 	// initialize vehicle mesh
 	renderable_init(&vm->r_vehicle, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
-	if(seed%2==1){
+	if((seed)%2==1){
 		objloader_load(VEHICLE_OBJ, r, &vm->r_vehicle);
 	}else{
 		objloader_load(VEHICLE_OBJ2, r, &vm->r_vehicle);

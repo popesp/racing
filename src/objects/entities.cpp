@@ -16,6 +16,7 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 	em->track = t;
 	em->r = r;
 
+	//initialize to 0 so the pickups know to attach
 	em->timerspawn1=0;
 	em->timerspawn2=0;
 	em->timerspawn3=0;
@@ -277,12 +278,14 @@ void entitymanager_update(struct entitymanager* em, struct vehiclemanager* vm)
 	}
 	for (i = 0; i < ENTITY_PICKUP_COUNT; i++) {
 		if (vm->em->pickups[i].hit > -1) {
-			//printf("index: %d\n", vm->em->pickups[i].hit);
+			
+			
+			if(vm->vehicles[vm->em->pickups[i].hit].haspickup!=100){
+				entitymanager_removepickup(vm->em,vm->vehicles[vm->em->pickups[i].hit].owns);
+			}
+
 			entitymanager_attachpickup(&vm->vehicles[vm->em->pickups[i].hit] , &vm->em->pickups[i],vm->em);
-			/////
-			//pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickup;
-
-
+			
 			vm->em->pickups[i].hit = -1;
 		}
 	}
@@ -368,9 +371,7 @@ void entitymanager_removemissile(struct entitymanager* em, struct missile* m)
 			em->missiles[i].flags = ENTITY_MISSILE_FLAG_INIT;
 			em->missiles[i].missle_channel = NULL;
 
-		}
-
-		
+		}	
 }
 
 
@@ -389,6 +390,7 @@ void entitymanager_attachpickup(struct vehicle* v, struct pickup* pu,struct enti
 	}
 
 	pu->owner = v;
+	v->owns = pu;
 
 	em->pm->scene->removeActor(*pu->body);
 	
@@ -497,22 +499,14 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f pos){
 	}
 	pu->set=1;
 
+	//possibly temp
 	pu->avg[VX] = avg[VX];
 	pu->avg[VY] = avg[VY];
 	pu->avg[VZ] = avg[VZ];
-		// initialize pickup textures, doing it here so no memory leaks
-		
-		
-
-		
-		
-
-		
-		
 
 	int seed = static_cast<int>(time(0));
 	srand(seed);
-	seed = seed%3;
+	seed = (seed)%3;
 	if(seed==1){
 		//Missile
 

@@ -81,6 +81,8 @@ struct vehicle
 
 	int index_in_vm;
 
+	struct pickup* owns;    //ideally this instead of haspickup
+
 	int boost;
 
 	int hit_flag;
