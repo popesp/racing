@@ -108,6 +108,7 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 		v->flags = VEHICLE_FLAG_INIT;
 		v->haspickup = 0;
 		v->index_in_vm = i;
+		v->boost = 0;
 	}
 }
 
@@ -236,8 +237,17 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 		for (i = 0; i < VEHICLE_COUNT_RAYCASTS; i++)
 			if (v->ray_touch[i])
 			{
+
+				int nitrous = 1;
+
+				if (v->boost > 0) {
+					printf("time remaining on boost: %d\n", v->boost);
+					v->boost = v->boost-1;
+					nitrous = 2;
+				}
+
 				vec3f_set(force, VEHICLE_FORWARD);
-				vec3f_scale(force, -VEHICLE_ACCELERATION * v->controller->axes[INPUT_AXIS_TRIGGERS]);
+				vec3f_scale(force, -VEHICLE_ACCELERATION * v->controller->axes[INPUT_AXIS_TRIGGERS]*nitrous);
 
 				physx::PxRigidBodyExt::addLocalForceAtLocalPos(*v->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, 0.f));
 
@@ -262,7 +272,40 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 		// firing a projectile
 		if (v->controller->buttons[INPUT_BUTTON_A] == (INPUT_STATE_DOWN | INPUT_STATE_CHANGED))
 		{
-			entitymanager_newmissile(vm->em, v, vm->dim);
+			printf("powerup#: %d\n", v->haspickup);
+			if (v->haspickup == 0) {
+				printf("Nope\n");
+			}
+			else if (v->haspickup == 1) {
+				entitymanager_newmissile(vm->em, v, vm->dim);
+				v->haspickup = 0;
+				for(int u = 0; u < ENTITY_PICKUP_COUNT; u++) {
+					if (vm->em->pickups[u].owner == v) {
+						vm->em->pickups[u].owner = NULL;
+						entitymanager_removepickup(vm->em, &vm->em->pickups[u]);
+					}
+				}
+			}
+			else if (v->haspickup == 2) {
+				entitymanager_newmine(vm->em, vm->dim, v);
+				v->haspickup = 0;
+				for(int u = 0; u < ENTITY_PICKUP_COUNT; u++) {
+					if (vm->em->pickups[u].owner == v) {
+						vm->em->pickups[u].owner = NULL;
+						entitymanager_removepickup(vm->em, &vm->em->pickups[u]);
+					}
+				}
+			}
+			else if (v->haspickup == 3) {
+				v->boost = 180;
+				v->haspickup = 0;
+				for(int u = 0; u < ENTITY_PICKUP_COUNT; u++) {
+					if (vm->em->pickups[u].owner == v) {
+						vm->em->pickups[u].owner = NULL;
+						entitymanager_removepickup(vm->em, &vm->em->pickups[u]);
+					}
+				}
+			}
 			//audiomanager_playsfx(vm->am, vm->sfx_missile, v->pos, 0);
 		}
 

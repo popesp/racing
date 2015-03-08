@@ -1,6 +1,7 @@
 #include	"collisions.h"
 #include	"../objects/vehicle.h"
 #include	"../objects/entities.h"
+#include	<time.h>
 
 using namespace physx;
 
@@ -77,7 +78,7 @@ void CustomCollisions::onContact(const physx::PxContactPairHeader& pairHeader, c
 			physx::PxFilterData filterData1 = shape1->getSimulationFilterData();
 
 			if(filterData0.word0 == FilterGroup::eProjectile) {
-				printf("Projectile collision confirmed\n");
+				//printf("Projectile collision confirmed\n");
 
 				physx::PxActor* vehicleActor = pairHeader.actors[1];
 				struct vehicle* v = (struct vehicle*)vehicleActor->userData;
@@ -88,7 +89,7 @@ void CustomCollisions::onContact(const physx::PxContactPairHeader& pairHeader, c
 				m->hit = 1;
 			}
 			else if(filterData1.word0 == FilterGroup::eProjectile) {
-				printf("Projectile collision confirmed\n");
+				//printf("Projectile collision confirmed\n");
 				physx::PxActor* vehicleActor = pairHeader.actors[0];
 				struct vehicle* v = (struct vehicle*)vehicleActor->userData;
 				v->hit_flag = 1;
@@ -98,7 +99,7 @@ void CustomCollisions::onContact(const physx::PxContactPairHeader& pairHeader, c
 				m->hit = 1;
 			}
 			else if(filterData0.word0 == FilterGroup::eMine) {
-				printf("Mine collision confirmed\n");
+				//printf("Mine collision confirmed\n");
 				physx::PxActor* vehicleActor = pairHeader.actors[1];
 				struct vehicle* v = (struct vehicle*)vehicleActor->userData;
 				v->hit_flag = 1;
@@ -108,7 +109,7 @@ void CustomCollisions::onContact(const physx::PxContactPairHeader& pairHeader, c
 				x->hit = 1;
 			}
 			else if(filterData1.word0 == FilterGroup::eMine) {
-				printf("Mine collision confirmed\n");
+				//printf("Mine collision confirmed\n");
 				physx::PxActor* vehicleActor = pairHeader.actors[0];
 				struct vehicle* v = (struct vehicle*)vehicleActor->userData;
 				v->hit_flag = 1;
@@ -118,20 +119,30 @@ void CustomCollisions::onContact(const physx::PxContactPairHeader& pairHeader, c
 				x->hit = 1;
 			}
 			else if(filterData0.word0 == FilterGroup::ePickup) {
-				printf("Pickup collision confirmed\n");
+				//printf("Pickup collision confirmed\n");
 				physx::PxActor* vehicleActor = pairHeader.actors[1];
 				struct vehicle* v = (struct vehicle*)vehicleActor->userData;
-				v->haspickup = 1;
+				if (v->haspickup == 0) {
+					int seed = static_cast<int>(time(0));
+					srand(seed);
+					seed = seed%3;
+					v->haspickup = seed+1;
+				}
 
 				physx::PxActor* pickupActor = pairHeader.actors[0];
 				struct pickup* pu = (struct pickup*)pickupActor->userData;
 				pu->hit = v->index_in_vm;
 			}
 			else if(filterData1.word0 == FilterGroup::ePickup) {
-				printf("Pickup collision confirmed\n");
+				//printf("Pickup collision confirmed\n");
 				physx::PxActor* vehicleActor = pairHeader.actors[0];
 				struct vehicle* v = (struct vehicle*)vehicleActor->userData;
-				v->haspickup = 1;
+				if (v->haspickup == 0) {
+					int seed = static_cast<int>(time(0));
+					srand(seed);
+					seed = seed%3;
+					v->haspickup = seed+1;
+				}
 
 				physx::PxActor* pickupActor = pairHeader.actors[1];
 				struct pickup* pu = (struct pickup*)pickupActor->userData;

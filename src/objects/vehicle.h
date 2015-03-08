@@ -81,6 +81,8 @@ struct vehicle
 
 	int index_in_vm;
 
+	int boost;
+
 	int hit_flag;
 
 	unsigned char flags;
