@@ -7,6 +7,7 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 	struct missile* m;
 	struct pickup* pu;
 	struct mine* x;
+	struct blimp* b;
 
 	float temp;
 	vec3f min, max, avg, diff;
@@ -20,6 +21,8 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 	em->timerspawn1=0;
 	em->timerspawn2=0;
 	em->timerspawn3=0;
+
+	em->num_blimps=0;
 
 	renderable_init(&em->r_missile, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
 	objloader_load(MISSILE_OBJ, r, &em->r_missile);
@@ -165,6 +168,14 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 		x->flags = ENTITY_MINE_FLAG_INIT;
 	}
 
+	for(i=0;i<BLIMP_COUNT;i++){
+		b = em->blimps+i;
+
+		b->body = NULL;
+		b->owner = NULL;
+		b->flags = BLIMP_FLAG_INIT;
+	}
+
 	// create sound for missles
 	em->sfx_missile = audiomanager_newsfx(am, SFX_MISSLE_FILENAME);
 	
@@ -192,6 +203,14 @@ void entitymanager_shutdown(struct entitymanager* em)
 		}
 	}
 
+	for(i=0;i<BLIMP_COUNT;i++){
+		if(em->blimps[i].flags & BLIMP_FLAG_ENABLED){
+			em->blimps[i].body->setActorFlag(physx::PxActorFlag::eDISABLE_SIMULATION, false);
+			em->blimps[i].body->release();
+		}
+		renderable_deallocate(&em->blimps[i].r_blimp);
+	}
+
 	renderable_deallocate(&em->r_missile);
 	renderable_deallocate(&em->r_mine);
 }
@@ -213,6 +232,12 @@ void entitymanager_render(struct entitymanager* em, struct renderer* r, mat4f wo
 	for (i = 0; i < ENTITY_PICKUP_COUNT; i++)
 		if (em->pickups[i].flags & ENTITY_PICKUP_FLAG_ENABLED)
 			renderable_render(r, &em->pickups[i].r_pickup, (float*)&physx::PxMat44(em->pickups[i].body->getGlobalPose()), worldview, 0);
+
+	for (i=0;i<BLIMP_COUNT;i++){
+		if(em->blimps[i].flags&BLIMP_FLAG_ENABLED){
+			renderable_render(r, &em->blimps[i].r_blimp, (float*)&physx::PxMat44(em->blimps[i].body->getGlobalPose()),worldview,0);
+		}
+	}
 }
 
 void entitymanager_update(struct entitymanager* em, struct vehiclemanager* vm)
@@ -371,7 +396,7 @@ void entitymanager_removemissile(struct entitymanager* em, struct missile* m)
 
 void entitymanager_attachpickup(struct vehicle* v, struct pickup* pu,struct entitymanager* em){
 
-	vec3f spawn,min, max, avg, diff;
+	vec3f min, max, avg, diff;
 	int i;
 	float temp;
 
@@ -677,17 +702,90 @@ void entitymanager_removemine(struct entitymanager* em, struct mine* x){
 	}
 }
 
-struct blimp* entitymanager_newblimp(struct vehicle* v, struct blimp* b,struct entitymanager* em){
+void entitymanager_newblimp(struct vehicle* v,struct entitymanager* em, vec3f pos){
 	vec3f spawn,min, max, avg, diff;
 	int i;
 	float temp;
+	struct blimp* b;
+
+	b=&em->blimps[em->num_blimps];
+	em->num_blimps++;
+	b->owner = v;
+
+	renderable_init(&b->r_blimp, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
+	objloader_load(BLIMP_OBJ, em->r, &b->r_blimp);
+	renderable_sendbuffer(em->r, &b->r_blimp);
+
+	texture_init(&b->diffuse_lap1);
+
+	// find the limits of the loaded mesh
+	vec3f_set(min, FLT_MAX, FLT_MAX, FLT_MAX);
+	vec3f_set(max, -FLT_MAX, -FLT_MAX, -FLT_MAX);
+
+	for (i = 0; (unsigned)i < b->r_blimp.num_verts; i++)
+	{
+		vec3f temp;
+
+		// retrieve vertex from buffer
+		vec3f_copy(temp, b->r_blimp.buf_verts + i*em->r->vertsize[b->r_blimp.type]);
+
+		// check for min and max vector positions
+		if (temp[VX] < min[VX])
+			min[VX] = temp[VX];
+		if (temp[VX] > max[VX])
+			max[VX] = temp[VX];
+
+		if (temp[VY] < min[VY])
+			min[VY] = temp[VY];
+		if (temp[VY] > max[VY])
+			max[VY] = temp[VY];
+
+		if (temp[VZ] < min[VZ])
+			min[VZ] = temp[VZ];
+		if (temp[VZ] > max[VZ])
+			max[VZ] = temp[VZ];
+	}
+
+	// find center point of model
+	vec3f_addn(avg, min, max);
+	vec3f_scale(avg, 0.5f);
+
+	// find dimensions of model
+	vec3f_subtractn(diff, max, min);
+	vec3f_scalen(b->dim_blimp, diff, BLIMP_MESHSCALE);
+
+	// swap x and z to get the correct vehicle dimensions
+	temp = b->dim_blimp[VX];
+	b->dim_blimp[VX] = b->dim_blimp[VZ];
+	b->dim_blimp[VZ] = temp;
+
+	mat4f_scalemul(b->r_blimp.matrix_model, BLIMP_MESHSCALE, BLIMP_MESHSCALE, BLIMP_MESHSCALE);
+	mat4f_rotateymul(b->r_blimp.matrix_model, -1.57080f);
+	mat4f_translatemul(b->r_blimp.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
+
+	texture_loadfile(&b->diffuse_lap1, BLIMP_LAP1_TEXTURE);
+	texture_upload(&b->diffuse_lap1, RENDER_TEXTURE_DIFFUSE);
+	b->r_blimp.textures[RENDER_TEXTURE_DIFFUSE] = &b->diffuse_lap1;
+
+	// find spawn location, this doesnt matter for blimp but had to set to create a body
+	vec3f_copy(b->pos, pos);
+	vec3f_copy(spawn, em->track->up);
+	vec3f_scale(spawn, ENTITY_PICKUP_SPAWNHEIGHT);
+	vec3f_add(b->pos, spawn);
+
+	// create a physics object and add it to the scene
+	b->body = physx::PxCreateDynamic(*em->pm->sdk, physx::PxTransform(b->pos[VX], b->pos[VY], b->pos[VZ]), physx::PxBoxGeometry(b->dim_blimp[VX] * 0.5f, b->dim_blimp[VY] * 0.5f, b->dim_blimp[VZ] * 0.5f), *em->pm->default_material, BLIMP_DENSITY);
+
+	b->flags = ENTITY_MINE_FLAG_ENABLED;
 }
 
 void entitymanager_removeblimp(struct entitymanager* em, struct blimp* b){
 	int i;
-
-	for(i=0;i<VEHICLE_COUNT;i++){
+	em->num_blimps--;
+	for(i=0;i<BLIMP_COUNT;i++){
 		if(b==em->blimps+i){
+			em->blimps[i].body->release();
+			em->blimps[i].flags = BLIMP_FLAG_INIT;
 		}
 	}
 }

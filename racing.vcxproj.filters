@@ -104,9 +104,6 @@
     <ClCompile Include="src\physics\collisions.cpp">
       <Filter>src\physics</Filter>
     </ClCompile>
-    <ClCompile Include="src\objects\blimp.cpp">
-      <Filter>src\objects</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\debug.h">

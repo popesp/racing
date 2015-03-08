@@ -68,6 +68,14 @@
 #define PICKUP_SPAWN_LOC2			40
 #define PICKUP_SPAWN_LOC3			120
 
+#define BLIMP_COUNT					152
+#define	BLIMP_FLAG_ENABLED			0x01
+#define	BLIMP_FLAG_INIT				0x00
+
+#define BLIMP_OBJ					"res/Models/Blimp/blimp.obj"
+#define BLIMP_LAP1_TEXTURE			"res/Models/Blimp/lap_tex/blimp_1.png"
+#define	BLIMP_MESHSCALE				0.2f
+#define	BLIMP_DENSITY				1.f
 
 struct pickup{
 	physx::PxRigidDynamic* body;
@@ -117,6 +125,15 @@ struct blimp{
 	physx::PxRigidDynamic* body;
 	struct vehicle* owner;
 	unsigned char flags;
+
+	struct renderable r_blimp;
+
+	struct texture diffuse_lap1;
+	vec3f dim_blimp;
+
+	physx::PxVec3 blimppos;
+
+	vec3f pos;
 };
 
 struct entitymanager
@@ -146,10 +163,12 @@ struct entitymanager
 	bool pickupatspawn3;
 	int timerspawn3;
 
+	int num_blimps;
+
 	struct missile missiles[ENTITY_MISSILE_COUNT];
 	struct mine mines[ENTITY_MINE_COUNT];
 	struct pickup pickups[ENTITY_PICKUP_COUNT];
-	struct blimp blimps[VEHICLE_COUNT];
+	struct blimp blimps[BLIMP_COUNT];
 };
 
 
@@ -170,7 +189,7 @@ void entitymanager_removepickup(struct entitymanager* em, struct pickup* pu);
 struct mine* entitymanager_newmine(struct entitymanager* em, vec3f dim, struct vehicle* v);
 void entitymanager_removemine(struct entitymanager* em, struct mine* x);
 
-struct blimp* entitymanager_newblimp(struct vehicle* v, struct blimp* b,struct entitymanager* em);
+void entitymanager_newblimp(struct vehicle* v, struct entitymanager* em, vec3f pos);
 void entitymanager_removeblimp(struct entitymanager* em, struct blimp* b);
 
 #endif

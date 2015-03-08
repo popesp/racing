@@ -122,6 +122,8 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 			{
 				printf("Win condition deactivated.\n");
 				game->flags &= ~GAME_FLAG_WINCONDITION;
+
+				//for(i=0;i<)
 			} else
 			{
 				printf("Win condition activated.\n");
@@ -268,10 +270,18 @@ static void update(struct game* game)
 			game->entitymanager.pickups[i].body->setGlobalPose(physx::PxTransform(physx::PxVec3(game->entitymanager.pickups[i].powerpos)));
 
 			//physx::PxMat44 owner_angle()
-			game->entitymanager.pickups[i].body->setAngularDamping(game->entitymanager.pickups[i].owner->body->getAngularDamping());
+			//game->entitymanager.pickups[i].body->setAngularDamping(game->entitymanager.pickups[i].owner->body->getAngularDamping());
 		}
 	}
 
+	//update blimp positions
+	for(i=0;i<BLIMP_COUNT;i++){
+		if(game->entitymanager.blimps[i].owner!=NULL){
+			physx::PxMat44 blimpowner(game->entitymanager.blimps[i].owner->body->getGlobalPose());
+			game->entitymanager.blimps[i].blimppos = blimpowner.transform(physx::PxVec3(-.3f,1.1f,1.5f));
+			game->entitymanager.blimps[i].body->setGlobalPose(physx::PxTransform(physx::PxVec3(game->entitymanager.blimps[i].blimppos)));
+		}
+	}
 
 	//check who has won the game
 	if(game->flags == GAME_FLAG_WINCONDITION){
