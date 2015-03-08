@@ -275,8 +275,10 @@ static void update(struct game* game)
 		}
 	}
 	for (int y = 0; y < ENTITY_PICKUP_COUNT; y++) {
-		if (game->vehiclemanager.em->pickups[y].hit == 1) {
-			entitymanager_attachpickup(game->vehiclemanager.em->pickups[y].temp, &game->vehiclemanager.em->pickups[y],game->vehiclemanager.em);
+		if (game->vehiclemanager.em->pickups[y].hit > -1) {
+			printf("index: %d\n", game->vehiclemanager.em->pickups[y].hit);
+			game->vehiclemanager.em->pickups[y].hit = -1;
+			entitymanager_attachpickup(&game->vehiclemanager.vehicles[game->vehiclemanager.em->pickups[y].hit] , &game->vehiclemanager.em->pickups[y],game->vehiclemanager.em);
 		}
 	}
 

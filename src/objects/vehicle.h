@@ -79,6 +79,8 @@ struct vehicle
 
 	int haspickup;
 
+	int index_in_vm;
+
 	int hit_flag;
 
 	unsigned char flags;

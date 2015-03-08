@@ -107,6 +107,7 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 		v->controller = NULL;
 		v->flags = VEHICLE_FLAG_INIT;
 		v->haspickup = 0;
+		v->index_in_vm = i;
 	}
 }
 
