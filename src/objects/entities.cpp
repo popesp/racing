@@ -17,6 +17,7 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 	em->r = r;
 
 	em->timerspawn1=0;
+	em->timerspawn2=0;
 
 	renderable_init(&em->r_missile, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
 	objloader_load(MISSILE_OBJ, r, &em->r_missile);
@@ -223,13 +224,25 @@ void entitymanager_update(struct entitymanager* em, struct vehiclemanager* vm)
 
 	if(em->pickupatspawn1==false){
 		em->timerspawn1--;
-		printf("%d\n",em->timerspawn1);
+		//printf("%d\n",em->timerspawn1);
 		if(em->timerspawn1==0){
-			entitymanager_newpickup(em, vm->track->pathpoints[100].pos); 
+			entitymanager_newpickup(em, vm->track->pathpoints[PICKUP_SPAWN_LOC1].pos); 
 			em->pickupatspawn1=true;
 			em->timerspawn1 = PICKUP_TIMERS;
 		}
 	}
+
+
+	if(em->pickupatspawn2==false){
+		em->timerspawn2--;
+		//printf("%d\n",em->timerspawn2);
+		if(em->timerspawn2==0){
+			entitymanager_newpickup(em, vm->track->pathpoints[PICKUP_SPAWN_LOC2].pos); 
+			em->pickupatspawn2=true;
+			em->timerspawn2 = PICKUP_TIMERS;
+		}
+	}
+
 
 	//Check what custom collisions happened for each vehicle/entity and deal with them appropriately
 	for (i = 0; i < VEHICLE_COUNT; i++) {
@@ -252,6 +265,10 @@ void entitymanager_update(struct entitymanager* em, struct vehiclemanager* vm)
 		if (vm->em->pickups[i].hit > -1) {
 			printf("index: %d\n", vm->em->pickups[i].hit);
 			entitymanager_attachpickup(&vm->vehicles[vm->em->pickups[i].hit] , &vm->em->pickups[i],vm->em);
+			/////
+			//pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickup;
+
+
 			vm->em->pickups[i].hit = -1;
 		}
 	}
@@ -348,7 +365,9 @@ void entitymanager_attachpickup(struct vehicle* v, struct pickup* pu,struct enti
 	for(int i=0;i<ENTITY_PICKUP_COUNT; i++){
 		if((em->pickups+i)==pu && pu->holdingpu1==true){
 			em->pickupatspawn1=false;
-			printf("pickup was taken\n");
+		}
+		else if((em->pickups+i)==pu && pu->holdingpu2==true){
+			em->pickupatspawn2=false;
 		}
 	}
 
@@ -357,6 +376,22 @@ void entitymanager_attachpickup(struct vehicle* v, struct pickup* pu,struct enti
 	em->pm->scene->removeActor(*pu->body);
 	
 	v->haspickup = pu->typepickup;
+
+
+
+
+
+	///THIS SHIT ISNT WORKING
+	//0=mine, 1=missile, 2=speed
+	if(pu->typepickup==0){
+		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickupMINE;
+	}
+	else if(pu->typepickup==1){
+		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickupMISSILE;
+	}
+	else if(pu->typepickup==2){
+		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickupSPEED;
+	}
 	
 }
 
@@ -377,12 +412,19 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f pos){
 		return NULL;
 
 	pu = em->pickups + i;
-	
 	printf("pickup %d\n", i);
+
+
+	// logic for attaching timers for respawning pickups
 	pu->holdingpu1=false;
+	pu->holdingpu2=false;
 	if(em->timerspawn1==0){
 		pu->holdingpu1=true;
 		em->timerspawn1=PICKUP_TIMERS;
+	}
+	else if(em->timerspawn2==0){
+		pu->holdingpu2=true;
+		em->timerspawn2=PICKUP_TIMERS;
 	}
 
 	// find the limits of the loaded mesh
@@ -437,34 +479,34 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f pos){
 	pu->avg[VY] = avg[VY];
 	pu->avg[VZ] = avg[VZ];
 		// initialize pickup textures, doing it here so no memory leaks
-		texture_init(&pu->diffuse_pickup);
-		texture_loadfile(&pu->diffuse_pickup, PICKUP_MINE_TEXTURE);
-		texture_upload(&pu->diffuse_pickup, RENDER_TEXTURE_DIFFUSE);
+		texture_init(&pu->diffuse_pickupMINE);
+		texture_loadfile(&pu->diffuse_pickupMINE, PICKUP_MINE_TEXTURE);
+		texture_upload(&pu->diffuse_pickupMINE, RENDER_TEXTURE_DIFFUSE);
 
-		texture_init(&pu->diffuse_pickup2);
-		texture_loadfile(&pu->diffuse_pickup2, PICKUP_MISSILE_TEXTURE);
-		texture_upload(&pu->diffuse_pickup2, RENDER_TEXTURE_DIFFUSE);
+		texture_init(&pu->diffuse_pickupMISSILE);
+		texture_loadfile(&pu->diffuse_pickupMISSILE, PICKUP_MISSILE_TEXTURE);
+		texture_upload(&pu->diffuse_pickupMISSILE, RENDER_TEXTURE_DIFFUSE);
 
-		texture_init(&pu->diffuse_pickup3);
-		texture_loadfile(&pu->diffuse_pickup3, PICKUP_SPEED_TEXTURE);
-		texture_upload(&pu->diffuse_pickup3, RENDER_TEXTURE_DIFFUSE);
+		texture_init(&pu->diffuse_pickupSPEED);
+		texture_loadfile(&pu->diffuse_pickupSPEED, PICKUP_SPEED_TEXTURE);
+		texture_upload(&pu->diffuse_pickupSPEED, RENDER_TEXTURE_DIFFUSE);
 
 	int seed = static_cast<int>(time(0));
 	srand(seed);
 	seed = seed%3;
 	if(seed==1){
 		//Missile
-		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickup2;
+		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickupMISSILE;
 		pu->typepickup=1;
 	}
 	else if(seed==2){
 		//Mine
-		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickup;
+		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickupMINE;
 		pu->typepickup=0;
 	}
 	else{
 		//Speed
-		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickup3;
+		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickupSPEED;
 		pu->typepickup=2;
 	}
 

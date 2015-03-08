@@ -56,7 +56,11 @@
 #define	MISSILE_OBJ					"res/models/Projectile/rocket.obj"
 #define	MISSILE_TEXTURE				"res/models/Projectile/rocket_tex.png"
 
-#define PICKUP_TIMERS				500
+#define PICKUP_TIMERS				350
+
+#define PICKUP_SPAWN_LOC1			90
+#define PICKUP_SPAWN_LOC2			40
+
 
 struct pickup{
 	physx::PxRigidDynamic* body;
@@ -71,11 +75,11 @@ struct pickup{
 
 	int hit, set;
 
-	bool holdingpu1;
+	bool holdingpu1, holdingpu2;
 
-	struct texture diffuse_pickup;
-	struct texture diffuse_pickup2;
-	struct texture diffuse_pickup3;
+	struct texture diffuse_pickupMINE;
+	struct texture diffuse_pickupMISSILE;
+	struct texture diffuse_pickupSPEED;
 	struct renderable r_pickup;
 	vec3f dim_pickup;
 
@@ -120,9 +124,11 @@ struct entitymanager
 
 	int sfx_missile;
 
-
 	bool pickupatspawn1;
 	int timerspawn1;
+
+	bool pickupatspawn2;
+	int timerspawn2;
 
 	struct missile missiles[ENTITY_MISSILE_COUNT];
 	struct mine mines[ENTITY_MINE_COUNT];
