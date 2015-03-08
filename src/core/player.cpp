@@ -112,15 +112,15 @@ void aiplayer_updateinput(struct aiplayer* p)
 	if(p->vehicle->haspickup==2){
 		if(p->vehicle->index_track==90 ||p->vehicle->index_track==0){
 
-			printf("HIHIHIHI\n");
-
-			p->controller.buttons[INPUT_BUTTON_A] = INPUT_STATE_DOWN;
+			p->controller.buttons[INPUT_BUTTON_A] = (INPUT_STATE_DOWN | INPUT_STATE_CHANGED);
 
 		}
 	}
 
 	if(p->vehicle->haspickup==0||p->vehicle->haspickup==1){
-		p->controller.buttons[INPUT_BUTTON_A] = 1;
+		if(p->vehicle->index_track%11==1){
+			p->controller.buttons[INPUT_BUTTON_A] = (INPUT_STATE_DOWN | INPUT_STATE_CHANGED);
+		}
 	}
 
 }
