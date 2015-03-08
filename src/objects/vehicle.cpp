@@ -316,8 +316,8 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 			
 
 		//spawn mine
-		if (v->controller->buttons[INPUT_BUTTON_X] == (INPUT_STATE_DOWN | INPUT_STATE_CHANGED))
-			entitymanager_newmine(vm->em, vm->dim, v);
+		/*if (v->controller->buttons[INPUT_BUTTON_X] == (INPUT_STATE_DOWN | INPUT_STATE_CHANGED))
+			entitymanager_newmine(vm->em, vm->dim, v);*/
 	}
 }
 
