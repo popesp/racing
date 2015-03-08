@@ -361,7 +361,7 @@ void entitymanager_attachpickup(struct vehicle* v, struct pickup* pu,struct enti
 }
 
 
-struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f dim){
+struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f dim, vec3f pos){
 	physx::PxTransform pose;
 	physx::PxMat44 mat_pose;
 	struct pickup* pu;
@@ -390,7 +390,7 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f dim){
 	}
 
 	// find spawn location
-	vec3f_copy(pu->pos, em->track->pathpoints[seed].pos);
+	vec3f_copy(pu->pos, pos);
 	vec3f_copy(spawn, em->track->up);
 	vec3f_scale(spawn, ENTITY_PICKUP_SPAWNHEIGHT);
 	vec3f_add(pu->pos, spawn);
