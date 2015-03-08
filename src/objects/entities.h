@@ -64,9 +64,9 @@
 
 #define PICKUP_TIMERS				350
 
-#define PICKUP_SPAWN_LOC1			90
-#define PICKUP_SPAWN_LOC2			40
-#define PICKUP_SPAWN_LOC3			120
+#define PICKUP_SPAWN_LOC1			10
+#define PICKUP_SPAWN_LOC2			70
+#define PICKUP_SPAWN_LOC3			100
 
 
 struct pickup{

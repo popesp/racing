@@ -445,7 +445,7 @@ int game_startup(struct game* game)
 
 	// initialize track object
 	track_init(&game->track, &game->physicsmanager, up);
-	track_loadpointsfile(&game->track, "res/tracks/turn.track");
+	track_loadpointsfile(&game->track, "res/tracks/turn1.track");
 	track_generate(&game->renderer, &game->track);
 	renderable_sendbuffer(&game->renderer, &game->track.r_track);
 
