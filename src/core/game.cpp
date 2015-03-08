@@ -465,7 +465,7 @@ int game_startup(struct game* game)
 	skybox_init(&game->skybox, &game->renderer);
 
 	// initialize track object
-	track_init(&game->track, &game->physicsmanager, up, "res/images/slate.jpg");
+	track_init(&game->track, &game->physicsmanager, up);
 	track_loadpointsfile(&game->track, "res/tracks/turn.track");
 	track_generate(&game->renderer, &game->track);
 	renderable_sendbuffer(&game->renderer, &game->track.r_track);
