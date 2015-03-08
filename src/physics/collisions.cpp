@@ -43,6 +43,7 @@ physx::PxFilterFlags OurFilterShader(physx::PxFilterObjectAttributes attributes0
 		pairFlags |= PxPairFlag::eNOTIFY_TOUCH_FOUND;
 	}
 	else if((filterData0.word0 == FilterGroup::ePickup && filterData1.word0 == FilterGroup::eVehicle)||(filterData1.word0 == FilterGroup::ePickup && filterData0.word0 == FilterGroup::eVehicle)) {
+		pairFlags = PxPairFlag::eTRIGGER_DEFAULT;
 		pairFlags |= PxPairFlag::eNOTIFY_TOUCH_FOUND;
 	}
 	
