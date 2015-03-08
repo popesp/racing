@@ -88,6 +88,7 @@
     <ClCompile Include="src\core\input.cpp" />
     <ClCompile Include="src\core\win.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\objects\blimp.cpp" />
     <ClCompile Include="src\objects\camera.cpp" />
     <ClCompile Include="src\objects\entities.cpp" />
     <ClCompile Include="src\objects\vehicle.cpp" />

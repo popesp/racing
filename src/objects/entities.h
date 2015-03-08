@@ -113,6 +113,12 @@ struct mine{
 	int hit;
 };
 
+struct blimp{
+	physx::PxRigidDynamic* body;
+	struct vehicle* owner;
+	unsigned char flags;
+};
+
 struct entitymanager
 {
 	struct physicsmanager* pm;
@@ -143,6 +149,7 @@ struct entitymanager
 	struct missile missiles[ENTITY_MISSILE_COUNT];
 	struct mine mines[ENTITY_MINE_COUNT];
 	struct pickup pickups[ENTITY_PICKUP_COUNT];
+	struct blimp blimps[VEHICLE_COUNT];
 };
 
 
@@ -162,5 +169,8 @@ void entitymanager_removepickup(struct entitymanager* em, struct pickup* pu);
 
 struct mine* entitymanager_newmine(struct entitymanager* em, vec3f dim, struct vehicle* v);
 void entitymanager_removemine(struct entitymanager* em, struct mine* x);
+
+struct blimp* entitymanager_newblimp(struct vehicle* v, struct blimp* b,struct entitymanager* em);
+void entitymanager_removeblimp(struct entitymanager* em, struct blimp* b);
 
 #endif

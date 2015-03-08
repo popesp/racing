@@ -676,3 +676,18 @@ void entitymanager_removemine(struct entitymanager* em, struct mine* x){
 		}
 	}
 }
+
+struct blimp* entitymanager_newblimp(struct vehicle* v, struct blimp* b,struct entitymanager* em){
+	vec3f spawn,min, max, avg, diff;
+	int i;
+	float temp;
+}
+
+void entitymanager_removeblimp(struct entitymanager* em, struct blimp* b){
+	int i;
+
+	for(i=0;i<VEHICLE_COUNT;i++){
+		if(b==em->blimps+i){
+		}
+	}
+}
