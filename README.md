@@ -42,8 +42,6 @@ Left Stick -		Turn
 
 Y -					Debug camera mode
 
-B -					Mine
-
-A -         Projectile
+A -         Use powerup
 
 X -         Spawns pickup somewhere

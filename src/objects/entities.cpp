@@ -404,7 +404,7 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f dim, vec3
 	mat4f_rotateymul(pu->r_pickup.matrix_model, -1.57080f);
 	mat4f_translatemul(pu->r_pickup.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
 
-			// initialize pickup texture
+		// initialize pickup textures, doing it here so no memory leaks
 		texture_init(&pu->diffuse_pickup);
 		texture_loadfile(&pu->diffuse_pickup, PICKUP_MINE_TEXTURE);
 		texture_upload(&pu->diffuse_pickup, RENDER_TEXTURE_DIFFUSE);
@@ -416,7 +416,6 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f dim, vec3
 		texture_init(&pu->diffuse_pickup3);
 		texture_loadfile(&pu->diffuse_pickup3, PICKUP_SPEED_TEXTURE);
 		texture_upload(&pu->diffuse_pickup3, RENDER_TEXTURE_DIFFUSE);
-
 
 	int seed = static_cast<int>(time(0));
 	srand(seed);
@@ -432,7 +431,7 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f dim, vec3
 		pu->typepickup=0;
 	}
 	else{
-		//speed
+		//Speed
 		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickup3;
 		pu->typepickup=2;
 	}
@@ -461,17 +460,12 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f dim, vec3
 void entitymanager_removepickup(struct entitymanager* em, struct pickup* pu){
 	int i;
 
-	//mat4f_scalemul(pu->r_pickup.matrix_model, -PICKUP_MESHSCALE, -PICKUP_MESHSCALE, -PICKUP_MESHSCALE);
-	
 	for(i=0;i<ENTITY_PICKUP_COUNT; i++){
 		if(pu==em->pickups+i){
-
-
-
+			mat4f_scalemul(em->pickups[i].r_pickup.matrix_model, 1/PICKUP_MESHSCALE, 1/PICKUP_MESHSCALE, 1/PICKUP_MESHSCALE);
+			
 			em->pickups[i].body->release();
 			em->pickups[i].flags = ENTITY_PICKUP_FLAG_INIT;
-
-			
 		}
 	}
 }
