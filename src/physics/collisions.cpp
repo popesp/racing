@@ -123,12 +123,12 @@ void CustomCollisions::onContact(const physx::PxContactPairHeader& pairHeader, c
 				//printf("Pickup collision confirmed\n");
 				physx::PxActor* vehicleActor = pairHeader.actors[1];
 				struct vehicle* v = (struct vehicle*)vehicleActor->userData;
-				if (v->haspickup == 0) {
-					int seed = static_cast<int>(time(0));
-					srand(seed);
-					seed = seed%3;
-					v->haspickup = seed+1;
-				}
+				
+				int seed = static_cast<int>(time(0));
+				srand(seed);
+				seed = seed%3;
+				v->haspickup = seed+1;
+				
 
 				physx::PxActor* pickupActor = pairHeader.actors[0];
 				struct pickup* pu = (struct pickup*)pickupActor->userData;
@@ -138,12 +138,12 @@ void CustomCollisions::onContact(const physx::PxContactPairHeader& pairHeader, c
 				//printf("Pickup collision confirmed\n");
 				physx::PxActor* vehicleActor = pairHeader.actors[0];
 				struct vehicle* v = (struct vehicle*)vehicleActor->userData;
-				if (v->haspickup == 0) {
-					int seed = static_cast<int>(time(0));
-					srand(seed);
-					seed = seed%3;
-					v->haspickup = seed+1;
-				}
+				
+				int seed = static_cast<int>(time(0));
+				srand(seed);
+				seed = seed%3;
+				v->haspickup = seed+1;
+				
 
 				physx::PxActor* pickupActor = pairHeader.actors[1];
 				struct pickup* pu = (struct pickup*)pickupActor->userData;
