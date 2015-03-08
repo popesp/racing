@@ -314,7 +314,9 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 
 			unsigned int seed = static_cast<unsigned int>(time(0))% 100;
 			srand(seed);
-			entitymanager_newpickup(vm->em, vm->dim, vm->track->pathpoints[seed].pos);
+			//entitymanager_newpickup(vm->em, vm->dim, vm->track->pathpoints[seed].pos);
+
+			entitymanager_newpickup(vm->em, vm->dim, vm->track->pathpoints[0].pos);
 		}
 			
 

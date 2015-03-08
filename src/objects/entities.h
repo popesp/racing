@@ -116,7 +116,7 @@ struct entitymanager
 void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, struct renderer* r,struct audiomanager* am, struct track* t);
 void entitymanager_shutdown(struct entitymanager* em);
 
-void entitymanager_update(struct entitymanager* em);
+void entitymanager_update(struct entitymanager* em, struct vehiclemanager* vm);
 
 struct missile* entitymanager_newmissile(struct entitymanager* em, struct vehicle* v, vec3f dim);
 void entitymanager_removemissile(struct entitymanager* em, struct missile* m);

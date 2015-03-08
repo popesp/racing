@@ -239,66 +239,42 @@ static void update(struct game* game)
 	// update the vehicles
 	vehiclemanager_update(&game->vehiclemanager);
 
+
+
+	// reset hit flags
+	for (i = 0; i < VEHICLE_COUNT; i++) {
+		game->vehiclemanager.vehicles[i].hit_flag = 0;
+	}
+	for (i = 0; i < ENTITY_MISSILE_COUNT; i++) {
+		game->vehiclemanager.em->missiles[i].hit = 0;
+	}
+	for (i = 0; i < ENTITY_MINE_COUNT; i++) {
+		game->vehiclemanager.em->mines[i].hit = 0;
+	}
+	physicsmanager_update(&game->physicsmanager, GAME_SPU);
+
 	// update the game objects
-	entitymanager_update(&game->entitymanager);
+	entitymanager_update(&game->entitymanager, &game->vehiclemanager);
 
 	player_updatecamera(&game->player);
 
-	// simulate
-	for (int h = 0; h < 152; h++) {
-		game->vehiclemanager.vehicles[h].hit_flag = 0;
-	}
-	for (int y = 0; y < ENTITY_MISSILE_COUNT; y++) {
-		game->vehiclemanager.em->missiles[y].hit = 0;
-	}
-	for (int y = 0; y < ENTITY_MINE_COUNT; y++) {
-		game->vehiclemanager.em->mines[y].hit = 0;
-	}
-
-	physicsmanager_update(&game->physicsmanager, GAME_SPU);
-
-	//Check what custom collisions happened for each vehicle/entity and deal with them appropriately
-	for (int y = 0; y < 152; y++) {
-		if (game->vehiclemanager.vehicles[y].hit_flag == 1) {
-			game->vehiclemanager.vehicles[y].body->clearForce();
-			physx::PxRigidBodyExt::addForceAtLocalPos(*game->vehiclemanager.vehicles[y].body, physx::PxVec3(0, 5000, 0), physx::PxVec3(0,0,0));
-		}
-	}
-	for (int y = 0; y < ENTITY_MISSILE_COUNT; y++) {
-		if (game->vehiclemanager.em->missiles[y].hit == 1) {
-			entitymanager_removemissile(game->vehiclemanager.em, &game->vehiclemanager.em->missiles[y]);
-		}
-	}
-	for (int y = 0; y < ENTITY_MISSILE_COUNT; y++) {
-		if (game->vehiclemanager.em->mines[y].hit == 1) {
-			entitymanager_removemine(game->vehiclemanager.em, &game->vehiclemanager.em->mines[y]);
-		}
-	}
-	for (int y = 0; y < ENTITY_PICKUP_COUNT; y++) {
-		if (game->vehiclemanager.em->pickups[y].hit > -1) {
-			printf("index: %d\n", game->vehiclemanager.em->pickups[y].hit);
-			entitymanager_attachpickup(&game->vehiclemanager.vehicles[game->vehiclemanager.em->pickups[y].hit] , &game->vehiclemanager.em->pickups[y],game->vehiclemanager.em);
-			game->vehiclemanager.em->pickups[y].hit = -1;
-		}
-	}
-
-	if(game->flags == GAME_FLAG_WINCONDITION){
-		checkwin(game);
-		checkplace(game);
-	}
-
 	
-	//update pickup position if has
+
+	//update pickup position if vehicle is holding
 	for(i = 0; i < ENTITY_PICKUP_COUNT; i++){
 		if(game->entitymanager.pickups[i].owner!=NULL){
-
 			physx::PxMat44 owner_vehicle(game->entitymanager.pickups[i].owner->body->getGlobalPose());
 			physx::PxVec3 powerpos = owner_vehicle.transform(physx::PxVec3(-.3f, -.1f, 1.1f));
-			
 			game->entitymanager.pickups[i].body->setGlobalPose(physx::PxTransform(physx::PxVec3(powerpos)));
 		}
 	}
 
+
+	//check who has won the game
+	if(game->flags == GAME_FLAG_WINCONDITION){
+		checkwin(game);
+		checkplace(game);
+	}
 
 	// check for window close messages
 	if (glfwWindowShouldClose(game->window.w))

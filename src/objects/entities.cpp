@@ -265,10 +265,38 @@ void entitymanager_render(struct entitymanager* em, struct renderer* r, mat4f wo
 			renderable_render(r, &em->r_pickup, (float*)&physx::PxMat44(em->pickups[i].body->getGlobalPose()), worldview, 0);
 }
 
-void entitymanager_update(struct entitymanager* em)
+void entitymanager_update(struct entitymanager* em, struct vehiclemanager* vm)
 {
 	int i;
 	physx::PxTransform pose;
+
+
+	//Check what custom collisions happened for each vehicle/entity and deal with them appropriately
+	for (i = 0; i < VEHICLE_COUNT; i++) {
+		if (vm->vehicles[i].hit_flag == 1) {
+			vm->vehicles[i].body->clearForce();
+			physx::PxRigidBodyExt::addForceAtLocalPos(*vm->vehicles[i].body, physx::PxVec3(0, 1500, 0), physx::PxVec3(0,0,0));
+		}
+	}
+	for (i = 0; i < ENTITY_MISSILE_COUNT; i++) {
+		if (vm->em->missiles[i].hit == 1) {
+			entitymanager_removemissile(vm->em, &vm->em->missiles[i]);
+		}
+	}
+	for (i = 0; i < ENTITY_MINE_COUNT; i++) {
+		if (vm->em->mines[i].hit == 1) {
+			entitymanager_removemine(vm->em, &vm->em->mines[i]);
+		}
+	}
+	for (i = 0; i < ENTITY_PICKUP_COUNT; i++) {
+		if (vm->em->pickups[i].hit > -1) {
+			printf("index: %d\n", vm->em->pickups[i].hit);
+			entitymanager_attachpickup(&vm->vehicles[vm->em->pickups[i].hit] , &vm->em->pickups[i],vm->em);
+			vm->em->pickups[i].hit = -1;
+		}
+	}
+
+
 	for (i = 0; i < ENTITY_MISSILE_COUNT; i++)
 		if (em->missiles[i].flags & ENTITY_MISSILE_FLAG_ENABLED)
 		{
@@ -286,6 +314,8 @@ void entitymanager_update(struct entitymanager* em)
 			
 			audiomanager_setsoundposition(em->missiles[i].missle_channel, em->missiles[i].pos);
 		}
+
+
 }
 
 struct missile* entitymanager_newmissile(struct entitymanager* em, struct vehicle* v, vec3f dim)
