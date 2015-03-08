@@ -9,7 +9,7 @@
 #include	"../audio/audio.h"
 
 #define	ENTITY_MISSILE_COUNT		32
-#define ENTITY_PICKUP_COUNT			100
+#define ENTITY_PICKUP_COUNT			17
 #define ENTITY_MINE_COUNT			1000
 
 #define	ENTITY_MISSILE_DENSITY		1.f
@@ -48,6 +48,7 @@
 #define PICKUP_OBJ					"res/models/powerup/powerup.obj"
 #define PICKUP_MISSILE_TEXTURE		"res/models/powerup/powerup_rocketUV.png"
 #define	PICKUP_MINE_TEXTURE			"res/models/powerup/powerup_mineUV.png"
+#define	PICKUP_SPEED_TEXTURE		"res/models/powerup/powerup_speedUV.png"
 
 #define	MINE_OBJ					"res/models/mine/mine.obj"
 #define	MINE_TEXTURE				"res/models/mine/mineUV.png"
@@ -65,6 +66,15 @@ struct pickup{
 	vec3f pos;
 
 	int hit;
+
+	struct texture diffuse_pickup;
+	struct texture diffuse_pickup2;
+	struct texture diffuse_pickup3;
+	struct renderable r_pickup;
+	vec3f dim_pickup;
+
+	//0=mine, 1=missile, 2=speed
+	int typepickup;
 };
 
 struct missile
@@ -91,17 +101,14 @@ struct entitymanager
 	struct physicsmanager* pm;
 	struct audiomanager* am;
 	struct track* track;
+	struct renderer* r;
 
 	struct renderable r_missile;
 	struct renderable r_mine;
-	struct renderable r_pickup;
 
 	vec3f dim_missile;
-	vec3f dim_pickup;
 	vec3f dim_mine;
 
-	struct texture diffuse_pickup;
-	struct texture diffuse_pickup2;
 	struct texture diffuse_missile;
 	struct texture diffuse_mine;
 

@@ -6,6 +6,107 @@
 #include	"../render/objloader.h"
 
 
+static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float speed)
+{
+	vec3f force;
+
+	if (v->controller != NULL && v->controller->flags & INPUT_FLAG_ENABLED)
+	{
+		int i;
+
+		// if at least one raycast is touching the ground, apply an acceleration force
+		for (i = 0; i < VEHICLE_COUNT_RAYCASTS; i++)
+			if (v->ray_touch[i])
+			{
+
+				int nitrous = 1;
+
+				if (v->boost > 0) {
+					printf("time remaining on boost: %d\n", v->boost);
+					v->boost = v->boost-1;
+					nitrous = 2;
+				}
+
+				vec3f_set(force, VEHICLE_FORWARD);
+				vec3f_scale(force, -VEHICLE_ACCELERATION * v->controller->axes[INPUT_AXIS_TRIGGERS]*nitrous);
+
+				physx::PxRigidBodyExt::addLocalForceAtLocalPos(*v->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, 0.f));
+
+				break;
+			}
+
+		// turning force
+		vec3f_set(force, VEHICLE_RIGHT);
+		vec3f_scale(force, VEHICLE_TURNFORCE * v->controller->axes[INPUT_AXIS_LEFT_LR]);
+
+		// TODO: this doesnt quite work right
+		if (v->controller->axes[INPUT_AXIS_TRIGGERS] > 0.1f && speed < 0.f)
+			vec3f_negate(force);
+		
+		physx::PxRigidBodyExt::addLocalForceAtLocalPos(*v->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, -vm->dim[VZ]/2.f));
+		
+		// reset button
+		if (v->controller->buttons[INPUT_BUTTON_BACK] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN)){
+			vehicle_reset(vm, v);
+		}
+
+		// firing a projectile
+		if (v->controller->buttons[INPUT_BUTTON_A] == (INPUT_STATE_DOWN | INPUT_STATE_CHANGED))
+		{
+
+			//0=mine, 1=missile, 2=speed
+			if (v->haspickup == 0) {
+				entitymanager_newmine(vm->em, vm->dim, v);
+				v->haspickup = 0;
+				for(int u = 0; u < ENTITY_PICKUP_COUNT; u++) {
+					if (vm->em->pickups[u].owner == v) {
+						vm->em->pickups[u].owner = NULL;
+						entitymanager_removepickup(vm->em, &vm->em->pickups[u]);
+					}
+				}
+			}
+			else if (v->haspickup == 1) {
+				entitymanager_newmissile(vm->em, v, vm->dim);
+				v->haspickup = 0;
+				for(int u = 0; u < ENTITY_PICKUP_COUNT; u++) {
+					if (vm->em->pickups[u].owner == v) {
+						vm->em->pickups[u].owner = NULL;
+						entitymanager_removepickup(vm->em, &vm->em->pickups[u]);
+					}
+				}
+			}
+			else if (v->haspickup == 2) {
+				v->boost = 180;
+				v->haspickup = 0;
+				for(int u = 0; u < ENTITY_PICKUP_COUNT; u++) {
+					if (vm->em->pickups[u].owner == v) {
+						vm->em->pickups[u].owner = NULL;
+						entitymanager_removepickup(vm->em, &vm->em->pickups[u]);
+					}
+				}
+			}
+			else if (v->haspickup == 3) {
+				
+			}
+		}
+
+		//spawn pickup
+		if (v->controller->buttons[INPUT_BUTTON_B] == (INPUT_STATE_DOWN | INPUT_STATE_CHANGED)){
+
+			unsigned int seed = static_cast<unsigned int>(time(0))% 100;
+			srand(seed);
+			//entitymanager_newpickup(vm->em, vm->dim, vm->track->pathpoints[seed].pos);
+
+			entitymanager_newpickup(vm->em, vm->dim, vm->track->pathpoints[0].pos);
+		}
+			
+
+		//spawn mine
+		/*if (v->controller->buttons[INPUT_BUTTON_X] == (INPUT_STATE_DOWN | INPUT_STATE_CHANGED))
+			entitymanager_newmine(vm->em, vm->dim, v);*/
+	}
+}
+
 void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm, struct entitymanager* em, struct audiomanager* am, struct renderer* r, struct track* t)
 {
 	vec3f min, max, avg, diff;
@@ -223,107 +324,6 @@ static float getspeed(struct vehicle* v)
 	mat4f_transformvec3f(forward, (float*)&transform);
 
 	return vec3f_dot(vel, forward);
-}
-
-static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float speed)
-{
-	vec3f force;
-
-	if (v->controller != NULL && v->controller->flags & INPUT_FLAG_ENABLED)
-	{
-		int i;
-
-		// if at least one raycast is touching the ground, apply an acceleration force
-		for (i = 0; i < VEHICLE_COUNT_RAYCASTS; i++)
-			if (v->ray_touch[i])
-			{
-
-				int nitrous = 1;
-
-				if (v->boost > 0) {
-					printf("time remaining on boost: %d\n", v->boost);
-					v->boost = v->boost-1;
-					nitrous = 2;
-				}
-
-				vec3f_set(force, VEHICLE_FORWARD);
-				vec3f_scale(force, -VEHICLE_ACCELERATION * v->controller->axes[INPUT_AXIS_TRIGGERS]*nitrous);
-
-				physx::PxRigidBodyExt::addLocalForceAtLocalPos(*v->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, 0.f));
-
-				break;
-			}
-
-		// turning force
-		vec3f_set(force, VEHICLE_RIGHT);
-		vec3f_scale(force, VEHICLE_TURNFORCE * v->controller->axes[INPUT_AXIS_LEFT_LR]);
-
-		// TODO: this doesnt quite work right
-		if (v->controller->axes[INPUT_AXIS_TRIGGERS] > 0.1f && speed < 0.f)
-			vec3f_negate(force);
-		
-		physx::PxRigidBodyExt::addLocalForceAtLocalPos(*v->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, -vm->dim[VZ]/2.f));
-		
-		// reset button
-		if (v->controller->buttons[INPUT_BUTTON_BACK] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN)){
-			vehicle_reset(vm, v);
-		}
-
-		// firing a projectile
-		if (v->controller->buttons[INPUT_BUTTON_A] == (INPUT_STATE_DOWN | INPUT_STATE_CHANGED))
-		{
-			printf("powerup#: %d\n", v->haspickup);
-			if (v->haspickup == 0) {
-				printf("Nope\n");
-			}
-			else if (v->haspickup == 1) {
-				entitymanager_newmissile(vm->em, v, vm->dim);
-				v->haspickup = 0;
-				for(int u = 0; u < ENTITY_PICKUP_COUNT; u++) {
-					if (vm->em->pickups[u].owner == v) {
-						vm->em->pickups[u].owner = NULL;
-						entitymanager_removepickup(vm->em, &vm->em->pickups[u]);
-					}
-				}
-			}
-			else if (v->haspickup == 2) {
-				entitymanager_newmine(vm->em, vm->dim, v);
-				v->haspickup = 0;
-				for(int u = 0; u < ENTITY_PICKUP_COUNT; u++) {
-					if (vm->em->pickups[u].owner == v) {
-						vm->em->pickups[u].owner = NULL;
-						entitymanager_removepickup(vm->em, &vm->em->pickups[u]);
-					}
-				}
-			}
-			else if (v->haspickup == 3) {
-				v->boost = 180;
-				v->haspickup = 0;
-				for(int u = 0; u < ENTITY_PICKUP_COUNT; u++) {
-					if (vm->em->pickups[u].owner == v) {
-						vm->em->pickups[u].owner = NULL;
-						entitymanager_removepickup(vm->em, &vm->em->pickups[u]);
-					}
-				}
-			}
-			//audiomanager_playsfx(vm->am, vm->sfx_missile, v->pos, 0);
-		}
-
-		//spawn pickup
-		if (v->controller->buttons[INPUT_BUTTON_B] == (INPUT_STATE_DOWN | INPUT_STATE_CHANGED)){
-
-			unsigned int seed = static_cast<unsigned int>(time(0))% 100;
-			srand(seed);
-			//entitymanager_newpickup(vm->em, vm->dim, vm->track->pathpoints[seed].pos);
-
-			entitymanager_newpickup(vm->em, vm->dim, vm->track->pathpoints[0].pos);
-		}
-			
-
-		//spawn mine
-		/*if (v->controller->buttons[INPUT_BUTTON_X] == (INPUT_STATE_DOWN | INPUT_STATE_CHANGED))
-			entitymanager_newmine(vm->em, vm->dim, v);*/
-	}
 }
 
 void vehiclemanager_update(struct vehiclemanager* vm)

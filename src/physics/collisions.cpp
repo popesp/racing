@@ -127,7 +127,7 @@ void CustomCollisions::onContact(const physx::PxContactPairHeader& pairHeader, c
 				int seed = static_cast<int>(time(0));
 				srand(seed);
 				seed = seed%3;
-				v->haspickup = seed+1;
+				//v->haspickup = seed+1;
 				
 
 				physx::PxActor* pickupActor = pairHeader.actors[0];
@@ -142,7 +142,7 @@ void CustomCollisions::onContact(const physx::PxContactPairHeader& pairHeader, c
 				int seed = static_cast<int>(time(0));
 				srand(seed);
 				seed = seed%3;
-				v->haspickup = seed+1;
+				//v->haspickup = seed+1;
 				
 
 				physx::PxActor* pickupActor = pairHeader.actors[1];
