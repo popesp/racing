@@ -67,7 +67,7 @@ struct pickup{
 
 	physx::PxVec3 powerpos;
 
-	int hit;
+	int hit, set;
 
 	struct texture diffuse_pickup;
 	struct texture diffuse_pickup2;

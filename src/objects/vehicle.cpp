@@ -62,7 +62,6 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 					if (vm->em->pickups[u].owner == v) {
 						
 						entitymanager_removepickup(vm->em, &vm->em->pickups[u]);
-						vm->em->pickups[u].owner = NULL;
 					}
 				}
 			}
@@ -72,7 +71,6 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 				for(int u = 0; u < ENTITY_PICKUP_COUNT; u++) {
 					if (vm->em->pickups[u].owner == v) {
 						entitymanager_removepickup(vm->em, &vm->em->pickups[u]);
-						vm->em->pickups[u].owner = NULL;
 					}
 				}
 			}
@@ -82,12 +80,11 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 				for(int u = 0; u < ENTITY_PICKUP_COUNT; u++) {
 					if (vm->em->pickups[u].owner == v) {
 						entitymanager_removepickup(vm->em, &vm->em->pickups[u]);
-						vm->em->pickups[u].owner = NULL;
 					}
 				}
 			}
 			else if (v->haspickup == 3) {
-				
+				//new pickup
 			}
 		}
 

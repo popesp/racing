@@ -402,7 +402,11 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f dim, vec3
 
 	mat4f_scalemul(pu->r_pickup.matrix_model, PICKUP_MESHSCALE, PICKUP_MESHSCALE, PICKUP_MESHSCALE);
 	mat4f_rotateymul(pu->r_pickup.matrix_model, -1.57080f);
-	mat4f_translatemul(pu->r_pickup.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
+
+	if(pu->set!=1){
+		mat4f_translatemul(pu->r_pickup.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
+	}
+	pu->set=1;
 
 	pu->avg[VX] = avg[VX];
 	pu->avg[VY] = avg[VY];
@@ -442,13 +446,12 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f dim, vec3
 	// find spawn location
 	vec3f_copy(pu->pos, pos);
 	vec3f_copy(spawn, em->track->up);
-	vec3f_scale(spawn, ENTITY_PICKUP_SPAWNHEIGHT);
+	//vec3f_scale(spawn, ENTITY_PICKUP_SPAWNHEIGHT);
 	vec3f_add(pu->pos, spawn);
-	vec3f_add(pu->pos, dim);
+	//vec3f_add(pu->pos, dim);
 
 	// create a physics object and add it to the scene
 	pu->body = physx::PxCreateDynamic(*em->pm->sdk, physx::PxTransform(pu->pos[VX], pu->pos[VY], pu->pos[VZ]), physx::PxBoxGeometry(pu->dim_pickup[VX] * 0.5f, pu->dim_pickup[VY] * 0.5f, pu->dim_pickup[VZ] * 0.5f), *em->pm->default_material, ENTITY_PICKUP_DENSITY);
-	//pu->body->setActorFlag(physx::PxActorFlag::eDISABLE_SIMULATION, true);
 	setupFiltering(pu->body, FilterGroup::ePickup, FilterGroup::ePickup);
 	pu->body->setRigidBodyFlag(physx::PxRigidBodyFlag::eENABLE_CCD, true);
 	pu->body->userData = pu;
@@ -466,16 +469,17 @@ void entitymanager_removepickup(struct entitymanager* em, struct pickup* pu){
 	for(i=0;i<ENTITY_PICKUP_COUNT; i++){
 		if(pu==em->pickups+i){
 			
-			physx::PxMat44 owner_vehicle(em->pickups[i].owner->body->getGlobalPose());
-			em->pickups[i].powerpos = owner_vehicle.transform(physx::PxVec3(.3f, .1f, -1.1f));
-			em->pickups[i].body->setGlobalPose(physx::PxTransform(physx::PxVec3(em->pickups[i].powerpos)));
+			//physx::PxMat44 owner_vehicle(em->pickups[i].owner->body->getGlobalPose());
+			//em->pickups[i].powerpos = owner_vehicle.transform(physx::PxVec3(.3f, .1f, -1.1f));
+			//em->pickups[i].body->setGlobalPose(physx::PxTransform(physx::PxVec3(em->pickups[i].powerpos)));
 
-			mat4f_translatemul(pu->r_pickup.matrix_model, 1/-pu->avg[VX], 1/-pu->avg[VY], 1/-pu->avg[VZ]);
-			mat4f_rotateymul(pu->r_pickup.matrix_model, 1/-1.57080f);
+			mat4f_translatemul(em->pickups[i].r_pickup.matrix_model, 1/-pu->avg[VX], 1/-pu->avg[VY], 1/-pu->avg[VZ]);
+			mat4f_rotateymul(em->pickups[i].r_pickup.matrix_model, 1/-1.57080f);
 			mat4f_scalemul(em->pickups[i].r_pickup.matrix_model, 1/PICKUP_MESHSCALE, 1/PICKUP_MESHSCALE, 1/PICKUP_MESHSCALE);
 			
 			em->pickups[i].body->release();
 			em->pickups[i].flags = ENTITY_PICKUP_FLAG_INIT;
+			em->pickups[i].owner = NULL;
 		}
 	}
 }
