@@ -122,7 +122,7 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 
 	int seed = static_cast<int>(time(0));
 	srand(seed);
-	seed= seed*89;
+	seed= seed;
 
 	// initialize vehicle mesh
 	renderable_init(&vm->r_vehicle, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
@@ -288,7 +288,7 @@ FMOD_RESULT F_CALLBACK eng_started(FMOD_CHANNEL *channel, FMOD_CHANNEL_CALLBACKT
 	 FMOD_Channel_GetUserData(channel, (void**)&v);
 	//audiomanager_playsfx(vm->am,vm->sfx_engineloop,v->pos,0);
 	if (type == FMOD_CHANNEL_CALLBACKTYPE_END) {
-		printf("engine startup END\n");
+		//printf("engine startup END\n");
 		v->engine_channel = audiomanager_playsfx(v->vm->am,v->vm->sfx_engineloop,v->pos,-1,0.25);
 		
 
@@ -351,7 +351,7 @@ void vehiclemanager_update(struct vehiclemanager* vm)
 
 		// update track path index
 		v->index_track = track_closestindex(vm->track, v->pos, v->index_track);
-
+		//printf("%d\n", v->index_track);
 		// reset vehicle if it leaves the track
 		vec3f_subtractn(dist, v->pos, vm->track->pathpoints[v->index_track].pos);
 		if (vec3f_length(dist) > vm->track->dist_boundary)

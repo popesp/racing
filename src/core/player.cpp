@@ -66,7 +66,7 @@ void aiplayer_init(struct aiplayer* p, struct vehiclemanager* vm, int index_trac
 	p->vehicle->checkpoint1 = false;
 	p->vehicle->checkpoint2 = false;
 
-	p->vehicle->haspickup = 0;
+	p->vehicle->haspickup = 100;
 }
 
 
@@ -107,6 +107,22 @@ void aiplayer_updateinput(struct aiplayer* p)
 
 	//-0.8f 2fast4me
 	p->controller.axes[INPUT_AXIS_TRIGGERS] = -0.8f;
+
+	//0=mine, 1=missile, 2=speed
+	if(p->vehicle->haspickup==2){
+		if(p->vehicle->index_track==90 ||p->vehicle->index_track==0){
+
+			printf("HIHIHIHI\n");
+
+			p->controller.buttons[INPUT_BUTTON_A] = INPUT_STATE_DOWN;
+
+		}
+	}
+
+	if(p->vehicle->haspickup==0||p->vehicle->haspickup==1){
+		p->controller.buttons[INPUT_BUTTON_A] = 1;
+	}
+
 }
 
 
