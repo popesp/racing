@@ -266,6 +266,9 @@ static void update(struct game* game)
 			physx::PxMat44 owner_vehicle(game->entitymanager.pickups[i].owner->body->getGlobalPose());
 			game->entitymanager.pickups[i].powerpos = owner_vehicle.transform(physx::PxVec3(-.3f, -.1f, 1.1f));
 			game->entitymanager.pickups[i].body->setGlobalPose(physx::PxTransform(physx::PxVec3(game->entitymanager.pickups[i].powerpos)));
+
+			//physx::PxMat44 owner_angle()
+			game->entitymanager.pickups[i].body->setAngularDamping(game->entitymanager.pickups[i].owner->body->getAngularDamping());
 		}
 	}
 
