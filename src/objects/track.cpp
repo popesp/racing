@@ -25,7 +25,7 @@ static vec3f segment_nor[TRACK_SEGMENT_VERTCOUNT] = {
 	{0.f, -1.f, 0.f} };
 
 
-void track_init(struct track* t, struct physicsmanager* pm, vec3f up, const char* file_normal)
+void track_init(struct track* t, struct physicsmanager* pm, vec3f up)
 {
 	(void)pm;
 
@@ -46,7 +46,7 @@ void track_init(struct track* t, struct physicsmanager* pm, vec3f up, const char
 	t->r_track.material.shn = 100.f;
 
 	texture_init(&t->normal);
-	texture_loadfile(&t->normal, file_normal);
+	texture_loadfile(&t->normal, TRACK_TEXT_SLATE);
 	texture_upload(&t->normal, RENDER_TEXTURE_NORMAL);
 	t->r_track.textures[RENDER_TEXTURE_NORMAL] = &t->normal;
 

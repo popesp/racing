@@ -17,6 +17,7 @@
 #define	TRACK_FLAG_INIT			0x00
 #define	TRACK_FLAG_LOOPED		0x01
 
+#define TRACK_TEXT_SLATE		"res/images/slate.jpg"
 
 struct physicsmanager;
 
@@ -61,7 +62,7 @@ struct track
 };
 
 
-void track_init(struct track* t, struct physicsmanager* pm, vec3f up, const char* file_normal);
+void track_init(struct track* t, struct physicsmanager* pm, vec3f up);
 void track_delete(struct track*);
 
 
