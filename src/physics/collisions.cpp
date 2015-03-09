@@ -46,7 +46,9 @@ physx::PxFilterFlags OurFilterShader(physx::PxFilterObjectAttributes attributes0
 		pairFlags = PxPairFlag::eTRIGGER_DEFAULT;
 		pairFlags |= PxPairFlag::eNOTIFY_TOUCH_FOUND;
 	}
-	
+	else if((filterData0.word0 == FilterGroup::ePickup && filterData1.word0 == FilterGroup::eProjectile)||(filterData1.word0 == FilterGroup::ePickup && filterData0.word0 == FilterGroup::eProjectile)) {
+		return PxFilterFlag::eSUPPRESS;
+	}
 	return PxFilterFlag::eDEFAULT;
 }
 void missileHit(struct vehicle* v) {
