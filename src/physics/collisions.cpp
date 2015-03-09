@@ -49,6 +49,10 @@ physx::PxFilterFlags OurFilterShader(physx::PxFilterObjectAttributes attributes0
 	else if((filterData0.word0 == FilterGroup::ePickup && filterData1.word0 == FilterGroup::eProjectile)||(filterData1.word0 == FilterGroup::ePickup && filterData0.word0 == FilterGroup::eProjectile)) {
 		return PxFilterFlag::eSUPPRESS;
 	}
+	else if((filterData0.word0 == FilterGroup::ePickup && filterData1.word0 == FilterGroup::eMine)||(filterData1.word0 == FilterGroup::ePickup && filterData0.word0 == FilterGroup::eMine)) {
+		return PxFilterFlag::eSUPPRESS;
+	}
+
 	return PxFilterFlag::eDEFAULT;
 }
 void missileHit(struct vehicle* v) {
@@ -160,17 +164,17 @@ void CustomCollisions::onContact(const physx::PxContactPairHeader& pairHeader, c
 	}
 }
 
-void resethitflags(struct vehiclemanager* vm, struct entitymanager* em, int ai){
+void resethitflags(struct vehiclemanager* vm, struct entitymanager* em){
 
 	int i;
 
-	for (i = 0; i <= ai; i++) {
+	for (i = 0; i < 152; i++) {
 		vm->vehicles[i].hit_flag = 0;
 	}
-	for (i = 0; i <= em->num_missiles; i++) {
+	for (i = 0; i < 32; i++) {
 		em->missiles[i].hit = 0;
 	}
-	for (i = 0; i <= em->num_mines; i++) {
+	for (i = 0; i < 1000; i++) {
 		em->mines[i].hit = 0;
 	}
 }

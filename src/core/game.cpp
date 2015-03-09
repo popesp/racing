@@ -243,7 +243,18 @@ static void update(struct game* game)
 	// update the vehicles
 	vehiclemanager_update(&game->vehiclemanager);
 
-	resethitflags(&game->vehiclemanager, &game->entitymanager,game->num_aiplayers+1);
+	resethitflags(&game->vehiclemanager, &game->entitymanager);
+
+	/*for (int i = 0; i < 152; i++) {
+		game->vehiclemanager.vehicles[i].hit_flag = 0;
+	}
+	for (int p = 0; p < ENTITY_MISSILE_COUNT; p++) {
+		game->vehiclemanager.em->missiles[p].hit = 0;
+	}
+	for (int p = 0; p < ENTITY_MINE_COUNT; p++) {
+		game->vehiclemanager.em->mines[p].hit = 0;
+	}*/
+
 
 	physicsmanager_update(&game->physicsmanager, GAME_SPU);
 
