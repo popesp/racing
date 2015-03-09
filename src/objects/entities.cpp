@@ -473,7 +473,6 @@ void entitymanager_removemissile(struct entitymanager* em, struct missile* m)
 		}	
 }
 
-
 void entitymanager_attachpickup(struct vehicle* v, struct pickup* pu,struct entitymanager* em){
 
 	vec3f min, max, avg, diff;
@@ -567,13 +566,11 @@ void entitymanager_attachpickup(struct vehicle* v, struct pickup* pu,struct enti
 	}
 	else{
 		//Speed
-
 		texture_loadfile(&pu->diffuse_pickupSPEED, PICKUP_ATTACHED_MINE_TEXTURE);
 		texture_upload(&pu->diffuse_pickupSPEED, RENDER_TEXTURE_DIFFUSE);
 		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickupSPEED;
 	}
 }
-
 
 struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f pos){
 	physx::PxTransform pose;
