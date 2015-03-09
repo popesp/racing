@@ -107,8 +107,8 @@ void entitymanager_shutdown(struct entitymanager* em)
 	for(i=0;i<ENTITY_PICKUP_COUNT;i++){
 		if (em->pickups[i].flags & ENTITY_PICKUP_FLAG_ENABLED){
 			//this is currently broken
-			em->pickups[i].body->setActorFlag(physx::PxActorFlag::eDISABLE_SIMULATION, false);
-			em->pickups[i].body->release();
+			//em->pickups[i].body->setActorFlag(physx::PxActorFlag::eDISABLE_SIMULATION, false);
+			//em->pickups[i].body->release();
 		}
 		renderable_deallocate(&em->pickups[i].r_pickup);
 	}
@@ -624,6 +624,7 @@ struct blimp* entitymanager_placeblimp(struct vehicle* v,struct entitymanager* e
 
 	// create a physics object and add it to the scene
 	b->body = physx::PxCreateDynamic(*em->pm->sdk, pose, physx::PxBoxGeometry(em->dim_blimp[VX] * 0.5f, em->dim_blimp[VY] * 0.5f, em->dim_blimp[VZ] * 0.5f), *em->pm->default_material, BLIMP_DENSITY);
+	b->body->setActorFlag(physx::PxActorFlag::eDISABLE_SIMULATION, true);
 	em->pm->scene->addActor(*b->body);
 
 	b->flags = ENTITY_MINE_FLAG_ENABLED;
@@ -674,6 +675,7 @@ void entitymanager_removeblimp(struct entitymanager* em, struct blimp* b,struct 
 	int i;
 	for(i=0;i<BLIMP_COUNT;i++){
 		if(b==em->blimps+i){
+			b->body->setActorFlag(physx::PxActorFlag::eDISABLE_SIMULATION, false);
 			em->blimps[i].body->release();
 			em->blimps[i].flags = BLIMP_FLAG_INIT;
 			em->blimps[i].owner = NULL;
