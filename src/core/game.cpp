@@ -272,9 +272,9 @@ static void update(struct game* game)
 			game->entitymanager.blimps[i].body->setGlobalPose(physx::PxTransform(physx::PxVec3(game->entitymanager.blimps[i].blimppos)));
 		}
 		if(game->entitymanager.blimps[i].typeblimp==BLIMP_TYPE_LAP){
-			physx::PxMat44 blimpcamera(game->player.camera.pos);
-			game->entitymanager.blimps[i].blimppos = blimpcamera.transform(physx::PxVec3(0.f,0.f,0.f));
-			game->entitymanager.blimps[i].body->setGlobalPose(physx::PxTransform(physx::PxVec3(game->entitymanager.blimps[i].blimppos)));
+			/*physx::PxMat44 blimpcamera(game->player.camera.pos);
+			game->entitymanager.blimps[i].blimppos = blimpcamera.transform(physx::PxVec3(0.f,-30.f,0.f));
+			game->entitymanager.blimps[i].body->setGlobalPose(physx::PxTransform(physx::PxVec3(game->entitymanager.blimps[i].blimppos)));*/
 		}
 	}
 

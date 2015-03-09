@@ -94,6 +94,7 @@
 
 #define	BLIMP_MESHSCALE				0.3f
 #define BLIMP_LAP_MESHSCALE			5.f
+#define BLIMP_LAP_SPAWNHEIGHT		15.f
 #define	BLIMP_DENSITY				1.f
 
 struct pickup{

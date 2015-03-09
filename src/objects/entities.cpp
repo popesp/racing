@@ -653,7 +653,7 @@ struct blimp* entitymanager_lapblimp(struct entitymanager* em, vec3f pos){
 	// find spawn location
 	vec3f_copy(b->pos, pos);
 	vec3f_copy(spawn, em->track->up);
-	vec3f_scale(spawn, ENTITY_PICKUP_SPAWNHEIGHT);
+	vec3f_scale(spawn, BLIMP_LAP_SPAWNHEIGHT);
 	vec3f_add(b->pos, spawn);
 
 	// create a physics object and add it to the scene
