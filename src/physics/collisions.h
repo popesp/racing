@@ -25,7 +25,7 @@ physx::PxFilterFlags OurFilterShader(physx::PxFilterObjectAttributes attributes0
 
 void setupFiltering(physx::PxRigidActor* actor, physx::PxU32 filterGroup, physx::PxU32 filterMask);
 
-void resethitflags(struct vehiclemanager* vm, struct entitymanager* em, int ai);
+void resethitflags(struct vehiclemanager* vm, struct entitymanager* em);
 
 class CustomCollisions : public physx::PxSimulationEventCallback
 {

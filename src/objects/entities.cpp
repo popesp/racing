@@ -254,6 +254,8 @@ struct missile* entitymanager_newmissile(struct entitymanager* em, struct vehicl
 	physx::PxTransform pose;
 	physx::PxMat44 mat_pose;
 	struct missile* m;
+	struct missile* m1;
+	struct missile* m2;
 	vec3f zero, vel;
 	int i;
 
@@ -294,6 +296,84 @@ struct missile* entitymanager_newmissile(struct entitymanager* em, struct vehicl
 
 	m->missle_channel = audiomanager_playsfx(em->am, em->sfx_missile, m->pos, -1,1.5);
 
+	//missile 2
+
+	/*for (i = 0; i < ENTITY_MISSILE_COUNT; i++)
+		if (!(em->missiles[i].flags & ENTITY_MISSILE_FLAG_ENABLED))
+			break;
+
+	if (i == ENTITY_MISSILE_COUNT)
+		return NULL;
+
+	m1 = em->missiles + i;
+	em->num_missiles++;
+
+	pose = v->body->getGlobalPose().transform(physx::PxTransform(2.f, 0.f, -(dim[VZ]*1.5f + ENTITY_MISSILE_SPAWNDIST)));
+	mat_pose = physx::PxMat44(pose);
+	vec3f_set(zero, 0.f, 0.f, 0.f);
+
+	m1->body = physx::PxCreateDynamic(*em->pm->sdk, pose, physx::PxBoxGeometry(em->dim_missile[VX] * 0.5f, em->dim_missile[VY] * 0.5f, em->dim_missile[VZ] * 0.5f), *em->pm->default_material, ENTITY_MISSILE_DENSITY);
+	m1->body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, true);
+	setupFiltering(m1->body, FilterGroup::eProjectile, FilterGroup::eProjectile);
+	m1->body->setRigidBodyFlag(physx::PxRigidBodyFlag::eENABLE_CCD, true);
+	m1->body->userData = m1;
+	em->pm->scene->addActor(*m1->body);
+	vec3f_set(vel, 0.f, 0.f, -1.f);
+	mat4f_transformvec3f(vel, (float*)&mat_pose);
+	vec3f_scale(vel, ENTITY_MISSILE_SPEED);
+
+	// update missle position
+	vec3f_set(m1->pos, pose.p.x, pose.p.y, pose.p.z);
+
+	m1->body->setLinearVelocity(physx::PxVec3(vel[VX], vel[VY], vel[VZ]));
+
+	m1->owner = v;
+
+	m1->timer = ENTITY_MISSILE_DESPAWNTIME;
+
+	m1->flags = ENTITY_MISSILE_FLAG_ENABLED;
+
+	m1->missle_channel = audiomanager_playsfx(em->am, em->sfx_missile, m1->pos, -1,1.5);
+
+	//missile 3
+
+	for (i = 0; i < ENTITY_MISSILE_COUNT; i++)
+		if (!(em->missiles[i].flags & ENTITY_MISSILE_FLAG_ENABLED))
+			break;
+
+	if (i == ENTITY_MISSILE_COUNT)
+		return NULL;
+
+	m2 = em->missiles + i;
+	em->num_missiles++;
+
+	pose = v->body->getGlobalPose().transform(physx::PxTransform(-2.f, 0.f, -(dim[VZ]*1.5f + ENTITY_MISSILE_SPAWNDIST)));
+	mat_pose = physx::PxMat44(pose);
+	vec3f_set(zero, 0.f, 0.f, 0.f);
+
+	m2->body = physx::PxCreateDynamic(*em->pm->sdk, pose, physx::PxBoxGeometry(em->dim_missile[VX] * 0.5f, em->dim_missile[VY] * 0.5f, em->dim_missile[VZ] * 0.5f), *em->pm->default_material, ENTITY_MISSILE_DENSITY);
+	m2->body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, true);
+	setupFiltering(m2->body, FilterGroup::eProjectile, FilterGroup::eProjectile);
+	m2->body->setRigidBodyFlag(physx::PxRigidBodyFlag::eENABLE_CCD, true);
+	m2->body->userData = m2;
+	em->pm->scene->addActor(*m2->body);
+	vec3f_set(vel, 0.f, 0.f, -1.f);
+	mat4f_transformvec3f(vel, (float*)&mat_pose);
+	vec3f_scale(vel, ENTITY_MISSILE_SPEED);
+
+	// update missle position
+	vec3f_set(m2->pos, pose.p.x, pose.p.y, pose.p.z);
+
+	m2->body->setLinearVelocity(physx::PxVec3(vel[VX], vel[VY], vel[VZ]));
+
+	m2->owner = v;
+
+	m2->timer = ENTITY_MISSILE_DESPAWNTIME;
+
+	m2->flags = ENTITY_MISSILE_FLAG_ENABLED;
+
+	m2->missle_channel = audiomanager_playsfx(em->am, em->sfx_missile, m2->pos, -1,1.5);*/
+
 	return m;
 }
 
@@ -308,7 +388,6 @@ void entitymanager_removemissile(struct entitymanager* em, struct missile* m)
 			em->missiles[i].body->release();
 			em->missiles[i].flags = ENTITY_MISSILE_FLAG_INIT;
 			em->missiles[i].missle_channel = NULL;
-
 		}	
 }
 
