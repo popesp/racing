@@ -70,14 +70,6 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 			}
 			else if (v->haspickup == 1) {
 				entitymanager_newmissile(vm->em, v, vm->dim);
-				//struct vehicle* v1 = new vehicle;
-				//physx::PxTransform pose = v->body->getGlobalPose().transform(physx::PxTransform(-2,0,0));
-				//v1->body = physx::PxCreateDynamic(*vm->pm->sdk, pose, physx::PxBoxGeometry(vm->dim[VX] * 0.5f, vm->dim[VY] * 0.5f, vm->dim[VZ] * 0.5f), *vm->pm->default_material, VEHICLE_DENSITY);
-				//entitymanager_newmissile(vm->em, v1, vm->dim);
-				//struct vehicle* v2 = new vehicle;
-				//v2->body = physx::PxCreateDynamic(*vm->pm->sdk, physx::PxTransform(v->pos[VX]-2.0, v->pos[VY], v->pos[VZ]), physx::PxBoxGeometry(vm->dim[VX] * 0.5f, vm->dim[VY] * 0.5f, vm->dim[VZ] * 0.5f), *vm->pm->default_material, VEHICLE_DENSITY);
-				//entitymanager_newmissile(vm->em, v2, vm->dim, v);
-
 				v->haspickup = 100;
 				for(int u = 0; u < ENTITY_PICKUP_COUNT; u++) {
 					if (vm->em->pickups[u].owner == v) {
@@ -138,11 +130,11 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 
 	// initialize vehicle mesh
 	renderable_init(&vm->r_vehicle, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
-	if((seed)%2==1){
-		objloader_load(VEHICLE_OBJ, r, &vm->r_vehicle);
-	}else{
+	//if((seed)%2==1){
+	//	objloader_load(VEHICLE_OBJ, r, &vm->r_vehicle);
+	//}else{
 		objloader_load(VEHICLE_OBJ2, r, &vm->r_vehicle);
-	}
+	//}
 	renderable_sendbuffer(r, &vm->r_vehicle);
 
 	// find the limits of the loaded mesh
@@ -198,11 +190,11 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 	texture_loadfile(&vm->diffuse2, VEHICLE_TEXTURE2);
 	texture_upload(&vm->diffuse2, RENDER_TEXTURE_DIFFUSE);
 	
-	if(seed % 2==1){
-		vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->diffuse;
-	}else{
+	//if(seed % 2==1){
+	//	vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->diffuse;
+	//}else{
 		vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->diffuse2;
-	}
+	//}
 
 	// create sound for engine
 	

@@ -298,7 +298,7 @@ struct missile* entitymanager_newmissile(struct entitymanager* em, struct vehicl
 
 	//missile 2
 
-	/*for (i = 0; i < ENTITY_MISSILE_COUNT; i++)
+	for (i = 0; i < ENTITY_MISSILE_COUNT; i++)
 		if (!(em->missiles[i].flags & ENTITY_MISSILE_FLAG_ENABLED))
 			break;
 
@@ -372,7 +372,7 @@ struct missile* entitymanager_newmissile(struct entitymanager* em, struct vehicl
 
 	m2->flags = ENTITY_MISSILE_FLAG_ENABLED;
 
-	m2->missle_channel = audiomanager_playsfx(em->am, em->sfx_missile, m2->pos, -1,1.5);*/
+	m2->missle_channel = audiomanager_playsfx(em->am, em->sfx_missile, m2->pos, -1,1.5);
 
 	return m;
 }
