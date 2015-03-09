@@ -195,7 +195,7 @@ struct entitymanager
 	bool pickupatspawn3;
 	int timerspawn3;
 
-	int num_blimps;
+	int num_blimps, num_missiles, num_mines, num_pickups;
 
 	struct missile missiles[ENTITY_MISSILE_COUNT];
 	struct mine mines[ENTITY_MINE_COUNT];

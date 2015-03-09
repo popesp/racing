@@ -22,7 +22,11 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 	em->timerspawn2=0;
 	em->timerspawn3=0;
 
+	//keeps track of how much stuff is on our map
 	em->num_blimps=0;
+	em->num_mines=0;
+	em->num_missiles=0;
+	em->num_pickups=0;
 
 	renderable_init(&em->r_missile, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
 	objloader_load(MISSILE_OBJ, r, &em->r_missile);
@@ -295,6 +299,7 @@ void entitymanager_shutdown(struct entitymanager* em)
 
 	for(i=0;i<ENTITY_PICKUP_COUNT;i++){
 		if (em->pickups[i].flags & ENTITY_PICKUP_FLAG_ENABLED){
+			//this is currently broken
 			em->pickups[i].body->setActorFlag(physx::PxActorFlag::eDISABLE_SIMULATION, false);
 			em->pickups[i].body->release();
 		}
@@ -309,6 +314,7 @@ void entitymanager_shutdown(struct entitymanager* em)
 
 	for(i=0;i<BLIMP_COUNT;i++){
 		if(em->blimps[i].flags & BLIMP_FLAG_ENABLED){
+			//this is probably broken too
 			em->blimps[i].body->setActorFlag(physx::PxActorFlag::eDISABLE_SIMULATION, false);
 			em->blimps[i].body->release();
 		}
@@ -365,7 +371,6 @@ void entitymanager_update(struct entitymanager* em, struct vehiclemanager* vm)
 		}
 	}
 
-
 	if(em->pickupatspawn2==false){
 		em->timerspawn2--;
 		//printf("%d\n",em->timerspawn2);
@@ -376,7 +381,6 @@ void entitymanager_update(struct entitymanager* em, struct vehiclemanager* vm)
 		}
 	}
 
-
 	if(em->pickupatspawn3==false){
 		em->timerspawn3--;
 		//printf("%d\n",em->timerspawn2);
@@ -386,7 +390,6 @@ void entitymanager_update(struct entitymanager* em, struct vehiclemanager* vm)
 			em->timerspawn3 = PICKUP_TIMERS;
 		}
 	}
-
 
 	//Check what custom collisions happened for each vehicle/entity and deal with them appropriately
 	for (i = 0; i < VEHICLE_COUNT; i++) {
@@ -407,8 +410,7 @@ void entitymanager_update(struct entitymanager* em, struct vehiclemanager* vm)
 	}
 	for (i = 0; i < ENTITY_PICKUP_COUNT; i++) {
 		if (vm->em->pickups[i].hit > -1) {
-			
-			
+						
 			if(vm->vehicles[vm->em->pickups[i].hit].haspickup!=100){
 				entitymanager_removepickup(vm->em,vm->vehicles[vm->em->pickups[i].hit].owns);
 			}
@@ -418,7 +420,6 @@ void entitymanager_update(struct entitymanager* em, struct vehiclemanager* vm)
 			vm->em->pickups[i].hit = -1;
 		}
 	}
-
 
 	for (i = 0; i < ENTITY_MISSILE_COUNT; i++)
 		if (em->missiles[i].flags & ENTITY_MISSILE_FLAG_ENABLED)
@@ -457,6 +458,7 @@ struct missile* entitymanager_newmissile(struct entitymanager* em, struct vehicl
 		return NULL;
 
 	m = em->missiles + i;
+	em->num_missiles++;
 
 	pose = v->body->getGlobalPose().transform(physx::PxTransform(0.f, 0.f, -(dim[VZ]*1.5f + ENTITY_MISSILE_SPAWNDIST)));
 	mat_pose = physx::PxMat44(pose);
@@ -492,6 +494,7 @@ struct missile* entitymanager_newmissile(struct entitymanager* em, struct vehicl
 void entitymanager_removemissile(struct entitymanager* em, struct missile* m)
 {
 	int i;
+	em->num_missiles--;
 
 	for (i = 0; i < ENTITY_MISSILE_COUNT; i++)
 		if (m == em->missiles + i)
@@ -619,6 +622,7 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f pos){
 
 	pu = em->pickups + i;
 	//printf("pickup %d\n", i);
+	em->num_pickups++;
 
 	renderable_init(&pu->r_pickup, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
 	objloader_load(PICKUP_OBJ, em->r, &pu->r_pickup);
@@ -748,6 +752,7 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f pos){
 
 void entitymanager_removepickup(struct entitymanager* em, struct pickup* pu){
 	int i;
+	em->num_pickups--;
 
 	for(i=0;i<ENTITY_PICKUP_COUNT; i++){
 		if(pu==em->pickups+i){
@@ -779,6 +784,7 @@ struct mine* entitymanager_newmine(struct entitymanager* em, vec3f dim, struct v
 		return NULL;
 
 	x = em->mines + i;
+	em->num_mines++;
 
 	// find spawn location
 	pose = v->body->getGlobalPose().transform(physx::PxTransform(0.f, 0.f, -(dim[VZ]*0.5f - ENTITY_MINE_SPAWNDIST)));
@@ -800,6 +806,7 @@ struct mine* entitymanager_newmine(struct entitymanager* em, vec3f dim, struct v
 
 void entitymanager_removemine(struct entitymanager* em, struct mine* x){
 	int i;
+	em->num_mines--;
 
 	for(i=0;i<ENTITY_MINE_COUNT;i++){
 		if(x==em->mines+i){
@@ -823,6 +830,7 @@ struct blimp* entitymanager_placeblimp(struct vehicle* v,struct entitymanager* e
 		return NULL;
 
 	b = em->blimps + i;
+	em->num_blimps++;
 
 	b->owner = v;
 	v->ownblimp = b;
@@ -858,6 +866,7 @@ struct blimp* entitymanager_lapblimp(struct entitymanager* em, vec3f pos){
 		return NULL;
 
 	b = em->blimps + i;
+	em->num_blimps++;
 
 	em->r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_blimp;
 
@@ -879,6 +888,7 @@ struct blimp* entitymanager_lapblimp(struct entitymanager* em, vec3f pos){
 
 void entitymanager_removeblimp(struct entitymanager* em, struct blimp* b,struct vehicle* v){
 	v->ownblimp=NULL;
+	em->num_blimps--;
 	
 	int i;
 	for(i=0;i<BLIMP_COUNT;i++){

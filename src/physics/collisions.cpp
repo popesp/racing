@@ -157,3 +157,18 @@ void CustomCollisions::onContact(const physx::PxContactPairHeader& pairHeader, c
 		
 	}
 }
+
+void resethitflags(struct vehiclemanager* vm, struct entitymanager* em, int ai){
+
+	int i;
+
+	for (i = 0; i <= ai; i++) {
+		vm->vehicles[i].hit_flag = 0;
+	}
+	for (i = 0; i <= em->num_missiles; i++) {
+		em->missiles[i].hit = 0;
+	}
+	for (i = 0; i <= em->num_mines; i++) {
+		em->mines[i].hit = 0;
+	}
+}
