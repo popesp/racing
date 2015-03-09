@@ -243,7 +243,18 @@ static void update(struct game* game)
 	// update the vehicles
 	vehiclemanager_update(&game->vehiclemanager);
 
-	resethitflags(&game->vehiclemanager, &game->entitymanager,game->num_aiplayers+1);
+	resethitflags(&game->vehiclemanager, &game->entitymanager);
+
+	/*for (int i = 0; i < 152; i++) {
+		game->vehiclemanager.vehicles[i].hit_flag = 0;
+	}
+	for (int p = 0; p < ENTITY_MISSILE_COUNT; p++) {
+		game->vehiclemanager.em->missiles[p].hit = 0;
+	}
+	for (int p = 0; p < ENTITY_MINE_COUNT; p++) {
+		game->vehiclemanager.em->mines[p].hit = 0;
+	}*/
+
 
 	physicsmanager_update(&game->physicsmanager, GAME_SPU);
 
@@ -272,11 +283,13 @@ static void update(struct game* game)
 			game->entitymanager.blimps[i].body->setGlobalPose(physx::PxTransform(physx::PxVec3(game->entitymanager.blimps[i].blimppos)));
 		}
 		if(game->entitymanager.blimps[i].typeblimp==BLIMP_TYPE_LAP){
-			physx::PxMat44 blimpcamera(game->player.camera.pos);
-			game->entitymanager.blimps[i].blimppos = blimpcamera.transform(physx::PxVec3(0.f,0.f,0.f));
-			game->entitymanager.blimps[i].body->setGlobalPose(physx::PxTransform(physx::PxVec3(game->entitymanager.blimps[i].blimppos)));
+			/*physx::PxMat44 blimpcamera(game->player.camera.pos);
+			game->entitymanager.blimps[i].blimppos = blimpcamera.transform(physx::PxVec3(0.f,-30.f,0.f));
+			game->entitymanager.blimps[i].body->setGlobalPose(physx::PxTransform(physx::PxVec3(game->entitymanager.blimps[i].blimppos)));*/
 		}
 	}
+
+	printf("%f %f %f\r", game->cam_debug.pos[0],game->cam_debug.pos[1],game->cam_debug.pos[2]);
 
 	//check who has won the game
 	if(game->flags == GAME_FLAG_WINCONDITION){
@@ -513,6 +526,12 @@ int game_startup(struct game* game)
 	//seperated this so the third is a different pickup
 	entitymanager_newpickup(&game->entitymanager,game->track.pathpoints[PICKUP_SPAWN_LOC3].pos);
 	game->entitymanager.pickupatspawn3=true;
+
+	//spawn a bigass blimp in the middle of the map
+	vec3f test;
+	vec3f_set(test, -22.f, 10.f,-115.f);
+	entitymanager_lapblimp(&game->entitymanager,test);
+
 
 	return 1;
 }
