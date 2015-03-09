@@ -505,7 +505,7 @@ int game_startup(struct game* game)
 	audiomanager_setmusicvolume(&game->audiomanager,0.5);
 	game->flags = GAME_FLAG_INIT;
 
-	//seperated this so the third is a different pickup type
+	//seperated this so the third is a different pickup
 	entitymanager_newpickup(&game->entitymanager,game->track.pathpoints[PICKUP_SPAWN_LOC3].pos);
 	game->entitymanager.pickupatspawn3=true;
 

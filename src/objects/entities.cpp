@@ -69,6 +69,10 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 		pu->owner = NULL;
 		pu->flags = ENTITY_PICKUP_FLAG_INIT;
 		pu->hit=-1;
+
+		texture_init(&pu->diffuse_pickupMISSILE);
+		texture_init(&pu->diffuse_pickupMINE);
+		texture_init(&pu->diffuse_pickupSPEED);
 	}
 
 	// mine array
@@ -277,7 +281,6 @@ struct missile* entitymanager_newmissile(struct entitymanager* em, struct vehicl
 	mat4f_transformvec3f(vel, (float*)&mat_pose);
 	vec3f_scale(vel, ENTITY_MISSILE_SPEED);
 
-
 	// update missle position
 	vec3f_set(m->pos, pose.p.x, pose.p.y, pose.p.z);
 
@@ -314,7 +317,8 @@ void entitymanager_attachpickup(struct vehicle* v, struct pickup* pu,struct enti
 	vec3f min, max, avg, diff;
 	int i;
 
-	for(i=0;i<ENTITY_PICKUP_COUNT; i++){
+
+	for(i=0;i<=em->num_pickups; i++){
 		if((em->pickups+i)==pu && pu->holdingpu1==true){
 			em->pickupatspawn1=false;
 		}
@@ -338,10 +342,6 @@ void entitymanager_attachpickup(struct vehicle* v, struct pickup* pu,struct enti
 	renderable_init(&pu->r_pickup, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
 	objloader_load(PICKUP_ATTACHED_OBJ, em->r, &pu->r_pickup);
 	renderable_sendbuffer(em->r, &pu->r_pickup);
-
-	texture_init(&pu->diffuse_pickupMINE);
-	texture_init(&pu->diffuse_pickupMISSILE);
-	texture_init(&pu->diffuse_pickupSPEED);
 
 	// find the limits of the loaded mesh
 	vec3f_set(min, FLT_MAX, FLT_MAX, FLT_MAX);
@@ -378,11 +378,6 @@ void entitymanager_attachpickup(struct vehicle* v, struct pickup* pu,struct enti
 	vec3f_subtractn(diff, max, min);
 	vec3f_scalen(pu->dim_pickup, diff, PICKUP_ATTACHED_MESHSCALE);
 
-	// swap x and z to get the correct vehicle dimensions
-	//temp = pu->dim_pickup[VX];
-	//pu->dim_pickup[VX] = pu->dim_pickup[VZ];
-	//pu->dim_pickup[VZ] = temp;
-
 	mat4f_scalemul(pu->r_pickup.matrix_model, PICKUP_ATTACHED_MESHSCALE, PICKUP_ATTACHED_MESHSCALE, PICKUP_ATTACHED_MESHSCALE);
 	mat4f_rotateymul(pu->r_pickup.matrix_model, -1.57080f);
 	mat4f_translatemul(pu->r_pickup.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
@@ -394,7 +389,7 @@ void entitymanager_attachpickup(struct vehicle* v, struct pickup* pu,struct enti
 		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickupMISSILE;
 	}
 	else if(pu->typepickup==2){
-		//MineE
+		//Mine
 		texture_loadfile(&pu->diffuse_pickupMINE, PICKUP_ATTACHED_SPEED_TEXTURE);
 		texture_upload(&pu->diffuse_pickupMINE, RENDER_TEXTURE_DIFFUSE);
 		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickupMINE;
@@ -426,14 +421,6 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f pos){
 	//printf("pickup %d\n", i);
 	em->num_pickups++;
 
-	renderable_init(&pu->r_pickup, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
-	objloader_load(PICKUP_OBJ, em->r, &pu->r_pickup);
-	renderable_sendbuffer(em->r, &pu->r_pickup);
-
-	texture_init(&pu->diffuse_pickupMINE);
-	texture_init(&pu->diffuse_pickupMISSILE);
-	texture_init(&pu->diffuse_pickupSPEED);
-
 	// logic for attaching timers for respawning pickups
 	pu->holdingpu1=false;
 	pu->holdingpu2=false;
@@ -450,6 +437,12 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f pos){
 		pu->holdingpu3=true;
 		em->timerspawn3=PICKUP_TIMERS;
 	}
+
+
+
+	renderable_init(&pu->r_pickup, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
+	objloader_load(PICKUP_OBJ, em->r, &pu->r_pickup);
+	renderable_sendbuffer(em->r, &pu->r_pickup);
 
 	// find the limits of the loaded mesh
 	vec3f_set(min, FLT_MAX, FLT_MAX, FLT_MAX);
@@ -493,42 +486,33 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f pos){
 
 	mat4f_scalemul(pu->r_pickup.matrix_model, PICKUP_MESHSCALE, PICKUP_MESHSCALE, PICKUP_MESHSCALE);
 	mat4f_rotateymul(pu->r_pickup.matrix_model, -1.57080f);
-
-	if(pu->set!=1){
-		mat4f_translatemul(pu->r_pickup.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
-	}
-	pu->set=1;
-
-	//possibly temp
-	pu->avg[VX] = avg[VX];
-	pu->avg[VY] = avg[VY];
-	pu->avg[VZ] = avg[VZ];
+	mat4f_translatemul(pu->r_pickup.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
 
 	int seed = static_cast<int>(time(0));
 	srand(seed);
 	seed = (seed)%3;
 	if(seed==1){
 		//Missile
-
 		texture_loadfile(&pu->diffuse_pickupMISSILE, PICKUP_MISSILE_TEXTURE);
 		texture_upload(&pu->diffuse_pickupMISSILE, RENDER_TEXTURE_DIFFUSE);
 		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickupMISSILE;
+
 		pu->typepickup=1;
 	}
 	else if(seed==2){
 		//Mine
-
 		texture_loadfile(&pu->diffuse_pickupMINE, PICKUP_MINE_TEXTURE);
 		texture_upload(&pu->diffuse_pickupMINE, RENDER_TEXTURE_DIFFUSE);
 		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickupMINE;
+
 		pu->typepickup=0;
 	}
 	else{
 		//Speed
-
 		texture_loadfile(&pu->diffuse_pickupSPEED, PICKUP_SPEED_TEXTURE);
 		texture_upload(&pu->diffuse_pickupSPEED, RENDER_TEXTURE_DIFFUSE);
 		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickupSPEED;
+
 		pu->typepickup=2;
 	}
 
@@ -558,11 +542,6 @@ void entitymanager_removepickup(struct entitymanager* em, struct pickup* pu){
 
 	for(i=0;i<ENTITY_PICKUP_COUNT; i++){
 		if(pu==em->pickups+i){
-
-			//mat4f_translatemul(em->pickups[i].r_pickup.matrix_model, 1/-pu->avg[VX], 1/-pu->avg[VY], 1/-pu->avg[VZ]);
-			//mat4f_rotateymul(em->pickups[i].r_pickup.matrix_model, 1/-1.57080f);
-			//mat4f_scalemul(em->pickups[i].r_pickup.matrix_model, 1/PICKUP_MESHSCALE, 1/PICKUP_MESHSCALE, 1/PICKUP_MESHSCALE);
-			
 			em->pickups[i].body->release();
 			em->pickups[i].flags = ENTITY_PICKUP_FLAG_INIT;
 			em->pickups[i].owner = NULL;
@@ -822,8 +801,6 @@ void entitymanager_missileinit(struct entitymanager* em){
 	float temp;
 	vec3f min, max, avg, diff;
 	int i;
-
-
 
 	vec3f_set(min, FLT_MAX, FLT_MAX, FLT_MAX);
 	vec3f_set(max, -FLT_MAX, -FLT_MAX, -FLT_MAX);
