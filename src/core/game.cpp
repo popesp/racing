@@ -279,8 +279,13 @@ static void update(struct game* game)
 	for(i=0;i<BLIMP_COUNT;i++){
 		if(game->entitymanager.blimps[i].owner!=NULL){
 			physx::PxMat44 blimpowner(game->entitymanager.blimps[i].owner->body->getGlobalPose());
-			game->entitymanager.blimps[i].blimppos = blimpowner.transform(physx::PxVec3(-.3f,1.1f,1.5f));
+			game->entitymanager.blimps[i].blimppos = blimpowner.transform(physx::PxVec3(-1.3f,2.f,1.5f));
 			game->entitymanager.blimps[i].body->setGlobalPose(physx::PxTransform(physx::PxVec3(game->entitymanager.blimps[i].blimppos)));
+		}
+		if(game->entitymanager.blimps[i].typeblimp==BLIMP_TYPE_LAP){
+			/*physx::PxMat44 blimpcamera(game->player.camera.pos);
+			game->entitymanager.blimps[i].blimppos = blimpcamera.transform(physx::PxVec3(0.f,-30.f,0.f));
+			game->entitymanager.blimps[i].body->setGlobalPose(physx::PxTransform(physx::PxVec3(game->entitymanager.blimps[i].blimppos)));*/
 		}
 	}
 
@@ -570,10 +575,16 @@ void game_shutdown(struct game* game)
 {
 	int i;
 
+	// delete blimps
+	for(i=0; i< game->entitymanager.num_blimps;i++){
+		entitymanager_removeblimp(&game->entitymanager,&game->entitymanager.blimps[i],game->player.vehicle);
+	}
+
 	// delete players
 	player_delete(&game->player, &game->vehiclemanager);
-	for (i = 0; i < game->num_aiplayers; i++)
-		aiplayer_delete(&game->aiplayers[i], &game->vehiclemanager);
+	for (i = 0; i < game->num_aiplayers; i++){
+		aiplayer_delete(&game->aiplayers[i], &game->vehiclemanager);}
+	
 	
 	// delete world objects
 	track_delete(&game->track);
