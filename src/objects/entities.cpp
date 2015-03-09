@@ -727,7 +727,7 @@ struct blimp* entitymanager_lapblimp(struct entitymanager* em, vec3f pos){
 	b = em->blimps + i;
 	em->num_blimps++;
 
-	em->r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_blimp;
+	em->r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_welcome;
 
 	// find spawn location
 	vec3f_copy(b->pos, pos);
@@ -768,6 +768,10 @@ void entitymanager_textures(struct entitymanager* em, struct renderer* r){
 	texture_init(&em->diffuse_missile);
 	texture_loadfile(&em->diffuse_missile, MISSILE_TEXTURE);
 	texture_upload(&em->diffuse_missile, RENDER_TEXTURE_DIFFUSE);
+
+	texture_init(&em->diffuse_welcome);
+	texture_loadfile(&em->diffuse_welcome, BLIMP_WELCOME_TEXTURE);
+	texture_upload(&em->diffuse_welcome, RENDER_TEXTURE_DIFFUSE);
 
 	texture_init(&em->diffuse_blimp);
 	texture_loadfile(&em->diffuse_blimp, BLIMP_REGULAR_TEXTURE);

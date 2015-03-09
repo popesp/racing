@@ -80,6 +80,7 @@
 #define BLIMP_REGULAR_TEXTURE		"res/Models/Blimp/blimpUV.png"
 #define BLIMP_WIN_TEXTURE			"res/Models/Blimp/blimp_win.png"
 #define BLIMP_LOSE_TEXTURE			"res/Models/Blimp/blimp_lose.png"
+#define BLIMP_WELCOME_TEXTURE		"res/Models/Blimp/blimp_welcome.png"
 
 #define BLIMP_LAP1_TEXTURE			"res/Models/Blimp/lap_tex/blimp_1.png"
 #define BLIMP_LAP2_TEXTURE			"res/Models/Blimp/lap_tex/blimp_2.png"
@@ -190,6 +191,7 @@ struct entitymanager
 
 	struct texture diffuse_win;
 	struct texture diffuse_lose;
+	struct texture diffuse_welcome;
 
 	int sfx_missile;
 

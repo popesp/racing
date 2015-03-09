@@ -2,6 +2,7 @@
 
 
 void checkwin(struct game* game){
+	setblimp(game);
 
 	unsigned int cp1 = game->track.num_pathpoints / 3;
 	unsigned int cp2 = game->track.num_pathpoints / 2;
@@ -16,7 +17,7 @@ void checkwin(struct game* game){
 		for(int i=0; i<game->num_aiplayers-1;i++){
 			game->aiplayers[i].vehicle->lap=1;
 		}
-		setblimp(game);
+		
 		game->flags &= ~GAME_FLAG_WINCONDITION;
 	}
 
@@ -32,7 +33,7 @@ void checkwin(struct game* game){
 			for(int i=0; i<=game->num_aiplayers-1;i++){
 				game->aiplayers[i].vehicle->lap=1;
 			}
-			setblimp(game);
+			
 			game->flags &= ~GAME_FLAG_WINCONDITION;
 		}
 	}
@@ -78,11 +79,13 @@ void checkwin(struct game* game){
 			game->aiplayers[i].vehicle->checkpoint2=false;
 		}
 	}
-	setblimp(game);
+
 }
 
 void checkplace(struct game* game){
 	
+	setblimp(game);
+
 	//init everyone to last place
 	for(int i=0;i<=game->num_aiplayers-1;i++){
 		game->aiplayers[i].vehicle->place=game->num_aiplayers+1;
@@ -197,10 +200,10 @@ void setblimp(struct game* game){
 	}
 
 
-	if(game->player.vehicle->lap==GAME_WINCONDITION_LAPS){
+	if(game->player.vehicle->lap==1 && game->flags != GAME_FLAG_WINCONDITION){
 		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_win;
 	}
-	if(game->flags != GAME_FLAG_WINCONDITION){
+	else if(game->flags != GAME_FLAG_WINCONDITION){
 		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_lose;
 	}
 
