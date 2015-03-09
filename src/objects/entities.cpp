@@ -878,11 +878,7 @@ struct blimp* entitymanager_lapblimp(struct entitymanager* em, vec3f pos){
 }
 
 void entitymanager_removeblimp(struct entitymanager* em, struct blimp* b,struct vehicle* v){
-	
-	//i have a feeling this will break
-	if(b->owner!=NULL){
-		v->ownblimp=NULL;
-	}
+	v->ownblimp=NULL;
 	
 	int i;
 	for(i=0;i<BLIMP_COUNT;i++){
