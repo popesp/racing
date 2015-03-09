@@ -35,9 +35,14 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 	renderable_init(&em->r_blimp, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
 	objloader_load(BLIMP_OBJ, em->r, &em->r_blimp);
 	renderable_sendbuffer(em->r, &em->r_blimp);
+
+	renderable_init(&em->r_blimplap, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
+	objloader_load(BLIMP_OBJ, em->r, &em->r_blimplap);
+	renderable_sendbuffer(em->r, &em->r_blimplap);
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//BLIMP
+	//BLIMP shit
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	vec3f_set(min, FLT_MAX, FLT_MAX, FLT_MAX);
 	vec3f_set(max, -FLT_MAX, -FLT_MAX, -FLT_MAX);
 
@@ -82,6 +87,26 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 	mat4f_rotateymul(em->r_blimp.matrix_model, -1.57080f);
 	mat4f_translatemul(em->r_blimp.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
 
+	mat4f_scalemul(em->r_blimplap.matrix_model, BLIMP_MESHSCALE, BLIMP_MESHSCALE, BLIMP_MESHSCALE);
+	mat4f_rotateymul(em->r_blimplap.matrix_model, -1.57080f);
+	mat4f_translatemul(em->r_blimplap.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
+
+	texture_init(&em->diffuse_blimp);
+	texture_loadfile(&em->diffuse_blimp, BLIMP_REGULAR_TEXTURE);
+	texture_upload(&em->diffuse_blimp, RENDER_TEXTURE_DIFFUSE);
+
+	texture_init(&em->diffuse_lap1);
+	texture_loadfile(&em->diffuse_lap1, BLIMP_LAP1_TEXTURE);
+	texture_upload(&em->diffuse_lap1, RENDER_TEXTURE_DIFFUSE);
+
+	texture_init(&em->diffuse_lap2);
+	texture_loadfile(&em->diffuse_lap2, BLIMP_LAP2_TEXTURE);
+	texture_upload(&em->diffuse_lap2, RENDER_TEXTURE_DIFFUSE);
+
+	texture_init(&em->diffuse_lap3);
+	texture_loadfile(&em->diffuse_lap3, BLIMP_LAP3_TEXTURE);
+	texture_upload(&em->diffuse_lap3, RENDER_TEXTURE_DIFFUSE);
+
 	texture_init(&em->diffuse_place1);
 	texture_loadfile(&em->diffuse_place1, BLIMP_PLACE1_TEXTURE);
 	texture_upload(&em->diffuse_place1, RENDER_TEXTURE_DIFFUSE);
@@ -115,7 +140,7 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 	texture_upload(&em->diffuse_place8, RENDER_TEXTURE_DIFFUSE);
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//MISSILE
-	// find the limits of the loaded mesh
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	vec3f_set(min, FLT_MAX, FLT_MAX, FLT_MAX);
 	vec3f_set(max, -FLT_MAX, -FLT_MAX, -FLT_MAX);
 
@@ -315,7 +340,12 @@ void entitymanager_render(struct entitymanager* em, struct renderer* r, mat4f wo
 
 	for (i=0;i<BLIMP_COUNT;i++){
 		if(em->blimps[i].flags&BLIMP_FLAG_ENABLED){
-			renderable_render(r, &em->r_blimp, (float*)&physx::PxMat44(em->blimps[i].body->getGlobalPose()),worldview,0);
+			if(em->blimps[i].typeblimp&BLIMP_TYPE_PLACE){
+				renderable_render(r, &em->r_blimp, (float*)&physx::PxMat44(em->blimps[i].body->getGlobalPose()),worldview,0);
+			}
+			else{
+				renderable_render(r, &em->r_blimplap, (float*)&physx::PxMat44(em->blimps[i].body->getGlobalPose()),worldview,0);
+			}
 		}
 	}
 }
@@ -779,7 +809,7 @@ void entitymanager_removemine(struct entitymanager* em, struct mine* x){
 	}
 }
 
-struct blimp* entitymanager_newblimp(struct vehicle* v,struct entitymanager* em, vec3f pos){
+struct blimp* entitymanager_placeblimp(struct vehicle* v,struct entitymanager* em, vec3f pos){
 	physx::PxTransform pose;
 	physx::PxMat44 mat_pose;
 	int i;
@@ -798,31 +828,7 @@ struct blimp* entitymanager_newblimp(struct vehicle* v,struct entitymanager* em,
 	v->ownblimp = b;
 	v->hasblimp=true;
 	
-	if(v->place==2){
-		em->r_blimp.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_place2;
-	}
-	else if(v->place==3){
-		em->r_blimp.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_place3;
-	}
-	else if(v->place==4){
-		em->r_blimp.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_place4;
-	}
-	else if(v->place==5){
-		em->r_blimp.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_place5;
-	}
-	else if(v->place==6){
-		em->r_blimp.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_place6;
-	}
-	else if(v->place==7){
-		em->r_blimp.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_place7;
-	}
-	else if(v->place==8){
-		em->r_blimp.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_place8;
-	}
-	// if(v->place==1){
-	else{
-		em->r_blimp.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_place1;
-	}
+	em->r_blimp.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_blimp;
 
 	pose = v->body->getGlobalPose().transform(physx::PxTransform(-.3f, 1.f, -(pos[VZ]*0.5f - BLIMP_SPAWNDIST)));
 	mat_pose = physx::PxMat44(pose);
@@ -832,20 +838,58 @@ struct blimp* entitymanager_newblimp(struct vehicle* v,struct entitymanager* em,
 	em->pm->scene->addActor(*b->body);
 
 	b->flags = ENTITY_MINE_FLAG_ENABLED;
+	b->typeblimp = BLIMP_TYPE_PLACE;
+
+	return b;
+}
+
+struct blimp* entitymanager_lapblimp(struct entitymanager* em, vec3f pos){
+	physx::PxTransform pose;
+	physx::PxMat44 mat_pose;
+	int i;
+	struct blimp* b;
+	vec3f spawn;
+
+	for (i = 0; i < BLIMP_COUNT; i++)
+		if (!(em->blimps[i].flags & BLIMP_FLAG_ENABLED))
+			break;
+
+	if (i == BLIMP_COUNT)
+		return NULL;
+
+	b = em->blimps + i;
+
+	em->r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_blimp;
+
+	// find spawn location
+	vec3f_copy(b->pos, pos);
+	vec3f_copy(spawn, em->track->up);
+	vec3f_scale(spawn, ENTITY_PICKUP_SPAWNHEIGHT);
+	vec3f_add(b->pos, spawn);
+
+	// create a physics object and add it to the scene
+	b->body = physx::PxCreateDynamic(*em->pm->sdk, physx::PxTransform(b->pos[VX], b->pos[VY], b->pos[VZ]), physx::PxBoxGeometry(em->dim_blimp[VX] * 0.5f, em->dim_blimp[VY] * 0.5f, em->dim_blimp[VZ] * 0.5f), *em->pm->default_material, BLIMP_DENSITY);
+	em->pm->scene->addActor(*b->body);
+
+	b->flags = BLIMP_FLAG_ENABLED;
+	b->typeblimp = BLIMP_TYPE_LAP;
 
 	return b;
 }
 
 void entitymanager_removeblimp(struct entitymanager* em, struct blimp* b,struct vehicle* v){
 	
-	v->ownblimp=NULL;
-	b->owner=NULL;
-
+	//i have a feeling this will break
+	if(b->owner!=NULL){
+		v->ownblimp=NULL;
+	}
+	
 	int i;
 	for(i=0;i<BLIMP_COUNT;i++){
 		if(b==em->blimps+i){
 			em->blimps[i].body->release();
 			em->blimps[i].flags = BLIMP_FLAG_INIT;
+			em->blimps[i].owner = NULL;
 		}
 	}
 }

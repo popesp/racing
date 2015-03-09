@@ -77,6 +77,7 @@ void checkwin(struct game* game){
 			game->aiplayers[i].vehicle->checkpoint2=false;
 		}
 	}
+	setblimp(game);
 }
 
 void checkplace(struct game* game){
@@ -132,7 +133,7 @@ void checkplace(struct game* game){
 
 			}
 
-			printf("Players place %d     AI[0] %d\n ", game->player.vehicle->place, game->aiplayers[0].vehicle->place);
+			//printf("Players place %d     AI[0] %d\n ", game->player.vehicle->place, game->aiplayers[0].vehicle->place);
 		}
 		
 
@@ -186,11 +187,30 @@ void checkplace(struct game* game){
 void setblimp(struct game* game){
 	if(game->player.vehicle->place==2){
 		game->entitymanager.r_blimp.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_place2;
-		//&game->entitymanager->r_blimp.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_place2;
 	}
 	else if(game->player.vehicle->place==1){
 		game->entitymanager.r_blimp.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_place1;
 	}
+	else{
+		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_blimp;
+	}
+
+
+
+	if(game->player.vehicle->lap==1){
+		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_lap1;
+	}
+	else if(game->player.vehicle->lap==2){
+		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_lap2;
+	}
+	else if(game->player.vehicle->lap==3){
+		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_lap3;
+	}
+	else{
+		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_blimp;
+	}
+
+
 	//if(game->player.vehicle->hasblimp==true){
 	//	entitymanager_removeblimp(&game->entitymanager,game->player.vehicle->ownblimp,game->player.vehicle);
 	//}

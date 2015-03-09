@@ -46,7 +46,7 @@
 #define	GAME_MUSIC_3_FILENAME	"res/music/Full Force Forward.mp3"
 #define	GAME_MUSIC_4_FILENAME	"res/music/Daft Punk & Boys Noize - End Of Line.mp3"
 
-#define GAME_WINCONDITION_LAPS	3
+#define GAME_WINCONDITION_LAPS	10
 
 #define	GAME_FLAG_INIT			0x00
 #define	GAME_FLAG_TERMINATED	0x01

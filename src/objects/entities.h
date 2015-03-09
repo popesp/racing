@@ -73,7 +73,12 @@
 #define	BLIMP_FLAG_ENABLED			0x01
 #define	BLIMP_FLAG_INIT				0x00
 
+#define BLIMP_TYPE_LAP				0x00
+#define BLIMP_TYPE_PLACE			0x01
+
 #define BLIMP_OBJ					"res/Models/Blimp/blimp.obj"
+#define BLIMP_REGULAR_TEXTURE		"res/Models/Blimp/blimpUV.png"
+
 #define BLIMP_LAP1_TEXTURE			"res/Models/Blimp/lap_tex/blimp_1.png"
 #define BLIMP_LAP2_TEXTURE			"res/Models/Blimp/lap_tex/blimp_2.png"
 #define BLIMP_LAP3_TEXTURE			"res/Models/Blimp/lap_tex/blimp_3.png"
@@ -141,6 +146,8 @@ struct blimp{
 	
 	physx::PxVec3 blimppos;
 
+	unsigned char typeblimp;
+
 	vec3f pos;
 };
 
@@ -154,6 +161,7 @@ struct entitymanager
 	struct renderable r_missile;
 	struct renderable r_mine;
 	struct renderable r_blimp;
+	struct renderable r_blimplap;
 
 	vec3f dim_missile;
 	vec3f dim_mine;
@@ -161,6 +169,7 @@ struct entitymanager
 
 	struct texture diffuse_missile;
 	struct texture diffuse_mine;
+	struct texture diffuse_blimp;
 
 	struct texture diffuse_place1;
 	struct texture diffuse_place2;
@@ -170,6 +179,10 @@ struct entitymanager
 	struct texture diffuse_place6;
 	struct texture diffuse_place7;
 	struct texture diffuse_place8;
+
+	struct texture diffuse_lap1;
+	struct texture diffuse_lap2;
+	struct texture diffuse_lap3;
 
 	int sfx_missile;
 
@@ -208,7 +221,8 @@ void entitymanager_removepickup(struct entitymanager* em, struct pickup* pu);
 struct mine* entitymanager_newmine(struct entitymanager* em, vec3f dim, struct vehicle* v);
 void entitymanager_removemine(struct entitymanager* em, struct mine* x);
 
-struct blimp* entitymanager_newblimp(struct vehicle* v, struct entitymanager* em, vec3f pos);
+struct blimp* entitymanager_placeblimp(struct vehicle* v, struct entitymanager* em, vec3f pos);
 void entitymanager_removeblimp(struct entitymanager* em, struct blimp* b,struct vehicle* v);
+struct blimp* entitymanager_lapblimp(struct entitymanager* em, vec3f pos);
 
 #endif

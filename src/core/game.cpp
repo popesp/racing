@@ -129,7 +129,7 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 				printf("Win condition activated.\n");
 				printf("Player is on lap %d\n", game->player.vehicle->lap);
 
-				entitymanager_newblimp(game->player.vehicle,&game->entitymanager,game->track.pathpoints[0].pos);
+				entitymanager_placeblimp(game->player.vehicle,&game->entitymanager,game->track.pathpoints[0].pos);
 
 				for (i = 0; i < game->num_aiplayers; i++)
 				{
@@ -585,6 +585,7 @@ void game_shutdown(struct game* game)
 	audiomanager_shutdown(&game->audiomanager);
 	inputmanager_shutdown(&game->inputmanager);
 	physicsmanager_shutdown(&game->physicsmanager);
+	//entitymanager_shutdown(&game->entitymanager);
 	
 	glfwDestroyWindow(game->window.w);
 	glfwTerminate();
