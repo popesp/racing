@@ -243,6 +243,16 @@ static void update(struct game* game)
 	// update the vehicles
 	vehiclemanager_update(&game->vehiclemanager);
 
+	// reset hit flags
+	for (i = 0; i < VEHICLE_COUNT; i++) {
+		game->vehiclemanager.vehicles[i].hit_flag = 0;
+	}
+	for (i = 0; i < ENTITY_MISSILE_COUNT; i++) {
+		game->entitymanager.missiles[i].hit = 0;
+	}
+	for (i = 0; i < ENTITY_MINE_COUNT; i++) {
+		game->entitymanager.mines[i].hit = 0;
+	}
 	physicsmanager_update(&game->physicsmanager, GAME_SPU);
 
 	// update the game objects

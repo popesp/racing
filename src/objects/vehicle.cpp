@@ -409,16 +409,7 @@ void vehiclemanager_update(struct vehiclemanager* vm)
 		
 		audiomanager_setsoundposition(v->engine_channel, v->pos);
 
-		// reset hit flags
-		for (i = 0; i < VEHICLE_COUNT; i++) {
-			vm->vehicles[i].hit_flag = 0;
-		}
-		for (i = 0; i < ENTITY_MISSILE_COUNT; i++) {
-			vm->em->missiles[i].hit = 0;
-		}
-		for (i = 0; i < ENTITY_MINE_COUNT; i++) {
-			vm->em->mines[i].hit = 0;
-		}
+
 	}
 }
 
