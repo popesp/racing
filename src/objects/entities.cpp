@@ -545,9 +545,9 @@ void entitymanager_attachpickup(struct vehicle* v, struct pickup* pu,struct enti
 	vec3f_scalen(pu->dim_pickup, diff, PICKUP_ATTACHED_MESHSCALE);
 
 	// swap x and z to get the correct vehicle dimensions
-	temp = pu->dim_pickup[VX];
-	pu->dim_pickup[VX] = pu->dim_pickup[VZ];
-	pu->dim_pickup[VZ] = temp;
+	//temp = pu->dim_pickup[VX];
+	//pu->dim_pickup[VX] = pu->dim_pickup[VZ];
+	//pu->dim_pickup[VZ] = temp;
 
 	mat4f_scalemul(pu->r_pickup.matrix_model, PICKUP_ATTACHED_MESHSCALE, PICKUP_ATTACHED_MESHSCALE, PICKUP_ATTACHED_MESHSCALE);
 	mat4f_rotateymul(pu->r_pickup.matrix_model, -1.57080f);
@@ -593,15 +593,13 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f pos){
 	pu = em->pickups + i;
 	//printf("pickup %d\n", i);
 
+	renderable_init(&pu->r_pickup, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
+	objloader_load(PICKUP_OBJ, em->r, &pu->r_pickup);
+	renderable_sendbuffer(em->r, &pu->r_pickup);
 
-			renderable_init(&pu->r_pickup, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
-		objloader_load(PICKUP_OBJ, em->r, &pu->r_pickup);
-		renderable_sendbuffer(em->r, &pu->r_pickup);
-
-		texture_init(&pu->diffuse_pickupMINE);
-		texture_init(&pu->diffuse_pickupMISSILE);
-		texture_init(&pu->diffuse_pickupSPEED);
-
+	texture_init(&pu->diffuse_pickupMINE);
+	texture_init(&pu->diffuse_pickupMISSILE);
+	texture_init(&pu->diffuse_pickupSPEED);
 
 	// logic for attaching timers for respawning pickups
 	pu->holdingpu1=false;
@@ -727,13 +725,15 @@ void entitymanager_removepickup(struct entitymanager* em, struct pickup* pu){
 	for(i=0;i<ENTITY_PICKUP_COUNT; i++){
 		if(pu==em->pickups+i){
 
-			mat4f_translatemul(em->pickups[i].r_pickup.matrix_model, 1/-pu->avg[VX], 1/-pu->avg[VY], 1/-pu->avg[VZ]);
-			mat4f_rotateymul(em->pickups[i].r_pickup.matrix_model, 1/-1.57080f);
-			mat4f_scalemul(em->pickups[i].r_pickup.matrix_model, 1/PICKUP_MESHSCALE, 1/PICKUP_MESHSCALE, 1/PICKUP_MESHSCALE);
+			//mat4f_translatemul(em->pickups[i].r_pickup.matrix_model, 1/-pu->avg[VX], 1/-pu->avg[VY], 1/-pu->avg[VZ]);
+			//mat4f_rotateymul(em->pickups[i].r_pickup.matrix_model, 1/-1.57080f);
+			//mat4f_scalemul(em->pickups[i].r_pickup.matrix_model, 1/PICKUP_MESHSCALE, 1/PICKUP_MESHSCALE, 1/PICKUP_MESHSCALE);
 			
 			em->pickups[i].body->release();
 			em->pickups[i].flags = ENTITY_PICKUP_FLAG_INIT;
 			em->pickups[i].owner = NULL;
+
+			renderable_deallocate(&em->pickups[i].r_pickup);
 		}
 	}
 }
@@ -842,6 +842,7 @@ struct blimp* entitymanager_newblimp(struct vehicle* v,struct entitymanager* em,
 void entitymanager_removeblimp(struct entitymanager* em, struct blimp* b,struct vehicle* v){
 	
 	v->ownblimp=NULL;
+	b->owner=NULL;
 
 	int i;
 	for(i=0;i<BLIMP_COUNT;i++){

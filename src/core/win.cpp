@@ -9,6 +9,8 @@ void checkwin(struct game* game){
 	if(game->player.vehicle->lap==GAME_WINCONDITION_LAPS){
 		printf("Player has won the game!\nGame's over\n\n");
 
+		entitymanager_removeblimp(&game->entitymanager,game->player.vehicle->ownblimp,game->player.vehicle);
+
 		//reset laps
 		game->player.vehicle->lap=1;
 		for(int i=0; i<game->num_aiplayers-1;i++){
@@ -22,6 +24,8 @@ void checkwin(struct game* game){
 		//printf("%d\n", game->aiplayers[i].vehicle->lap);
 		if(game->aiplayers[i].vehicle->lap==GAME_WINCONDITION_LAPS){
 			printf("Computer-%d has won the game!\nGame's over\n\n", i);
+
+			entitymanager_removeblimp(&game->entitymanager,game->player.vehicle->ownblimp,game->player.vehicle);
 
 			//reset laps
 			game->player.vehicle->lap=1;
