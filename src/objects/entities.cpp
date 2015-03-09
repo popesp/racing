@@ -624,8 +624,6 @@ struct blimp* entitymanager_placeblimp(struct vehicle* v,struct entitymanager* e
 
 	// create a physics object and add it to the scene
 	b->body = physx::PxCreateDynamic(*em->pm->sdk, pose, physx::PxBoxGeometry(em->dim_blimp[VX] * 0.5f, em->dim_blimp[VY] * 0.5f, em->dim_blimp[VZ] * 0.5f), *em->pm->default_material, BLIMP_DENSITY);
-	b->body->setActorFlag(physx::PxActorFlag::eDISABLE_SIMULATION, true);
-	em->pm->scene->addActor(*b->body);
 
 	b->flags = ENTITY_MINE_FLAG_ENABLED;
 	b->typeblimp = BLIMP_TYPE_PLACE;
@@ -660,7 +658,6 @@ struct blimp* entitymanager_lapblimp(struct entitymanager* em, vec3f pos){
 
 	// create a physics object and add it to the scene
 	b->body = physx::PxCreateDynamic(*em->pm->sdk, physx::PxTransform(b->pos[VX], b->pos[VY], b->pos[VZ]), physx::PxBoxGeometry(em->dim_blimp[VX] * 0.5f, em->dim_blimp[VY] * 0.5f, em->dim_blimp[VZ] * 0.5f), *em->pm->default_material, BLIMP_DENSITY);
-	em->pm->scene->addActor(*b->body);
 
 	b->flags = BLIMP_FLAG_ENABLED;
 	b->typeblimp = BLIMP_TYPE_LAP;
@@ -682,6 +679,7 @@ void entitymanager_removeblimp(struct entitymanager* em, struct blimp* b,struct 
 		}
 	}
 }
+
 
 void entitymanager_textures(struct entitymanager* em, struct renderer* r){
 
@@ -794,7 +792,7 @@ void entitymanager_blimpinit(struct entitymanager* em){
 	mat4f_rotateymul(em->r_blimp.matrix_model, -1.57080f);
 	mat4f_translatemul(em->r_blimp.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
 
-	mat4f_scalemul(em->r_blimplap.matrix_model, BLIMP_MESHSCALE, BLIMP_MESHSCALE, BLIMP_MESHSCALE);
+	mat4f_scalemul(em->r_blimplap.matrix_model, BLIMP_LAP_MESHSCALE, BLIMP_LAP_MESHSCALE, BLIMP_LAP_MESHSCALE);
 	mat4f_rotateymul(em->r_blimplap.matrix_model, -1.57080f);
 	mat4f_translatemul(em->r_blimplap.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
 }
