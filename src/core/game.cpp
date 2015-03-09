@@ -123,11 +123,13 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 				printf("Win condition deactivated.\n");
 				game->flags &= ~GAME_FLAG_WINCONDITION;
 
-				//for(i=0;i<)
+				entitymanager_removeblimp(&game->entitymanager,game->player.vehicle->ownblimp,game->player.vehicle);
 			} else
 			{
 				printf("Win condition activated.\n");
 				printf("Player is on lap %d\n", game->player.vehicle->lap);
+
+				entitymanager_newblimp(game->player.vehicle,&game->entitymanager,game->track.pathpoints[0].pos);
 
 				for (i = 0; i < game->num_aiplayers; i++)
 				{

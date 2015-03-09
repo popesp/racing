@@ -31,6 +31,7 @@
 #define	ENTITY_MISSILE_SPAWNDIST	1.f
 #define	ENTITY_PICKUP_SPAWNHEIGHT	1.2f
 #define ENTITY_MINE_SPAWNDIST		5.f
+#define BLIMP_SPAWNDIST				2.f
 
 #define	ENTITY_MISSILE_FLAG_ENABLED	0x01
 #define	ENTITY_MISSILE_FLAG_INIT	0x00
@@ -64,8 +65,8 @@
 
 #define PICKUP_TIMERS				350
 
-#define PICKUP_SPAWN_LOC1			10
-#define PICKUP_SPAWN_LOC2			70
+#define PICKUP_SPAWN_LOC1			70
+#define PICKUP_SPAWN_LOC2			20
 #define PICKUP_SPAWN_LOC3			100
 
 #define BLIMP_COUNT					152
@@ -74,6 +75,18 @@
 
 #define BLIMP_OBJ					"res/Models/Blimp/blimp.obj"
 #define BLIMP_LAP1_TEXTURE			"res/Models/Blimp/lap_tex/blimp_1.png"
+#define BLIMP_LAP2_TEXTURE			"res/Models/Blimp/lap_tex/blimp_2.png"
+#define BLIMP_LAP3_TEXTURE			"res/Models/Blimp/lap_tex/blimp_3.png"
+
+#define BLIMP_PLACE1_TEXTURE		"res/Models/Blimp/place_tex/blimp_place_1.png"
+#define BLIMP_PLACE2_TEXTURE		"res/Models/Blimp/place_tex/blimp_place_2.png"
+#define BLIMP_PLACE3_TEXTURE		"res/Models/Blimp/place_tex/blimp_place_3.png"
+#define BLIMP_PLACE4_TEXTURE		"res/Models/Blimp/place_tex/blimp_place_4.png"
+#define BLIMP_PLACE5_TEXTURE		"res/Models/Blimp/place_tex/blimp_place_5.png"
+#define BLIMP_PLACE6_TEXTURE		"res/Models/Blimp/place_tex/blimp_place_6.png"
+#define BLIMP_PLACE7_TEXTURE		"res/Models/Blimp/place_tex/blimp_place_7.png"
+#define BLIMP_PLACE8_TEXTURE		"res/Models/Blimp/place_tex/blimp_place_8.png"
+
 #define	BLIMP_MESHSCALE				0.2f
 #define	BLIMP_DENSITY				1.f
 
@@ -125,12 +138,7 @@ struct blimp{
 	physx::PxRigidDynamic* body;
 	struct vehicle* owner;
 	unsigned char flags;
-
-	struct renderable r_blimp;
-
-	struct texture diffuse_lap1;
-	vec3f dim_blimp;
-
+	
 	physx::PxVec3 blimppos;
 
 	vec3f pos;
@@ -145,12 +153,23 @@ struct entitymanager
 
 	struct renderable r_missile;
 	struct renderable r_mine;
+	struct renderable r_blimp;
 
 	vec3f dim_missile;
 	vec3f dim_mine;
+	vec3f dim_blimp;
 
 	struct texture diffuse_missile;
 	struct texture diffuse_mine;
+
+	struct texture diffuse_place1;
+	struct texture diffuse_place2;
+	struct texture diffuse_place3;
+	struct texture diffuse_place4;
+	struct texture diffuse_place5;
+	struct texture diffuse_place6;
+	struct texture diffuse_place7;
+	struct texture diffuse_place8;
 
 	int sfx_missile;
 
@@ -189,7 +208,7 @@ void entitymanager_removepickup(struct entitymanager* em, struct pickup* pu);
 struct mine* entitymanager_newmine(struct entitymanager* em, vec3f dim, struct vehicle* v);
 void entitymanager_removemine(struct entitymanager* em, struct mine* x);
 
-void entitymanager_newblimp(struct vehicle* v, struct entitymanager* em, vec3f pos);
-void entitymanager_removeblimp(struct entitymanager* em, struct blimp* b);
+struct blimp* entitymanager_newblimp(struct vehicle* v, struct entitymanager* em, vec3f pos);
+void entitymanager_removeblimp(struct entitymanager* em, struct blimp* b,struct vehicle* v);
 
 #endif

@@ -78,10 +78,12 @@ struct vehicle
 	bool checkpoint2;
 
 	int haspickup;
+	struct pickup* owns;    //ideally this instead of haspickup
 
 	int index_in_vm;
 
-	struct pickup* owns;    //ideally this instead of haspickup
+	bool hasblimp;
+	struct blimp* ownblimp;
 
 	int boost;
 

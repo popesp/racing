@@ -83,7 +83,7 @@ void checkplace(struct game* game){
 		game->player.vehicle->place=game->num_aiplayers+1;
 	}
 
-
+	
 	for(int i=0; i<=game->num_aiplayers-1;i++){
 
 		////////////////////////////////////
@@ -91,12 +91,11 @@ void checkplace(struct game* game){
 		if(game->num_aiplayers-1==0){
 
 			//first check for laps
-
-
 			//AI has larger lap he's ahead
 			if(game->aiplayers[i].vehicle->lap > game->player.vehicle->lap){
 				game->aiplayers[i].vehicle->place = game->player.vehicle->place-1;
 				game->player.vehicle->place = game->aiplayers[i].vehicle->place+1;
+
 			}
 
 			//player has larger lap
@@ -128,7 +127,8 @@ void checkplace(struct game* game){
 				}
 
 			}
-			//printf("Players place %d     AI[0] %d\n ", game->player.vehicle->place, game->aiplayers[0].vehicle->place);
+
+			printf("Players place %d     AI[0] %d\n ", game->player.vehicle->place, game->aiplayers[0].vehicle->place);
 		}
 		
 
@@ -177,4 +177,18 @@ void checkplace(struct game* game){
 			}
 		}
 	}
+	setblimp(game);
+}
+void setblimp(struct game* game){
+	if(game->player.vehicle->place==2){
+		game->entitymanager.r_blimp.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_place2;
+		//&game->entitymanager->r_blimp.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_place2;
+	}
+	else if(game->player.vehicle->place==1){
+		game->entitymanager.r_blimp.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_place1;
+	}
+	//if(game->player.vehicle->hasblimp==true){
+	//	entitymanager_removeblimp(&game->entitymanager,game->player.vehicle->ownblimp,game->player.vehicle);
+	//}
+	//entitymanager_newblimp(game->player.vehicle,&game->entitymanager,game->track.pathpoints[0].pos);
 }

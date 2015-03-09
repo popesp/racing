@@ -32,9 +32,88 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 	objloader_load(MINE_OBJ, r, &em->r_mine);
 	renderable_sendbuffer(r, &em->r_mine);
 
-
+	renderable_init(&em->r_blimp, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
+	objloader_load(BLIMP_OBJ, em->r, &em->r_blimp);
+	renderable_sendbuffer(em->r, &em->r_blimp);
+	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//BLIMP
+	vec3f_set(min, FLT_MAX, FLT_MAX, FLT_MAX);
+	vec3f_set(max, -FLT_MAX, -FLT_MAX, -FLT_MAX);
 
+	for (i = 0; (unsigned)i < em->r_blimp.num_verts; i++)
+	{
+		vec3f temp;
+
+		// retrieve vertex from buffer
+		vec3f_copy(temp, em->r_blimp.buf_verts + i*em->r->vertsize[em->r_blimp.type]);
+
+		// check for min and max vector positions
+		if (temp[VX] < min[VX])
+			min[VX] = temp[VX];
+		if (temp[VX] > max[VX])
+			max[VX] = temp[VX];
+
+		if (temp[VY] < min[VY])
+			min[VY] = temp[VY];
+		if (temp[VY] > max[VY])
+			max[VY] = temp[VY];
+
+		if (temp[VZ] < min[VZ])
+			min[VZ] = temp[VZ];
+		if (temp[VZ] > max[VZ])
+			max[VZ] = temp[VZ];
+	}
+
+	// find center point of model
+	vec3f_addn(avg, min, max);
+	vec3f_scale(avg, 0.5f);
+
+	// find dimensions of model
+	vec3f_subtractn(diff, max, min);
+	vec3f_scalen(em->dim_blimp, diff, BLIMP_MESHSCALE);
+
+	// swap x and z to get the correct vehicle dimensions
+	temp = em->dim_blimp[VX];
+	em->dim_blimp[VX] = em->dim_blimp[VZ];
+	em->dim_blimp[VZ] = temp;
+
+	mat4f_scalemul(em->r_blimp.matrix_model, BLIMP_MESHSCALE, BLIMP_MESHSCALE, BLIMP_MESHSCALE);
+	mat4f_rotateymul(em->r_blimp.matrix_model, -1.57080f);
+	mat4f_translatemul(em->r_blimp.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
+
+	texture_init(&em->diffuse_place1);
+	texture_loadfile(&em->diffuse_place1, BLIMP_PLACE1_TEXTURE);
+	texture_upload(&em->diffuse_place1, RENDER_TEXTURE_DIFFUSE);
+
+	texture_init(&em->diffuse_place2);
+	texture_loadfile(&em->diffuse_place2, BLIMP_PLACE2_TEXTURE);
+	texture_upload(&em->diffuse_place2, RENDER_TEXTURE_DIFFUSE);
+
+	texture_init(&em->diffuse_place3);
+	texture_loadfile(&em->diffuse_place3, BLIMP_PLACE3_TEXTURE);
+	texture_upload(&em->diffuse_place3, RENDER_TEXTURE_DIFFUSE);
+
+	texture_init(&em->diffuse_place4);
+	texture_loadfile(&em->diffuse_place4, BLIMP_PLACE4_TEXTURE);
+	texture_upload(&em->diffuse_place4, RENDER_TEXTURE_DIFFUSE);
+
+	texture_init(&em->diffuse_place5);
+	texture_loadfile(&em->diffuse_place5, BLIMP_PLACE5_TEXTURE);
+	texture_upload(&em->diffuse_place5, RENDER_TEXTURE_DIFFUSE);
+
+	texture_init(&em->diffuse_place6);
+	texture_loadfile(&em->diffuse_place6, BLIMP_PLACE6_TEXTURE);
+	texture_upload(&em->diffuse_place6, RENDER_TEXTURE_DIFFUSE);
+
+	texture_init(&em->diffuse_place7);
+	texture_loadfile(&em->diffuse_place7, BLIMP_PLACE7_TEXTURE);
+	texture_upload(&em->diffuse_place7, RENDER_TEXTURE_DIFFUSE);
+
+	texture_init(&em->diffuse_place8);
+	texture_loadfile(&em->diffuse_place8, BLIMP_PLACE8_TEXTURE);
+	texture_upload(&em->diffuse_place8, RENDER_TEXTURE_DIFFUSE);
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//MISSILE
 	// find the limits of the loaded mesh
 	vec3f_set(min, FLT_MAX, FLT_MAX, FLT_MAX);
@@ -156,7 +235,7 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 		pu->owner = NULL;
 		pu->flags = ENTITY_PICKUP_FLAG_INIT;
 
-
+		pu->hit=-1;
 	}
 
 	// mine array
@@ -208,9 +287,10 @@ void entitymanager_shutdown(struct entitymanager* em)
 			em->blimps[i].body->setActorFlag(physx::PxActorFlag::eDISABLE_SIMULATION, false);
 			em->blimps[i].body->release();
 		}
-		renderable_deallocate(&em->blimps[i].r_blimp);
+		
 	}
 
+	renderable_deallocate(&em->r_blimp);
 	renderable_deallocate(&em->r_missile);
 	renderable_deallocate(&em->r_mine);
 }
@@ -235,7 +315,7 @@ void entitymanager_render(struct entitymanager* em, struct renderer* r, mat4f wo
 
 	for (i=0;i<BLIMP_COUNT;i++){
 		if(em->blimps[i].flags&BLIMP_FLAG_ENABLED){
-			renderable_render(r, &em->blimps[i].r_blimp, (float*)&physx::PxMat44(em->blimps[i].body->getGlobalPose()),worldview,0);
+			renderable_render(r, &em->r_blimp, (float*)&physx::PxMat44(em->blimps[i].body->getGlobalPose()),worldview,0);
 		}
 	}
 }
@@ -702,91 +782,68 @@ void entitymanager_removemine(struct entitymanager* em, struct mine* x){
 	}
 }
 
-void entitymanager_newblimp(struct vehicle* v,struct entitymanager* em, vec3f pos){
-	vec3f spawn,min, max, avg, diff;
+struct blimp* entitymanager_newblimp(struct vehicle* v,struct entitymanager* em, vec3f pos){
+	physx::PxTransform pose;
+	physx::PxMat44 mat_pose;
 	int i;
-	float temp;
 	struct blimp* b;
 
-	b=&em->blimps[em->num_blimps];
-	em->num_blimps++;
+	for (i = 0; i < BLIMP_COUNT; i++)
+		if (!(em->blimps[i].flags & BLIMP_FLAG_ENABLED))
+			break;
+
+	if (i == BLIMP_COUNT)
+		return NULL;
+
+	b = em->blimps + i;
+
 	b->owner = v;
-
-	renderable_init(&b->r_blimp, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
-	objloader_load(BLIMP_OBJ, em->r, &b->r_blimp);
-	renderable_sendbuffer(em->r, &b->r_blimp);
-
-	texture_init(&b->diffuse_lap1);
-
-	// find the limits of the loaded mesh
-	vec3f_set(min, FLT_MAX, FLT_MAX, FLT_MAX);
-	vec3f_set(max, -FLT_MAX, -FLT_MAX, -FLT_MAX);
-
-	for (i = 0; (unsigned)i < b->r_blimp.num_verts; i++)
-	{
-		vec3f temp;
-
-		// retrieve vertex from buffer
-		vec3f_copy(temp, b->r_blimp.buf_verts + i*em->r->vertsize[b->r_blimp.type]);
-
-		// check for min and max vector positions
-		if (temp[VX] < min[VX])
-			min[VX] = temp[VX];
-		if (temp[VX] > max[VX])
-			max[VX] = temp[VX];
-
-		if (temp[VY] < min[VY])
-			min[VY] = temp[VY];
-		if (temp[VY] > max[VY])
-			max[VY] = temp[VY];
-
-		if (temp[VZ] < min[VZ])
-			min[VZ] = temp[VZ];
-		if (temp[VZ] > max[VZ])
-			max[VZ] = temp[VZ];
+	v->ownblimp = b;
+	v->hasblimp=true;
+	
+	if(v->place==2){
+		em->r_blimp.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_place2;
+	}
+	else if(v->place==3){
+		em->r_blimp.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_place3;
+	}
+	else if(v->place==4){
+		em->r_blimp.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_place4;
+	}
+	else if(v->place==5){
+		em->r_blimp.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_place5;
+	}
+	else if(v->place==6){
+		em->r_blimp.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_place6;
+	}
+	else if(v->place==7){
+		em->r_blimp.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_place7;
+	}
+	else if(v->place==8){
+		em->r_blimp.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_place8;
+	}
+	// if(v->place==1){
+	else{
+		em->r_blimp.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_place1;
 	}
 
-	// find center point of model
-	vec3f_addn(avg, min, max);
-	vec3f_scale(avg, 0.5f);
-
-	// find dimensions of model
-	vec3f_subtractn(diff, max, min);
-	vec3f_scalen(b->dim_blimp, diff, BLIMP_MESHSCALE);
-
-	// swap x and z to get the correct vehicle dimensions
-	temp = b->dim_blimp[VX];
-	b->dim_blimp[VX] = b->dim_blimp[VZ];
-	b->dim_blimp[VZ] = temp;
-
-	mat4f_scalemul(b->r_blimp.matrix_model, BLIMP_MESHSCALE, BLIMP_MESHSCALE, BLIMP_MESHSCALE);
-	mat4f_rotateymul(b->r_blimp.matrix_model, -1.57080f);
-	mat4f_translatemul(b->r_blimp.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
-
-	texture_loadfile(&b->diffuse_lap1, BLIMP_LAP1_TEXTURE);
-	texture_upload(&b->diffuse_lap1, RENDER_TEXTURE_DIFFUSE);
-	b->r_blimp.textures[RENDER_TEXTURE_DIFFUSE] = &b->diffuse_lap1;
-
-	// find spawn location, this doesnt matter for blimp but had to set to create a body
-	vec3f_copy(b->pos, pos);
-	vec3f_copy(spawn, em->track->up);
-	vec3f_scale(spawn, ENTITY_PICKUP_SPAWNHEIGHT);
-	vec3f_add(b->pos, spawn);
+	pose = v->body->getGlobalPose().transform(physx::PxTransform(-.3f, 1.f, -(pos[VZ]*0.5f - BLIMP_SPAWNDIST)));
+	mat_pose = physx::PxMat44(pose);
 
 	// create a physics object and add it to the scene
-	b->body = physx::PxCreateDynamic(*em->pm->sdk, physx::PxTransform(b->pos[VX], b->pos[VY], b->pos[VZ]), physx::PxBoxGeometry(b->dim_blimp[VX] * 0.5f, b->dim_blimp[VY] * 0.5f, b->dim_blimp[VZ] * 0.5f), *em->pm->default_material, BLIMP_DENSITY);
+	b->body = physx::PxCreateDynamic(*em->pm->sdk, pose, physx::PxBoxGeometry(em->dim_blimp[VX] * 0.5f, em->dim_blimp[VY] * 0.5f, em->dim_blimp[VZ] * 0.5f), *em->pm->default_material, BLIMP_DENSITY);
+	em->pm->scene->addActor(*b->body);
 
 	b->flags = ENTITY_MINE_FLAG_ENABLED;
-}
-//struct blimp* entitymanager_newblimp(struct vehicle* v, struct blimp* b,struct entitymanager* em){
-//	vec3f spawn,min, max, avg, diff;
-//	int i;
-//	float temp;
-//}
 
-void entitymanager_removeblimp(struct entitymanager* em, struct blimp* b){
+	return b;
+}
+
+void entitymanager_removeblimp(struct entitymanager* em, struct blimp* b,struct vehicle* v){
+	
+	v->ownblimp=NULL;
+
 	int i;
-	em->num_blimps--;
 	for(i=0;i<BLIMP_COUNT;i++){
 		if(b==em->blimps+i){
 			em->blimps[i].body->release();
