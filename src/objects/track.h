@@ -19,7 +19,7 @@
 
 #define TRACK_NUMPOINTS			3000
 
-#define TRACK_TEXT_SLATE		"res/images/slate.jpg"
+#define TRACK_TEXT_SLATE		"res/images/smootharrows.png"
 
 struct physicsmanager;
 
