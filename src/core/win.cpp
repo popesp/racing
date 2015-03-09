@@ -16,7 +16,7 @@ void checkwin(struct game* game){
 		for(int i=0; i<game->num_aiplayers-1;i++){
 			game->aiplayers[i].vehicle->lap=1;
 		}
-
+		setblimp(game);
 		game->flags &= ~GAME_FLAG_WINCONDITION;
 	}
 
@@ -32,6 +32,7 @@ void checkwin(struct game* game){
 			for(int i=0; i<=game->num_aiplayers-1;i++){
 				game->aiplayers[i].vehicle->lap=1;
 			}
+			setblimp(game);
 			game->flags &= ~GAME_FLAG_WINCONDITION;
 		}
 	}
@@ -196,8 +197,14 @@ void setblimp(struct game* game){
 	}
 
 
+	if(game->player.vehicle->lap==GAME_WINCONDITION_LAPS){
+		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_win;
+	}
+	if(game->flags != GAME_FLAG_WINCONDITION){
+		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_lose;
+	}
 
-	if(game->player.vehicle->lap==1){
+	else if(game->player.vehicle->lap==1){
 		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_lap1;
 	}
 	else if(game->player.vehicle->lap==2){

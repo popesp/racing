@@ -289,8 +289,6 @@ static void update(struct game* game)
 		}
 	}
 
-	printf("%f %f %f\r", game->cam_debug.pos[0],game->cam_debug.pos[1],game->cam_debug.pos[2]);
-
 	//check who has won the game
 	if(game->flags == GAME_FLAG_WINCONDITION){
 		checkwin(game);

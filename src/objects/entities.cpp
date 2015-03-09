@@ -785,6 +785,16 @@ void entitymanager_textures(struct entitymanager* em, struct renderer* r){
 	texture_loadfile(&em->diffuse_lap3, BLIMP_LAP3_TEXTURE);
 	texture_upload(&em->diffuse_lap3, RENDER_TEXTURE_DIFFUSE);
 
+	//blimp winning texture
+	texture_init(&em->diffuse_win);
+	texture_loadfile(&em->diffuse_win, BLIMP_WIN_TEXTURE);
+	texture_upload(&em->diffuse_win, RENDER_TEXTURE_DIFFUSE);
+
+	//blimp losing testure
+	texture_init(&em->diffuse_lose);
+	texture_loadfile(&em->diffuse_lose, BLIMP_LOSE_TEXTURE);
+	texture_upload(&em->diffuse_lose, RENDER_TEXTURE_DIFFUSE);
+
 	texture_init(&em->diffuse_place1);
 	texture_loadfile(&em->diffuse_place1, BLIMP_PLACE1_TEXTURE);
 	texture_upload(&em->diffuse_place1, RENDER_TEXTURE_DIFFUSE);
