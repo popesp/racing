@@ -289,6 +289,8 @@ static void update(struct game* game)
 		}
 	}
 
+	printf("%f %f %f\r", game->cam_debug.pos[0],game->cam_debug.pos[1],game->cam_debug.pos[2]);
+
 	//check who has won the game
 	if(game->flags == GAME_FLAG_WINCONDITION){
 		checkwin(game);
@@ -524,6 +526,12 @@ int game_startup(struct game* game)
 	//seperated this so the third is a different pickup
 	entitymanager_newpickup(&game->entitymanager,game->track.pathpoints[PICKUP_SPAWN_LOC3].pos);
 	game->entitymanager.pickupatspawn3=true;
+
+	//spawn a bigass blimp in the middle of the map
+	vec3f test;
+	vec3f_set(test, -22.f, 10.f,-115.f);
+	entitymanager_lapblimp(&game->entitymanager,test);
+
 
 	return 1;
 }

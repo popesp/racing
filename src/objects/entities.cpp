@@ -731,9 +731,6 @@ struct blimp* entitymanager_lapblimp(struct entitymanager* em, vec3f pos){
 
 	// find spawn location
 	vec3f_copy(b->pos, pos);
-	vec3f_copy(spawn, em->track->up);
-	vec3f_scale(spawn, BLIMP_LAP_SPAWNHEIGHT);
-	vec3f_add(b->pos, spawn);
 
 	// create a physics object and add it to the scene
 	b->body = physx::PxCreateDynamic(*em->pm->sdk, physx::PxTransform(b->pos[VX], b->pos[VY], b->pos[VZ]), physx::PxBoxGeometry(em->dim_blimp[VX] * 0.5f, em->dim_blimp[VY] * 0.5f, em->dim_blimp[VZ] * 0.5f), *em->pm->default_material, BLIMP_DENSITY);
