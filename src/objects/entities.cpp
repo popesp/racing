@@ -9,8 +9,6 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 	struct mine* x;
 	struct blimp* b;
 
-	float temp;
-	vec3f min, max, avg, diff;
 	int i;
 
 	em->pm = pm;
@@ -27,7 +25,7 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 	em->num_mines=0;
 	em->num_missiles=0;
 	em->num_pickups=0;
-
+	
 	renderable_init(&em->r_missile, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
 	objloader_load(MISSILE_OBJ, r, &em->r_missile);
 	renderable_sendbuffer(r, &em->r_missile);
@@ -43,214 +41,22 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 	renderable_init(&em->r_blimplap, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
 	objloader_load(BLIMP_OBJ, em->r, &em->r_blimplap);
 	renderable_sendbuffer(em->r, &em->r_blimplap);
-	
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//BLIMP shit
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	vec3f_set(min, FLT_MAX, FLT_MAX, FLT_MAX);
-	vec3f_set(max, -FLT_MAX, -FLT_MAX, -FLT_MAX);
 
-	for (i = 0; (unsigned)i < em->r_blimp.num_verts; i++)
-	{
-		vec3f temp;
+	//initialize all the textures for the objects
+	entitymanager_textures(em, r);
 
-		// retrieve vertex from buffer
-		vec3f_copy(temp, em->r_blimp.buf_verts + i*em->r->vertsize[em->r_blimp.type]);
+	//initialize dimensions for the objects
+	entitymanager_blimpinit(em);
+	entitymanager_missileinit(em);
+	entitymanager_mineinit(em);
 
-		// check for min and max vector positions
-		if (temp[VX] < min[VX])
-			min[VX] = temp[VX];
-		if (temp[VX] > max[VX])
-			max[VX] = temp[VX];
-
-		if (temp[VY] < min[VY])
-			min[VY] = temp[VY];
-		if (temp[VY] > max[VY])
-			max[VY] = temp[VY];
-
-		if (temp[VZ] < min[VZ])
-			min[VZ] = temp[VZ];
-		if (temp[VZ] > max[VZ])
-			max[VZ] = temp[VZ];
-	}
-
-	// find center point of model
-	vec3f_addn(avg, min, max);
-	vec3f_scale(avg, 0.5f);
-
-	// find dimensions of model
-	vec3f_subtractn(diff, max, min);
-	vec3f_scalen(em->dim_blimp, diff, BLIMP_MESHSCALE);
-
-	// swap x and z to get the correct vehicle dimensions
-	temp = em->dim_blimp[VX];
-	em->dim_blimp[VX] = em->dim_blimp[VZ];
-	em->dim_blimp[VZ] = temp;
-
-	mat4f_scalemul(em->r_blimp.matrix_model, BLIMP_MESHSCALE, BLIMP_MESHSCALE, BLIMP_MESHSCALE);
-	mat4f_rotateymul(em->r_blimp.matrix_model, -1.57080f);
-	mat4f_translatemul(em->r_blimp.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
-
-	mat4f_scalemul(em->r_blimplap.matrix_model, BLIMP_MESHSCALE, BLIMP_MESHSCALE, BLIMP_MESHSCALE);
-	mat4f_rotateymul(em->r_blimplap.matrix_model, -1.57080f);
-	mat4f_translatemul(em->r_blimplap.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
-
-	texture_init(&em->diffuse_blimp);
-	texture_loadfile(&em->diffuse_blimp, BLIMP_REGULAR_TEXTURE);
-	texture_upload(&em->diffuse_blimp, RENDER_TEXTURE_DIFFUSE);
-
-	texture_init(&em->diffuse_lap1);
-	texture_loadfile(&em->diffuse_lap1, BLIMP_LAP1_TEXTURE);
-	texture_upload(&em->diffuse_lap1, RENDER_TEXTURE_DIFFUSE);
-
-	texture_init(&em->diffuse_lap2);
-	texture_loadfile(&em->diffuse_lap2, BLIMP_LAP2_TEXTURE);
-	texture_upload(&em->diffuse_lap2, RENDER_TEXTURE_DIFFUSE);
-
-	texture_init(&em->diffuse_lap3);
-	texture_loadfile(&em->diffuse_lap3, BLIMP_LAP3_TEXTURE);
-	texture_upload(&em->diffuse_lap3, RENDER_TEXTURE_DIFFUSE);
-
-	texture_init(&em->diffuse_place1);
-	texture_loadfile(&em->diffuse_place1, BLIMP_PLACE1_TEXTURE);
-	texture_upload(&em->diffuse_place1, RENDER_TEXTURE_DIFFUSE);
-
-	texture_init(&em->diffuse_place2);
-	texture_loadfile(&em->diffuse_place2, BLIMP_PLACE2_TEXTURE);
-	texture_upload(&em->diffuse_place2, RENDER_TEXTURE_DIFFUSE);
-
-	texture_init(&em->diffuse_place3);
-	texture_loadfile(&em->diffuse_place3, BLIMP_PLACE3_TEXTURE);
-	texture_upload(&em->diffuse_place3, RENDER_TEXTURE_DIFFUSE);
-
-	texture_init(&em->diffuse_place4);
-	texture_loadfile(&em->diffuse_place4, BLIMP_PLACE4_TEXTURE);
-	texture_upload(&em->diffuse_place4, RENDER_TEXTURE_DIFFUSE);
-
-	texture_init(&em->diffuse_place5);
-	texture_loadfile(&em->diffuse_place5, BLIMP_PLACE5_TEXTURE);
-	texture_upload(&em->diffuse_place5, RENDER_TEXTURE_DIFFUSE);
-
-	texture_init(&em->diffuse_place6);
-	texture_loadfile(&em->diffuse_place6, BLIMP_PLACE6_TEXTURE);
-	texture_upload(&em->diffuse_place6, RENDER_TEXTURE_DIFFUSE);
-
-	texture_init(&em->diffuse_place7);
-	texture_loadfile(&em->diffuse_place7, BLIMP_PLACE7_TEXTURE);
-	texture_upload(&em->diffuse_place7, RENDER_TEXTURE_DIFFUSE);
-
-	texture_init(&em->diffuse_place8);
-	texture_loadfile(&em->diffuse_place8, BLIMP_PLACE8_TEXTURE);
-	texture_upload(&em->diffuse_place8, RENDER_TEXTURE_DIFFUSE);
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//MISSILE
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	vec3f_set(min, FLT_MAX, FLT_MAX, FLT_MAX);
-	vec3f_set(max, -FLT_MAX, -FLT_MAX, -FLT_MAX);
-
-	for (i = 0; (unsigned)i < em->r_missile.num_verts; i++)
-	{
-		vec3f temp;
-
-		// retrieve vertex from buffer
-		vec3f_copy(temp, em->r_missile.buf_verts + i*r->vertsize[em->r_missile.type]);
-
-		// check for min and max vector positions
-		if (temp[VX] < min[VX])
-			min[VX] = temp[VX];
-		if (temp[VX] > max[VX])
-			max[VX] = temp[VX];
-
-		if (temp[VY] < min[VY])
-			min[VY] = temp[VY];
-		if (temp[VY] > max[VY])
-			max[VY] = temp[VY];
-
-		if (temp[VZ] < min[VZ])
-			min[VZ] = temp[VZ];
-		if (temp[VZ] > max[VZ])
-			max[VZ] = temp[VZ];
-	}
-	// find center point of model
-	vec3f_addn(avg, min, max);
-	vec3f_scale(avg, 0.5f);
-
-	// find dimensions of model
-	vec3f_subtractn(diff, max, min);
-	vec3f_scalen(em->dim_missile, diff, MISSILE_MESHSCALE);
-
-	// swap x and z to get the correct vehicle dimensions
-	temp = em->dim_missile[VX];
-	em->dim_missile[VX] = em->dim_missile[VZ];
-	em->dim_missile[VZ] = temp;
-
-	mat4f_scalemul(em->r_missile.matrix_model, MISSILE_MESHSCALE, MISSILE_MESHSCALE, MISSILE_MESHSCALE);
-	mat4f_rotateymul(em->r_missile.matrix_model, 3.f);
-	mat4f_translatemul(em->r_missile.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
-
-	// initialize missile texture
-	texture_init(&em->diffuse_missile);
-	texture_loadfile(&em->diffuse_missile, MISSILE_TEXTURE);
-	texture_upload(&em->diffuse_missile, RENDER_TEXTURE_DIFFUSE);
 	em->r_missile.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_missile;
-
-	/////////////////////////////////////////////////////////////////////////
-	//MINE STUFF
-	/////////////////////////////////////////////////////////////////////////
-	vec3f_set(min, FLT_MAX, FLT_MAX, FLT_MAX);
-	vec3f_set(max, -FLT_MAX, -FLT_MAX, -FLT_MAX);
-
-	for (i = 0; (unsigned)i < em->r_mine.num_verts; i++)
-	{
-		vec3f temp;
-
-		// retrieve vertex from buffer
-		vec3f_copy(temp, em->r_mine.buf_verts + i*r->vertsize[em->r_mine.type]);
-
-		// check for min and max vector positions
-		if (temp[VX] < min[VX])
-			min[VX] = temp[VX];
-		if (temp[VX] > max[VX])
-			max[VX] = temp[VX];
-
-		if (temp[VY] < min[VY])
-			min[VY] = temp[VY];
-		if (temp[VY] > max[VY])
-			max[VY] = temp[VY];
-
-		if (temp[VZ] < min[VZ])
-			min[VZ] = temp[VZ];
-		if (temp[VZ] > max[VZ])
-			max[VZ] = temp[VZ];
-	}
-	// find center point of model
-	vec3f_addn(avg, min, max);
-	vec3f_scale(avg, 0.5f);
-
-	// find dimensions of model
-	vec3f_subtractn(diff, max, min);
-	vec3f_scalen(em->dim_mine, diff, MINE_MESHSCALE);
-
-	// swap x and z to get the correct vehicle dimensions
-	temp = em->dim_mine[VX];
-	em->dim_mine[VX] = em->dim_mine[VZ];
-	em->dim_mine[VZ] = temp;
-
-	mat4f_scalemul(em->r_mine.matrix_model, MINE_MESHSCALE, MINE_MESHSCALE, MINE_MESHSCALE);
-	mat4f_rotateymul(em->r_mine.matrix_model, -1.57080f);
-	mat4f_translatemul(em->r_mine.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
-
-	// initialize pickup texture
-	texture_init(&em->diffuse_mine);
-	texture_loadfile(&em->diffuse_mine, MINE_TEXTURE);
-	texture_upload(&em->diffuse_mine, RENDER_TEXTURE_DIFFUSE);
 	em->r_mine.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_mine;
 
 	// initialize missile array
 	for (i = 0; i < ENTITY_MISSILE_COUNT; i++)
 	{
 		m = em->missiles + i;
-
 		m->body = NULL;
 		m->owner = NULL;
 		m->flags = ENTITY_MISSILE_FLAG_INIT;
@@ -259,26 +65,23 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 	// pickup array
 	for(i=0;i<ENTITY_PICKUP_COUNT;i++){
 		pu = em->pickups+i;
-
 		pu->body = NULL;
 		pu->owner = NULL;
 		pu->flags = ENTITY_PICKUP_FLAG_INIT;
-
 		pu->hit=-1;
 	}
 
 	// mine array
 	for(i=0;i<ENTITY_MINE_COUNT;i++){
 		x = em->mines+i;
-
 		x->body = NULL;
 		x->owner = NULL;
 		x->flags = ENTITY_MINE_FLAG_INIT;
 	}
 
+	// blimp array
 	for(i=0;i<BLIMP_COUNT;i++){
 		b = em->blimps+i;
-
 		b->body = NULL;
 		b->owner = NULL;
 		b->flags = BLIMP_FLAG_INIT;
@@ -510,7 +313,6 @@ void entitymanager_attachpickup(struct vehicle* v, struct pickup* pu,struct enti
 
 	vec3f min, max, avg, diff;
 	int i;
-	float temp;
 
 	for(i=0;i<ENTITY_PICKUP_COUNT; i++){
 		if((em->pickups+i)==pu && pu->holdingpu1==true){
@@ -898,4 +700,221 @@ void entitymanager_removeblimp(struct entitymanager* em, struct blimp* b,struct 
 			em->blimps[i].owner = NULL;
 		}
 	}
+}
+
+void entitymanager_textures(struct entitymanager* em, struct renderer* r){
+
+	// initialize mine texture
+	texture_init(&em->diffuse_mine);
+	texture_loadfile(&em->diffuse_mine, MINE_TEXTURE);
+	texture_upload(&em->diffuse_mine, RENDER_TEXTURE_DIFFUSE);
+
+	// initialize missile texture
+	texture_init(&em->diffuse_missile);
+	texture_loadfile(&em->diffuse_missile, MISSILE_TEXTURE);
+	texture_upload(&em->diffuse_missile, RENDER_TEXTURE_DIFFUSE);
+
+	texture_init(&em->diffuse_blimp);
+	texture_loadfile(&em->diffuse_blimp, BLIMP_REGULAR_TEXTURE);
+	texture_upload(&em->diffuse_blimp, RENDER_TEXTURE_DIFFUSE);
+
+	texture_init(&em->diffuse_lap1);
+	texture_loadfile(&em->diffuse_lap1, BLIMP_LAP1_TEXTURE);
+	texture_upload(&em->diffuse_lap1, RENDER_TEXTURE_DIFFUSE);
+
+	texture_init(&em->diffuse_lap2);
+	texture_loadfile(&em->diffuse_lap2, BLIMP_LAP2_TEXTURE);
+	texture_upload(&em->diffuse_lap2, RENDER_TEXTURE_DIFFUSE);
+
+	texture_init(&em->diffuse_lap3);
+	texture_loadfile(&em->diffuse_lap3, BLIMP_LAP3_TEXTURE);
+	texture_upload(&em->diffuse_lap3, RENDER_TEXTURE_DIFFUSE);
+
+	texture_init(&em->diffuse_place1);
+	texture_loadfile(&em->diffuse_place1, BLIMP_PLACE1_TEXTURE);
+	texture_upload(&em->diffuse_place1, RENDER_TEXTURE_DIFFUSE);
+
+	texture_init(&em->diffuse_place2);
+	texture_loadfile(&em->diffuse_place2, BLIMP_PLACE2_TEXTURE);
+	texture_upload(&em->diffuse_place2, RENDER_TEXTURE_DIFFUSE);
+
+	texture_init(&em->diffuse_place3);
+	texture_loadfile(&em->diffuse_place3, BLIMP_PLACE3_TEXTURE);
+	texture_upload(&em->diffuse_place3, RENDER_TEXTURE_DIFFUSE);
+
+	texture_init(&em->diffuse_place4);
+	texture_loadfile(&em->diffuse_place4, BLIMP_PLACE4_TEXTURE);
+	texture_upload(&em->diffuse_place4, RENDER_TEXTURE_DIFFUSE);
+
+	texture_init(&em->diffuse_place5);
+	texture_loadfile(&em->diffuse_place5, BLIMP_PLACE5_TEXTURE);
+	texture_upload(&em->diffuse_place5, RENDER_TEXTURE_DIFFUSE);
+
+	texture_init(&em->diffuse_place6);
+	texture_loadfile(&em->diffuse_place6, BLIMP_PLACE6_TEXTURE);
+	texture_upload(&em->diffuse_place6, RENDER_TEXTURE_DIFFUSE);
+
+	texture_init(&em->diffuse_place7);
+	texture_loadfile(&em->diffuse_place7, BLIMP_PLACE7_TEXTURE);
+	texture_upload(&em->diffuse_place7, RENDER_TEXTURE_DIFFUSE);
+
+	texture_init(&em->diffuse_place8);
+	texture_loadfile(&em->diffuse_place8, BLIMP_PLACE8_TEXTURE);
+	texture_upload(&em->diffuse_place8, RENDER_TEXTURE_DIFFUSE);
+
+}
+
+void entitymanager_blimpinit(struct entitymanager* em){
+	float temp;
+	vec3f min, max, avg, diff;
+	int i;
+
+	vec3f_set(min, FLT_MAX, FLT_MAX, FLT_MAX);
+	vec3f_set(max, -FLT_MAX, -FLT_MAX, -FLT_MAX);
+
+	for (i = 0; (unsigned)i < em->r_blimp.num_verts; i++)
+	{
+		vec3f temp;
+
+		// retrieve vertex from buffer
+		vec3f_copy(temp, em->r_blimp.buf_verts + i*em->r->vertsize[em->r_blimp.type]);
+
+		// check for min and max vector positions
+		if (temp[VX] < min[VX])
+			min[VX] = temp[VX];
+		if (temp[VX] > max[VX])
+			max[VX] = temp[VX];
+
+		if (temp[VY] < min[VY])
+			min[VY] = temp[VY];
+		if (temp[VY] > max[VY])
+			max[VY] = temp[VY];
+
+		if (temp[VZ] < min[VZ])
+			min[VZ] = temp[VZ];
+		if (temp[VZ] > max[VZ])
+			max[VZ] = temp[VZ];
+	}
+
+	// find center point of model
+	vec3f_addn(avg, min, max);
+	vec3f_scale(avg, 0.5f);
+
+	// find dimensions of model
+	vec3f_subtractn(diff, max, min);
+	vec3f_scalen(em->dim_blimp, diff, BLIMP_MESHSCALE);
+
+	// swap x and z to get the correct vehicle dimensions
+	temp = em->dim_blimp[VX];
+	em->dim_blimp[VX] = em->dim_blimp[VZ];
+	em->dim_blimp[VZ] = temp;
+
+	mat4f_scalemul(em->r_blimp.matrix_model, BLIMP_MESHSCALE, BLIMP_MESHSCALE, BLIMP_MESHSCALE);
+	mat4f_rotateymul(em->r_blimp.matrix_model, -1.57080f);
+	mat4f_translatemul(em->r_blimp.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
+
+	mat4f_scalemul(em->r_blimplap.matrix_model, BLIMP_MESHSCALE, BLIMP_MESHSCALE, BLIMP_MESHSCALE);
+	mat4f_rotateymul(em->r_blimplap.matrix_model, -1.57080f);
+	mat4f_translatemul(em->r_blimplap.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
+}
+
+void entitymanager_missileinit(struct entitymanager* em){
+	float temp;
+	vec3f min, max, avg, diff;
+	int i;
+
+
+
+	vec3f_set(min, FLT_MAX, FLT_MAX, FLT_MAX);
+	vec3f_set(max, -FLT_MAX, -FLT_MAX, -FLT_MAX);
+
+	for (i = 0; (unsigned)i < em->r_missile.num_verts; i++)
+	{
+		vec3f temp;
+
+		// retrieve vertex from buffer
+		vec3f_copy(temp, em->r_missile.buf_verts + i*em->r->vertsize[em->r_missile.type]);
+
+		// check for min and max vector positions
+		if (temp[VX] < min[VX])
+			min[VX] = temp[VX];
+		if (temp[VX] > max[VX])
+			max[VX] = temp[VX];
+
+		if (temp[VY] < min[VY])
+			min[VY] = temp[VY];
+		if (temp[VY] > max[VY])
+			max[VY] = temp[VY];
+
+		if (temp[VZ] < min[VZ])
+			min[VZ] = temp[VZ];
+		if (temp[VZ] > max[VZ])
+			max[VZ] = temp[VZ];
+	}
+	// find center point of model
+	vec3f_addn(avg, min, max);
+	vec3f_scale(avg, 0.5f);
+
+	// find dimensions of model
+	vec3f_subtractn(diff, max, min);
+	vec3f_scalen(em->dim_missile, diff, MISSILE_MESHSCALE);
+
+	// swap x and z to get the correct vehicle dimensions
+	temp = em->dim_missile[VX];
+	em->dim_missile[VX] = em->dim_missile[VZ];
+	em->dim_missile[VZ] = temp;
+
+	mat4f_scalemul(em->r_missile.matrix_model, MISSILE_MESHSCALE, MISSILE_MESHSCALE, MISSILE_MESHSCALE);
+	mat4f_rotateymul(em->r_missile.matrix_model, 3.f);
+	mat4f_translatemul(em->r_missile.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
+}
+
+void entitymanager_mineinit(struct entitymanager* em){
+	float temp;
+	vec3f min, max, avg, diff;
+	int i;
+
+	vec3f_set(min, FLT_MAX, FLT_MAX, FLT_MAX);
+	vec3f_set(max, -FLT_MAX, -FLT_MAX, -FLT_MAX);
+
+	for (i = 0; (unsigned)i < em->r_mine.num_verts; i++)
+	{
+		vec3f temp;
+
+		// retrieve vertex from buffer
+		vec3f_copy(temp, em->r_mine.buf_verts + i*em->r->vertsize[em->r_mine.type]);
+
+		// check for min and max vector positions
+		if (temp[VX] < min[VX])
+			min[VX] = temp[VX];
+		if (temp[VX] > max[VX])
+			max[VX] = temp[VX];
+
+		if (temp[VY] < min[VY])
+			min[VY] = temp[VY];
+		if (temp[VY] > max[VY])
+			max[VY] = temp[VY];
+
+		if (temp[VZ] < min[VZ])
+			min[VZ] = temp[VZ];
+		if (temp[VZ] > max[VZ])
+			max[VZ] = temp[VZ];
+	}
+	// find center point of model
+	vec3f_addn(avg, min, max);
+	vec3f_scale(avg, 0.5f);
+
+	// find dimensions of model
+	vec3f_subtractn(diff, max, min);
+	vec3f_scalen(em->dim_mine, diff, MINE_MESHSCALE);
+
+	// swap x and z to get the correct vehicle dimensions
+	temp = em->dim_mine[VX];
+	em->dim_mine[VX] = em->dim_mine[VZ];
+	em->dim_mine[VZ] = temp;
+
+	mat4f_scalemul(em->r_mine.matrix_model, MINE_MESHSCALE, MINE_MESHSCALE, MINE_MESHSCALE);
+	mat4f_rotateymul(em->r_mine.matrix_model, -1.57080f);
+	mat4f_translatemul(em->r_mine.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
+
 }

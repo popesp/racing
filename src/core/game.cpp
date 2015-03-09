@@ -488,6 +488,13 @@ int game_startup(struct game* game)
 	game->vehiclemanager.r_vehicle.lights[0] = game->track_lights + 0;
 	game->vehiclemanager.r_vehicle.lights[1] = game->track_lights + 1;
 	
+	//spawn the tracks pickups
+	entitymanager_newpickup(&game->entitymanager,game->track.pathpoints[PICKUP_SPAWN_LOC1].pos);
+	game->entitymanager.pickupatspawn1=true;
+	
+	entitymanager_newpickup(&game->entitymanager,game->track.pathpoints[PICKUP_SPAWN_LOC2].pos);
+	game->entitymanager.pickupatspawn2=true;
+
 	// add background music
 	game->songs[GAME_MUSIC_1_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_3_FILENAME);
 	game->songs[GAME_MUSIC_2_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_2_FILENAME);
@@ -498,13 +505,7 @@ int game_startup(struct game* game)
 	audiomanager_setmusicvolume(&game->audiomanager,0.5);
 	game->flags = GAME_FLAG_INIT;
 
-	//spawn the tracks pickups
-	entitymanager_newpickup(&game->entitymanager,game->track.pathpoints[PICKUP_SPAWN_LOC1].pos);
-	game->entitymanager.pickupatspawn1=true;
-	
-	entitymanager_newpickup(&game->entitymanager,game->track.pathpoints[PICKUP_SPAWN_LOC2].pos);
-	game->entitymanager.pickupatspawn2=true;
-
+	//seperated this so the third is a different pickup type
 	entitymanager_newpickup(&game->entitymanager,game->track.pathpoints[PICKUP_SPAWN_LOC3].pos);
 	game->entitymanager.pickupatspawn3=true;
 

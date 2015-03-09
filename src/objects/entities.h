@@ -225,4 +225,8 @@ struct blimp* entitymanager_placeblimp(struct vehicle* v, struct entitymanager* 
 void entitymanager_removeblimp(struct entitymanager* em, struct blimp* b,struct vehicle* v);
 struct blimp* entitymanager_lapblimp(struct entitymanager* em, vec3f pos);
 
+void entitymanager_textures(struct entitymanager* em, struct renderer* r);
+void entitymanager_blimpinit(struct entitymanager* em);
+void entitymanager_missileinit(struct entitymanager* em);
+void entitymanager_mineinit(struct entitymanager* em);
 #endif
