@@ -93,6 +93,7 @@
 #define BLIMP_PLACE8_TEXTURE		"res/Models/Blimp/place_tex/blimp_place_8.png"
 
 #define	BLIMP_MESHSCALE				0.3f
+#define BLIMP_LAP_MESHSCALE			5.f
 #define	BLIMP_DENSITY				1.f
 
 struct pickup{

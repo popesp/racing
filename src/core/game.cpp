@@ -271,6 +271,11 @@ static void update(struct game* game)
 			game->entitymanager.blimps[i].blimppos = blimpowner.transform(physx::PxVec3(-1.3f,2.f,1.5f));
 			game->entitymanager.blimps[i].body->setGlobalPose(physx::PxTransform(physx::PxVec3(game->entitymanager.blimps[i].blimppos)));
 		}
+		if(game->entitymanager.blimps[i].typeblimp==BLIMP_TYPE_LAP){
+			physx::PxMat44 blimpcamera(game->player.camera.pos);
+			game->entitymanager.blimps[i].blimppos = blimpcamera.transform(physx::PxVec3(0.f,0.f,0.f));
+			game->entitymanager.blimps[i].body->setGlobalPose(physx::PxTransform(physx::PxVec3(game->entitymanager.blimps[i].blimppos)));
+		}
 	}
 
 	//check who has won the game
@@ -560,7 +565,7 @@ void game_shutdown(struct game* game)
 	int i;
 
 	// delete blimps
-	for(i=0; i<= game->entitymanager.num_blimps;i++){
+	for(i=0; i< game->entitymanager.num_blimps;i++){
 		entitymanager_removeblimp(&game->entitymanager,&game->entitymanager.blimps[i],game->player.vehicle);
 	}
 
