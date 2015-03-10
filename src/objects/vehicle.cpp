@@ -31,7 +31,7 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 				vec3f_scale(force, -VEHICLE_ACCELERATION * v->controller->axes[INPUT_AXIS_TRIGGERS]*nitrous);
 				
 				if ((v->controller->axes[INPUT_AXIS_TRIGGERS] < -0.3) && v->engine_loopstart)
-					audiomanager_setchannelfreq(v->engine_channel, v->controller->axes[INPUT_AXIS_TRIGGERS]*1.25*nitrous);
+					audiomanager_setchannelfreq(v->engine_channel, v->controller->axes[INPUT_AXIS_TRIGGERS]*1.15*nitrous);
 				else
 					audiomanager_setchannelfreq(v->engine_channel, 1);
 				
