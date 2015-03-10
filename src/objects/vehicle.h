@@ -48,8 +48,27 @@
 
 #define VEHICLE_OBJ					"res/models/car/car.obj"
 #define VEHICLE_OBJ2				"res/models/car/car2.obj"
+
+
+//obj 1
 #define VEHICLE_TEXTURE				"res/models/car/carUV.png"
+#define VEHICLE_TEXTUREblack			"res/models/car/carUVb.png"//should be black
+#define VEHICLE_TEXTUREgreen		"res/models/car/carUVg.png"
+#define VEHICLE_TEXTUREorange		"res/models/car/carUVo.png"
+#define VEHICLE_TEXTUREpurple		"res/models/car/carUVp.png"
+#define VEHICLE_TEXTUREred			"res/models/car/carUVr.png"
+#define VEHICLE_TEXTUREwhite		"res/models/car/carUVw.png"
+#define VEHICLE_TEXTUREyellow		"res/models/car/carUVy.png"
+
+//obj 2
 #define VEHICLE_TEXTURE2			"res/models/car/carUV2.png"
+#define VEHICLE_TEXTURE2black		"res/models/car/carUV2b.png"
+#define VEHICLE_TEXTURE2green		"res/models/car/carUV2g.png"
+#define VEHICLE_TEXTURE2orange		"res/models/car/carUV2o.png"
+#define VEHICLE_TEXTURE2purple		"res/models/car/carUV2p.png"
+#define VEHICLE_TEXTURE2white		"res/models/car/carUV2w.png"
+#define VEHICLE_TEXTURE2yellow		"res/models/car/carUV2y.png"
+#define VEHICLE_TEXTURE2blue		"res/models/car/carUV2blue.png"
 
 #define	SFX_ENGSTART_FILENAME		"res/soundfx/aud-eng-start-base.wav"
 #define	SFX_ENGLOOP_FILENAME		"res/soundfx/aud-eng-loop-base.wav"
@@ -103,6 +122,22 @@ struct vehiclemanager
 	struct renderable r_vehicle;
 	struct texture diffuse;
 	struct texture diffuse2;
+	struct texture black;
+	struct texture green;
+	struct texture orange;
+	struct texture purple;
+	struct texture red;
+	struct texture white;
+	struct texture yellow;
+
+	struct texture black2;
+	struct texture green2;
+	struct texture orange2;
+	struct texture purple2;
+	struct texture blue2;
+	struct texture white2;
+	struct texture yellow2;
+
 	vec3f dim;
 
 	int sfx_enginestart;
