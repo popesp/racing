@@ -145,6 +145,9 @@ struct mine{
 	struct vehicle* owner;
 	unsigned char flags;
 	int hit;
+
+	vec3f pos;	
+	FMOD_CHANNEL* mine_channel;
 };
 
 struct blimp{
@@ -199,6 +202,9 @@ struct entitymanager
 	struct texture diffuse_welcome;
 
 	int sfx_missile;
+	int sfx_missile_exp;
+	int sfx_mine;
+	int sfx_mine_exp;
 
 	bool pickupatspawn1;
 	int timerspawn1;

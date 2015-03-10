@@ -31,7 +31,7 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 				vec3f_scale(force, -VEHICLE_ACCELERATION * v->controller->axes[INPUT_AXIS_TRIGGERS]*nitrous);
 				
 				if ((v->controller->axes[INPUT_AXIS_TRIGGERS] < -0.3) && v->engine_loopstart)
-					audiomanager_setchannelfreq(v->engine_channel, v->controller->axes[INPUT_AXIS_TRIGGERS]*1.25*nitrous);
+					audiomanager_setchannelfreq(v->engine_channel, v->controller->axes[INPUT_AXIS_TRIGGERS]*1.15*nitrous);
 				else
 					audiomanager_setchannelfreq(v->engine_channel, 1);
 				
@@ -49,9 +49,6 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 			vec3f_negate(force);
 		
 		physx::PxRigidBodyExt::addLocalForceAtLocalPos(*v->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, -vm->dim[VZ]/2.f));
-	//	if(v->owns!=NULL){
-	//		physx::PxRigidBodyExt::addForceAtLocalPos(*v->owns->body,physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, -vm->dim[VZ]/2.f));
-	//	}
 
 		// reset button
 		if (v->controller->buttons[INPUT_BUTTON_BACK] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN)){
@@ -109,9 +106,9 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 
 		//spawn blimp
 		if (v->controller->buttons[INPUT_BUTTON_X] == (INPUT_STATE_DOWN | INPUT_STATE_CHANGED)){
-			vec3f test;
-			vec3f_set(test, -22.f, 10.f,-115.f);
-			entitymanager_lapblimp(vm->em,test);
+			//vec3f test;
+			//vec3f_set(test, -22.f, 10.f,-115.f);
+			//entitymanager_lapblimp(vm->em,test);
 		}
 	}
 }

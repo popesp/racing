@@ -1,30 +1,24 @@
 # Warped Steel
 Winter 2015, CPSC 585 - Games Programming
+# Needs Gamepad
+
 
 Keyboard controls
 -----------------
 
-W -		Forward
-
-S -		Reverse
-
-A -		Turn left
-
-D -		Turn right
-
 Q -		Wireframe rendering
-
-C -		Debug camera mode
 
 R -		Reset vehicles
 
 M -		Go to next music track
 
-A -		Add a computer player
+P -		Pause music track
+
+A -		Add a computer player 
 
 BACKSPACE - Deletes all added computers
 
-SPACE - Starts "win-state"
+SPACE - Activates/Deactivates "win-state"
 
 ESC -	Exit game
 
@@ -40,8 +34,9 @@ Left Trigger -		Brake/Reverse
 
 Left Stick -		Turn
 
-Y -					Debug camera mode
+Back - Respawn all vehicles
+
+Y -			Debug camera mode
 
 A -         Use powerup
 
-X -         Spawns pickup somewhere

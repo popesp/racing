@@ -13,7 +13,7 @@ void checkwin(struct game* game){
 		entitymanager_removeblimp(&game->entitymanager,game->player.vehicle->ownblimp,game->player.vehicle);
 
 		//reset laps
-		game->player.vehicle->lap=1;
+		//game->player.vehicle->lap=1;
 		for(int i=0; i<game->num_aiplayers-1;i++){
 			game->aiplayers[i].vehicle->lap=1;
 		}
@@ -27,11 +27,12 @@ void checkwin(struct game* game){
 			printf("Computer-%d has won the game!\nGame's over\n\n", i);
 
 			entitymanager_removeblimp(&game->entitymanager,game->player.vehicle->ownblimp,game->player.vehicle);
-
+			
 			//reset laps
 			game->player.vehicle->lap=1;
-			for(int i=0; i<=game->num_aiplayers-1;i++){
-				game->aiplayers[i].vehicle->lap=1;
+			for(int j=0; j<=game->num_aiplayers-1;j++){
+				if (i!=j)
+					game->aiplayers[j].vehicle->lap=1;
 			}
 			
 			game->flags &= ~GAME_FLAG_WINCONDITION;
@@ -201,7 +202,7 @@ void setblimp(struct game* game){
 	}
 
 
-	if(game->player.vehicle->lap==1 && game->flags != GAME_FLAG_WINCONDITION){
+	if(game->player.vehicle->lap==GAME_WINCONDITION_LAPS && game->flags != GAME_FLAG_WINCONDITION){
 		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_win;
 	}
 	else if(game->flags != GAME_FLAG_WINCONDITION){
