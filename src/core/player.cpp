@@ -117,7 +117,7 @@ void aiplayer_updateinput(struct aiplayer* p)
 		}
 	}
 
-	if(p->vehicle->haspickup==0||p->vehicle->haspickup==1){
+	if(p->vehicle->haspickup==3||p->vehicle->haspickup==1){
 		if(p->vehicle->index_track%11==1){
 			p->controller.buttons[INPUT_BUTTON_A] = (INPUT_STATE_DOWN | INPUT_STATE_CHANGED);
 		}

@@ -8,6 +8,7 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 	struct pickup* pu;
 	struct mine* x;
 	struct blimp* b;
+	struct turret* tu;
 
 	int i;
 
@@ -26,6 +27,7 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 	em->num_mines=0;
 	em->num_missiles=0;
 	em->num_pickups=0;
+	em->num_turrets=0;
 	
 	renderable_init(&em->r_missile, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
 	objloader_load(MISSILE_OBJ, r, &em->r_missile);
@@ -43,6 +45,10 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 	objloader_load(BLIMP_OBJ, em->r, &em->r_blimplap);
 	renderable_sendbuffer(em->r, &em->r_blimplap);
 
+	renderable_init(&em->r_turret, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
+	objloader_load(TURRET_OBJ, em->r, &em->r_turret);
+	renderable_sendbuffer(r, &em->r_turret);
+
 	//initialize all the textures for the objects
 	entitymanager_textures(em, r);
 
@@ -50,9 +56,11 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 	entitymanager_blimpinit(em);
 	entitymanager_missileinit(em);
 	entitymanager_mineinit(em);
+	entitymanager_turretinit(em);
 
 	em->r_missile.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_missile;
 	em->r_mine.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_mine;
+	em->r_turret.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_turret;
 
 	// initialize missile array
 	for (i = 0; i < ENTITY_MISSILE_COUNT; i++)
@@ -60,6 +68,7 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 		m = em->missiles + i;
 		m->body = NULL;
 		m->owner = NULL;
+		m->turretowner = NULL;
 		m->flags = ENTITY_MISSILE_FLAG_INIT;
 	}
 
@@ -92,13 +101,20 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 		b->flags = BLIMP_FLAG_INIT;
 	}
 
+	// turret array
+	for(i=0;i<ENTITY_TURRET_COUNT;i++){
+		tu = em->turrets+i;
+		tu->body = NULL;
+		tu->owner = NULL;
+		tu->flags = TURRET_FLAG_INIT;
+	}
+
 	// create sound for missles and mines
 	em->sfx_missile = audiomanager_newsfx(am, SFX_MISSLE_FILENAME);
 	em->sfx_missile_exp = audiomanager_newsfx(am, SFX_MISSLE_EXP_FILENAME);
 
 	em->sfx_mine = audiomanager_newsfx(am, SFX_MINE_FILENAME);
-	em->sfx_mine_exp = audiomanager_newsfx(am, SFX_MINE_EXP_FILENAME);
-	
+	em->sfx_mine_exp = audiomanager_newsfx(am, SFX_MINE_EXP_FILENAME);	
 }
 
 void entitymanager_shutdown(struct entitymanager* em)
@@ -149,6 +165,12 @@ void entitymanager_render(struct entitymanager* em, struct renderer* r, mat4f wo
 	for(i=0; i<ENTITY_MINE_COUNT;i++){
 		if (em->mines[i].flags & ENTITY_MINE_FLAG_ENABLED){
 			renderable_render(r, &em->r_mine, (float*)&physx::PxMat44(em->mines[i].body->getGlobalPose()), worldview, 0);
+		}
+	}
+
+	for(i=0; i<ENTITY_TURRET_COUNT;i++){
+		if (em->turrets[i].flags & TURRET_FLAG_ENABLED){
+			renderable_render(r, &em->r_turret, (float*)&physx::PxMat44(em->turrets[i].body->getGlobalPose()), worldview, 0);
 		}
 	}
 
@@ -272,6 +294,21 @@ void entitymanager_update(struct entitymanager* em, struct vehiclemanager* vm)
 			
 			audiomanager_setsoundposition(em->missiles[i].missle_channel, em->missiles[i].pos);
 		}
+	
+	for (i=0;i<ENTITY_TURRET_COUNT; i++){
+		if(em->turrets[i].flags & TURRET_FLAG_ENABLED){
+			em->turrets[i].timer--;
+
+			//remove turret
+			if(em->turrets[i].timer==0){
+				entitymanager_removeturret(em,em->turrets+i);
+				continue;
+			}
+			if(em->turrets[i].timer%10==0){
+				entitymanager_turretmissile(em,em->turrets+i,vm->dim);
+			}
+		}
+	}
 
 
 }
@@ -404,6 +441,54 @@ struct missile* entitymanager_newmissile(struct entitymanager* em, struct vehicl
 	return m;
 }
 
+struct missile* entitymanager_turretmissile(struct entitymanager* em, struct turret* tu, vec3f dim)
+{
+	physx::PxTransform pose;
+	physx::PxMat44 mat_pose;
+	struct missile* m;
+	vec3f zero, vel;
+	int i;
+
+	for (i = 0; i < ENTITY_MISSILE_COUNT; i++)
+		if (!(em->missiles[i].flags & ENTITY_MISSILE_FLAG_ENABLED))
+			break;
+
+	if (i == ENTITY_MISSILE_COUNT)
+		return NULL;
+
+	m = em->missiles + i;
+	em->num_missiles++;
+
+	pose = tu->body->getGlobalPose().transform(physx::PxTransform(0.f, 0.f, (dim[VZ]*1.5f + ENTITY_MISSILE_SPAWNDIST)));
+	mat_pose = physx::PxMat44(pose);
+	vec3f_set(zero, 0.f, 0.f, 0.f);
+
+	m->body = physx::PxCreateDynamic(*em->pm->sdk, pose, physx::PxBoxGeometry(em->dim_missile[VX] * 0.5f, em->dim_missile[VY] * 0.5f, em->dim_missile[VZ] * 0.5f), *em->pm->default_material, ENTITY_MISSILE_DENSITY);
+	m->body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, true);
+	setupFiltering(m->body, FilterGroup::eProjectile, FilterGroup::eProjectile);
+	m->body->setRigidBodyFlag(physx::PxRigidBodyFlag::eENABLE_CCD, true);
+	m->body->userData = m;
+	em->pm->scene->addActor(*m->body);
+	vec3f_set(vel, 0.f, 0.f, -1.f);
+	mat4f_transformvec3f(vel, (float*)&mat_pose);
+	vec3f_scale(vel, ENTITY_MISSILE_SPEED);
+
+	// update missle position
+	vec3f_set(m->pos, pose.p.x, pose.p.y, pose.p.z);
+
+	m->body->setLinearVelocity(physx::PxVec3(-vel[VX], -vel[VY], -vel[VZ]));
+
+	m->turretowner = tu;
+
+	m->timer = ENTITY_MISSILE_DESPAWNTIME;
+
+	m->flags = ENTITY_MISSILE_FLAG_ENABLED;
+
+	m->missle_channel = audiomanager_playsfx(em->am, em->sfx_missile, m->pos, -1,1.5);
+
+	return m;
+}
+
 void entitymanager_removemissile(struct entitymanager* em, struct missile* m)
 {
 	int i;
@@ -444,7 +529,13 @@ void entitymanager_attachpickup(struct vehicle* v, struct pickup* pu,struct enti
 
 	em->pm->scene->removeActor(*pu->body);
 
-	v->haspickup = pu->typepickup;
+	if(v->haspickup==0){
+		v->haspickup=3;
+		pu->typepickup=3;
+	}else{
+		v->haspickup = pu->typepickup;
+	}
+	
 
 	//entitymanager_removepickup(em,pu);
 
@@ -500,6 +591,12 @@ void entitymanager_attachpickup(struct vehicle* v, struct pickup* pu,struct enti
 	else if(pu->typepickup==2){
 		//Mine
 		texture_loadfile(&pu->diffuse_pickupMINE, PICKUP_ATTACHED_SPEED_TEXTURE);
+		texture_upload(&pu->diffuse_pickupMINE, RENDER_TEXTURE_DIFFUSE);
+		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickupMINE;
+	}
+	else if(pu->typepickup==3){
+		//TURRET
+		texture_loadfile(&pu->diffuse_pickupMINE, PICKUP_ATTACHED_TURRET_TEXTURE);
 		texture_upload(&pu->diffuse_pickupMINE, RENDER_TEXTURE_DIFFUSE);
 		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickupMINE;
 	}
@@ -663,6 +760,49 @@ void entitymanager_removepickup(struct entitymanager* em, struct pickup* pu){
 	}
 }
 
+struct turret* entitymanager_newturret(struct entitymanager* em, vec3f dim, struct vehicle* v){
+	physx::PxTransform pose;
+	physx::PxMat44 mat_pose;
+	struct turret* tu;
+	int i;
+
+	for (i = 0; i < ENTITY_TURRET_COUNT; i++)
+		if (!(em->turrets[i].flags & TURRET_FLAG_ENABLED))
+			break;
+
+	if (i == ENTITY_TURRET_COUNT)
+		return NULL;
+
+	tu = em->turrets + i;
+	em->num_turrets++;
+
+	// find spawn location
+	pose = v->body->getGlobalPose().transform(physx::PxTransform(0.f, 0.f, -(dim[VZ]*0.5f - TURRET_SPAWNDIST)));
+	mat_pose = physx::PxMat44(pose);
+
+	// create a physics object and add it to the scene
+	tu->body = physx::PxCreateDynamic(*em->pm->sdk, pose, physx::PxBoxGeometry(em->dim_turret[VX] * 0.5f, em->dim_turret[VY] * 0.5f, em->dim_turret[VZ] * 0.5f), *em->pm->default_material, TURRET_DENSITY);
+	//em->pm->scene->addActor(*tu->body);
+
+	tu->owner = v;
+	tu->flags = TURRET_FLAG_ENABLED;
+	tu->timer = ENTITY_TURRET_DESPAWNTIME;
+
+	return tu;
+}
+
+void entitymanager_removeturret(struct entitymanager* em, struct turret* tu){
+	int i;
+	em->num_turrets--;
+
+	for(i=0;i<ENTITY_TURRET_COUNT;i++){
+		if(tu==em->turrets+i){
+			em->turrets[i].body->release();
+			em->turrets[i].flags = TURRET_FLAG_INIT;
+		}
+	}
+}
+
 struct mine* entitymanager_newmine(struct entitymanager* em, vec3f dim, struct vehicle* v){
 	physx::PxTransform pose;
 	physx::PxMat44 mat_pose;
@@ -793,8 +933,12 @@ void entitymanager_removeblimp(struct entitymanager* em, struct blimp* b,struct 
 	}
 }
 
-
 void entitymanager_textures(struct entitymanager* em, struct renderer* r){
+
+	// initialize turret texture
+	texture_init(&em->diffuse_turret);
+	texture_loadfile(&em->diffuse_turret, TURRET_TEXTURE);
+	texture_upload(&em->diffuse_turret, RENDER_TEXTURE_DIFFUSE);
 
 	// initialize mine texture
 	texture_init(&em->diffuse_mine);
@@ -806,6 +950,7 @@ void entitymanager_textures(struct entitymanager* em, struct renderer* r){
 	texture_loadfile(&em->diffuse_missile, MISSILE_TEXTURE);
 	texture_upload(&em->diffuse_missile, RENDER_TEXTURE_DIFFUSE);
 
+	// initialize all the blimp textures
 	texture_init(&em->diffuse_welcome);
 	texture_loadfile(&em->diffuse_welcome, BLIMP_WELCOME_TEXTURE);
 	texture_upload(&em->diffuse_welcome, RENDER_TEXTURE_DIFFUSE);
@@ -1029,4 +1174,53 @@ void entitymanager_mineinit(struct entitymanager* em){
 	mat4f_rotateymul(em->r_mine.matrix_model, -1.57080f);
 	mat4f_translatemul(em->r_mine.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
 
+}
+
+void entitymanager_turretinit(struct entitymanager* em){
+	float temp;
+	vec3f min, max, avg, diff;
+	int i;
+
+	vec3f_set(min, FLT_MAX, FLT_MAX, FLT_MAX);
+	vec3f_set(max, -FLT_MAX, -FLT_MAX, -FLT_MAX);
+
+	for (i = 0; (unsigned)i < em->r_turret.num_verts; i++)
+	{
+		vec3f temp;
+
+		// retrieve vertex from buffer
+		vec3f_copy(temp, em->r_turret.buf_verts + i*em->r->vertsize[em->r_turret.type]);
+
+		// check for min and max vector positions
+		if (temp[VX] < min[VX])
+			min[VX] = temp[VX];
+		if (temp[VX] > max[VX])
+			max[VX] = temp[VX];
+
+		if (temp[VY] < min[VY])
+			min[VY] = temp[VY];
+		if (temp[VY] > max[VY])
+			max[VY] = temp[VY];
+
+		if (temp[VZ] < min[VZ])
+			min[VZ] = temp[VZ];
+		if (temp[VZ] > max[VZ])
+			max[VZ] = temp[VZ];
+	}
+	// find center point of model
+	vec3f_addn(avg, min, max);
+	vec3f_scale(avg, 0.5f);
+
+	// find dimensions of model
+	vec3f_subtractn(diff, max, min);
+	vec3f_scalen(em->dim_turret, diff, TURRET_MESHSCALE);
+
+	// swap x and z to get the correct vehicle dimensions
+	temp = em->dim_turret[VX];
+	em->dim_turret[VX] = em->dim_turret[VZ];
+	em->dim_turret[VZ] = temp;
+
+	mat4f_scalemul(em->r_turret.matrix_model, TURRET_MESHSCALE, TURRET_MESHSCALE, TURRET_MESHSCALE);
+	mat4f_rotateymul(em->r_turret.matrix_model, 0.f);
+	mat4f_translatemul(em->r_turret.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
 }

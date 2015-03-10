@@ -89,7 +89,13 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 				}
 			}
 			else if (v->haspickup == 3) {
-				//new pickup
+				entitymanager_newturret(vm->em,vm->dim,v);
+				v->haspickup = 100;
+				for(int u = 0; u < ENTITY_PICKUP_COUNT; u++) {
+					if (vm->em->pickups[u].owner == v) {
+						entitymanager_removepickup(vm->em, &vm->em->pickups[u]);
+					}
+				}
 			}
 		}
 
@@ -104,11 +110,12 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 		}
 			
 
-		//spawn blimp
 		if (v->controller->buttons[INPUT_BUTTON_X] == (INPUT_STATE_DOWN | INPUT_STATE_CHANGED)){
 			//vec3f test;
 			//vec3f_set(test, -22.f, 10.f,-115.f);
 			//entitymanager_lapblimp(vm->em,test);
+
+			//entitymanager_newturret(vm->em,vm->dim,v);
 		}
 	}
 }
@@ -134,11 +141,11 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 
 	// initialize vehicle mesh
 	renderable_init(&vm->r_vehicle, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
-	if((seed)%2==1){
-		objloader_load(VEHICLE_OBJ, r, &vm->r_vehicle);
-	}else{
+	//if((seed)%2==1){
+	//	objloader_load(VEHICLE_OBJ, r, &vm->r_vehicle);
+	//}else{
 		objloader_load(VEHICLE_OBJ2, r, &vm->r_vehicle);
-	}
+	//}
 	renderable_sendbuffer(r, &vm->r_vehicle);
 
 	// find the limits of the loaded mesh
@@ -252,32 +259,32 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 	texture_loadfile(&vm->yellow2, VEHICLE_TEXTURE2yellow);
 	texture_upload(&vm->yellow2, RENDER_TEXTURE_DIFFUSE);
 
-	if(seed % 2==1){
-		if(seed%8==1){
-			vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->black;
-		}
-		else if(seed%8==2){
-			vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->green;
-		}
-		else if(seed%8==3){
-			vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->orange;
-		}
-		else if(seed%8==4){
-			vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->purple;
-		}
-		else if(seed%8==5){
-			vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->red;
-		}
-		else if(seed%8==6){
-			vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->white;
-		}
-		else if(seed%8==7){
-			vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->yellow;
-		}
-		else{
-			vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->diffuse;
-		}
-	}else{
+	//if(seed % 2==1){
+	//	if(seed%8==1){
+	//		vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->black;
+	//	}
+	//	else if(seed%8==2){
+		//	vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->green;
+		//}
+		//else if(seed%8==3){
+		//	vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->orange;
+		//}
+		//else if(seed%8==4){
+		//	vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->purple;
+		//}
+		//else if(seed%8==5){
+		//	vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->red;
+		//}
+		//else if(seed%8==6){
+		//	vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->white;
+		//}
+		//else if(seed%8==7){
+		//	vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->yellow;
+		//}
+		//else{
+		//	vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->diffuse;
+//		}
+//	}else{
 		if(seed%8==1){
 			vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->black2;
 		}
@@ -304,7 +311,7 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 		}
 
 		delete_vehicletexture(vm);
-	}
+	//}
 
 	// create sound for engine
 	

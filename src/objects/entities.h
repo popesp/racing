@@ -8,9 +8,10 @@
 #include	"../physics/collisions.h"
 #include	"../audio/audio.h"
 
-#define	ENTITY_MISSILE_COUNT		100
+#define	ENTITY_MISSILE_COUNT		200
 #define ENTITY_PICKUP_COUNT			170
 #define ENTITY_MINE_COUNT			100
+#define ENTITY_TURRET_COUNT			100
 
 #define	ENTITY_MISSILE_DENSITY		1.f
 #define	ENTITY_MISSILE_SPEED		80.f
@@ -27,6 +28,7 @@
 #define ENTITY_MINE_LENGTH			.8f
 
 #define	ENTITY_MISSILE_DESPAWNTIME	300
+#define	ENTITY_TURRET_DESPAWNTIME	300
 
 #define	ENTITY_MISSILE_SPAWNDIST	1.f
 #define	ENTITY_PICKUP_SPAWNHEIGHT	1.2f
@@ -51,6 +53,7 @@
 #define PICKUP_ATTACHED_MISSILE_TEXTURE		"res/models/powerup/power_up_attached/powerup_attached_rocket.png"
 #define	PICKUP_ATTACHED_MINE_TEXTURE		"res/models/powerup/power_up_attached/powerup_attached_mine.png"
 #define	PICKUP_ATTACHED_SPEED_TEXTURE		"res/models/powerup/power_up_attached/powerup_attached_speed.png"
+#define	PICKUP_ATTACHED_TURRET_TEXTURE		"res/models/powerup/power_up_attached/powerup_attached_turret.png"
 
 #define PICKUP_OBJ					"res/models/powerup/powerup.obj"
 #define PICKUP_MISSILE_TEXTURE		"res/models/powerup/powerup_rocketUV.png"
@@ -103,6 +106,17 @@
 #define BLIMP_LAP_SPAWNHEIGHT		15.f
 #define	BLIMP_DENSITY				1.f
 
+#define TURRET_OBJ					"res/Models/turret/turret.obj"
+#define TURRET_TEXTURE				"res/Models/turret/turret.png"
+
+#define TURRET_MESHSCALE			.5f
+
+#define	TURRET_FLAG_ENABLED			0x01
+#define	TURRET_FLAG_INIT			0x00
+
+#define TURRET_SPAWNDIST			5.f
+#define	TURRET_DENSITY				1.f
+
 struct pickup{
 	physx::PxRigidDynamic* body;
 
@@ -133,6 +147,8 @@ struct missile
 	physx::PxRigidDynamic* body;
 	vec3f pos;
 	struct vehicle* owner;
+	struct turret* turretowner;
+
 	unsigned timer;
 	unsigned char flags;
 	int hit;
@@ -162,6 +178,17 @@ struct blimp{
 	vec3f pos;
 };
 
+struct turret{
+	physx::PxRigidDynamic* body;
+	struct vehicle* owner;
+	unsigned char flags;
+	int hit;
+
+	unsigned timer;
+
+	vec3f pos;	
+};
+
 struct entitymanager
 {
 	struct physicsmanager* pm;
@@ -173,15 +200,18 @@ struct entitymanager
 	struct renderable r_mine;
 	struct renderable r_blimp;
 	struct renderable r_blimplap;
+	struct renderable r_turret;
 
 	vec3f dim_missile;
 	vec3f dim_mine;
 	vec3f dim_blimp;
+	vec3f dim_turret;
 
 	struct texture diffuse_missile;
 	struct texture diffuse_mine;
-	struct texture diffuse_blimp;
+	struct texture diffuse_turret;
 
+	struct texture diffuse_blimp;
 	struct texture diffuse_place1;
 	struct texture diffuse_place2;
 	struct texture diffuse_place3;
@@ -218,12 +248,13 @@ struct entitymanager
 	bool pickupatspawn4;
 	int timerspawn4;
 
-	int num_blimps, num_missiles, num_mines, num_pickups;
+	int num_blimps, num_missiles, num_mines, num_pickups, num_turrets;
 
 	struct missile missiles[ENTITY_MISSILE_COUNT];
 	struct mine mines[ENTITY_MINE_COUNT];
 	struct pickup pickups[ENTITY_PICKUP_COUNT];
 	struct blimp blimps[BLIMP_COUNT];
+	struct turret turrets[ENTITY_TURRET_COUNT];
 };
 
 
@@ -248,8 +279,13 @@ struct blimp* entitymanager_placeblimp(struct vehicle* v, struct entitymanager* 
 void entitymanager_removeblimp(struct entitymanager* em, struct blimp* b,struct vehicle* v);
 struct blimp* entitymanager_lapblimp(struct entitymanager* em, vec3f pos);
 
+struct turret* entitymanager_newturret(struct entitymanager* em, vec3f dim, struct vehicle* v);
+void entitymanager_removeturret(struct entitymanager* em, struct turret* tu);
+struct missile* entitymanager_turretmissile(struct entitymanager* em, struct turret* tu, vec3f dim);
+
 void entitymanager_textures(struct entitymanager* em, struct renderer* r);
 void entitymanager_blimpinit(struct entitymanager* em);
 void entitymanager_missileinit(struct entitymanager* em);
 void entitymanager_mineinit(struct entitymanager* em);
+void entitymanager_turretinit(struct entitymanager* em);
 #endif
