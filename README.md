@@ -40,6 +40,9 @@ Left Trigger -		Brake/Reverse
 
 Left Stick -		Turn
 
+Back - Respawn all vehicles
+
 Y -					Debug camera mode
 
 A -         Use powerup
+
