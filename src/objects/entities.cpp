@@ -511,7 +511,7 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f pos){
 		return NULL;
 
 	pu = em->pickups + i;
-	printf("pickup %d\n", i);
+	//printf("pickup %d\n", i);
 	em->num_pickups++;
 
 	// logic for attaching timers for respawning pickups
