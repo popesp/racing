@@ -13,7 +13,7 @@ void checkwin(struct game* game){
 		entitymanager_removeblimp(&game->entitymanager,game->player.vehicle->ownblimp,game->player.vehicle);
 
 		//reset laps
-		game->player.vehicle->lap=1;
+		
 		for(int i=0; i<game->num_aiplayers-1;i++){
 			game->aiplayers[i].vehicle->lap=1;
 		}
@@ -198,10 +198,10 @@ void setblimp(struct game* game){
 	else{
 		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_blimp;
 	}
-
-
-	if(game->player.vehicle->lap==1 && game->flags != GAME_FLAG_WINCONDITION){
+	//
+	if(game->player.vehicle->lap==GAME_WINCONDITION_LAPS){
 		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_win;
+		game->player.vehicle->lap=1;
 	}
 	else if(game->flags != GAME_FLAG_WINCONDITION){
 		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_lose;
@@ -215,6 +215,12 @@ void setblimp(struct game* game){
 	}
 	else if(game->player.vehicle->lap==3){
 		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_lap3;
+	}
+	else if(game->player.vehicle->lap==4){
+		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_lap4;
+	}
+	else if(game->player.vehicle->lap==5){
+		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_lap5;
 	}
 	else{
 		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_blimp;

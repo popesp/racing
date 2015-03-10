@@ -68,6 +68,7 @@
 #define PICKUP_SPAWN_LOC1			70
 #define PICKUP_SPAWN_LOC2			20
 #define PICKUP_SPAWN_LOC3			100
+#define PICKUP_SPAWN_LOC4			140
 
 #define BLIMP_COUNT					152
 #define	BLIMP_FLAG_ENABLED			0x01
@@ -85,6 +86,8 @@
 #define BLIMP_LAP1_TEXTURE			"res/Models/Blimp/lap_tex/blimp_1.png"
 #define BLIMP_LAP2_TEXTURE			"res/Models/Blimp/lap_tex/blimp_2.png"
 #define BLIMP_LAP3_TEXTURE			"res/Models/Blimp/lap_tex/blimp_3.png"
+#define BLIMP_LAP4_TEXTURE			"res/Models/Blimp/lap_tex/blimp_4.png"
+#define BLIMP_LAP5_TEXTURE			"res/Models/Blimp/lap_tex/blimp_5.png"
 
 #define BLIMP_PLACE1_TEXTURE		"res/Models/Blimp/place_tex/blimp_place_1.png"
 #define BLIMP_PLACE2_TEXTURE		"res/Models/Blimp/place_tex/blimp_place_2.png"
@@ -113,7 +116,7 @@ struct pickup{
 
 	int hit, set;
 
-	bool holdingpu1, holdingpu2, holdingpu3;
+	bool holdingpu1, holdingpu2, holdingpu3, holdingpu4;
 
 	struct texture diffuse_pickupMINE;
 	struct texture diffuse_pickupMISSILE;
@@ -188,6 +191,8 @@ struct entitymanager
 	struct texture diffuse_lap1;
 	struct texture diffuse_lap2;
 	struct texture diffuse_lap3;
+	struct texture diffuse_lap4;
+	struct texture diffuse_lap5;
 
 	struct texture diffuse_win;
 	struct texture diffuse_lose;
@@ -203,6 +208,9 @@ struct entitymanager
 
 	bool pickupatspawn3;
 	int timerspawn3;
+
+	bool pickupatspawn4;
+	int timerspawn4;
 
 	int num_blimps, num_missiles, num_mines, num_pickups;
 
