@@ -245,17 +245,6 @@ static void update(struct game* game)
 
 	resethitflags(&game->vehiclemanager, &game->entitymanager);
 
-	/*for (int i = 0; i < 152; i++) {
-		game->vehiclemanager.vehicles[i].hit_flag = 0;
-	}
-	for (int p = 0; p < ENTITY_MISSILE_COUNT; p++) {
-		game->vehiclemanager.em->missiles[p].hit = 0;
-	}
-	for (int p = 0; p < ENTITY_MINE_COUNT; p++) {
-		game->vehiclemanager.em->mines[p].hit = 0;
-	}*/
-
-
 	physicsmanager_update(&game->physicsmanager, GAME_SPU);
 
 	// update the game objects
@@ -508,9 +497,8 @@ int game_startup(struct game* game)
 	entitymanager_newpickup(&game->entitymanager,game->track.pathpoints[PICKUP_SPAWN_LOC1].pos);
 	game->entitymanager.pickupatspawn1=true;
 	
-	
-	entitymanager_newpickup(&game->entitymanager,game->track.pathpoints[PICKUP_SPAWN_LOC3].pos);
-	game->entitymanager.pickupatspawn3=true;
+	/*entitymanager_newpickup(&game->entitymanager,game->track.pathpoints[PICKUP_SPAWN_LOC3].pos);
+	game->entitymanager.pickupatspawn3=true;*/
 	// add background music
 	game->songs[GAME_MUSIC_1_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_3_FILENAME);
 	game->songs[GAME_MUSIC_2_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_2_FILENAME);
@@ -525,13 +513,27 @@ int game_startup(struct game* game)
 	entitymanager_newpickup(&game->entitymanager,game->track.pathpoints[PICKUP_SPAWN_LOC2].pos);
 	game->entitymanager.pickupatspawn2=true;
 
-	entitymanager_newpickup(&game->entitymanager,game->track.pathpoints[PICKUP_SPAWN_LOC4].pos);
+	entitymanager_newpickup(&game->entitymanager,game->track.pathpoints[PICKUP_SPAWN_LOC3].pos);
 	game->entitymanager.pickupatspawn4=true;
 
 	//spawn a bigass blimp in the middle of the map
 	vec3f test;
 	vec3f_set(test, -22.f, 10.f,-115.f);
 	entitymanager_lapblimp(&game->entitymanager,test);
+
+	//set win condition on at the beginning
+				printf("Win condition activated.\n");
+				printf("Player is on lap %d\n", game->player.vehicle->lap);
+
+				entitymanager_placeblimp(game->player.vehicle,&game->entitymanager,game->track.pathpoints[0].pos);
+
+				for (int i = 0; i < game->num_aiplayers; i++)
+				{
+					game->aiplayers[i].vehicle->lap = 1;
+					printf("Computer-%d is on lap %d\n", i+1, game->aiplayers[i].vehicle->lap);
+				}
+
+				game->flags |= GAME_FLAG_WINCONDITION;
 
 
 	return 1;

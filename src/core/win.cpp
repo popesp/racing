@@ -13,7 +13,7 @@ void checkwin(struct game* game){
 		entitymanager_removeblimp(&game->entitymanager,game->player.vehicle->ownblimp,game->player.vehicle);
 
 		//reset laps
-		
+		game->player.vehicle->lap=1;
 		for(int i=0; i<game->num_aiplayers-1;i++){
 			game->aiplayers[i].vehicle->lap=1;
 		}
@@ -143,6 +143,7 @@ void checkplace(struct game* game){
 
 		// IF MORE THAN ONE AI
 		if(game->num_aiplayers-1 > 0){
+			entitymanager_removeblimp(&game->entitymanager,game->player.vehicle->ownblimp,game->player.vehicle);
 			for(int j=0; j<=game->num_aiplayers-1;j++){
 
 
@@ -198,10 +199,10 @@ void setblimp(struct game* game){
 	else{
 		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_blimp;
 	}
-	//
-	if(game->player.vehicle->lap==GAME_WINCONDITION_LAPS){
+
+
+	if(game->player.vehicle->lap==1 && game->flags != GAME_FLAG_WINCONDITION){
 		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_win;
-		game->player.vehicle->lap=1;
 	}
 	else if(game->flags != GAME_FLAG_WINCONDITION){
 		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_lose;
