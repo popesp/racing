@@ -52,6 +52,9 @@ physx::PxFilterFlags OurFilterShader(physx::PxFilterObjectAttributes attributes0
 	else if((filterData0.word0 == FilterGroup::ePickup && filterData1.word0 == FilterGroup::eMine)||(filterData1.word0 == FilterGroup::ePickup && filterData0.word0 == FilterGroup::eMine)) {
 		return PxFilterFlag::eSUPPRESS;
 	}
+	else if((filterData0.word0 == FilterGroup::eProjectile && filterData1.word0 == FilterGroup::eMine)||(filterData1.word0 == FilterGroup::eProjectile && filterData0.word0 == FilterGroup::eMine)) {
+		return PxFilterFlag::eSUPPRESS;
+	}
 
 	return PxFilterFlag::eDEFAULT;
 }
