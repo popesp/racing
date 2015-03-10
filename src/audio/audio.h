@@ -7,7 +7,7 @@
 
 
 #define	AUDIO_MUSIC_COUNT		8
-#define	AUDIO_SFX_COUNT			3
+#define	AUDIO_SFX_COUNT			6
 
 
 struct sound

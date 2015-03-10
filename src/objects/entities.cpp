@@ -92,8 +92,12 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 		b->flags = BLIMP_FLAG_INIT;
 	}
 
-	// create sound for missles
+	// create sound for missles and mines
 	em->sfx_missile = audiomanager_newsfx(am, SFX_MISSLE_FILENAME);
+	em->sfx_missile_exp = audiomanager_newsfx(am, SFX_MISSLE_EXP_FILENAME);
+
+	em->sfx_mine = audiomanager_newsfx(am, SFX_MINE_FILENAME);
+	em->sfx_mine_exp = audiomanager_newsfx(am, SFX_MINE_EXP_FILENAME);
 	
 }
 
@@ -167,7 +171,7 @@ void entitymanager_render(struct entitymanager* em, struct renderer* r, mat4f wo
 void entitymanager_update(struct entitymanager* em, struct vehiclemanager* vm)
 {
 	int i;
-	physx::PxTransform pose;
+	physx::PxTransform pose,mine_pose;
 
 	if(em->pickupatspawn1==false){
 		em->timerspawn1--;
@@ -218,13 +222,25 @@ void entitymanager_update(struct entitymanager* em, struct vehiclemanager* vm)
 	}
 	for (i = 0; i < ENTITY_MISSILE_COUNT; i++) {
 		if (vm->em->missiles[i].hit == 1) {
+			audiomanager_playsfx(vm->em->am,vm->em->sfx_missile_exp,vm->em->missiles[i].pos,0);
 			entitymanager_removemissile(vm->em, &vm->em->missiles[i]);
 		}
 	}
 	for (i = 0; i < ENTITY_MINE_COUNT; i++) {
 		if (vm->em->mines[i].hit == 1) {
+			audiomanager_playsfx(vm->em->am,vm->em->sfx_mine_exp,vm->em->mines[i].pos,0);
 			entitymanager_removemine(vm->em, &vm->em->mines[i]);
+			continue;
 		}
+		if (em->mines[i].flags & ENTITY_MINE_FLAG_ENABLED){
+			mine_pose = em->mines[i].body->getGlobalPose();
+
+			// update mine position
+			vec3f_set(em->mines[i].pos, mine_pose.p.x, mine_pose.p.y, mine_pose.p.z);
+			
+			audiomanager_setsoundposition(em->mines[i].mine_channel, em->mines[i].pos);
+		}
+
 	}
 	for (i = 0; i < ENTITY_PICKUP_COUNT; i++) {
 		if (vm->em->pickups[i].hit > -1) {
@@ -383,7 +399,7 @@ struct missile* entitymanager_newmissile(struct entitymanager* em, struct vehicl
 
 	m2->flags = ENTITY_MISSILE_FLAG_ENABLED;
 
-	m2->missle_channel = audiomanager_playsfx(em->am, em->sfx_missile, m2->pos, -1);
+	m2->missle_channel = audiomanager_playsfx(em->am, em->sfx_missile, m2->pos, -1, 1.5);
 
 	return m;
 }
@@ -677,6 +693,8 @@ struct mine* entitymanager_newmine(struct entitymanager* em, vec3f dim, struct v
 
 	x->owner = v;
 	x->flags = ENTITY_MINE_FLAG_ENABLED;
+	
+	x->mine_channel= audiomanager_playsfx(em->am, em->sfx_mine, x->pos, -1,1.5);
 
 	return x;
 }
@@ -689,6 +707,8 @@ void entitymanager_removemine(struct entitymanager* em, struct mine* x){
 		if(x==em->mines+i){
 			em->mines[i].body->release();
 			em->mines[i].flags = ENTITY_MINE_FLAG_INIT;
+			
+			audiomanager_stopsound(em->mines[i].mine_channel);
 		}
 	}
 }

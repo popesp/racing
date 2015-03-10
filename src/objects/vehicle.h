@@ -55,6 +55,10 @@
 #define	SFX_ENGLOOP_FILENAME		"res/soundfx/aud-eng-loop-base.wav"
 #define	SFX_MISSLE_FILENAME			"res/soundfx/rocket-boost-engine-loop.wav"
 
+#define	SFX_MINE_EXP_FILENAME			"res/soundfx/MineExp.wav"
+#define	SFX_MISSLE_EXP_FILENAME			"res/soundfx/MissleExp.wav"
+#define	SFX_MINE_FILENAME			"res/soundfx/spaceship-engine-rumble-loop-norm.wav"
+
 struct vehicle
 {
 	physx::PxRigidDynamic* body;
