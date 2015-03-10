@@ -446,7 +446,7 @@ static int start_subsystems(struct game* game)
 
 int game_startup(struct game* game)
 {
-	vec3f up, dir, pos, offs;
+	vec3f up, dir, pos, offs, aioffs;
 
 	vec3f_set(up, 0.f, 1.f, 0.f);
 
@@ -475,12 +475,13 @@ int game_startup(struct game* game)
 	vehiclemanager_startup(&game->vehiclemanager, &game->physicsmanager, &game->entitymanager, &game->audiomanager, &game->renderer, &game->track);
 
 	// initialize player objects
-	vec3f_set(offs, 0.f, 0.f, 0.f);
+	vec3f_set(offs, 1.f, 0.f, 0.f);
+	vec3f_set(aioffs, -1.f, 0.f, 0.f);
 	if (game->inputmanager.controllers[0].flags & INPUT_FLAG_ENABLED)
 		player_init(&game->player, &game->vehiclemanager, &game->inputmanager.controllers[0], 0, offs);
 	else
 		player_init(&game->player, &game->vehiclemanager, &game->inputmanager.keyboard, 0, offs);
-	aiplayer_init(&game->aiplayers[0], &game->vehiclemanager, 5, offs);
+	aiplayer_init(&game->aiplayers[0], &game->vehiclemanager, 1, aioffs);
 	game->num_aiplayers = 1;
 
 	// initialize debug camera
@@ -518,7 +519,7 @@ int game_startup(struct game* game)
 	game->songs[GAME_MUSIC_4_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_4_FILENAME);
 	game->index_currentsong = 0;
 	game->currentchannel = audiomanager_playmusic(&game->audiomanager, game->songs[game->index_currentsong], -1);
-	audiomanager_setmusicvolume(&game->audiomanager,0.5);
+	audiomanager_setmusicvolume(&game->audiomanager,0.2);
 	game->flags = GAME_FLAG_INIT;
 
 	//seperated this so the third is a different pickup

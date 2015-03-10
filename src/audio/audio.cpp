@@ -170,6 +170,8 @@ FMOD_CHANNEL* audiomanager_playsfx(struct audiomanager* am, int id, vec3f pos, i
 	FMOD_CHANNEL* channel;
 	
 	FMOD_System_PlaySound(am->system, FMOD_CHANNEL_FREE, am->sfx[id].track, true, &channel);
+	
+	audiomanager_setsfx_channelvolume(channel,vol);
 	FMOD_Channel_SetChannelGroup(channel, am->group_sfx);
 
 	// position the sound effect in space
@@ -179,7 +181,6 @@ FMOD_CHANNEL* audiomanager_playsfx(struct audiomanager* am, int id, vec3f pos, i
 	FMOD_Channel_SetLoopCount(channel, loops);
 
 	
-	audiomanager_setsfx_channelvolume(channel,vol);
 
 	// play the sound
 	FMOD_Channel_SetPaused(channel, false);
@@ -188,14 +189,11 @@ FMOD_CHANNEL* audiomanager_playsfx(struct audiomanager* am, int id, vec3f pos, i
 	return channel;
 }
 
-void audiomanager_getdefaults(struct audiomanager* am, int id){
+void audiomanager_displayvol(FMOD_CHANNEL* channel){
 	
-	float freq,vol,pan;
-	int priority;
-
-	FMOD_Sound_GetDefaults(am->sfx[id].track,&freq,&vol,&pan,&priority);
-
-	printf("frq %f, vol %f, pan %f, pri %d", freq,vol,pan,priority);
+	float volume;
+	FMOD_Channel_GetVolume(channel, &volume);
+	printf("missle vol %f\n", volume);
 }
 
 
@@ -238,7 +236,11 @@ void audiomanager_setmusicvolume(struct audiomanager* am, float volume)
 */
 void audiomanager_setsfxvolume(struct audiomanager* am, float volume)
 {
+	
+	FMOD_ChannelGroup_SetPaused(am->group_sfx, true);
 	FMOD_ChannelGroup_SetVolume(am->group_sfx, volume);
+	
+	FMOD_ChannelGroup_SetPaused(am->group_sfx, false);
 }
 
 /*	set the individual sfx volume
@@ -276,4 +278,10 @@ void audiomanager_togglesound(FMOD_CHANNEL* channel)
 		FMOD_Channel_SetPaused(channel, false);
 	else
 		FMOD_Channel_SetPaused(channel, true);
+}
+
+void audiomanager_setchannelfreq(FMOD_CHANNEL* channel,float rate)
+{
+	FMOD_Channel_SetFrequency(channel, 44100.0*rate);
+
 }
