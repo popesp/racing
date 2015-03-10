@@ -198,7 +198,7 @@ void setblimp(struct game* game){
 	else{
 		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_blimp;
 	}
-
+	//
 	if(game->player.vehicle->lap==GAME_WINCONDITION_LAPS){
 		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_win;
 		game->player.vehicle->lap=1;
