@@ -189,19 +189,19 @@ void entitymanager_update(struct entitymanager* em, struct vehiclemanager* vm)
 		}
 	}
 
-	if(em->pickupatspawn3==false){
+	/*if(em->pickupatspawn3==false){
 		em->timerspawn3--;
-		//printf("%d\n",em->timerspawn2);
+		printf("%d\n",em->timerspawn3);
 		if(em->timerspawn3==0){
 			entitymanager_newpickup(em, vm->track->pathpoints[PICKUP_SPAWN_LOC3].pos); 
 			em->pickupatspawn3=true;
 			em->timerspawn3 = PICKUP_TIMERS;
 		}
-	}
-
+	}*/
+	
 	if(em->pickupatspawn4==false){
 		em->timerspawn4--;
-		printf("%d\n",em->timerspawn4);
+		//printf("%d\n",em->timerspawn4);
 		if(em->timerspawn4==0){
 			entitymanager_newpickup(em, vm->track->pathpoints[PICKUP_SPAWN_LOC3].pos); 
 			em->pickupatspawn4=true;
@@ -415,8 +415,11 @@ void entitymanager_attachpickup(struct vehicle* v, struct pickup* pu,struct enti
 		else if((em->pickups+i)==pu && pu->holdingpu2==true){
 			em->pickupatspawn2=false;
 		}
-		else if((em->pickups+i)==pu && pu->holdingpu3==true){
+		/*else if((em->pickups+i)==pu && pu->holdingpu3==true){
 			em->pickupatspawn3=false;
+		}*/
+		else if((em->pickups+i)==pu && pu->holdingpu4==true){
+			em->pickupatspawn4=false;
 		}
 	}
 
@@ -508,7 +511,7 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f pos){
 		return NULL;
 
 	pu = em->pickups + i;
-	//printf("pickup %d\n", i);
+	printf("pickup %d\n", i);
 	em->num_pickups++;
 
 	// logic for attaching timers for respawning pickups
@@ -524,16 +527,14 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f pos){
 		pu->holdingpu2=true;
 		em->timerspawn2=PICKUP_TIMERS;
 	}
-	else if(em->timerspawn3==0){
+	/*else if(em->timerspawn3==0){
 		pu->holdingpu3=true;
 		em->timerspawn3=PICKUP_TIMERS;
-	}
+	}*/
 	else if(em->timerspawn4==0){
 		pu->holdingpu4=true;
 		em->timerspawn4=PICKUP_TIMERS;
 	}
-
-
 
 	renderable_init(&pu->r_pickup, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
 	objloader_load(PICKUP_OBJ, em->r, &pu->r_pickup);
@@ -805,13 +806,13 @@ void entitymanager_textures(struct entitymanager* em, struct renderer* r){
 	texture_loadfile(&em->diffuse_lap3, BLIMP_LAP3_TEXTURE);
 	texture_upload(&em->diffuse_lap3, RENDER_TEXTURE_DIFFUSE);
 
-	texture_init(&em->diffuse_lap5);
-	texture_loadfile(&em->diffuse_lap5, BLIMP_LAP4_TEXTURE);
-	texture_upload(&em->diffuse_lap5, RENDER_TEXTURE_DIFFUSE);
+	texture_init(&em->diffuse_lap4);
+	texture_loadfile(&em->diffuse_lap4, BLIMP_LAP4_TEXTURE);
+	texture_upload(&em->diffuse_lap4, RENDER_TEXTURE_DIFFUSE);
 
-	texture_init(&em->diffuse_lap3);
-	texture_loadfile(&em->diffuse_lap3, BLIMP_LAP5_TEXTURE);
-	texture_upload(&em->diffuse_lap3, RENDER_TEXTURE_DIFFUSE);
+	texture_init(&em->diffuse_lap5);
+	texture_loadfile(&em->diffuse_lap5, BLIMP_LAP5_TEXTURE);
+	texture_upload(&em->diffuse_lap5, RENDER_TEXTURE_DIFFUSE);
 
 	//blimp winning texture
 	texture_init(&em->diffuse_win);
