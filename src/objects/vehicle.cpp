@@ -185,6 +185,8 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 	mat4f_rotateymul(vm->r_vehicle.matrix_model, -1.57080f);
 	mat4f_translatemul(vm->r_vehicle.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
 
+	texture_init(&vm->chosen);
+
 	// initialize vehicle texture
 	texture_init(&vm->diffuse);
 	texture_loadfile(&vm->diffuse, VEHICLE_TEXTURE);
@@ -300,6 +302,8 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 		else{
 			vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE] = &vm->diffuse2;
 		}
+
+		delete_vehicletexture(vm);
 	}
 
 	// create sound for engine
@@ -331,6 +335,21 @@ void vehiclemanager_shutdown(struct vehiclemanager* vm)
 
 	renderable_deallocate(&vm->r_vehicle);
 	texture_delete(&vm->diffuse);
+	texture_delete(&vm->diffuse2);
+	texture_delete(&vm->black);
+	texture_delete(&vm->green);
+	texture_delete(&vm->orange);
+	texture_delete(&vm->purple);
+	texture_delete(&vm->red);
+	texture_delete(&vm->white);
+	texture_delete(&vm->yellow);
+	texture_delete(&vm->black2);
+	texture_delete(&vm->green2);
+	texture_delete(&vm->orange2);
+	texture_delete(&vm->purple2);
+	texture_delete(&vm->blue2);
+	texture_delete(&vm->white2);
+	texture_delete(&vm->yellow2);
 }
 
 struct vehicle* vehiclemanager_newvehicle(struct vehiclemanager* vm, int index_track, vec3f offs)
@@ -554,4 +573,56 @@ void vehicle_reset(struct vehiclemanager* vm, struct vehicle* v)
 	v->body->setGlobalPose(physx::PxTransform((physx::PxMat44)basis));
 	v->body->setLinearVelocity(physx::PxVec3(0.f, 0.f, 0.f));
 	v->body->setAngularVelocity(physx::PxVec3(0.f, 0.f, 0.f));
+}
+
+void delete_vehicletexture(struct vehiclemanager* vm){
+
+	if(vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE]!=&vm->diffuse){
+		texture_delete(&vm->diffuse);
+	}
+	if(vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE]!=&vm->diffuse2){
+		texture_delete(&vm->diffuse2);
+	}
+	if(vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE]!=&vm->black){
+		texture_delete(&vm->black);
+	}
+	if(vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE]!=&vm->green){
+		texture_delete(&vm->green);
+	}
+	if(vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE]!=&vm->orange){
+		texture_delete(&vm->orange);
+	}
+	if(vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE]!=&vm->purple){
+		texture_delete(&vm->purple);
+	}
+	if(vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE]!=&vm->red){
+		texture_delete(&vm->red);
+	}
+	if(vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE]!=&vm->white){
+		texture_delete(&vm->white);
+	}
+	if(vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE]!=&vm->yellow){
+		texture_delete(&vm->yellow);
+	}
+	if(vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE]!=&vm->black2){
+		texture_delete(&vm->black2);
+	}
+	if(vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE]!=&vm->green2){
+		texture_delete(&vm->green2);
+	}
+	if(vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE]!=&vm->orange2){
+		texture_delete(&vm->orange2);
+	}
+	if(vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE]!=&vm->purple2){
+		texture_delete(&vm->purple2);
+	}
+	if(vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE]!=&vm->blue2){
+		texture_delete(&vm->blue2);
+	}
+	if(vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE]!=&vm->white2){
+		texture_delete(&vm->white2);
+	}
+	if(vm->r_vehicle.textures[RENDER_TEXTURE_DIFFUSE]!=&vm->yellow2){
+		texture_delete(&vm->yellow2);
+	}
 }

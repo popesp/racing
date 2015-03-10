@@ -142,6 +142,9 @@ struct vehiclemanager
 	struct texture white2;
 	struct texture yellow2;
 
+
+	struct texture chosen;
+
 	vec3f dim;
 
 	int sfx_enginestart;
@@ -195,7 +198,7 @@ void vehiclemanager_update(struct vehiclemanager* vm);
 	param:	v				vehicle to reset
 */
 void vehicle_reset(struct vehiclemanager* vm, struct vehicle* v);
-
+void delete_vehicletexture(struct vehiclemanager* vm);
 FMOD_RESULT F_CALLBACK eng_started(FMOD_CHANNEL *channel, FMOD_CHANNEL_CALLBACKTYPE type, void* commanddata1, void* commanddata2);
 
 #endif
