@@ -509,9 +509,9 @@ int game_startup(struct game* game)
 	entitymanager_newpickup(&game->entitymanager,game->track.pathpoints[PICKUP_SPAWN_LOC1].pos);
 	game->entitymanager.pickupatspawn1=true;
 	
-	entitymanager_newpickup(&game->entitymanager,game->track.pathpoints[PICKUP_SPAWN_LOC2].pos);
-	game->entitymanager.pickupatspawn2=true;
-
+	
+	entitymanager_newpickup(&game->entitymanager,game->track.pathpoints[PICKUP_SPAWN_LOC3].pos);
+	game->entitymanager.pickupatspawn3=true;
 	// add background music
 	game->songs[GAME_MUSIC_1_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_3_FILENAME);
 	game->songs[GAME_MUSIC_2_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_2_FILENAME);
@@ -523,8 +523,11 @@ int game_startup(struct game* game)
 	game->flags = GAME_FLAG_INIT;
 
 	//seperated this so the third is a different pickup
-	entitymanager_newpickup(&game->entitymanager,game->track.pathpoints[PICKUP_SPAWN_LOC3].pos);
-	game->entitymanager.pickupatspawn3=true;
+	entitymanager_newpickup(&game->entitymanager,game->track.pathpoints[PICKUP_SPAWN_LOC2].pos);
+	game->entitymanager.pickupatspawn2=true;
+
+	entitymanager_newpickup(&game->entitymanager,game->track.pathpoints[PICKUP_SPAWN_LOC4].pos);
+	game->entitymanager.pickupatspawn4=true;
 
 	//spawn a bigass blimp in the middle of the map
 	vec3f test;

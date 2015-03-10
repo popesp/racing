@@ -19,6 +19,7 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 	em->timerspawn1=0;
 	em->timerspawn2=0;
 	em->timerspawn3=0;
+	em->timerspawn4=0;
 
 	//keeps track of how much stuff is on our map
 	em->num_blimps=0;
@@ -195,6 +196,16 @@ void entitymanager_update(struct entitymanager* em, struct vehiclemanager* vm)
 			entitymanager_newpickup(em, vm->track->pathpoints[PICKUP_SPAWN_LOC3].pos); 
 			em->pickupatspawn3=true;
 			em->timerspawn3 = PICKUP_TIMERS;
+		}
+	}
+
+	if(em->pickupatspawn4==false){
+		em->timerspawn4--;
+		printf("%d\n",em->timerspawn4);
+		if(em->timerspawn4==0){
+			entitymanager_newpickup(em, vm->track->pathpoints[PICKUP_SPAWN_LOC3].pos); 
+			em->pickupatspawn4=true;
+			em->timerspawn4 = PICKUP_TIMERS;
 		}
 	}
 
@@ -504,6 +515,7 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f pos){
 	pu->holdingpu1=false;
 	pu->holdingpu2=false;
 	pu->holdingpu3=false;
+	pu->holdingpu4=false;
 	if(em->timerspawn1==0){
 		pu->holdingpu1=true;
 		em->timerspawn1=PICKUP_TIMERS;
@@ -515,6 +527,10 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f pos){
 	else if(em->timerspawn3==0){
 		pu->holdingpu3=true;
 		em->timerspawn3=PICKUP_TIMERS;
+	}
+	else if(em->timerspawn4==0){
+		pu->holdingpu4=true;
+		em->timerspawn4=PICKUP_TIMERS;
 	}
 
 
@@ -787,6 +803,14 @@ void entitymanager_textures(struct entitymanager* em, struct renderer* r){
 
 	texture_init(&em->diffuse_lap3);
 	texture_loadfile(&em->diffuse_lap3, BLIMP_LAP3_TEXTURE);
+	texture_upload(&em->diffuse_lap3, RENDER_TEXTURE_DIFFUSE);
+
+	texture_init(&em->diffuse_lap5);
+	texture_loadfile(&em->diffuse_lap5, BLIMP_LAP4_TEXTURE);
+	texture_upload(&em->diffuse_lap5, RENDER_TEXTURE_DIFFUSE);
+
+	texture_init(&em->diffuse_lap3);
+	texture_loadfile(&em->diffuse_lap3, BLIMP_LAP5_TEXTURE);
 	texture_upload(&em->diffuse_lap3, RENDER_TEXTURE_DIFFUSE);
 
 	//blimp winning texture
