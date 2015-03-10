@@ -383,7 +383,7 @@ struct missile* entitymanager_newmissile(struct entitymanager* em, struct vehicl
 
 	m2->flags = ENTITY_MISSILE_FLAG_ENABLED;
 
-	m2->missle_channel = audiomanager_playsfx(em->am, em->sfx_missile, m2->pos, -1,1.5);
+	m2->missle_channel = audiomanager_playsfx(em->am, em->sfx_missile, m2->pos, -1);
 
 	return m;
 }
@@ -398,7 +398,7 @@ void entitymanager_removemissile(struct entitymanager* em, struct missile* m)
 		{
 			em->missiles[i].body->release();
 			em->missiles[i].flags = ENTITY_MISSILE_FLAG_INIT;
-			em->missiles[i].missle_channel = NULL;
+			audiomanager_stopsound(em->missiles[i].missle_channel);
 		}	
 }
 
@@ -669,7 +669,7 @@ struct mine* entitymanager_newmine(struct entitymanager* em, vec3f dim, struct v
 
 	// create a physics object and add it to the scene
 	x->body = physx::PxCreateDynamic(*em->pm->sdk, pose, physx::PxBoxGeometry(em->dim_mine[VX] * 0.5f, em->dim_mine[VY] * 0.5f, em->dim_mine[VZ] * 0.5f), *em->pm->default_material, ENTITY_MINE_DENSITY);
-	//x->body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, true);
+	x->body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, true);
 	setupFiltering(x->body, FilterGroup::eMine, FilterGroup::eMine);
 	x->body->setRigidBodyFlag(physx::PxRigidBodyFlag::eENABLE_CCD, true);
 	x->body->userData = x;

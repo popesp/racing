@@ -88,7 +88,9 @@ FMOD_CHANNEL* audiomanager_playmusic(struct audiomanager* am, int id, int loops)
 */
 FMOD_CHANNEL* audiomanager_playsfx(struct audiomanager* am, int id, vec3f pos, int loops, float vol = 1.0);
 
-void audiomanager_getdefaults(struct audiomanager* am, int id);
+void audiomanager_displayvol(FMOD_CHANNEL* channel);
+
+
 /*	stop a sound
 	param:	channel			sound channel
 */
@@ -133,5 +135,7 @@ void audiomanager_setmastervolume(struct audiomanager* am, float volume);
 */
 void audiomanager_togglesound(FMOD_CHANNEL* channel);
 
+
+void audiomanager_setchannelfreq(FMOD_CHANNEL* channel,float rate);
 
 #endif

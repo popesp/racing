@@ -66,6 +66,7 @@ struct vehicle
 	struct controller* controller;
 	struct vehiclemanager* vm;
 	FMOD_CHANNEL* engine_channel;
+	bool engine_loopstart;
 	vec3f pos;
 
 	int index_track;

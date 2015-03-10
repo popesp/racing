@@ -29,7 +29,12 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 
 				vec3f_set(force, VEHICLE_FORWARD);
 				vec3f_scale(force, -VEHICLE_ACCELERATION * v->controller->axes[INPUT_AXIS_TRIGGERS]*nitrous);
-
+				
+				if ((v->controller->axes[INPUT_AXIS_TRIGGERS] < -0.3) && v->engine_loopstart)
+					audiomanager_setchannelfreq(v->engine_channel, v->controller->axes[INPUT_AXIS_TRIGGERS]*1.25*nitrous);
+				else
+					audiomanager_setchannelfreq(v->engine_channel, 1);
+				
 				physx::PxRigidBodyExt::addLocalForceAtLocalPos(*v->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, 0.f));
 
 				break;
@@ -202,7 +207,7 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 	
 	vm->sfx_enginestart = audiomanager_newsfx(am, SFX_ENGSTART_FILENAME);
 	vm->sfx_engineloop = audiomanager_newsfx(am, SFX_ENGLOOP_FILENAME);
-
+	
 	// initialize vehicle array
 	for (i = 0; i < VEHICLE_COUNT; i++)
 	{
@@ -278,8 +283,8 @@ struct vehicle* vehiclemanager_newvehicle(struct vehiclemanager* vm, int index_t
 	v->index_track = index_track;
 
 	v->flags = VEHICLE_FLAG_ENABLED;
-
-	v->engine_channel = audiomanager_playsfx(vm->am,vm->sfx_enginestart,v->pos,0,0.25);
+	v->engine_loopstart = false;
+	v->engine_channel = audiomanager_playsfx(vm->am,vm->sfx_enginestart,v->pos,0);
 	FMOD_Channel_SetCallback(v->engine_channel, eng_started);
 	FMOD_Channel_SetUserData(v->engine_channel, v);
 	/*float vol;
@@ -295,8 +300,8 @@ FMOD_RESULT F_CALLBACK eng_started(FMOD_CHANNEL *channel, FMOD_CHANNEL_CALLBACKT
 	//audiomanager_playsfx(vm->am,vm->sfx_engineloop,v->pos,0);
 	if (type == FMOD_CHANNEL_CALLBACKTYPE_END) {
 		//printf("engine startup END\n");
-		v->engine_channel = audiomanager_playsfx(v->vm->am,v->vm->sfx_engineloop,v->pos,-1,0.25);
-		
+		v->engine_channel = audiomanager_playsfx(v->vm->am,v->vm->sfx_engineloop,v->pos,-1);
+		v->engine_loopstart = true;
 
 	}
 return FMOD_OK;
