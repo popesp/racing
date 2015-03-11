@@ -529,7 +529,7 @@ void entitymanager_attachpickup(struct vehicle* v, struct pickup* pu,struct enti
 
 	em->pm->scene->removeActor(*pu->body);
 
-	if(v->haspickup==0){
+	if(pu->typepickup==0 && (v->haspickup==0 || v->haspickup==3)){
 		v->haspickup=3;
 		pu->typepickup=3;
 	}else{
