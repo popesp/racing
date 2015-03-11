@@ -60,7 +60,7 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 		{
 
 			//0=mine, 1=missile, 2=speed
-			if (v->haspickup == 0) {
+			if (v->haspickup == POWERUP_MINE) {
 				entitymanager_newmine(vm->em, vm->dim, v);
 				v->haspickup = 100;
 				for(int u = 0; u < ENTITY_PICKUP_COUNT; u++) {
@@ -70,7 +70,7 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 					}
 				}
 			}
-			else if (v->haspickup == 1) {
+			else if (v->haspickup == POWERUP_MISSILE) {
 				entitymanager_newmissile(vm->em, v, vm->dim);
 				v->haspickup = 100;
 				for(int u = 0; u < ENTITY_PICKUP_COUNT; u++) {
@@ -79,7 +79,7 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 					}
 				}
 			}
-			else if (v->haspickup == 2) {
+			else if (v->haspickup == POWERUP_SPEED) {
 				v->boost = 180;
 				v->haspickup = 100;
 				for(int u = 0; u < ENTITY_PICKUP_COUNT; u++) {
@@ -88,7 +88,7 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 					}
 				}
 			}
-			else if (v->haspickup == 3) {
+			else if (v->haspickup == POWERUP_TURRET) {
 				entitymanager_newturret(vm->em,vm->dim,v);
 				v->haspickup = 100;
 				for(int u = 0; u < ENTITY_PICKUP_COUNT; u++) {
