@@ -63,8 +63,8 @@
 #define PICKUP_ATTACHED_MISSILEX2_TEXTURE		"res/models/powerup/power_up_attached/powerup_attached_rocketx2.png"
 #define PICKUP_ATTACHED_MISSILEX3_TEXTURE		"res/models/powerup/power_up_attached/powerup_attached_rocketx3.png"
 #define	PICKUP_ATTACHED_MINE_TEXTURE		"res/models/powerup/power_up_attached/powerup_attached_mine.png"
-#define	PICKUP_ATTACHED_SPEED_TEXTURE		"res/models/powerup/power_up_attached/powerup_attached_speed.png"
-#define	PICKUP_ATTACHED_SPEEDX2_TEXTURE		"res/models/powerup/power_up_attached/powerup_attached_base.png"
+#define	PICKUP_ATTACHED_SPEED_TEXTURE		"res/models/powerup/power_up_attached/powerup_attached_speed_2.png"
+#define	PICKUP_ATTACHED_SPEEDX2_TEXTURE		"res/models/powerup/power_up_attached/powerup_attached_speed.png"
 #define	PICKUP_ATTACHED_TURRET_TEXTURE		"res/models/powerup/power_up_attached/powerup_attached_turret.png"
 
 #define PICKUP_OBJ					"res/models/powerup/powerup.obj"
@@ -118,8 +118,8 @@
 #define BLIMP_LAP_SPAWNHEIGHT		15.f
 #define	BLIMP_DENSITY				1.f
 
-#define TURRET_OBJ					"res/Models/turret/turret.obj"
-#define TURRET_TEXTURE				"res/Models/turret/turret.png"
+#define TURRET_OBJ					"res/Models/turret/scifiturret.obj"
+#define TURRET_TEXTURE				"res/Models/turret/scifiturret.png"
 
 #define TURRET_MESHSCALE			.5f
 

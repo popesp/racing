@@ -174,7 +174,7 @@ void resethitflags(struct vehiclemanager* vm, struct entitymanager* em){
 	for (i = 0; i < 152; i++) {
 		vm->vehicles[i].hit_flag = 0;
 	}
-	for (i = 0; i < 100; i++) {
+	for (i = 0; i < 200; i++) {
 		em->missiles[i].hit = 0;
 	}
 	for (i = 0; i < 100; i++) {

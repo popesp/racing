@@ -287,7 +287,7 @@ void entitymanager_update(struct entitymanager* em, struct vehiclemanager* vm)
 	}
 
 	for (i = 0; i < ENTITY_MISSILE_COUNT; i++)
-		if (em->missiles[i].flags & ENTITY_MISSILE_FLAG_ENABLED)
+		if (em->missiles[i].flags & ENTITY_MISSILE_FLAG_ENABLED || em->missiles[i].flags & ENTITY_TURRETMISSILE_FLAG_ENABLED)
 		{
 			em->missiles[i].timer--;
 
@@ -1251,6 +1251,6 @@ void entitymanager_turretinit(struct entitymanager* em){
 	em->dim_turret[VZ] = temp;
 
 	mat4f_scalemul(em->r_turret.matrix_model, TURRET_MESHSCALE, TURRET_MESHSCALE, TURRET_MESHSCALE);
-	mat4f_rotateymul(em->r_turret.matrix_model, 0.f);
+	mat4f_rotateymul(em->r_turret.matrix_model, -1.5f);
 	mat4f_translatemul(em->r_turret.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
 }
