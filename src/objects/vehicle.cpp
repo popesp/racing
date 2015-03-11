@@ -97,6 +97,37 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 					}
 				}
 			}
+			else if (v->haspickup == POWERUP_MISSILEX3) {
+				entitymanager_newmissile(vm->em, v, vm->dim);
+				v->haspickup = POWERUP_MISSILEX2;
+				for(int u = 0; u < ENTITY_PICKUP_COUNT; u++) {
+					if (vm->em->pickups[u].owner == v) {
+						texture_loadfile(&vm->em->pickups[u].diffuse_pickupMINE, PICKUP_ATTACHED_MISSILEX2_TEXTURE);
+						texture_upload(&vm->em->pickups[u].diffuse_pickupMINE, RENDER_TEXTURE_DIFFUSE);
+						vm->em->pickups[u].r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &vm->em->pickups[u].diffuse_pickupMINE;
+					}
+				}
+			}
+			else if (v->haspickup == POWERUP_MISSILEX2) {
+				entitymanager_newmissile(vm->em, v, vm->dim);
+				v->haspickup = POWERUP_MISSILE;
+				for(int u = 0; u < ENTITY_PICKUP_COUNT; u++) {
+					if (vm->em->pickups[u].owner == v) {
+						texture_loadfile(&vm->em->pickups[u].diffuse_pickupMINE, PICKUP_ATTACHED_MISSILE_TEXTURE);
+						texture_upload(&vm->em->pickups[u].diffuse_pickupMINE, RENDER_TEXTURE_DIFFUSE);
+						vm->em->pickups[u].r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &vm->em->pickups[u].diffuse_pickupMINE;
+					}
+				}
+			}
+			else if (v->haspickup == POWERUP_SPEEDUP) {
+				v->boost = 360;
+				v->haspickup = 100;
+				for(int u = 0; u < ENTITY_PICKUP_COUNT; u++) {
+					if (vm->em->pickups[u].owner == v) {
+						entitymanager_removepickup(vm->em, &vm->em->pickups[u]);
+					}
+				}
+			}
 		}
 
 		//spawn pickup

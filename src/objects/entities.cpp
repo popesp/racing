@@ -313,7 +313,7 @@ void entitymanager_update(struct entitymanager* em, struct vehiclemanager* vm)
 				entitymanager_removeturret(em,em->turrets+i);
 				continue;
 			}
-			if(em->turrets[i].timer%24==0){
+			if(em->turrets[i].timer%20==0){
 				entitymanager_turretmissile(em,em->turrets+i,vm->dim);
 			}
 		}
@@ -457,7 +457,7 @@ struct missile* entitymanager_turretmissile(struct entitymanager* em, struct tur
 	int i;
 
 	for (i = 0; i < ENTITY_MISSILE_COUNT; i++)
-		if (!(em->missiles[i].flags & ENTITY_MISSILE_FLAG_ENABLED))
+		if (!(em->missiles[i].flags & ENTITY_TURRETMISSILE_FLAG_ENABLED))
 			break;
 
 	if (i == ENTITY_MISSILE_COUNT)
@@ -538,7 +538,16 @@ void entitymanager_attachpickup(struct vehicle* v, struct pickup* pu,struct enti
 	if(pu->typepickup==POWERUP_MINE && (v->haspickup==POWERUP_MINE || v->haspickup==POWERUP_TURRET)){
 		v->haspickup=POWERUP_TURRET;
 		pu->typepickup=POWERUP_TURRET;
-	}else{
+	}
+	else if(pu->typepickup==POWERUP_MISSILE && (v->haspickup==POWERUP_MISSILE || v->haspickup==POWERUP_MISSILEX2 || v->haspickup==POWERUP_MISSILEX3)){
+		v->haspickup=POWERUP_MISSILEX3;
+		pu->typepickup=POWERUP_MISSILEX3;
+	}
+	else if(pu->typepickup==POWERUP_SPEED && (v->haspickup==POWERUP_SPEED || v->haspickup==POWERUP_SPEEDUP)){
+		v->haspickup=POWERUP_SPEEDUP;
+		pu->typepickup=POWERUP_SPEEDUP;
+	}
+	else{
 		v->haspickup = pu->typepickup;
 	}
 
@@ -601,6 +610,18 @@ void entitymanager_attachpickup(struct vehicle* v, struct pickup* pu,struct enti
 	else if(pu->typepickup==POWERUP_TURRET){
 		//TURRET
 		texture_loadfile(&pu->diffuse_pickupMINE, PICKUP_ATTACHED_TURRET_TEXTURE);
+		texture_upload(&pu->diffuse_pickupMINE, RENDER_TEXTURE_DIFFUSE);
+		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickupMINE;
+	}
+	else if(pu->typepickup==POWERUP_MISSILEX3){
+		//X3 MISSILES
+		texture_loadfile(&pu->diffuse_pickupMINE, PICKUP_ATTACHED_MISSILEX3_TEXTURE);
+		texture_upload(&pu->diffuse_pickupMINE, RENDER_TEXTURE_DIFFUSE);
+		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickupMINE;
+	}
+	else if(pu->typepickup==POWERUP_SPEEDUP){
+		//SPEED UP MORE
+		texture_loadfile(&pu->diffuse_pickupMINE, PICKUP_ATTACHED_SPEEDX2_TEXTURE);
 		texture_upload(&pu->diffuse_pickupMINE, RENDER_TEXTURE_DIFFUSE);
 		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickupMINE;
 	}
@@ -953,6 +974,7 @@ void entitymanager_textures(struct entitymanager* em, struct renderer* r){
 	texture_init(&em->diffuse_missile);
 	texture_loadfile(&em->diffuse_missile, MISSILE_TEXTURE);
 	texture_upload(&em->diffuse_missile, RENDER_TEXTURE_DIFFUSE);
+
 
 	// initialize all the blimp textures
 	texture_init(&em->diffuse_welcome);
