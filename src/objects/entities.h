@@ -36,6 +36,7 @@
 #define BLIMP_SPAWNDIST				2.f
 
 #define	ENTITY_MISSILE_FLAG_ENABLED	0x01
+#define	ENTITY_TURRETMISSILE_FLAG_ENABLED	0x02
 #define	ENTITY_MISSILE_FLAG_INIT	0x00
 
 #define ENTITY_PICKUP_FLAG_INIT		0x00
@@ -201,6 +202,7 @@ struct entitymanager
 	struct renderable r_blimp;
 	struct renderable r_blimplap;
 	struct renderable r_turret;
+	struct renderable r_turretmissile;
 
 	vec3f dim_missile;
 	vec3f dim_mine;

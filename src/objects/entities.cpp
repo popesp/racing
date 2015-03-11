@@ -33,6 +33,10 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 	objloader_load(MISSILE_OBJ, r, &em->r_missile);
 	renderable_sendbuffer(r, &em->r_missile);
 
+	renderable_init(&em->r_turretmissile, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
+	objloader_load(MISSILE_OBJ, r, &em->r_turretmissile);
+	renderable_sendbuffer(r, &em->r_turretmissile);
+
 	renderable_init(&em->r_mine, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
 	objloader_load(MINE_OBJ, r, &em->r_mine);
 	renderable_sendbuffer(r, &em->r_mine);
@@ -59,6 +63,7 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 	entitymanager_turretinit(em);
 
 	em->r_missile.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_missile;
+	em->r_turretmissile.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_missile;
 	em->r_mine.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_mine;
 	em->r_turret.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_turret;
 
@@ -159,8 +164,11 @@ void entitymanager_render(struct entitymanager* em, struct renderer* r, mat4f wo
 	int i;
 
 	for (i = 0; i < ENTITY_MISSILE_COUNT; i++)
-		if (em->missiles[i].flags & ENTITY_MISSILE_FLAG_ENABLED)
-			renderable_render(r, &em->r_missile, (float*)&physx::PxMat44(em->missiles[i].body->getGlobalPose()), worldview, 0);
+		if (em->missiles[i].flags & ENTITY_MISSILE_FLAG_ENABLED){
+			renderable_render(r, &em->r_missile, (float*)&physx::PxMat44(em->missiles[i].body->getGlobalPose()), worldview, 0);}
+		else if(em->missiles[i].flags & ENTITY_TURRETMISSILE_FLAG_ENABLED){
+			renderable_render(r, &em->r_turretmissile, (float*)&physx::PxMat44(em->missiles[i].body->getGlobalPose()), worldview, 0);
+		}
 
 	for(i=0; i<ENTITY_MINE_COUNT;i++){
 		if (em->mines[i].flags & ENTITY_MINE_FLAG_ENABLED){
@@ -304,13 +312,11 @@ void entitymanager_update(struct entitymanager* em, struct vehiclemanager* vm)
 				entitymanager_removeturret(em,em->turrets+i);
 				continue;
 			}
-			if(em->turrets[i].timer%10==0){
+			if(em->turrets[i].timer%24==0){
 				entitymanager_turretmissile(em,em->turrets+i,vm->dim);
 			}
 		}
 	}
-
-
 }
 
 struct missile* entitymanager_newmissile(struct entitymanager* em, struct vehicle* v, vec3f dim)
@@ -482,7 +488,7 @@ struct missile* entitymanager_turretmissile(struct entitymanager* em, struct tur
 
 	m->timer = ENTITY_MISSILE_DESPAWNTIME;
 
-	m->flags = ENTITY_MISSILE_FLAG_ENABLED;
+	m->flags = ENTITY_TURRETMISSILE_FLAG_ENABLED;
 
 	m->missle_channel = audiomanager_playsfx(em->am, em->sfx_missile, m->pos, -1,1.5);
 
@@ -507,7 +513,6 @@ void entitymanager_attachpickup(struct vehicle* v, struct pickup* pu,struct enti
 
 	vec3f min, max, avg, diff;
 	int i;
-
 
 	for(i=0;i<=em->num_pickups; i++){
 		if((em->pickups+i)==pu && pu->holdingpu1==true){
@@ -535,7 +540,6 @@ void entitymanager_attachpickup(struct vehicle* v, struct pickup* pu,struct enti
 	}else{
 		v->haspickup = pu->typepickup;
 	}
-	
 
 	//entitymanager_removepickup(em,pu);
 
@@ -1124,6 +1128,10 @@ void entitymanager_missileinit(struct entitymanager* em){
 	mat4f_scalemul(em->r_missile.matrix_model, MISSILE_MESHSCALE, MISSILE_MESHSCALE, MISSILE_MESHSCALE);
 	mat4f_rotateymul(em->r_missile.matrix_model, 3.f);
 	mat4f_translatemul(em->r_missile.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
+
+	mat4f_scalemul(em->r_turretmissile.matrix_model, MISSILE_MESHSCALE, MISSILE_MESHSCALE, MISSILE_MESHSCALE);
+	mat4f_rotateymul(em->r_turretmissile.matrix_model, 0.f);
+	mat4f_translatemul(em->r_turretmissile.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
 }
 
 void entitymanager_mineinit(struct entitymanager* em){

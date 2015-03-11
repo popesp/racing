@@ -115,7 +115,7 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 			//vec3f_set(test, -22.f, 10.f,-115.f);
 			//entitymanager_lapblimp(vm->em,test);
 
-			//entitymanager_newturret(vm->em,vm->dim,v);
+			entitymanager_newturret(vm->em,vm->dim,v);
 		}
 	}
 }
