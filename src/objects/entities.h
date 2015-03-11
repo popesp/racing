@@ -13,6 +13,14 @@
 #define ENTITY_MINE_COUNT			100
 #define ENTITY_TURRET_COUNT			100
 
+#define	POWERUP_MINE				0
+#define	POWERUP_MISSILE				1
+#define POWERUP_SPEED				2
+#define POWERUP_TURRET				3	
+#define	POWERUP_MISSILEX2			4
+#define	POWERUP_MISSILEX3			5
+#define POWERUP_SPEEDUP				6
+
 #define	ENTITY_MISSILE_DENSITY		1.f
 #define	ENTITY_MISSILE_SPEED		80.f
 #define	ENTITY_MISSILE_SIZE			1.f
@@ -36,6 +44,7 @@
 #define BLIMP_SPAWNDIST				2.f
 
 #define	ENTITY_MISSILE_FLAG_ENABLED	0x01
+#define	ENTITY_TURRETMISSILE_FLAG_ENABLED	0x02
 #define	ENTITY_MISSILE_FLAG_INIT	0x00
 
 #define ENTITY_PICKUP_FLAG_INIT		0x00
@@ -51,8 +60,11 @@
 
 #define PICKUP_ATTACHED_OBJ					"res/models/powerup/power_up_attached/powerup_attached.obj"
 #define PICKUP_ATTACHED_MISSILE_TEXTURE		"res/models/powerup/power_up_attached/powerup_attached_rocket.png"
+#define PICKUP_ATTACHED_MISSILEX2_TEXTURE		"res/models/powerup/power_up_attached/powerup_attached_rocketx2.png"
+#define PICKUP_ATTACHED_MISSILEX3_TEXTURE		"res/models/powerup/power_up_attached/powerup_attached_rocketx3.png"
 #define	PICKUP_ATTACHED_MINE_TEXTURE		"res/models/powerup/power_up_attached/powerup_attached_mine.png"
 #define	PICKUP_ATTACHED_SPEED_TEXTURE		"res/models/powerup/power_up_attached/powerup_attached_speed.png"
+#define	PICKUP_ATTACHED_SPEEDX2_TEXTURE		"res/models/powerup/power_up_attached/powerup_attached_base.png"
 #define	PICKUP_ATTACHED_TURRET_TEXTURE		"res/models/powerup/power_up_attached/powerup_attached_turret.png"
 
 #define PICKUP_OBJ					"res/models/powerup/powerup.obj"
@@ -201,6 +213,7 @@ struct entitymanager
 	struct renderable r_blimp;
 	struct renderable r_blimplap;
 	struct renderable r_turret;
+	struct renderable r_turretmissile;
 
 	vec3f dim_missile;
 	vec3f dim_mine;
@@ -208,6 +221,8 @@ struct entitymanager
 	vec3f dim_turret;
 
 	struct texture diffuse_missile;
+	struct texture diffuse_missilex2;
+	struct texture diffuse_missilex3;
 	struct texture diffuse_mine;
 	struct texture diffuse_turret;
 

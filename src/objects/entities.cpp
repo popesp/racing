@@ -33,6 +33,10 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 	objloader_load(MISSILE_OBJ, r, &em->r_missile);
 	renderable_sendbuffer(r, &em->r_missile);
 
+	renderable_init(&em->r_turretmissile, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
+	objloader_load(MISSILE_OBJ, r, &em->r_turretmissile);
+	renderable_sendbuffer(r, &em->r_turretmissile);
+
 	renderable_init(&em->r_mine, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
 	objloader_load(MINE_OBJ, r, &em->r_mine);
 	renderable_sendbuffer(r, &em->r_mine);
@@ -59,6 +63,7 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 	entitymanager_turretinit(em);
 
 	em->r_missile.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_missile;
+	em->r_turretmissile.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_missile;
 	em->r_mine.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_mine;
 	em->r_turret.textures[RENDER_TEXTURE_DIFFUSE] = &em->diffuse_turret;
 
@@ -159,8 +164,11 @@ void entitymanager_render(struct entitymanager* em, struct renderer* r, mat4f wo
 	int i;
 
 	for (i = 0; i < ENTITY_MISSILE_COUNT; i++)
-		if (em->missiles[i].flags & ENTITY_MISSILE_FLAG_ENABLED)
-			renderable_render(r, &em->r_missile, (float*)&physx::PxMat44(em->missiles[i].body->getGlobalPose()), worldview, 0);
+		if (em->missiles[i].flags & ENTITY_MISSILE_FLAG_ENABLED){
+			renderable_render(r, &em->r_missile, (float*)&physx::PxMat44(em->missiles[i].body->getGlobalPose()), worldview, 0);}
+		else if(em->missiles[i].flags & ENTITY_TURRETMISSILE_FLAG_ENABLED){
+			renderable_render(r, &em->r_turretmissile, (float*)&physx::PxMat44(em->missiles[i].body->getGlobalPose()), worldview, 0);
+		}
 
 	for(i=0; i<ENTITY_MINE_COUNT;i++){
 		if (em->mines[i].flags & ENTITY_MINE_FLAG_ENABLED){
@@ -198,7 +206,7 @@ void entitymanager_update(struct entitymanager* em, struct vehiclemanager* vm)
 	if(em->pickupatspawn1==false){
 		em->timerspawn1--;
 		//printf("%d\n",em->timerspawn1);
-		if(em->timerspawn1==0){
+		if(em->timerspawn1<=0){
 			entitymanager_newpickup(em, vm->track->pathpoints[PICKUP_SPAWN_LOC1].pos); 
 			em->pickupatspawn1=true;
 			em->timerspawn1 = PICKUP_TIMERS;
@@ -208,7 +216,7 @@ void entitymanager_update(struct entitymanager* em, struct vehiclemanager* vm)
 	if(em->pickupatspawn2==false){
 		em->timerspawn2--;
 		//printf("%d\n",em->timerspawn2);
-		if(em->timerspawn2==0){
+		if(em->timerspawn2<=0){
 			entitymanager_newpickup(em, vm->track->pathpoints[PICKUP_SPAWN_LOC2].pos); 
 			em->pickupatspawn2=true;
 			em->timerspawn2 = PICKUP_TIMERS;
@@ -227,8 +235,9 @@ void entitymanager_update(struct entitymanager* em, struct vehiclemanager* vm)
 	
 	if(em->pickupatspawn4==false){
 		em->timerspawn4--;
-		//printf("%d\n",em->timerspawn4);
-		if(em->timerspawn4==0){
+		printf("%d\n",em->timerspawn4);
+		if(em->timerspawn4<=0){
+			//printf("new pikcup\n");
 			entitymanager_newpickup(em, vm->track->pathpoints[PICKUP_SPAWN_LOC3].pos); 
 			em->pickupatspawn4=true;
 			em->timerspawn4 = PICKUP_TIMERS;
@@ -304,13 +313,11 @@ void entitymanager_update(struct entitymanager* em, struct vehiclemanager* vm)
 				entitymanager_removeturret(em,em->turrets+i);
 				continue;
 			}
-			if(em->turrets[i].timer%10==0){
+			if(em->turrets[i].timer%20==0){
 				entitymanager_turretmissile(em,em->turrets+i,vm->dim);
 			}
 		}
 	}
-
-
 }
 
 struct missile* entitymanager_newmissile(struct entitymanager* em, struct vehicle* v, vec3f dim)
@@ -450,7 +457,7 @@ struct missile* entitymanager_turretmissile(struct entitymanager* em, struct tur
 	int i;
 
 	for (i = 0; i < ENTITY_MISSILE_COUNT; i++)
-		if (!(em->missiles[i].flags & ENTITY_MISSILE_FLAG_ENABLED))
+		if (!(em->missiles[i].flags & ENTITY_TURRETMISSILE_FLAG_ENABLED))
 			break;
 
 	if (i == ENTITY_MISSILE_COUNT)
@@ -482,7 +489,7 @@ struct missile* entitymanager_turretmissile(struct entitymanager* em, struct tur
 
 	m->timer = ENTITY_MISSILE_DESPAWNTIME;
 
-	m->flags = ENTITY_MISSILE_FLAG_ENABLED;
+	m->flags = ENTITY_TURRETMISSILE_FLAG_ENABLED;
 
 	m->missle_channel = audiomanager_playsfx(em->am, em->sfx_missile, m->pos, -1,1.5);
 
@@ -508,7 +515,6 @@ void entitymanager_attachpickup(struct vehicle* v, struct pickup* pu,struct enti
 	vec3f min, max, avg, diff;
 	int i;
 
-
 	for(i=0;i<=em->num_pickups; i++){
 		if((em->pickups+i)==pu && pu->holdingpu1==true){
 			em->pickupatspawn1=false;
@@ -529,15 +535,21 @@ void entitymanager_attachpickup(struct vehicle* v, struct pickup* pu,struct enti
 
 	em->pm->scene->removeActor(*pu->body);
 
-	if(pu->typepickup==0 && (v->haspickup==0 || v->haspickup==3)){
-		v->haspickup=3;
-		pu->typepickup=3;
-	}else{
+	if(pu->typepickup==POWERUP_MINE && (v->haspickup==POWERUP_MINE || v->haspickup==POWERUP_TURRET)){
+		v->haspickup=POWERUP_TURRET;
+		pu->typepickup=POWERUP_TURRET;
+	}
+	else if(pu->typepickup==POWERUP_MISSILE && (v->haspickup==POWERUP_MISSILE || v->haspickup==POWERUP_MISSILEX2 || v->haspickup==POWERUP_MISSILEX3)){
+		v->haspickup=POWERUP_MISSILEX3;
+		pu->typepickup=POWERUP_MISSILEX3;
+	}
+	else if(pu->typepickup==POWERUP_SPEED && (v->haspickup==POWERUP_SPEED || v->haspickup==POWERUP_SPEEDUP)){
+		v->haspickup=POWERUP_SPEEDUP;
+		pu->typepickup=POWERUP_SPEEDUP;
+	}
+	else{
 		v->haspickup = pu->typepickup;
 	}
-	
-
-	//entitymanager_removepickup(em,pu);
 
 	renderable_init(&pu->r_pickup, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
 	objloader_load(PICKUP_ATTACHED_OBJ, em->r, &pu->r_pickup);
@@ -582,29 +594,42 @@ void entitymanager_attachpickup(struct vehicle* v, struct pickup* pu,struct enti
 	mat4f_rotateymul(pu->r_pickup.matrix_model, -1.57080f);
 	mat4f_translatemul(pu->r_pickup.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
 
-	if(pu->typepickup==1){
+	if(pu->typepickup==POWERUP_MISSILE){
 		//Missile
 		texture_loadfile(&pu->diffuse_pickupMISSILE, PICKUP_ATTACHED_MISSILE_TEXTURE);
 		texture_upload(&pu->diffuse_pickupMISSILE, RENDER_TEXTURE_DIFFUSE);
 		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickupMISSILE;
 	}
-	else if(pu->typepickup==2){
-		//Mine
-		texture_loadfile(&pu->diffuse_pickupMINE, PICKUP_ATTACHED_SPEED_TEXTURE);
-		texture_upload(&pu->diffuse_pickupMINE, RENDER_TEXTURE_DIFFUSE);
-		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickupMINE;
+	else if(pu->typepickup==POWERUP_SPEED){
+		
+		//Speed
+		texture_loadfile(&pu->diffuse_pickupSPEED, PICKUP_ATTACHED_SPEED_TEXTURE);
+		texture_upload(&pu->diffuse_pickupSPEED, RENDER_TEXTURE_DIFFUSE);
+		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickupSPEED;
 	}
-	else if(pu->typepickup==3){
+	else if(pu->typepickup==POWERUP_TURRET){
 		//TURRET
 		texture_loadfile(&pu->diffuse_pickupMINE, PICKUP_ATTACHED_TURRET_TEXTURE);
 		texture_upload(&pu->diffuse_pickupMINE, RENDER_TEXTURE_DIFFUSE);
 		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickupMINE;
 	}
+	else if(pu->typepickup==POWERUP_MISSILEX3){
+		//X3 MISSILES
+		texture_loadfile(&pu->diffuse_pickupMINE, PICKUP_ATTACHED_MISSILEX3_TEXTURE);
+		texture_upload(&pu->diffuse_pickupMINE, RENDER_TEXTURE_DIFFUSE);
+		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickupMINE;
+	}
+	else if(pu->typepickup==POWERUP_SPEEDUP){
+		//SPEED UP MORE
+		texture_loadfile(&pu->diffuse_pickupMINE, PICKUP_ATTACHED_SPEEDX2_TEXTURE);
+		texture_upload(&pu->diffuse_pickupMINE, RENDER_TEXTURE_DIFFUSE);
+		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickupMINE;
+	}
 	else{
-		//Speed
-		texture_loadfile(&pu->diffuse_pickupSPEED, PICKUP_ATTACHED_MINE_TEXTURE);
-		texture_upload(&pu->diffuse_pickupSPEED, RENDER_TEXTURE_DIFFUSE);
-		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickupSPEED;
+		//Mine
+		texture_loadfile(&pu->diffuse_pickupMINE, PICKUP_ATTACHED_MINE_TEXTURE);
+		texture_upload(&pu->diffuse_pickupMINE, RENDER_TEXTURE_DIFFUSE);
+		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickupMINE;
 	}
 }
 
@@ -632,19 +657,19 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f pos){
 	pu->holdingpu2=false;
 	pu->holdingpu3=false;
 	pu->holdingpu4=false;
-	if(em->timerspawn1==0){
+	if(em->timerspawn1<=0){
 		pu->holdingpu1=true;
 		em->timerspawn1=PICKUP_TIMERS;
 	}
-	else if(em->timerspawn2==0){
+	else if(em->timerspawn2<=0){
 		pu->holdingpu2=true;
 		em->timerspawn2=PICKUP_TIMERS;
 	}
-	/*else if(em->timerspawn3==0){
+	/*else if(em->timerspawn3<=0){
 		pu->holdingpu3=true;
 		em->timerspawn3=PICKUP_TIMERS;
 	}*/
-	else if(em->timerspawn4==0){
+	else if(em->timerspawn4<=0){
 		pu->holdingpu4=true;
 		em->timerspawn4=PICKUP_TIMERS;
 	}
@@ -706,7 +731,7 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f pos){
 		texture_upload(&pu->diffuse_pickupMISSILE, RENDER_TEXTURE_DIFFUSE);
 		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickupMISSILE;
 
-		pu->typepickup=1;
+		pu->typepickup=POWERUP_MISSILE;
 	}
 	else if(seed==2){
 		//Mine
@@ -714,7 +739,7 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f pos){
 		texture_upload(&pu->diffuse_pickupMINE, RENDER_TEXTURE_DIFFUSE);
 		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickupMINE;
 
-		pu->typepickup=0;
+		pu->typepickup=POWERUP_MINE;
 	}
 	else{
 		//Speed
@@ -722,7 +747,7 @@ struct pickup* entitymanager_newpickup(struct entitymanager* em, vec3f pos){
 		texture_upload(&pu->diffuse_pickupSPEED, RENDER_TEXTURE_DIFFUSE);
 		pu->r_pickup.textures[RENDER_TEXTURE_DIFFUSE] = &pu->diffuse_pickupSPEED;
 
-		pu->typepickup=2;
+		pu->typepickup=POWERUP_SPEED;
 	}
 
 	// find spawn location
@@ -950,6 +975,7 @@ void entitymanager_textures(struct entitymanager* em, struct renderer* r){
 	texture_loadfile(&em->diffuse_missile, MISSILE_TEXTURE);
 	texture_upload(&em->diffuse_missile, RENDER_TEXTURE_DIFFUSE);
 
+
 	// initialize all the blimp textures
 	texture_init(&em->diffuse_welcome);
 	texture_loadfile(&em->diffuse_welcome, BLIMP_WELCOME_TEXTURE);
@@ -1124,6 +1150,10 @@ void entitymanager_missileinit(struct entitymanager* em){
 	mat4f_scalemul(em->r_missile.matrix_model, MISSILE_MESHSCALE, MISSILE_MESHSCALE, MISSILE_MESHSCALE);
 	mat4f_rotateymul(em->r_missile.matrix_model, 3.f);
 	mat4f_translatemul(em->r_missile.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
+
+	mat4f_scalemul(em->r_turretmissile.matrix_model, MISSILE_MESHSCALE, MISSILE_MESHSCALE, MISSILE_MESHSCALE);
+	mat4f_rotateymul(em->r_turretmissile.matrix_model, 0.f);
+	mat4f_translatemul(em->r_turretmissile.matrix_model, -avg[VX], -avg[VY], -avg[VZ]);
 }
 
 void entitymanager_mineinit(struct entitymanager* em){
