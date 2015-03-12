@@ -269,7 +269,7 @@ void entitymanager_update(struct entitymanager* em, struct vehiclemanager* vm)
 			// update mine position
 			vec3f_set(em->mines[i].pos, mine_pose.p.x, mine_pose.p.y, mine_pose.p.z);
 			
-			audiomanager_setsoundposition(em->mines[i].mine_channel, em->mines[i].pos);
+			soundchannel_setposition(em->mines[i].mine_channel, em->mines[i].pos);
 		}
 
 	}
@@ -301,7 +301,7 @@ void entitymanager_update(struct entitymanager* em, struct vehiclemanager* vm)
 			// update missle position
 			vec3f_set(em->missiles[i].pos, pose.p.x, pose.p.y, pose.p.z);
 			
-			audiomanager_setsoundposition(em->missiles[i].missle_channel, em->missiles[i].pos);
+			soundchannel_setposition(em->missiles[i].missle_channel, em->missiles[i].pos);
 		}
 	
 	for (i=0;i<ENTITY_TURRET_COUNT; i++){
@@ -506,7 +506,7 @@ void entitymanager_removemissile(struct entitymanager* em, struct missile* m)
 		{
 			em->missiles[i].body->release();
 			em->missiles[i].flags = ENTITY_MISSILE_FLAG_INIT;
-			audiomanager_stopsound(em->missiles[i].missle_channel);
+			soundchannel_stop(em->missiles[i].missle_channel);
 		}	
 }
 
@@ -873,7 +873,7 @@ void entitymanager_removemine(struct entitymanager* em, struct mine* x){
 			em->mines[i].body->release();
 			em->mines[i].flags = ENTITY_MINE_FLAG_INIT;
 			
-			audiomanager_stopsound(em->mines[i].mine_channel);
+			soundchannel_stop(em->mines[i].mine_channel);
 		}
 	}
 }

@@ -66,14 +66,14 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 
 		case GLFW_KEY_M:
 			// go to next track
-			audiomanager_stopsound(game->currentchannel);
+			soundchannel_stop(game->currentchannel);
 			game->index_currentsong = (game->index_currentsong + 1) % GAME_MUSIC_COUNT;
 			game->currentchannel = audiomanager_playmusic(&game->audiomanager, game->index_currentsong, -1);
 			break;
 
 		case GLFW_KEY_P:
 			// pause the music
-			audiomanager_togglesound(game->currentchannel);
+			soundchannel_toggle(game->currentchannel);
 			break;
 
 		case GLFW_KEY_Q:

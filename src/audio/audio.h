@@ -74,34 +74,20 @@ int audiomanager_newsfx(struct audiomanager* am, const char* filename);
 	param:	am				audio manager
 	param:	id				index to the sound object
 	param:	loops			number of times to loop the song
-	return:	FMOD_CHANNEL*	pointer to sund channel
+	param:	volume			volume for music channel
+	return:	FMOD_CHANNEL*	pointer to sound channel
 */
-FMOD_CHANNEL* audiomanager_playmusic(struct audiomanager* am, int id, int loops);
+FMOD_CHANNEL* audiomanager_playmusic(struct audiomanager* am, int id, int loops, float volume = 1.f);
 
 /*	play an sfx sound
 	param:	am				audio manager
 	param:	id				index to the sound object
 	param:	pos				position to play the sound effect
 	param:	loops			number of times to loop the sound effect
-	param:	vol				set sfx specific volume
+	param:	volume			volume for sfx channel
 	return:	FMOD_CHANNEL*	pointer to sound channel
 */
-FMOD_CHANNEL* audiomanager_playsfx(struct audiomanager* am, int id, vec3f pos, int loops, float vol = 1.0);
-
-void audiomanager_displayvol(FMOD_CHANNEL* channel);
-
-
-/*	stop a sound
-	param:	channel			sound channel
-*/
-void audiomanager_stopsound(FMOD_CHANNEL* channel);
-
-
-/*	set the position in 3d space of a sound effect
-	param:	channel			sound channel
-	param:	pos				new position
-*/
-void audiomanager_setsoundposition(FMOD_CHANNEL* channel, vec3f pos);
+FMOD_CHANNEL* audiomanager_playsfx(struct audiomanager* am, int id, vec3f pos, int loops, float volume = 1.f);
 
 
 /*	set the music volume
@@ -116,13 +102,6 @@ void audiomanager_setmusicvolume(struct audiomanager* am, float volume);
 */
 void audiomanager_setsfxvolume(struct audiomanager* am, float volume);
 
-
-/*	set the individual sfx volume
-	param:	channel			specific sfx channel
-	param:	volume			new sfx volume
-*/
-void audiomanager_setsfx_channelvolume(FMOD_CHANNEL* channel, float volume);
-
 /*	set the master volume
 	param:	am				audio manager
 	param:	volume			new master volume
@@ -130,12 +109,34 @@ void audiomanager_setsfx_channelvolume(FMOD_CHANNEL* channel, float volume);
 void audiomanager_setmastervolume(struct audiomanager* am, float volume);
 
 
-/*	toggle a sound's paused state
+/*	set a sound's position in space
+	param:	channel			sound channel
+	param:	pos				new position
+*/
+void soundchannel_setposition(FMOD_CHANNEL* channel, vec3f pos);
+
+/*	set a sound channel's volume
+	param:	channel			sound channel
+	param:	volume			new volume
+*/
+void soundchannel_setvolume(FMOD_CHANNEL* channel, float volume);
+
+/*	set a sound channel's frequency
+	param:	channel			sound channel
+	param:	freq			new frequency
+*/
+void soundchannel_setfreq(FMOD_CHANNEL* channel, float freq);
+
+
+/*	toggle whether a sound channel is playing
 	param:	channel			sound channel
 */
-void audiomanager_togglesound(FMOD_CHANNEL* channel);
+void soundchannel_toggle(FMOD_CHANNEL* channel);
 
+/*	stop a sound channel
+	param:	channel			sound channel
+*/
+void soundchannel_stop(FMOD_CHANNEL* channel);
 
-void audiomanager_setchannelfreq(FMOD_CHANNEL* channel,float rate);
 
 #endif

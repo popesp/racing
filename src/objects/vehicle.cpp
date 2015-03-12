@@ -31,9 +31,9 @@ static void vehicleinput(struct vehiclemanager* vm, struct vehicle* v, float spe
 				vec3f_scale(force, -VEHICLE_ACCELERATION * v->controller->axes[INPUT_AXIS_TRIGGERS]*nitrous);
 				
 				if ((v->controller->axes[INPUT_AXIS_TRIGGERS] < -0.3) && v->engine_loopstart)
-					audiomanager_setchannelfreq(v->engine_channel, v->controller->axes[INPUT_AXIS_TRIGGERS]*1.15*nitrous);
+					soundchannel_setfreq(v->engine_channel, v->controller->axes[INPUT_AXIS_TRIGGERS]*1.15*nitrous);
 				else
-					audiomanager_setchannelfreq(v->engine_channel, 1);
+					soundchannel_setfreq(v->engine_channel, 1);
 				
 				physx::PxRigidBodyExt::addLocalForceAtLocalPos(*v->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, 0.f));
 
@@ -570,8 +570,7 @@ void vehiclemanager_update(struct vehiclemanager* vm)
 
 		physx::PxRigidBodyExt::addLocalForceAtLocalPos(*v->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, 0.f));
 		
-		audiomanager_setsoundposition(v->engine_channel, v->pos);
-
+		soundchannel_setposition(v->engine_channel, v->pos);
 
 	}
 }
