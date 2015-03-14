@@ -48,6 +48,12 @@
     <Filter Include="src\core">
       <UniqueIdentifier>{1690f433-fd9c-4b16-acfa-eaec98246453}</UniqueIdentifier>
     </Filter>
+    <Filter Include="headers\objects\entities">
+      <UniqueIdentifier>{95cd60fd-c32d-4c20-8fd2-2d2000e4a94c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\objects\entities">
+      <UniqueIdentifier>{276f7a83-884b-43b0-a1b1-3da35a98446d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -95,13 +101,25 @@
     <ClCompile Include="src\render\primitives.cpp">
       <Filter>src\render</Filter>
     </ClCompile>
-    <ClCompile Include="src\objects\entities.cpp">
-      <Filter>src\objects</Filter>
-    </ClCompile>
     <ClCompile Include="src\core\win.cpp">
       <Filter>src\core</Filter>
     </ClCompile>
-    <ClCompile Include="src\physics\collisions.cpp">
+    <ClCompile Include="src\objects\entities\missile.cpp">
+      <Filter>src\objects\entities</Filter>
+    </ClCompile>
+    <ClCompile Include="src\objects\entities\mine.cpp">
+      <Filter>src\objects\entities</Filter>
+    </ClCompile>
+    <ClCompile Include="src\objects\entities\entity.cpp">
+      <Filter>src\objects\entities</Filter>
+    </ClCompile>
+    <ClCompile Include="src\objects\pickup.cpp">
+      <Filter>src\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\objects\entities\turret.cpp">
+      <Filter>src\objects\entities</Filter>
+    </ClCompile>
+    <ClCompile Include="src\physics\collision.cpp">
       <Filter>src\physics</Filter>
     </ClCompile>
   </ItemGroup>
@@ -169,13 +187,28 @@
     <ClInclude Include="src\render\primitives.h">
       <Filter>headers\render</Filter>
     </ClInclude>
-    <ClInclude Include="src\objects\entities.h">
-      <Filter>headers\objects</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\win.h">
       <Filter>headers\core</Filter>
     </ClInclude>
-    <ClInclude Include="src\physics\collisions.h">
+    <ClInclude Include="src\objects\entities\missile.h">
+      <Filter>headers\objects\entities</Filter>
+    </ClInclude>
+    <ClInclude Include="src\objects\entities\mine.h">
+      <Filter>headers\objects\entities</Filter>
+    </ClInclude>
+    <ClInclude Include="src\objects\entities\entity.h">
+      <Filter>headers\objects\entities</Filter>
+    </ClInclude>
+    <ClInclude Include="src\objects\pickup.h">
+      <Filter>headers\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\random.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\objects\entities\turret.h">
+      <Filter>headers\objects\entities</Filter>
+    </ClInclude>
+    <ClInclude Include="src\physics\collision.h">
       <Filter>headers\physics</Filter>
     </ClInclude>
   </ItemGroup>

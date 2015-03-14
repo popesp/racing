@@ -32,7 +32,7 @@ void track_init(struct track* t, struct physicsmanager* pm, vec3f up)
 	t->num_points = 0;
 	t->points = NULL;
 
-	t->num_pathpoints = TRACK_NUMPOINTS;
+	t->num_pathpoints = 0;
 	t->pathpoints = NULL;
 
 	t->p_track = NULL;
@@ -46,7 +46,7 @@ void track_init(struct track* t, struct physicsmanager* pm, vec3f up)
 	t->r_track.material.shn = 100.f;
 
 	texture_init(&t->normal);
-	texture_loadfile(&t->normal, TRACK_TEXT_SLATE);
+	texture_loadfile(&t->normal, TRACK_TEXTURE_FILENAME_NORMAL);
 	texture_upload(&t->normal, RENDER_TEXTURE_NORMAL);
 	t->r_track.textures[RENDER_TEXTURE_NORMAL] = &t->normal;
 
@@ -66,12 +66,6 @@ void track_delete(struct track* t)
 }
 
 
-/*	find the closest point on the track to a given position
-	param:	t					track object
-	param:	pos					position in space to search around
-	param:	last				last known "closest" index (used so as to not search every point on the track)
-	return:	unsigned			index of the closest track point
-*/
 int track_closestindex(struct track* t, vec3f pos, int last)
 {
 	float d, least;
@@ -116,6 +110,35 @@ int track_closestindex(struct track* t, vec3f pos, int last)
 	}
 
 	return l;
+}
+
+
+void track_transformindex(struct track* t, mat4f res, int index, vec3f pos_offs)
+{
+	vec3f tan, bin, nor, pos;
+
+	// find negated tangent
+	vec3f_copy(tan, t->pathpoints[index].tan);
+	vec3f_negate(tan);
+
+	vec3f_cross(bin, t->up, tan);
+	vec3f_normalize(bin);
+
+	vec3f_cross(nor, tan, bin);
+
+	// find translation
+	vec3f_copy(pos, t->pathpoints[index].pos);
+	vec3f_add(pos, pos_offs);
+
+	// find the change of basis matrix
+	mat4f_identity(res);
+	vec3f_copy(res + C0, bin);
+	vec3f_copy(res + C1, nor);
+	vec3f_copy(res + C2, tan);
+	vec3f_copy(res + C3, pos);
+
+	// rotate to the track angle
+	mat4f_rotatezmul(res, -t->pathpoints[index].angle);
 }
 
 

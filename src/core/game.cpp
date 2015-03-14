@@ -8,9 +8,10 @@
 #include	"../error.h"			// PRINT_ERROR
 #include	"../math/mat4f.h"		// identity TEMPORARY
 #include	"../math/vec3f.h"		// set TEMPORARY
+#include	"../random.h"
 #include	"../render/objloader.h"
 
-#include	"../objects/entities.h"
+#include	"../objects/entities/entity.h"
 
 #include	"../physics/physics.h"		// startup, shutdown
 
@@ -29,10 +30,10 @@ static void resetplayers(struct game* game)
 {
 	int i;
 
-	vehicle_reset(&game->vehiclemanager, game->player.vehicle);
+	vehiclemanager_resetvehicle(&game->vehiclemanager, game->player.vehicle);
 
 	for (i = 0; i < game->num_aiplayers; i++)
-		vehicle_reset(&game->vehiclemanager, game->aiplayers[i].vehicle);
+		vehiclemanager_resetvehicle(&game->vehiclemanager, game->aiplayers[i].vehicle);
 }
 
 static void resize(GLFWwindow* window, int width, int height)
@@ -117,6 +118,7 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 			break;
 
 		case GLFW_KEY_SPACE:
+			/*
 			// toggle win condition
 			if (game->flags & GAME_FLAG_WINCONDITION)
 			{
@@ -139,6 +141,7 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 
 				game->flags |= GAME_FLAG_WINCONDITION;
 			}
+			*/
 			break;
 
 		case GLFW_KEY_BACKSPACE:
@@ -204,8 +207,9 @@ static void update(struct game* game)
 		aiplayer_updateinput(&game->aiplayers[i]);
 	
 	// temporary debug button
-	if (game->inputmanager.controllers[GLFW_JOYSTICK_1].flags & INPUT_FLAG_ENABLED){
-		if (game->inputmanager.controllers[0].buttons[INPUT_BUTTON_Y] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
+	if (game->inputmanager.controllers[GLFW_JOYSTICK_1].flags & INPUT_FLAG_ENABLED)
+	{
+		if (game->inputmanager.controllers[GLFW_JOYSTICK_1].buttons[INPUT_BUTTON_Y] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
 		{
 			if (game->flags & GAME_FLAG_DEBUGCAM)
 				game->flags &= ~GAME_FLAG_DEBUGCAM;
@@ -238,32 +242,25 @@ static void update(struct game* game)
 	} else
 		game->player.vehicle->controller = &game->inputmanager.controllers[GLFW_JOYSTICK_1];
 
+	// update the audio manager
 	audiomanager_update(&game->audiomanager, game->player.camera.pos, game->player.camera.dir, game->player.camera.up);
 
 	// update the vehicles
 	vehiclemanager_update(&game->vehiclemanager);
 
-	resethitflags(&game->vehiclemanager, &game->entitymanager);
+	// update the game objects
+	entitymanager_update(&game->entitymanager);
 
+	// update the pickup manager
+	pickupmanager_update(&game->pickupmanager);
+
+	// update physics simulation
 	physicsmanager_update(&game->physicsmanager, GAME_SPU);
 
-	// update the game objects
-	entitymanager_update(&game->entitymanager, &game->vehiclemanager);
-
+	// update player camera
 	player_updatecamera(&game->player);
 
-	//update pickup position if vehicle is holding
-	for(i = 0; i < ENTITY_PICKUP_COUNT; i++){
-		if(game->entitymanager.pickups[i].owner!=NULL){
-			physx::PxMat44 owner_vehicle(game->entitymanager.pickups[i].owner->body->getGlobalPose());
-			game->entitymanager.pickups[i].powerpos = owner_vehicle.transform(physx::PxVec3(-.3f, -.1f, 1.5f));
-			game->entitymanager.pickups[i].body->setGlobalPose(physx::PxTransform(physx::PxVec3(game->entitymanager.pickups[i].powerpos)));
-
-			//physx::PxMat44 owner_angle()
-			//game->entitymanager.pickups[i].body->setAngularDamping(game->entitymanager.pickups[i].owner->body->getAngularDamping());
-		}
-	}
-
+	/*
 	//update blimp positions
 	for(i=0;i<BLIMP_COUNT;i++){
 		if(game->entitymanager.blimps[i].owner!=NULL){
@@ -272,18 +269,18 @@ static void update(struct game* game)
 			game->entitymanager.blimps[i].body->setGlobalPose(physx::PxTransform(physx::PxVec3(game->entitymanager.blimps[i].blimppos)));
 		}
 		if(game->entitymanager.blimps[i].typeblimp==BLIMP_TYPE_LAP){
-			/*physx::PxMat44 blimpcamera(game->player.camera.pos);
-			game->entitymanager.blimps[i].blimppos = blimpcamera.transform(physx::PxVec3(0.f,-30.f,0.f));
-			game->entitymanager.blimps[i].body->setGlobalPose(physx::PxTransform(physx::PxVec3(game->entitymanager.blimps[i].blimppos)));*/
+			//physx::PxMat44 blimpcamera(game->player.camera.pos);
+			//game->entitymanager.blimps[i].blimppos = blimpcamera.transform(physx::PxVec3(0.f,-30.f,0.f));
+			//game->entitymanager.blimps[i].body->setGlobalPose(physx::PxTransform(physx::PxVec3(game->entitymanager.blimps[i].blimppos)));
 		}
 	}
-
+	
 	//check who has won the game
 	if(game->flags == GAME_FLAG_WINCONDITION){
 		checkwin(game);
 		checkplace(game);
 	}
-
+	*/
 	// check for window close messages
 	if (glfwWindowShouldClose(game->window.w))
 		game->flags |= GAME_FLAG_TERMINATED;
@@ -294,7 +291,6 @@ static void render(struct game* game)
 	physx::PxMat44 player_mw, aiplayer_mw;
 	mat4f global_wv, skybox_wv;
 	mat4f track_mw, skybox_mw;
-	int i;
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -320,16 +316,13 @@ static void render(struct game* game)
 	renderable_render(&game->renderer, &game->track.r_track, track_mw, global_wv, 0);
 
 	// render players
-	player_mw = physx::PxMat44(game->player.vehicle->body->getGlobalPose());
-	renderable_render(&game->renderer, &game->vehiclemanager.r_vehicle, (float*)&player_mw, global_wv, 0);
-	for(i = 0; i < game->num_aiplayers; i++)
-	{
-		aiplayer_mw = physx::PxMat44(game->aiplayers[i].vehicle->body->getGlobalPose());
-		renderable_render(&game->renderer, &game->vehiclemanager.r_vehicle, (float*)&aiplayer_mw, global_wv, 0);	
-	}
+	vehiclemanager_render(&game->vehiclemanager, &game->renderer, global_wv);
 
-	// render all game objects
+	// render game entities
 	entitymanager_render(&game->entitymanager, &game->renderer, global_wv);
+
+	// render pickups
+	pickupmanager_render(&game->pickupmanager, &game->renderer, global_wv);
 
 	glfwSwapBuffers(game->window.w);
 }
@@ -424,11 +417,9 @@ static int start_subsystems(struct game* game)
 	}
 
 	// initialize audio manager
-	
 	printf("Starting up audio manager...");
 	audiomanager_startup(&game->audiomanager);
 	printf("...done. Using FMOD version %d.\n", audiomanager_getlibversion(&game->audiomanager));
-	
 	
 	return 1;
 }
@@ -445,6 +436,8 @@ int game_startup(struct game* game)
 		return 0;
 	}
 
+	random_timeseed();
+
 	// initialize skybox
 	skybox_init(&game->skybox, &game->renderer);
 
@@ -458,10 +451,14 @@ int game_startup(struct game* game)
 	physicsmanager_addstatic_trianglestrip(&game->physicsmanager, game->track.r_track.num_verts, sizeof(float)*RENDER_VERTSIZE_BUMP_L, game->track.r_track.buf_verts);
 	
 	// start up the entity manager for the track
-	entitymanager_startup(&game->entitymanager, &game->physicsmanager, &game->renderer,&game->audiomanager, &game->track);
+	entitymanager_startup(&game->entitymanager, &game->physicsmanager, &game->audiomanager, &game->renderer);
 
 	// start up the vehicle manager for the track
 	vehiclemanager_startup(&game->vehiclemanager, &game->physicsmanager, &game->entitymanager, &game->audiomanager, &game->renderer, &game->track);
+
+	// start up the pickup manager for the track
+	int track_indices[] = {50, 80, 120}; // test values
+	pickupmanager_startup(&game->pickupmanager, &game->physicsmanager, &game->renderer, &game->track, 3, track_indices);
 
 	// initialize player objects
 	vec3f_set(offs, 1.f, 0.f, 0.f);
@@ -493,13 +490,7 @@ int game_startup(struct game* game)
 	game->track.r_track.lights[1] = game->track_lights + 1;
 	game->vehiclemanager.r_vehicle.lights[0] = game->track_lights + 0;
 	game->vehiclemanager.r_vehicle.lights[1] = game->track_lights + 1;
-	
-	//spawn the tracks pickups
-	entitymanager_newpickup(&game->entitymanager,game->track.pathpoints[PICKUP_SPAWN_LOC1].pos);
-	game->entitymanager.pickupatspawn1=true;
-	
-	/*entitymanager_newpickup(&game->entitymanager,game->track.pathpoints[PICKUP_SPAWN_LOC3].pos);
-	game->entitymanager.pickupatspawn3=true;*/
+
 	// add background music
 	game->songs[GAME_MUSIC_1_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_3_FILENAME);
 	game->songs[GAME_MUSIC_2_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_2_FILENAME);
@@ -507,15 +498,11 @@ int game_startup(struct game* game)
 	game->songs[GAME_MUSIC_4_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_4_FILENAME);
 	game->index_currentsong = 0;
 	game->currentchannel = audiomanager_playmusic(&game->audiomanager, game->songs[game->index_currentsong], -1);
-	audiomanager_setmusicvolume(&game->audiomanager,0.2);
+	audiomanager_setmusicvolume(&game->audiomanager, 0.2f);
+
 	game->flags = GAME_FLAG_INIT;
 
-	//seperated this so the third is a different pickup
-	entitymanager_newpickup(&game->entitymanager,game->track.pathpoints[PICKUP_SPAWN_LOC2].pos);
-	game->entitymanager.pickupatspawn2=true;
-
-	entitymanager_newpickup(&game->entitymanager,game->track.pathpoints[PICKUP_SPAWN_LOC3].pos);
-	game->entitymanager.pickupatspawn4=true;
+	/*
 
 	//spawn a bigass blimp in the middle of the map
 	vec3f test;
@@ -523,20 +510,17 @@ int game_startup(struct game* game)
 	entitymanager_lapblimp(&game->entitymanager,test);
 
 	//set win condition on at the beginning
-				printf("Win condition activated.\n");
-				printf("Player is on lap %d\n", game->player.vehicle->lap);
+	printf("Win condition activated.\n");
+	printf("Player is on lap %d\n", game->player.vehicle->lap);
 
-				entitymanager_placeblimp(game->player.vehicle,&game->entitymanager,game->track.pathpoints[0].pos);
+	entitymanager_placeblimp(game->player.vehicle,&game->entitymanager,game->track.pathpoints[0].pos);
 
-				for (int i = 0; i < game->num_aiplayers; i++)
-				{
-					game->aiplayers[i].vehicle->lap = 1;
-					printf("Computer-%d is on lap %d\n", i+1, game->aiplayers[i].vehicle->lap);
-				}
-
-				game->flags |= GAME_FLAG_WINCONDITION;
-
-
+	for (int i = 0; i < game->num_aiplayers; i++)
+	{
+		game->aiplayers[i].vehicle->lap = 1;
+		printf("Computer-%d is on lap %d\n", i+1, game->aiplayers[i].vehicle->lap);
+	}
+	*/
 	return 1;
 }
 
@@ -587,16 +571,16 @@ void game_shutdown(struct game* game)
 {
 	int i;
 
+	/*
 	// delete blimps
 	for(i=0; i< game->entitymanager.num_blimps;i++){
 		entitymanager_removeblimp(&game->entitymanager,&game->entitymanager.blimps[i],game->player.vehicle);
 	}
-
+	*/
 	// delete players
 	player_delete(&game->player, &game->vehiclemanager);
 	for (i = 0; i < game->num_aiplayers; i++){
 		aiplayer_delete(&game->aiplayers[i], &game->vehiclemanager);}
-	
 	
 	// delete world objects
 	track_delete(&game->track);

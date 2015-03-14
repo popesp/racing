@@ -8,6 +8,7 @@ static void resetsound(struct sound* s)
 }
 
 
+#include	<stdio.h>
 void audiomanager_startup(struct audiomanager* am)
 {
 	int i;
@@ -15,9 +16,13 @@ void audiomanager_startup(struct audiomanager* am)
 	// create audio system
 	FMOD_System_Create(&am->system);
 
+	printf("test\n");
+
 	// initialize sound system
 	FMOD_System_Init(am->system, 100, FMOD_INIT_3D_RIGHTHANDED, 0);
     
+	printf("test\n");
+
 	// create channel groups
 	FMOD_System_CreateChannelGroup(am->system, "music", &am->group_music);
 	FMOD_System_CreateChannelGroup(am->system, "sfx", &am->group_sfx);

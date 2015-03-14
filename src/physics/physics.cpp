@@ -36,7 +36,7 @@ void physicsmanager_startup(struct physicsmanager* pm)
 	PxSceneDesc scenedesc(scale);
 	scenedesc.gravity = PxVec3(PHYSICS_DEFAULT_GRAVITY);
 	scenedesc.cpuDispatcher = PxDefaultCpuDispatcherCreate(1);
-	scenedesc.filterShader = OurFilterShader;
+	scenedesc.filterShader = collision_filter;
 	scenedesc.simulationEventCallback = pm->collisions;
 	scenedesc.flags |= PxSceneFlag::eENABLE_CCD;
 	pm->scene = pm->sdk->createScene(scenedesc);

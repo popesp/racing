@@ -6,8 +6,8 @@
 #include	"../math/vec3f.h"
 
 
-#define	AUDIO_MUSIC_COUNT		8
-#define	AUDIO_SFX_COUNT			6
+#define	AUDIO_MUSIC_COUNT		16
+#define	AUDIO_SFX_COUNT			16
 
 
 struct sound

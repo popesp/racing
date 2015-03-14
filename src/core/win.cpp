@@ -1,7 +1,9 @@
 #include	"win.h"
 
-
-void checkwin(struct game* game){
+/*
+void checkwin(struct game* game)
+{
+	
 	setblimp(game);
 
 	unsigned int cp1 = game->track.num_pathpoints / 3;
@@ -234,3 +236,4 @@ void setblimp(struct game* game){
 	//}
 	//entitymanager_newblimp(game->player.vehicle,&game->entitymanager,game->track.pathpoints[0].pos);
 }
+*/

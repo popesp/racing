@@ -6,14 +6,14 @@
 #include	"input.h"
 #include	"win.h"
 #include	"../objects/camera.h"
-#include	"../objects/entities.h"
-#include	"../objects/vehicle.h"
+#include	"../objects/entities/entity.h"
+#include	"../objects/pickup.h"
 #include	"../objects/skybox.h"
 #include	"../objects/track.h"
+#include	"../objects/vehicle.h"
 #include	"../physics/physics.h"
 #include	"player.h"
 #include	"../render/render.h"
-#include	"../render/texture.h"
 #include	"../render/window.h"
 
 
@@ -48,24 +48,26 @@
 
 #define GAME_WINCONDITION_LAPS	4
 
-#define	GAME_FLAG_INIT			0x00
 #define	GAME_FLAG_TERMINATED	0x01
 #define	GAME_FLAG_WIREFRAME		0x02	// TEMP
 #define	GAME_FLAG_DEBUGCAM		0x04
 #define	GAME_FLAG_PAUSED		0x08
 #define	GAME_FLAG_WINCONDITION	0x10
+#define	GAME_FLAG_INIT			(GAME_FLAG_WINCONDITION)
 
 
 struct game
 {
 	struct window window;
 	struct renderer renderer;
+
 	struct physicsmanager physicsmanager;
 	struct inputmanager inputmanager;
 	struct audiomanager audiomanager;
 
 	struct entitymanager entitymanager;
 	struct vehiclemanager vehiclemanager;
+	struct pickupmanager pickupmanager;
 
 	struct skybox skybox;
 	struct track track;

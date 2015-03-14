@@ -3,7 +3,7 @@
 
 
 #include	<PxPhysicsAPI.h>
-#include	"collisions.h"
+#include	"collision.h"
 #include	"../math/vec3f.h"
 
 
@@ -19,8 +19,6 @@ struct physicsmanager
 	physx::PxFoundation* foundation;
 	physx::PxCooking* cooking;
 	physx::PxMaterial* default_material;
-
-	int vehicles_hit[200];
 
 	CustomCollisions* collisions;
 

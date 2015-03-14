@@ -1,5 +1,6 @@
 #include	"objloader.h"
 
+#include	<float.h>
 #include	<stdio.h>
 #include	<string.h>
 #include	"../error.h"
@@ -8,18 +9,14 @@
 #include	"../mem.h"
 
 
-/*	load a mesh from an obj file into a renderable object
-	param:	filename		path to obj file
-	param:	r				renderer
-	param:	obj				renderable object
-*/
-void objloader_load(const char* filename, struct renderer* r, struct renderable* obj)
+void objloader_load(const char* filename, struct renderer* r, struct renderable* obj, vec3f dim, vec3f center)
 {
 	unsigned num_verts, num_norms, num_uvs, num_faces;
 	unsigned* ptr_ind_verts, * ptr_ind_norms, * ptr_ind_uvs;
 	unsigned* ind_verts, * ind_norms, * ind_uvs;
 	float* ptr_verts, * ptr_norms, * ptr_uvs;
 	vec3f* verts, * norms;
+	vec3f min, max;
 	vec2f* uvs;
 	char line[256];
 	FILE* file;
@@ -118,6 +115,27 @@ void objloader_load(const char* filename, struct renderer* r, struct renderable*
 			ptr_verts += RENDER_ATTRIBSIZE_TEX;
 		}
 	}
+
+	// find dimensions and center point
+	vec3f_set(min, FLT_MAX, FLT_MAX, FLT_MAX);
+	vec3f_set(max, -FLT_MAX, -FLT_MAX, -FLT_MAX);
+	for (i = 0; i < num_verts; i++)
+	{
+		for (j = 0; j < 3; j++)
+		{
+			if (verts[i][j] < min[j])
+				min[j] = verts[i][j];
+			if (verts[i][j] > max[j])
+				max[j] = verts[i][j];
+		}
+	}
+
+	// center point
+	vec3f_addn(center, min, max);
+	vec3f_scale(center, 0.5f);
+
+	// dimensions
+	vec3f_subtractn(dim, max, min);
 
 	// deallocate temporary vertex buffers
 	mem_free(verts);

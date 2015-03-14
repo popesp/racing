@@ -122,13 +122,6 @@ struct renderable
 
 struct renderer
 {
-	unsigned id_gl_wire_s;
-	unsigned id_gl_txtr_s;
-	unsigned id_gl_mats_l;
-	unsigned id_gl_txtr_l;
-	unsigned id_gl_bump_l;
-	unsigned id_gl_text;
-
 	unsigned vertsize[RENDER_TYPE_COUNT];
 	unsigned shader[RENDER_TYPE_COUNT];
 
