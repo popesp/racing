@@ -2,17 +2,17 @@
 #define	TRACK
 
 
-#include	<PxRigidStatic.h>
 #include	"../math/vec3f.h"
+#include	"../physics/physics.h"
 #include	"../render/render.h"
 
 
-#define	TRACK_SEGMENT_VERTCOUNT			5
+#define	TRACK_SEGMENT_VERTCOUNT			4
 
 #define	TRACK_SEARCHDIVIDE				10
 #define	TRACK_SEARCHSIZE				10
 
-#define	TRACK_DEFAULT_DISTBOUND			30.f
+#define	TRACK_DEFAULT_DISTBOUND			20.f
 
 #define	TRACK_FLAG_INIT					0x00
 #define	TRACK_FLAG_LOOPED				0x01
@@ -38,11 +38,15 @@ struct path_point
 {
 	vec3f pos;
 	vec3f tan;
+
 	float angle;
+	float width;
 };
 
 struct track
 {
+	struct physicsmanager* pm;
+
 	unsigned num_points;
 	struct track_point* points;
 
@@ -88,23 +92,23 @@ int track_closestindex(struct track* t, vec3f pos, int last);
 	param:	t			track object
 	param:	res			resultant transformation matrix
 	param:	index		path point index
-	param:	pos_offs	local position offset to apply before rotation
 */
-void track_transformindex(struct track* t, mat4f res, int index, vec3f pos_offs);
+void track_transformindex(struct track* t, mat4f res, int index);
 
 
 /*	load track points from a file
 	param:	t			track object to load points into
 	param:	filename	path to file holding track points
+	param:	r			renderer
 */
-void track_loadpointsfile(struct track* t, const char* filename);
+void track_loadpointsfile(struct track* t, const char* filename, struct renderer* r);
 
 
 /*	generate the track mesh (assuming points have already been specified)
-	param:	r			renderer
 	param:	t			track object to generate mesh for
+	param:	r			renderer
 */
-void track_generate(struct renderer* r, struct track* t);
+void track_generate(struct track* t, struct renderer* r);
 
 
 #endif

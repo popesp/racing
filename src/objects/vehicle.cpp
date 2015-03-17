@@ -244,9 +244,11 @@ static void vehicleinput(struct vehicle* v)
 	}
 }
 
-static void updatespeed(struct vehicle* v)
+static void updatespeed(struct vehicle* v, struct track* t)
 {
-	vec3f vel, forward, damp;
+	vec3f vel, forward, right, up, damp,  nor;
+	mat4f basis;
+	int i;
 
 	physx::PxVec3 px_vel = v->body->getLinearVelocity();
 	physx::PxMat44 transform(v->body->getGlobalPose());
@@ -256,14 +258,32 @@ static void updatespeed(struct vehicle* v)
 	// transform local vectors
 	vec3f_set(forward, VEHICLE_FORWARD);
 	mat4f_transformvec3f(forward, (float*)&transform);
+	vec3f_set(right, VEHICLE_RIGHT);
+	mat4f_transformvec3f(right, (float*)&transform);
+	vec3f_set(up, VEHICLE_UP);
+	mat4f_transformvec3f(up, (float*)&transform);
+
+	// find track transformation
+	track_transformindex(t, basis, v->index_track);
+
+	vec3f_copy(nor, basis + C1);
+
+	// reset the vehicle if its flipped
+	if ((vec3f_length2(vel) < VEHICLE_RESETSPEEDTHRESHHOLD) && (vec3f_dot(up, nor) < VEHICLE_RESETTILTTHRESHHOLD))
+		vehiclemanager_resetvehicle(v->vm, v);
+
+	// get vehicle speed
+	v->speed = vec3f_dot(vel, forward);
 
 	// lateral damping
-	vec3f_set(damp, VEHICLE_RIGHT);
-	mat4f_transformvec3f(damp, (float*)&transform);
-	vec3f_scale(damp, -VEHICLE_LATERALDAMPFORCE * vec3f_dot(vel, damp));
-	physx::PxRigidBodyExt::addForceAtLocalPos(*v->body, physx::PxVec3(damp[VX], damp[VY], damp[VZ]), physx::PxVec3(0.f, 0.f, 0.f));
+	for (i = 0; i < VEHICLE_COUNT_RAYCASTS; i++)
+			if (v->ray_touch[i])
+			{
+				vec3f_scalen(damp, right, -VEHICLE_LATERALDAMPFORCE * vec3f_dot(vel, right));
+				physx::PxRigidBodyExt::addForceAtLocalPos(*v->body, physx::PxVec3(damp[VX], damp[VY], damp[VZ]), physx::PxVec3(0.f, 0.f, 0.f));
 
-	v->speed = vec3f_dot(vel, forward);
+				break;
+			}
 }
 
 void vehiclemanager_update(struct vehiclemanager* vm)
@@ -305,15 +325,7 @@ void vehiclemanager_update(struct vehiclemanager* vm)
 		if (vec3f_length(dist) > vm->track->dist_boundary)
 			vehiclemanager_resetvehicle(v->vm, v);
 
-		updatespeed(v);
-
-		// check for flip TODO: fix this
-		if(v->speed<0.0001 && v->speed>-0.0005 && v->speed!=0){
-			//printf("%f\n", speed);
-			if(v->ray_touch[0]==false && v->ray_touch[1]==false && v->ray_touch[2]==false && v->ray_touch[3]==false){
-				vehiclemanager_resetvehicle(v->vm, v);
-			}
-		}
+		updatespeed(v, vm->track);
 
 		// process controller input
 		vehicleinput(v);
@@ -409,10 +421,13 @@ struct vehicle* vehiclemanager_newvehicle(struct vehiclemanager* vm, struct cont
 	v->vm = vm;
 
 	// find spawn global pose
+	track_transformindex(vm->track, basis, index_track);
+
+	// spawn offset
 	vec3f_copy(spawn, vm->track->up);
 	vec3f_scale(spawn, VEHICLE_SPAWNHEIGHT);
 	vec3f_add(spawn, offs);
-	track_transformindex(vm->track, basis, index_track, spawn);
+	mat4f_translatemul(basis, spawn[VX], spawn[VY], spawn[VZ]);
 
 	pose = physx::PxTransform((physx::PxMat44)basis);
 
@@ -512,9 +527,11 @@ void vehiclemanager_resetvehicle(struct vehiclemanager* vm, struct vehicle* v)
 	vec3f offs;
 
 	// find transformation matrix
+	track_transformindex(vm->track, basis, v->index_track);
+
 	vec3f_copy(offs, vm->track->up);
 	vec3f_scale(offs, VEHICLE_SPAWNHEIGHT);
-	track_transformindex(vm->track, basis, v->index_track, offs);
+	mat4f_translatemul(basis, offs[VX], offs[VY], offs[VZ]);
 
 	// set the pose and velocities
 	v->body->setGlobalPose(physx::PxTransform((physx::PxMat44)basis));

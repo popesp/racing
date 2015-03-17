@@ -21,8 +21,7 @@
 #define	PICKUP_TYPE_MINE				1
 #define	PICKUP_TYPE_BOOST				2
 
-#define	PICKUP_RADIUS					0.5f
-#define	PICKUP_SPAWNHEIGHT				0.f
+#define	PICKUP_RADIUS					1.f
 #define	PICKUP_DENSITY					1.f
 #define	PICKUP_SPAWNTIME				350
 

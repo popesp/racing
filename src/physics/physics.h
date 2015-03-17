@@ -53,8 +53,9 @@ physx::PxRigidDynamic* physics_adddynamic_box(struct physicsmanager*, vec3f, vec
 	param:	num_verts		number of vertices in the buffer
 	param:	stride			stride between vertices in the buffer
 	param:	buf_verts		vertex buffer
+	return:	PxRigidStatic*	pointer to the static actor
 */
-void physicsmanager_addstatic_trianglestrip(struct physicsmanager* pm, unsigned num_verts, unsigned stride, float* buf_verts);
+physx::PxRigidStatic* physicsmanager_addstatic_trianglestrip(struct physicsmanager* pm, unsigned num_verts, unsigned stride, float* buf_verts);
 
 
 #endif

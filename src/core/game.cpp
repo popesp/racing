@@ -443,12 +443,7 @@ int game_startup(struct game* game)
 
 	// initialize track object
 	track_init(&game->track, &game->physicsmanager, up);
-	track_loadpointsfile(&game->track, "res/tracks/turn1.track");
-	track_generate(&game->renderer, &game->track);
-	renderable_sendbuffer(&game->renderer, &game->track.r_track);
-
-	// send track mesh to physX
-	physicsmanager_addstatic_trianglestrip(&game->physicsmanager, game->track.r_track.num_verts, sizeof(float)*RENDER_VERTSIZE_BUMP_L, game->track.r_track.buf_verts);
+	track_loadpointsfile(&game->track, "res/tracks/bigturn.track", &game->renderer);
 	
 	// start up the entity manager for the track
 	entitymanager_startup(&game->entitymanager, &game->physicsmanager, &game->audiomanager, &game->renderer);
@@ -457,7 +452,7 @@ int game_startup(struct game* game)
 	vehiclemanager_startup(&game->vehiclemanager, &game->physicsmanager, &game->entitymanager, &game->audiomanager, &game->renderer, &game->track);
 
 	// start up the pickup manager for the track
-	int track_indices[] = {50, 80, 120}; // test values
+	int track_indices[] = {50, 100, 150}; // test values
 	pickupmanager_startup(&game->pickupmanager, &game->physicsmanager, &game->renderer, &game->track, 3, track_indices);
 
 	// initialize player objects

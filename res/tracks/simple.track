@@ -1,0 +1,5 @@
+npoints = 2
+looped = false
+
+point = pos(-20.0, 0.0, 0.0), tan(0.0, 0.0, -1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(0)
+point = pos(-20.0, 0.0, -20.0), tan(0.0, 0.0, -1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(0)

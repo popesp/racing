@@ -39,10 +39,12 @@ physx::PxFilterFlags collision_filter(physx::PxFilterObjectAttributes attributes
 	(void)constantBlock;
 	(void)constantBlockSize;
 
+	pairFlags = physx::PxPairFlag::eCONTACT_DEFAULT;
+
 	if ((filterData0.word0 & filterData1.word1) && (filterData1.word0 & filterData0.word1))
 		pairFlags = physx::PxPairFlag::eTRIGGER_DEFAULT | physx::PxPairFlag::eNOTIFY_TOUCH_FOUND;
-	else
-		pairFlags = physx::PxPairFlag::eCONTACT_DEFAULT;
+	else if (filterData0.word0 == COLLISION_FILTER_PICKUP || filterData1.word0 == COLLISION_FILTER_PICKUP)
+		return physx::PxFilterFlag::eKILL;
 
 	return physx::PxFilterFlag::eDEFAULT;
 }

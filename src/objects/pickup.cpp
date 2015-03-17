@@ -15,15 +15,15 @@ static char* pickup_texture_filename[PICKUP_TYPE_COUNT] =
 };
 
 
-static void createpickup(struct pickup* p, struct physicsmanager* pm, struct track* t, int track_index)
+static void createpickup(struct pickup* p, struct physicsmanager* pm, struct track* t, int track_index, vec3f offs)
 {
 	mat4f basis;
-	vec3f offs;
 
 	// get the pickup global transform
-	vec3f_set(offs, 0.f, 1.f, 0.f);
-	vec3f_scale(offs, PICKUP_SPAWNHEIGHT);
-	track_transformindex(t, basis, track_index, offs);
+	track_transformindex(t, basis, track_index);
+
+	// pickup spawn offset
+	mat4f_translatemul(basis, offs[VX], offs[VY] + PICKUP_RADIUS, offs[VZ]);
 
 	// initialize physx actor
 	p->body = physx::PxCreateDynamic(*pm->sdk, physx::PxTransform((physx::PxMat44)basis), physx::PxSphereGeometry(PICKUP_RADIUS), *pm->default_material, PICKUP_DENSITY);
@@ -40,14 +40,15 @@ static void createpickup(struct pickup* p, struct physicsmanager* pm, struct tra
 }
 
 
-void pickupmanager_startup(struct pickupmanager* pum, struct physicsmanager* pm, struct renderer* r, struct track* t, unsigned num_pickups, int* track_indices)
+void pickupmanager_startup(struct pickupmanager* pum, struct physicsmanager* pm, struct renderer* r, struct track* t, unsigned num_pickupgroups, int* track_indices)
 {
-	vec3f dim, center;
+	vec3f dim, center, offs;
 	unsigned i;
+	float w;
 
 	// initialize pickup array
-	pum->num_pickups = num_pickups;
-	pum->pickups = (struct pickup*)mem_alloc(sizeof(struct pickup) * num_pickups);
+	pum->num_pickups = num_pickupgroups * 2;
+	pum->pickups = (struct pickup*)mem_alloc(sizeof(struct pickup) * pum->num_pickups);
 
 	// initialize pickup mesh
 	renderable_init(&pum->renderable, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
@@ -55,6 +56,7 @@ void pickupmanager_startup(struct pickupmanager* pum, struct physicsmanager* pm,
 	renderable_sendbuffer(r, &pum->renderable);
 
 	// matrix model transformation
+	mat4f_translatemul(pum->renderable.matrix_model, 0.f, -PICKUP_RADIUS, 0.f);
 	mat4f_scalemul(pum->renderable.matrix_model, PICKUP_MESH_SCALE, PICKUP_MESH_SCALE, PICKUP_MESH_SCALE);
 	mat4f_rotateymul(pum->renderable.matrix_model, PICKUP_MESH_YROTATE);
 	mat4f_translatemul(pum->renderable.matrix_model, -center[VX], dim[VY]*0.5f - center[VY], -center[VZ]);
@@ -68,8 +70,16 @@ void pickupmanager_startup(struct pickupmanager* pum, struct physicsmanager* pm,
 	}
 
 	// create pickups
-	for (i = 0; i < num_pickups; i++)
-		createpickup(pum->pickups + i, pm, t, track_indices[i]);
+	for (i = 0; i < num_pickupgroups; i++)
+	{
+		w = t->pathpoints[track_indices[i]].width * 0.25f;
+
+		vec3f_set(offs, -w, 0.f, 0.f);
+		createpickup(pum->pickups + i*2 + 0, pm, t, track_indices[i], offs);
+
+		vec3f_set(offs, w, 0.f, 0.f);
+		createpickup(pum->pickups + i*2 + 1, pm, t, track_indices[i], offs);
+	}
 }
 
 void pickupmanager_shutdown(struct pickupmanager* pum)

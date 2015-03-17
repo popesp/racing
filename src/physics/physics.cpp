@@ -30,7 +30,7 @@ void physicsmanager_startup(struct physicsmanager* pm)
 	pm->cooking = PxCreateCooking(PX_PHYSICS_VERSION, *pm->foundation, params);
 
 	// create default material
-	pm->default_material = pm->sdk->createMaterial(0.1f, 0.1f, 0.5f);
+	pm->default_material = pm->sdk->createMaterial(0.1f, 0.1f, 0.f);
 
 	// create the scene for simulation
 	PxSceneDesc scenedesc(scale);
@@ -66,8 +66,6 @@ void physicsmanager_update(struct physicsmanager* pm, float dt)
 	pm->scene->fetchResults(true);
 }
 
-
-/*	probably temporary	*/
 PxRigidDynamic* physics_adddynamic_box(struct physicsmanager* pm, vec3f pos, vec3f dim)
 {
 	PxRigidDynamic* actor;
@@ -78,13 +76,7 @@ PxRigidDynamic* physics_adddynamic_box(struct physicsmanager* pm, vec3f pos, vec
 	return actor;
 }
 
-/*	add a static triangle mesh stored in a triangle strip vertex buffer
-	param:	pm				physics manager
-	param:	num_verts		number of vertices in the buffer
-	param:	stride			stride between vertices in the buffer
-	param:	buf_verts		vertex buffer
-*/
-void physicsmanager_addstatic_trianglestrip(struct physicsmanager* pm, unsigned num_verts, unsigned stride, float* buf_verts)
+PxRigidStatic* physicsmanager_addstatic_trianglestrip(struct physicsmanager* pm, unsigned num_verts, unsigned stride, float* buf_verts)
 {
 	PxDefaultMemoryOutputStream writebuf;
 	PxTriangleMeshDesc meshdesc;
@@ -131,4 +123,6 @@ void physicsmanager_addstatic_trianglestrip(struct physicsmanager* pm, unsigned 
 	pm->scene->addActor(*obj);
 
 	mem_free(indices);
+
+	return obj;
 }
