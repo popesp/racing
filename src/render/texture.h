@@ -8,12 +8,15 @@
 #define	TA	3
 
 
+typedef unsigned char pixel[4];
+
+
 struct texture
 {
 	unsigned width;
 	unsigned height;
 
-	unsigned char* data;
+	pixel* data;
 
 	unsigned gl_id;
 };
@@ -29,6 +32,13 @@ void texture_init(struct texture* t);
 	*/
 void texture_delete(struct texture* t);
 
+
+/*	allocate a texture without populating with data
+	param:	t			texture object
+	param:	width		width of texture
+	param:	height		height of texture
+*/
+void texture_allocate(struct texture* t, unsigned width, unsigned height);
 
 /*	set a texture to a solid diffuse color
 	param:	t			texture object
@@ -48,6 +58,9 @@ void texture_defaultnormal(struct texture* t);
 	param:	filename	path to file to load from
 */
 void texture_loadfile(struct texture* t, const char* filename);
+
+
+void texture_blitalpha(struct texture* t, unsigned char* data, unsigned width, unsigned height, unsigned x, unsigned y);
 
 
 /*	upload a texture to OpenGL and generate mipmaps

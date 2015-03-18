@@ -42,7 +42,6 @@ struct pickup
 	unsigned char flags;
 };
 
-
 struct pickupmanager
 {
 	unsigned num_pickups;

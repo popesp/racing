@@ -39,7 +39,6 @@ static void createpickup(struct pickup* p, struct physicsmanager* pm, struct tra
 	p->flags = PICKUP_FLAG_INIT;
 }
 
-
 void pickupmanager_startup(struct pickupmanager* pum, struct physicsmanager* pm, struct renderer* r, struct track* t, unsigned num_pickupgroups, int* track_indices)
 {
 	vec3f dim, center, offs;

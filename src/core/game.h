@@ -15,6 +15,7 @@
 #include	"player.h"
 #include	"../render/render.h"
 #include	"../render/window.h"
+#include	"ui.h"
 
 
 #define	GAME_DEFAULT_WIDTH		1280
@@ -64,6 +65,7 @@ struct game
 	struct physicsmanager physicsmanager;
 	struct inputmanager inputmanager;
 	struct audiomanager audiomanager;
+	struct uimanager uimanager;
 
 	struct entitymanager entitymanager;
 	struct vehiclemanager vehiclemanager;
@@ -83,6 +85,9 @@ struct game
 	FMOD_CHANNEL* currentchannel;
 	int index_currentsong;
 	int songs[GAME_MUSIC_COUNT];
+
+	struct font font;
+	struct renderable r_fonttest;
 
 	unsigned char flags;
 };

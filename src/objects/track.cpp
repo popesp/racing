@@ -181,8 +181,6 @@ void track_loadpointsfile(struct track* t, const char* filename, struct renderer
 			}
 		} else if (!strcmp(s, "point"))
 		{
-			vec3f temp;
-
 			fscanf(file, "pos(%f, %f, %f), ", t->points[p].pos + VX, t->points[p].pos + VY, t->points[p].pos + VZ);
 			fscanf(file, "tan(%f, %f, %f), ", t->points[p].tan + VX, t->points[p].tan + VY, t->points[p].tan + VZ);
 			vec3f_normalize(t->points[p].tan);
@@ -207,7 +205,6 @@ static void curvepoint(struct track* t, unsigned index, float d, struct track_po
 	struct track_point* p0, * p1;
 	float dp0, dp1, dt0, dt1;
 	float d2, d3;
-	vec3f temp;
 
 	d2 = d*d;
 	d3 = d2*d;
