@@ -215,7 +215,14 @@ static void update(struct game* game)
 				game->flags &= ~GAME_FLAG_DEBUGCAM;
 			else
 				game->flags |= GAME_FLAG_DEBUGCAM;
-		}
+			}
+		if (game->inputmanager.controllers[GLFW_JOYSTICK_1].buttons[INPUT_BUTTON_START] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
+		{
+			if (game->flags & GAME_FLAG_PAUSED)
+				game->flags &= ~GAME_FLAG_PAUSED;
+			else
+				game->flags |= GAME_FLAG_PAUSED;
+			}
 	}
 
 	vec3f_set(up, 0.f, 1.f, 0.f);
@@ -239,48 +246,55 @@ static void update(struct game* game)
 
 		// disable cart controls if debug camera is enabled
 		game->player.vehicle->controller = NULL;
-	} else
-		game->player.vehicle->controller = &game->inputmanager.controllers[GLFW_JOYSTICK_1];
+		} else
+			game->player.vehicle->controller = &game->inputmanager.controllers[GLFW_JOYSTICK_1];
 
-	// update the audio manager
-	audiomanager_update(&game->audiomanager, game->player.camera.pos, game->player.camera.dir, game->player.camera.up);
 
-	// update the vehicles
-	vehiclemanager_update(&game->vehiclemanager);
+	if(!(game->flags&GAME_FLAG_PAUSED)){
 
-	// update the game objects
-	entitymanager_update(&game->entitymanager);
+		// update the audio manager
+		audiomanager_update(&game->audiomanager, game->player.camera.pos, game->player.camera.dir, game->player.camera.up);
 
-	// update the pickup manager
-	pickupmanager_update(&game->pickupmanager);
+		// update the vehicles
+		vehiclemanager_update(&game->vehiclemanager);
 
-	// update physics simulation
-	physicsmanager_update(&game->physicsmanager, GAME_SPU);
+		// update the game objects
+		entitymanager_update(&game->entitymanager);
 
-	// update player camera
-	player_updatecamera(&game->player);
+		// update the pickup manager
+		pickupmanager_update(&game->pickupmanager);
 
-	/*
-	//update blimp positions
-	for(i=0;i<BLIMP_COUNT;i++){
-		if(game->entitymanager.blimps[i].owner!=NULL){
-			physx::PxMat44 blimpowner(game->entitymanager.blimps[i].owner->body->getGlobalPose());
-			game->entitymanager.blimps[i].blimppos = blimpowner.transform(physx::PxVec3(-1.3f,2.f,1.5f));
-			game->entitymanager.blimps[i].body->setGlobalPose(physx::PxTransform(physx::PxVec3(game->entitymanager.blimps[i].blimppos)));
+		// update physics simulation
+		physicsmanager_update(&game->physicsmanager, GAME_SPU);
+
+		// update player camera
+		player_updatecamera(&game->player);
+
+		/*
+		//update blimp positions
+		for(i=0;i<BLIMP_COUNT;i++){
+			if(game->entitymanager.blimps[i].owner!=NULL){
+				physx::PxMat44 blimpowner(game->entitymanager.blimps[i].owner->body->getGlobalPose());
+				game->entitymanager.blimps[i].blimppos = blimpowner.transform(physx::PxVec3(-1.3f,2.f,1.5f));
+				game->entitymanager.blimps[i].body->setGlobalPose(physx::PxTransform(physx::PxVec3(game->entitymanager.blimps[i].blimppos)));
+			}
+			if(game->entitymanager.blimps[i].typeblimp==BLIMP_TYPE_LAP){
+				//physx::PxMat44 blimpcamera(game->player.camera.pos);
+				//game->entitymanager.blimps[i].blimppos = blimpcamera.transform(physx::PxVec3(0.f,-30.f,0.f));
+				//game->entitymanager.blimps[i].body->setGlobalPose(physx::PxTransform(physx::PxVec3(game->entitymanager.blimps[i].blimppos)));
+			}
 		}
-		if(game->entitymanager.blimps[i].typeblimp==BLIMP_TYPE_LAP){
-			//physx::PxMat44 blimpcamera(game->player.camera.pos);
-			//game->entitymanager.blimps[i].blimppos = blimpcamera.transform(physx::PxVec3(0.f,-30.f,0.f));
-			//game->entitymanager.blimps[i].body->setGlobalPose(physx::PxTransform(physx::PxVec3(game->entitymanager.blimps[i].blimppos)));
-		}
-	}
 	
-	//check who has won the game
-	if(game->flags == GAME_FLAG_WINCONDITION){
-		checkwin(game);
-		checkplace(game);
+		//check who has won the game
+		if(game->flags == GAME_FLAG_WINCONDITION){
+			checkwin(game);
+			checkplace(game);
+		}
+		*/
 	}
-	*/
+
+	
+
 	// check for window close messages
 	if (glfwWindowShouldClose(game->window.w))
 		game->flags |= GAME_FLAG_TERMINATED;
