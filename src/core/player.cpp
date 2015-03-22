@@ -57,9 +57,11 @@ void aiplayer_init(struct aiplayer* p, struct vehiclemanager* vm, int index_trac
 
 	resetcontroller(p);
 
-	p->turn = 50/(random_int(15)+1);
-	p->speed = -(1-(1/(random_int(15)+1)));
-	p->next = (random_int(3)+3);
+	p->turn = 50/(random_int(15)+7.5);
+	p->speed = -(1-(1/(random_int(15)+2.5)));
+	p->next = (random_int(4)+3);
+	//printf("turn=%f speed=%f next=%d\n",p->turn,p->speed,p->next);
+
 	/*
 	//initialize lap
 	p->vehicle->lap = 1;
@@ -104,10 +106,17 @@ void aiplayer_updateinput(struct aiplayer* p)
 	vec3f_set(right, VEHICLE_RIGHT);
 	mat4f_transformvec3f(right, (float*)&pose);
 
-
 	p->controller.axes[INPUT_AXIS_LEFT_LR] = vec3f_dot(right, diff) * p->turn / vec3f_length(diff);
 
 	p->controller.axes[INPUT_AXIS_TRIGGERS] = p->speed;
+
+	if(p->vehicle->powerup==VEHICLE_POWERUP_BOOST||p->vehicle->powerup==VEHICLE_POWERUP_LONGBOOST){
+		if(p->vehicle->index_track==140||p->vehicle->index_track==160||p->vehicle->index_track==729){
+			p->controller.buttons[INPUT_BUTTON_A] = (INPUT_STATE_CHANGED | INPUT_STATE_DOWN);
+			//printf("he used it\n");
+		}
+	}
+	
 
 }
 

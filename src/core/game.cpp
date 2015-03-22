@@ -197,7 +197,7 @@ static void update(struct game* game)
 {
 	vec3f move, up;
 	int i;
-
+	printf("%d\r",game->player.vehicle->index_track);
 	// check for callback events
 	glfwPollEvents();
 
@@ -478,13 +478,28 @@ int game_startup(struct game* game)
 
 	// initialize player objects
 	vec3f_set(offs, 1.f, 0.f, 0.f);
-	vec3f_set(aioffs, -1.f, 0.f, 0.f);
+	//vec3f_set(aioffs, -1.f, 0.f, 0.f);
 	if (game->inputmanager.controllers[0].flags & INPUT_FLAG_ENABLED)
 		player_init(&game->player, &game->vehiclemanager, &game->inputmanager.controllers[0], 0, offs);
 	else
 		player_init(&game->player, &game->vehiclemanager, &game->inputmanager.keyboard, 0, offs);
-	aiplayer_init(&game->aiplayers[0], &game->vehiclemanager, 1, aioffs);
-	game->num_aiplayers = 1;
+
+	game->num_aiplayers = 8;
+	float w;
+	// create ai
+	for (int i=0; i < 4; i++)
+	{
+		if(i<3){
+			w =game->track.pathpoints[track_indices[i]].width * .25f;
+		}else{
+			w =game->track.pathpoints[track_indices[i-1]].width * .25f;
+		}
+		vec3f_set(aioffs, -w, 0.f, 0.f);
+		aiplayer_init(game->aiplayers+i*2+0, &game->vehiclemanager, i, aioffs);
+
+		vec3f_set(aioffs, w, 0.f, 0.f);
+		aiplayer_init(game->aiplayers+i*2+1, &game->vehiclemanager, i, aioffs);
+	}
 
 	// initialize debug camera
 	vec3f_set(pos, 0.f, 0.f, -30.f);
