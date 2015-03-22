@@ -57,8 +57,9 @@ void aiplayer_init(struct aiplayer* p, struct vehiclemanager* vm, int index_trac
 
 	resetcontroller(p);
 
-	p->turn = 50/random_int(100);
+	p->turn = 50/(random_int(15)+1);
 	p->speed = -(1-(1/(random_int(15)+1)));
+	p->next = (random_int(3)+3);
 	/*
 	//initialize lap
 	p->vehicle->lap = 1;
@@ -93,7 +94,7 @@ void aiplayer_updateinput(struct aiplayer* p)
 
 	resetcontroller(p);
 
-	next_index = (p->vehicle->index_track + 3) % (int)p->track->num_pathpoints;
+	next_index = (p->vehicle->index_track + p->next) % (int)p->track->num_pathpoints;
 	vec3f_copy(next_point, p->track->pathpoints[next_index].pos);
 
 	// IDEA: future point based on current speed

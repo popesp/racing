@@ -30,6 +30,7 @@ struct aiplayer
 	struct controller controller;
 
 	float turn, speed;
+	int next;
 };
 
 
