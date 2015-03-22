@@ -36,6 +36,8 @@ Left Stick -		Turn
 
 Back - Respawn all vehicles
 
+Start - Pause game
+
 Y -			Debug camera mode
 
 A -         Use powerup

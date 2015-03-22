@@ -1,7 +1,7 @@
 #include	"player.h"
 
 #include	"../mem.h"
-
+#include	"../random.h"
 
 static void resetcontroller(struct aiplayer* p)
 {
@@ -57,6 +57,8 @@ void aiplayer_init(struct aiplayer* p, struct vehiclemanager* vm, int index_trac
 
 	resetcontroller(p);
 
+	p->turn = 50/random_int(100);
+	p->speed = -(1-(1/(random_int(15)+1)));
 	/*
 	//initialize lap
 	p->vehicle->lap = 1;
@@ -101,26 +103,11 @@ void aiplayer_updateinput(struct aiplayer* p)
 	vec3f_set(right, VEHICLE_RIGHT);
 	mat4f_transformvec3f(right, (float*)&pose);
 
-	p->controller.axes[INPUT_AXIS_LEFT_LR] = vec3f_dot(right, diff) * 4.f / vec3f_length(diff);
 
-	p->controller.axes[INPUT_AXIS_TRIGGERS] = -0.8f;
+	p->controller.axes[INPUT_AXIS_LEFT_LR] = vec3f_dot(right, diff) * p->turn / vec3f_length(diff);
 
-	/*
-	//0=mine, 1=missile, 2=speed
-	if(p->vehicle->haspickup==2){
-		if(p->vehicle->index_track==90 ||p->vehicle->index_track==0){
+	p->controller.axes[INPUT_AXIS_TRIGGERS] = p->speed;
 
-			p->controller.buttons[INPUT_BUTTON_A] = (INPUT_STATE_DOWN | INPUT_STATE_CHANGED);
-
-		}
-	}
-
-	if(p->vehicle->haspickup==3||p->vehicle->haspickup==1){
-		if(p->vehicle->index_track%11==1){
-			p->controller.buttons[INPUT_BUTTON_A] = (INPUT_STATE_DOWN | INPUT_STATE_CHANGED);
-		}
-	}
-	*/
 }
 
 

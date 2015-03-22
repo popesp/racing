@@ -28,6 +28,8 @@ struct aiplayer
 	struct track* track;
 
 	struct controller controller;
+
+	float turn, speed;
 };
 
 
