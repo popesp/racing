@@ -11,7 +11,7 @@
 #include	"track.h"
 
 
-#define	VEHICLE_COUNT								16
+#define	VEHICLE_COUNT								100
 #define	VEHICLE_COUNT_RAYCASTS						4
 
 #define	VEHICLE_RAYCAST_FRONTLEFT					0
@@ -76,7 +76,7 @@
 #define	VEHICLE_DIMENSIONS							0.7254f, 0.3056f, 1.3884f
 #define	VEHICLE_DENSITY								0.8f
 #define	VEHICLE_ACCELERATION						40.f
-#define	VEHICLE_TURNFORCE							10.f
+#define	VEHICLE_TURNFORCE							12.f
 #define	VEHICLE_DOWNFORCE							0.2f
 #define	VEHICLE_SPAWNHEIGHT							1.f
 #define	VEHICLE_FREQSCALE							0.0001f

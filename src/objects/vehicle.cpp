@@ -241,6 +241,7 @@ static void vehicleinput(struct vehicle* v)
 			if (v->flags & VEHICLE_FLAG_HASPOWERUP)
 				powerupfunction[v->powerup](v);
 		}
+		
 	}
 }
 
