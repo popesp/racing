@@ -38,6 +38,7 @@
 #define	RENDER_VERTSIZE_MATS_L		(RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_NOR)
 #define	RENDER_VERTSIZE_TXTR_L		(RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_NOR + RENDER_ATTRIBSIZE_TEX)
 #define	RENDER_VERTSIZE_BUMP_L		(RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_NOR + RENDER_ATTRIBSIZE_TAN + RENDER_ATTRIBSIZE_TEX)
+#define	RENDER_VERTSIZE_TEXT		(RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_COL + RENDER_ATTRIBSIZE_TEX)
 
 #define	RENDER_LIGHT_UNIFORMS		3
 #define	RENDER_LIGHT_POS			0
@@ -77,6 +78,10 @@
 #define	RENDER_SHADER_FRAG_TXTR_L	"shaders/txtrl.frag"
 #define	RENDER_SHADER_VERT_BUMP_L	"shaders/bumpl.vert"
 #define	RENDER_SHADER_FRAG_BUMP_L	"shaders/bumpl.frag"
+#define	RENDER_SHADER_VERT_TEXT		"shaders/text.vert"
+#define	RENDER_SHADER_FRAG_TEXT		"shaders/text.frag"
+
+
 
 #define	RENDER_FLAG_NONE			0x00
 #define	RENDER_FLAG_DYNAMIC			0x01
@@ -141,12 +146,6 @@ struct renderer
 	struct
 	{
 		int transform;
-		int tex_diffuse;
-	} uniforms_text;
-
-	struct
-	{
-		int transform;
 		int eyepos;
 		int lights[RENDER_MAX_LIGHTS][RENDER_LIGHT_UNIFORMS];
 		int ambient;
@@ -172,6 +171,11 @@ struct renderer
 		int tex_normal;
 		int material[RENDER_MATERIAL_UNIFORMS];
 	} uniforms_bump_l;
+
+	struct
+	{
+		int tex_diffuse;
+	} uniforms_text;
 };
 
 

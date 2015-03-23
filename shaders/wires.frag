@@ -3,10 +3,10 @@
 
 in		vec3		pass_vertcol;
 
-out		vec3		fragcol;
+out		vec4		fragcol;
 
 
 void main()
 {
-	fragcol = pass_vertcol;
+	fragcol = vec4(pass_vertcol, 1.f);
 }

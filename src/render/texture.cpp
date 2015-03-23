@@ -19,6 +19,7 @@ void texture_init(struct texture* t)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
 }
 
 void texture_delete(struct texture* t)
@@ -84,6 +85,20 @@ void texture_loadfile(struct texture* t, const char* filename)
 	t->data = (pixel*)mem_realloc(t->data, sizeof(pixel) * t->width * t->height);
 	FreeImage_ConvertToRawBits((unsigned char*)t->data, bmp32, (int)t->width * sizeof(pixel), 32, FI_RGBA_RED_MASK, FI_RGBA_GREEN_MASK, FI_RGBA_BLUE_MASK, true);
 	FreeImage_Unload(bmp32);
+}
+
+
+void texture_fill(struct texture* t, unsigned char r, unsigned char g, unsigned char b, unsigned char a)
+{
+	unsigned i;
+
+	for (i = 0; i < t->width*t->height; i++)
+	{
+		t->data[i][TR] = r;
+		t->data[i][TG] = g;
+		t->data[i][TB] = b;
+		t->data[i][TA] = a;
+	}
 }
 
 

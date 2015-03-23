@@ -145,6 +145,8 @@
     <None Include="shaders\bumpl.vert" />
     <None Include="shaders\matsl.frag" />
     <None Include="shaders\matsl.vert" />
+    <None Include="shaders\text.frag" />
+    <None Include="shaders\text.vert" />
     <None Include="shaders\txtrl.frag" />
     <None Include="shaders\txtrl.vert" />
     <None Include="shaders\txtrs.frag" />

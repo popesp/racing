@@ -324,7 +324,7 @@ static void render(struct game* game)
 	// render pickups
 	pickupmanager_render(&game->pickupmanager, &game->renderer, global_wv);
 
-	//renderable_render(&game->renderer, &game->r_fonttest, track_mw, global_wv, 0);
+	uimanager_render(&game->uimanager, game);
 
 	glfwSwapBuffers(game->window.w);
 }
@@ -383,6 +383,8 @@ static int start_subsystems(struct game* game)
 	glPointSize(GAME_POINTSIZE);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// initialize gl viewport
 	glViewport(0, 0, game->window.width, game->window.height);
@@ -425,7 +427,7 @@ static int start_subsystems(struct game* game)
 	
 	// initialize ui manager
 	printf("Starting up user interface manager...");
-	uimanager_startup(&game->uimanager);
+	uimanager_startup(&game->uimanager, &game->window);
 	printf("...done.\n");
 
 	return 1;
@@ -501,29 +503,7 @@ int game_startup(struct game* game)
 	game->index_currentsong = 0;
 	game->currentchannel = audiomanager_playmusic(&game->audiomanager, game->songs[game->index_currentsong], -1);
 	audiomanager_setmusicvolume(&game->audiomanager, 0.2f);
-
-	// temp font testing stuff
-	/*
-	font_create(&game->font, &game->uimanager, "res/fonts/labtsec.ttf");
-	renderable_init(&game->r_fonttest, RENDER_MODE_TRIANGLES, RENDER_TYPE_TEXT, RENDER_FLAG_NONE);
-	renderable_allocate(&game->renderer, &game->r_fonttest, 6);
-	vec3f_set(game->r_fonttest.buf_verts, -1.f, 1.f, 0.f);
-	vec2f_set(game->r_fonttest.buf_verts+3, 0.f, 1.f);
-	vec3f_set(game->r_fonttest.buf_verts+5, -1.f, 0.f, 0.f);
-	vec2f_set(game->r_fonttest.buf_verts+8, 0.f, 0.f);
-	vec3f_set(game->r_fonttest.buf_verts+10, 0.f, 0.f, 0.f);
-	vec2f_set(game->r_fonttest.buf_verts+13, 1.f, 0.f);
-
-	vec3f_set(game->r_fonttest.buf_verts+15, -1.f, 1.f, 0.f);
-	vec2f_set(game->r_fonttest.buf_verts+18, 0.f, 1.f);
-	vec3f_set(game->r_fonttest.buf_verts+20, 0.f, 0.f, 0.f);
-	vec2f_set(game->r_fonttest.buf_verts+23, 1.f, 0.f);
-	vec3f_set(game->r_fonttest.buf_verts+25, 0.f, 1.f, 0.f);
-	vec2f_set(game->r_fonttest.buf_verts+28, 1.f, 1.f);
-
-	renderable_sendbuffer(&game->renderer, &game->r_fonttest);
-	game->r_fonttest.textures[RENDER_TEXTURE_DIFFUSE] = &game->font.texture;
-	*/
+	
 	game->flags = GAME_FLAG_INIT;
 
 	/*
@@ -594,9 +574,6 @@ void game_mainloop(struct game* game)
 void game_shutdown(struct game* game)
 {
 	int i;
-	
-	//renderable_deallocate(&game->r_fonttest);
-	//font_delete(&game->font);
 
 	/*
 	// delete blimps

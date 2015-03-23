@@ -60,6 +60,16 @@ void texture_defaultnormal(struct texture* t);
 void texture_loadfile(struct texture* t, const char* filename);
 
 
+/*	fill a texture with a color
+	param:	t			texture to fill
+	param:	r			red component
+	param:	g			green component
+	param:	b			blue component
+	param:	a			alpha component
+*/
+void texture_fill(struct texture* t, unsigned char r, unsigned char g, unsigned char b, unsigned char a);
+
+
 void texture_blitalpha(struct texture* t, unsigned char* data, unsigned width, unsigned height, unsigned x, unsigned y);
 
 

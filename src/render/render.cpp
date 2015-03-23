@@ -64,7 +64,6 @@ void renderable_init(struct renderable* obj, unsigned char mode, unsigned char t
 		attrib(RENDER_ATTRIB_COL, RENDER_ATTRIBSIZE_COL, RENDER_VERTSIZE_WIRE_S, RENDER_ATTRIBSIZE_POS);
 		break;
 
-	case RENDER_TYPE_TEXT:
 	case RENDER_TYPE_TXTR_S:
 		attrib(RENDER_ATTRIB_POS, RENDER_ATTRIBSIZE_POS, RENDER_VERTSIZE_TXTR_S, 0);
 		attrib(RENDER_ATTRIB_TEX, RENDER_ATTRIBSIZE_TEX, RENDER_VERTSIZE_TXTR_S, RENDER_ATTRIBSIZE_POS);
@@ -86,6 +85,12 @@ void renderable_init(struct renderable* obj, unsigned char mode, unsigned char t
 		attrib(RENDER_ATTRIB_NOR, RENDER_ATTRIBSIZE_NOR, RENDER_VERTSIZE_BUMP_L, RENDER_ATTRIBSIZE_POS);
 		attrib(RENDER_ATTRIB_TAN, RENDER_ATTRIBSIZE_TAN, RENDER_VERTSIZE_BUMP_L, RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_NOR);
 		attrib(RENDER_ATTRIB_TEX, RENDER_ATTRIBSIZE_TEX, RENDER_VERTSIZE_BUMP_L, RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_NOR + RENDER_ATTRIBSIZE_TAN);
+		break;
+
+	case RENDER_TYPE_TEXT:
+		attrib(RENDER_ATTRIB_POS, RENDER_ATTRIBSIZE_POS, RENDER_VERTSIZE_TEXT, 0);
+		attrib(RENDER_ATTRIB_COL, RENDER_ATTRIBSIZE_COL, RENDER_VERTSIZE_TEXT, RENDER_ATTRIBSIZE_POS);
+		attrib(RENDER_ATTRIB_TEX, RENDER_ATTRIBSIZE_TEX, RENDER_VERTSIZE_TEXT, RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_COL);
 		break;
 
 	default:
@@ -164,14 +169,12 @@ void renderable_sendbuffer(struct renderer* r, struct renderable* obj)
 */
 void renderable_render(struct renderer* r, struct renderable* obj, mat4f modelworld, mat4f worldview, unsigned num_draw)
 {
-	mat4f modelview, inverse_mw, inverse_mv, mvp, identity;
+	mat4f modelview, inverse_mw, inverse_mv, mvp;
 	vec3f eyepos, temp;
 	int i, unit;
 
 	glUseProgram(r->shader[obj->type]);
 	glBindVertexArray(obj->id_gl_vao);
-
-	mat4f_identity(identity);
 
 	// multiply by object model matrix
 	mat4f_multiply(modelworld, obj->matrix_model);
@@ -211,18 +214,6 @@ void renderable_render(struct renderer* r, struct renderable* obj, mat4f modelwo
 
 		break;
 
-	case RENDER_TYPE_TEXT:
-		// MVP matrix
-		glUniformMatrix4fv(r->uniforms_text.transform, 1, GL_FALSE, identity);
-
-		// texture uniforms
-		unit = RENDER_TEXTURE_DIFFUSE;
-		glUniform1iv(r->uniforms_text.tex_diffuse, 1, &unit);
-
-		glActiveTexture(GL_TEXTURE0 + (unsigned)unit);
-		glBindTexture(GL_TEXTURE_2D, obj->textures[RENDER_TEXTURE_DIFFUSE]->gl_id);
-
-		break;
 	case RENDER_TYPE_MATS_L:
 		// MVP matrix and eye position uniforms
 		glUniformMatrix4fv(r->uniforms_mats_l.transform, 1, GL_FALSE, mvp);
@@ -381,6 +372,16 @@ void renderable_render(struct renderer* r, struct renderable* obj, mat4f modelwo
 		glUniform1fv(r->uniforms_bump_l.material[RENDER_MATERIAL_SHN], 1, &obj->material.shn);
 		break;
 
+	case RENDER_TYPE_TEXT:
+		// texture uniforms
+		unit = RENDER_TEXTURE_DIFFUSE;
+		glUniform1iv(r->uniforms_text.tex_diffuse, 1, &unit);
+
+		glActiveTexture(GL_TEXTURE0 + (unsigned)unit);
+		glBindTexture(GL_TEXTURE_2D, obj->textures[RENDER_TEXTURE_DIFFUSE]->gl_id);
+
+		break;
+
 	default:
 		break;
 	}
@@ -424,9 +425,9 @@ unsigned renderer_init(struct renderer* r, struct window* window)
 		return 0;
 	if (!(frag_bump_l = shader_create(RENDER_SHADER_FRAG_BUMP_L, SHADER_FRAGMENT)))
 		return 0;
-	if (!(vert_text = shader_create(RENDER_SHADER_VERT_TXTR_S, SHADER_VERTEX)))
+	if (!(vert_text = shader_create(RENDER_SHADER_VERT_TEXT, SHADER_VERTEX)))
 		return 0;
-	if (!(frag_text = shader_create(RENDER_SHADER_FRAG_TXTR_S, SHADER_FRAGMENT)))
+	if (!(frag_text = shader_create(RENDER_SHADER_FRAG_TEXT, SHADER_FRAGMENT)))
 		return 0;
 
 	// create shader programs
@@ -444,9 +445,6 @@ unsigned renderer_init(struct renderer* r, struct window* window)
 	glBindAttribLocation(r->shader[RENDER_TYPE_TXTR_S], RENDER_ATTRIB_POS, "vertpos");
 	glBindAttribLocation(r->shader[RENDER_TYPE_TXTR_S], RENDER_ATTRIB_TEX, "verttex");
 
-	glBindAttribLocation(r->shader[RENDER_TYPE_TEXT], RENDER_ATTRIB_POS, "vertpos");
-	glBindAttribLocation(r->shader[RENDER_TYPE_TEXT], RENDER_ATTRIB_TEX, "verttex");
-
 	glBindAttribLocation(r->shader[RENDER_TYPE_MATS_L], RENDER_ATTRIB_POS, "vertpos");
 	glBindAttribLocation(r->shader[RENDER_TYPE_MATS_L], RENDER_ATTRIB_NOR, "vertnor");
 
@@ -458,6 +456,10 @@ unsigned renderer_init(struct renderer* r, struct window* window)
 	glBindAttribLocation(r->shader[RENDER_TYPE_BUMP_L], RENDER_ATTRIB_NOR, "vertnor");
 	glBindAttribLocation(r->shader[RENDER_TYPE_BUMP_L], RENDER_ATTRIB_TAN, "verttan");
 	glBindAttribLocation(r->shader[RENDER_TYPE_BUMP_L], RENDER_ATTRIB_TEX, "verttex");
+
+	glBindAttribLocation(r->shader[RENDER_TYPE_TEXT], RENDER_ATTRIB_POS, "vertpos");
+	glBindAttribLocation(r->shader[RENDER_TYPE_TEXT], RENDER_ATTRIB_COL, "vertcol");
+	glBindAttribLocation(r->shader[RENDER_TYPE_TEXT], RENDER_ATTRIB_TEX, "verttex");
 
 	// link programs
 	if (!shader_link(r->shader[RENDER_TYPE_WIRE_S]))
@@ -479,6 +481,7 @@ unsigned renderer_init(struct renderer* r, struct window* window)
 	r->vertsize[RENDER_TYPE_MATS_L] = RENDER_VERTSIZE_MATS_L;
 	r->vertsize[RENDER_TYPE_TXTR_L] = RENDER_VERTSIZE_TXTR_L;
 	r->vertsize[RENDER_TYPE_BUMP_L] = RENDER_VERTSIZE_BUMP_L;
+	r->vertsize[RENDER_TYPE_TEXT] = RENDER_VERTSIZE_TEXT;
 
 	// register window pointer
 	r->window = window;
@@ -492,11 +495,6 @@ unsigned renderer_init(struct renderer* r, struct window* window)
 	r->uniforms_txtr_s.transform = glGetUniformLocation(r->shader[RENDER_TYPE_TXTR_S], "transform");
 
 	r->uniforms_txtr_s.tex_diffuse = glGetUniformLocation(r->shader[RENDER_TYPE_TXTR_S], "tex_diffuse");
-
-
-
-	r->uniforms_text.transform = glGetUniformLocation(r->shader[RENDER_TYPE_TEXT], "transform");
-	r->uniforms_text.tex_diffuse = glGetUniformLocation(r->shader[RENDER_TYPE_TEXT], "tex_diffuse");
 
 
 	// get solid uniform locations
@@ -576,6 +574,10 @@ unsigned renderer_init(struct renderer* r, struct window* window)
 	r->uniforms_bump_l.material[RENDER_MATERIAL_DIF] = glGetUniformLocation(r->shader[RENDER_TYPE_BUMP_L], "material.dif");
 	r->uniforms_bump_l.material[RENDER_MATERIAL_SPC] = glGetUniformLocation(r->shader[RENDER_TYPE_BUMP_L], "material.spc");
 	r->uniforms_bump_l.material[RENDER_MATERIAL_SHN] = glGetUniformLocation(r->shader[RENDER_TYPE_BUMP_L], "material.shn");
+
+
+	// get text uniform locations
+	r->uniforms_text.tex_diffuse = glGetUniformLocation(r->shader[RENDER_TYPE_TEXT], "tex_diffuse");
 
 
 	// flag shaders for deletion

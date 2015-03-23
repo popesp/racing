@@ -86,9 +86,6 @@ struct game
 	int index_currentsong;
 	int songs[GAME_MUSIC_COUNT];
 
-	struct font font;
-	struct renderable r_fonttest;
-
 	unsigned char flags;
 };
 

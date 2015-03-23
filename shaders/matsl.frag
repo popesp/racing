@@ -16,7 +16,7 @@ in		vec3		pass_normal;
 in		vec3		pass_toeye;
 in		vec3		pass_tolight[MAX_LIGHTS];
 
-out		vec3		fragcol;
+out		vec4		fragcol;
 
 uniform	light		lights[MAX_LIGHTS];
 uniform	vec3		ambient;
@@ -54,5 +54,5 @@ void main()
 	dif *= material.dif;
 	spc *= material.spc;
 	
-	fragcol = amb + dif + spc;
+	fragcol = vec4(amb + dif + spc, 1.f);
 }
