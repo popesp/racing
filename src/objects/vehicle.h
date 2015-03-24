@@ -12,7 +12,7 @@
 #include	"track.h"
 
 
-#define	VEHICLE_COUNT								100
+#define	VEHICLE_COUNT								99
 #define	VEHICLE_COUNT_RAYCASTS						4
 
 #define	VEHICLE_RAYCAST_FRONTLEFT					0

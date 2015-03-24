@@ -17,6 +17,8 @@ void uimanager_startup(struct uimanager* um, struct window* window)
 	font_generate(&um->font_default, um, UI_FONT_FILENAME_DEFAULT, UI_DEFAULT_FONTSIZE);
 	font_generate(&um->font_pause, um, UI_FONT_FILENAME_PAUSE, UI_PAUSE_FONTSIZE);
 	font_generate(&um->font_playerlap, um, UI_FONT_FILENAME_PAUSE, UI_PLAYERLAP_FONTSIZE);
+	font_generate(&um->font_place, um, UI_FONT_FILENAME_PLACE, UI_PLACE_FONTSIZE);
+	font_generate(&um->font_placer, um, UI_FONT_FILENAME_PLACE, UI_PLACER_FONTSIZE);
 
 	for(int i=0;i<UI_TEXT_COUNT;i++){
 		um->texts[i].flags=UI_TEXT_FLAG_INIT;
@@ -28,6 +30,8 @@ void uimanager_shutdown(struct uimanager* um)
 	font_delete(&um->font_default);
 	font_delete(&um->font_pause);
 	font_delete(&um->font_playerlap);
+	font_delete(&um->font_place);
+	font_delete(&um->font_placer);
 
 	FT_Done_FreeType(um->freetype);
 }
@@ -137,7 +141,22 @@ void uimanager_render(struct uimanager* um, struct game* game)
 
 
 			if(um->texts[j].numberadder==-1){
-				sprintf(rendertext, "Lap   %d", game->player.vehicle->lap);
+				sprintf(rendertext, "Lap   %d /%d", game->player.vehicle->lap, GAME_WINCONDITION_LAPS);
+			}
+			else if(um->texts[j].numberadder==-2){
+				sprintf(rendertext, "%d", game->player.vehicle->place);
+			}
+			else if(um->texts[j].numberadder==-3){
+				sprintf(rendertext, "st");
+			}
+			else if(um->texts[j].numberadder==-4){
+				sprintf(rendertext, "nd");
+			}
+			else if(um->texts[j].numberadder==-5){
+				sprintf(rendertext, "rd");
+			}
+			else if(um->texts[j].numberadder==-6){
+				sprintf(rendertext, "th");
 			}else{
 				sprintf(rendertext, um->texts[j].inputtext);
 			}

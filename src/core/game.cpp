@@ -281,9 +281,7 @@ static void update(struct game* game)
 	//check who has won the game
 		if(game->flags & GAME_FLAG_WINCONDITION){
 			checkwin(game);
-			printf("player lap %d\r",game->player.vehicle->lap);
-
-			//checkplace(game);
+			checkplace(game);
 		}
 
 	// check for window close messages
@@ -526,7 +524,13 @@ int game_startup(struct game* game)
 	
 	vec3f color;
 	vec3f_set(color, 1.0f,1.0f,1.0f);
+	//laps
 	addtext(&game->uimanager,"",100,700,color,&game->uimanager.font_playerlap,-1);
+
+	//place
+	vec3f_set(color, 1.0f,1.0f,.0f);
+	addtext(&game->uimanager,"",100,650,color,&game->uimanager.font_place,-2);
+
 
 	game->flags = GAME_FLAG_INIT;
 
