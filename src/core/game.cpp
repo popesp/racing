@@ -197,7 +197,7 @@ static void update(struct game* game)
 {
 	vec3f move, up;
 	int i;
-	printf("%d\r",game->player.vehicle->index_track);
+
 	// check for callback events
 	glfwPollEvents();
 
@@ -218,11 +218,17 @@ static void update(struct game* game)
 			}
 		if (game->inputmanager.controllers[GLFW_JOYSTICK_1].buttons[INPUT_BUTTON_START] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
 		{
-			if (game->flags & GAME_FLAG_PAUSED)
+			vec3f color;
+			vec3f_set(color,1.0f,1.0f,1.0f);
+	
+			if (game->flags & GAME_FLAG_PAUSED){
+				removetext(&game->uimanager, "Game Paused");
 				game->flags &= ~GAME_FLAG_PAUSED;
-			else
+			}else{
+				addtext(&game->uimanager, "Game Paused", 450, 350, color, &game->uimanager.font_pause,0);
 				game->flags |= GAME_FLAG_PAUSED;
 			}
+		}
 	}
 
 	vec3f_set(up, 0.f, 1.f, 0.f);
@@ -269,31 +275,16 @@ static void update(struct game* game)
 
 		// update player camera
 		player_updatecamera(&game->player);
-
-		/*
-		//update blimp positions
-		for(i=0;i<BLIMP_COUNT;i++){
-			if(game->entitymanager.blimps[i].owner!=NULL){
-				physx::PxMat44 blimpowner(game->entitymanager.blimps[i].owner->body->getGlobalPose());
-				game->entitymanager.blimps[i].blimppos = blimpowner.transform(physx::PxVec3(-1.3f,2.f,1.5f));
-				game->entitymanager.blimps[i].body->setGlobalPose(physx::PxTransform(physx::PxVec3(game->entitymanager.blimps[i].blimppos)));
-			}
-			if(game->entitymanager.blimps[i].typeblimp==BLIMP_TYPE_LAP){
-				//physx::PxMat44 blimpcamera(game->player.camera.pos);
-				//game->entitymanager.blimps[i].blimppos = blimpcamera.transform(physx::PxVec3(0.f,-30.f,0.f));
-				//game->entitymanager.blimps[i].body->setGlobalPose(physx::PxTransform(physx::PxVec3(game->entitymanager.blimps[i].blimppos)));
-			}
-		}
-	
-		//check who has won the game
-		if(game->flags == GAME_FLAG_WINCONDITION){
-			checkwin(game);
-			checkplace(game);
-		}
-		*/
+		
 	}
 
-	
+	//check who has won the game
+		if(game->flags & GAME_FLAG_WINCONDITION){
+			checkwin(game);
+			printf("player lap %d\r",game->player.vehicle->lap);
+
+			//checkplace(game);
+		}
 
 	// check for window close messages
 	if (glfwWindowShouldClose(game->window.w))
@@ -338,7 +329,6 @@ static void render(struct game* game)
 	// render pickups
 	pickupmanager_render(&game->pickupmanager, &game->renderer, global_wv);
 
-	
 	uimanager_render(&game->uimanager, game);
 
 	glfwSwapBuffers(game->window.w);
@@ -445,12 +435,6 @@ static int start_subsystems(struct game* game)
 	uimanager_startup(&game->uimanager, &game->window);
 	printf("...done.\n");
 
-	vec3f color;
-	vec3f_set(color,1.0f,0.0f,.0f);
-	addtext(&game->uimanager, "Hello", 100, 100, color);
-	
-	addtext(&game->uimanager, "something else", 200, 100, color);
-
 	return 1;
 }
 
@@ -540,27 +524,12 @@ int game_startup(struct game* game)
 	game->currentchannel = audiomanager_playmusic(&game->audiomanager, game->songs[game->index_currentsong], -1);
 	audiomanager_setmusicvolume(&game->audiomanager, 0.2f);
 	
+	vec3f color;
+	vec3f_set(color, 1.0f,1.0f,1.0f);
+	addtext(&game->uimanager,"",100,700,color,&game->uimanager.font_playerlap,-1);
+
 	game->flags = GAME_FLAG_INIT;
 
-	/*
-
-	//spawn a bigass blimp in the middle of the map
-	vec3f test;
-	vec3f_set(test, -22.f, 10.f,-115.f);
-	entitymanager_lapblimp(&game->entitymanager,test);
-
-	//set win condition on at the beginning
-	printf("Win condition activated.\n");
-	printf("Player is on lap %d\n", game->player.vehicle->lap);
-
-	entitymanager_placeblimp(game->player.vehicle,&game->entitymanager,game->track.pathpoints[0].pos);
-
-	for (int i = 0; i < game->num_aiplayers; i++)
-	{
-		game->aiplayers[i].vehicle->lap = 1;
-		printf("Computer-%d is on lap %d\n", i+1, game->aiplayers[i].vehicle->lap);
-	}
-	*/
 	return 1;
 }
 
@@ -611,12 +580,6 @@ void game_shutdown(struct game* game)
 {
 	int i;
 
-	/*
-	// delete blimps
-	for(i=0; i< game->entitymanager.num_blimps;i++){
-		entitymanager_removeblimp(&game->entitymanager,&game->entitymanager.blimps[i],game->player.vehicle);
-	}
-	*/
 	// delete players
 	player_delete(&game->player, &game->vehiclemanager);
 	for (i = 0; i < game->num_aiplayers; i++){

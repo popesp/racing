@@ -15,9 +15,8 @@ void uimanager_startup(struct uimanager* um, struct window* window)
 	um->window = window;
 
 	font_generate(&um->font_default, um, UI_FONT_FILENAME_DEFAULT, UI_DEFAULT_FONTSIZE);
-	um->activefont = &um->font_default;
-
-	um->num_texts=0;
+	font_generate(&um->font_pause, um, UI_FONT_FILENAME_PAUSE, UI_PAUSE_FONTSIZE);
+	font_generate(&um->font_playerlap, um, UI_FONT_FILENAME_PAUSE, UI_PLAYERLAP_FONTSIZE);
 
 	for(int i=0;i<UI_TEXT_COUNT;i++){
 		um->texts[i].flags=UI_TEXT_FLAG_INIT;
@@ -27,6 +26,9 @@ void uimanager_startup(struct uimanager* um, struct window* window)
 void uimanager_shutdown(struct uimanager* um)
 {
 	font_delete(&um->font_default);
+	font_delete(&um->font_pause);
+	font_delete(&um->font_playerlap);
+
 	FT_Done_FreeType(um->freetype);
 }
 
@@ -37,60 +39,60 @@ static void convertcoords(struct uimanager* um, int x, int y, float* fx, float* 
 	*fy = (float)((um->window->height / 2) - y) / (float)(um->window->height / 2);
 }
 
-static float* renderchar(struct uimanager* um, int x, int y, char c, vec3f color, float* ptr)
+static float* renderchar(struct uimanager* um, int x, int y, char c, vec3f color, float* ptr, int textnumber)
 {
 	float lx, rx;
 	float ty, by;
 
 	convertcoords(um, x, y, &lx, &ty);
-	convertcoords(um, x + um->activefont->glyphs[c].width, y + um->activefont->glyphs[c].height, &rx, &by);
+	convertcoords(um, x + um->texts[textnumber].activefont->glyphs[c].width, y + um->texts[textnumber].activefont->glyphs[c].height, &rx, &by);
 
 	vec3f_set(ptr, lx, ty, 0.f);
 	ptr += RENDER_ATTRIBSIZE_POS;
 	vec3f_copy(ptr, color);
 	ptr += RENDER_ATTRIBSIZE_COL;
-	vec2f_set(ptr, um->activefont->glyphs[c].coords[0][VU], um->activefont->glyphs[c].coords[0][VV]);
+	vec2f_set(ptr, um->texts[textnumber].activefont->glyphs[c].coords[0][VU], um->texts[textnumber].activefont->glyphs[c].coords[0][VV]);
 	ptr += RENDER_ATTRIBSIZE_TEX;
 
 	vec3f_set(ptr, lx, by, 0.f);
 	ptr += RENDER_ATTRIBSIZE_POS;
 	vec3f_copy(ptr, color);
 	ptr += RENDER_ATTRIBSIZE_COL;
-	vec2f_set(ptr, um->activefont->glyphs[c].coords[0][VU], um->activefont->glyphs[c].coords[1][VV]);
+	vec2f_set(ptr, um->texts[textnumber].activefont->glyphs[c].coords[0][VU], um->texts[textnumber].activefont->glyphs[c].coords[1][VV]);
 	ptr += RENDER_ATTRIBSIZE_TEX;
 
 	vec3f_set(ptr, rx, by, 0.f);
 	ptr += RENDER_ATTRIBSIZE_POS;
 	vec3f_copy(ptr, color);
 	ptr += RENDER_ATTRIBSIZE_COL;
-	vec2f_set(ptr, um->activefont->glyphs[c].coords[1][VU], um->activefont->glyphs[c].coords[1][VV]);
+	vec2f_set(ptr, um->texts[textnumber].activefont->glyphs[c].coords[1][VU], um->texts[textnumber].activefont->glyphs[c].coords[1][VV]);
 	ptr += RENDER_ATTRIBSIZE_TEX;
 
 	vec3f_set(ptr, lx, ty, 0.f);
 	ptr += RENDER_ATTRIBSIZE_POS;
 	vec3f_copy(ptr, color);
 	ptr += RENDER_ATTRIBSIZE_COL;
-	vec2f_set(ptr, um->activefont->glyphs[c].coords[0][VU], um->activefont->glyphs[c].coords[0][VV]);
+	vec2f_set(ptr, um->texts[textnumber].activefont->glyphs[c].coords[0][VU], um->texts[textnumber].activefont->glyphs[c].coords[0][VV]);
 	ptr += RENDER_ATTRIBSIZE_TEX;
 
 	vec3f_set(ptr, rx, by, 0.f);
 	ptr += RENDER_ATTRIBSIZE_POS;
 	vec3f_copy(ptr, color);
 	ptr += RENDER_ATTRIBSIZE_COL;
-	vec2f_set(ptr, um->activefont->glyphs[c].coords[1][VU], um->activefont->glyphs[c].coords[1][VV]);
+	vec2f_set(ptr, um->texts[textnumber].activefont->glyphs[c].coords[1][VU], um->texts[textnumber].activefont->glyphs[c].coords[1][VV]);
 	ptr += RENDER_ATTRIBSIZE_TEX;
 
 	vec3f_set(ptr, rx, ty, 0.f);
 	ptr += RENDER_ATTRIBSIZE_POS;
 	vec3f_copy(ptr, color);
 	ptr += RENDER_ATTRIBSIZE_COL;
-	vec2f_set(ptr, um->activefont->glyphs[c].coords[1][VU], um->activefont->glyphs[c].coords[0][VV]);
+	vec2f_set(ptr, um->texts[textnumber].activefont->glyphs[c].coords[1][VU], um->texts[textnumber].activefont->glyphs[c].coords[0][VV]);
 	ptr += RENDER_ATTRIBSIZE_TEX;
 
 	return ptr;
 }
 
-void addtext(struct uimanager* um, char* inputtext, int x, int y, vec3f color){
+void addtext(struct uimanager* um, char* inputtext, int x, int y, vec3f color, struct font* font, int numberadder){
 	int i;
 	for (i = 0; i < UI_TEXT_COUNT; i++)
 		if (!(um->texts[i].flags & UI_TEXT_FLAG_ENABLED))
@@ -102,12 +104,13 @@ void addtext(struct uimanager* um, char* inputtext, int x, int y, vec3f color){
 	struct text* t = um->texts + i;
 
 	t->inputtext = inputtext;
+	t->numberadder = numberadder;
 	t->x = x;
 	t->y = y;
 	vec3f_copy(t->color, color);
+	t->activefont= font;
 	t->flags = UI_TEXT_FLAG_ENABLED;
 
-	um->num_texts++;
 }
 
 void removetext(struct uimanager* um, char* inputtext){
@@ -129,14 +132,19 @@ void uimanager_render(struct uimanager* um, struct game* game)
 	float* ptr;
 	char c;
 
-	if(um->num_texts>0){
-		for(j=0;j<um->num_texts;j++){
+	for(j=0;j<UI_TEXT_COUNT;j++){
+		if(um->texts[j].flags & UI_TEXT_FLAG_ENABLED){
 
-			sprintf(rendertext, um->texts[j].inputtext);
 
-			renderable_allocate(&game->renderer, &um->activefont->renderable, strlen(rendertext) * 6);
+			if(um->texts[j].numberadder==-1){
+				sprintf(rendertext, "Lap   %d", game->player.vehicle->lap);
+			}else{
+				sprintf(rendertext, um->texts[j].inputtext);
+			}
 
-			ptr = um->activefont->renderable.buf_verts;
+			renderable_allocate(&game->renderer, &um->texts[j].activefont->renderable, strlen(rendertext) * 6);
+
+			ptr = um->texts[j].activefont->renderable.buf_verts;
 
 			int x = um->texts[j].x;
 			int y = um->texts[j].y;
@@ -145,15 +153,16 @@ void uimanager_render(struct uimanager* um, struct game* game)
 			{
 				c = rendertext[i];
 
-				ptr = renderchar(um, x + um->activefont->glyphs[c].left, y - um->activefont->glyphs[c].top, rendertext[i], um->texts[j].color, ptr);
+				ptr = renderchar(um, x + um->texts[j].activefont->glyphs[c].left, y - um->texts[j].activefont->glyphs[c].top, rendertext[i], um->texts[j].color, ptr, j);
 
-				x += um->activefont->glyphs[c].xadvance;
+				x += um->texts[j].activefont->glyphs[c].xadvance;
 			}
 
-			renderable_sendbuffer(&game->renderer, &um->activefont->renderable);
-			renderable_render(&game->renderer, &um->activefont->renderable, dummy, dummy, 0);
+			renderable_sendbuffer(&game->renderer, &um->texts[j].activefont->renderable);
+			renderable_render(&game->renderer, &um->texts[j].activefont->renderable, dummy, dummy, 0);
 		}
 	}
+	
 }
 
 

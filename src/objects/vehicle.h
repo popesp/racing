@@ -125,6 +125,10 @@ struct vehicle
 	unsigned powerup;
 
 	unsigned char flags;
+
+	int lap, place;
+	
+	bool checkpoint1, checkpoint2;
 };
 
 struct vehiclemanager

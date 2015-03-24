@@ -159,8 +159,13 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 	vm->sfx_engine_idle = audiomanager_newsfx(am, VEHICLE_SFX_FILENAME_ENGINEIDLE);
 
 	// initialize vehicle array
-	for (i = 0; i < VEHICLE_COUNT; i++)
+	for (i = 0; i < VEHICLE_COUNT; i++){
 		vm->vehicles[i].flags = VEHICLE_FLAG_INIT;
+		vm->vehicles[i].lap = 1;
+
+		vm->vehicles[i].checkpoint1 = false;
+		vm->vehicles[i].checkpoint2 = false;
+	}
 }
 
 void vehiclemanager_shutdown(struct vehiclemanager* vm)
@@ -241,11 +246,6 @@ static void vehicleinput(struct vehicle* v)
 		{
 			if (v->flags & VEHICLE_FLAG_HASPOWERUP)
 				powerupfunction[v->powerup](v);
-		}
-
-		if (v->controller->buttons[INPUT_BUTTON_X] == (INPUT_STATE_DOWN | INPUT_STATE_CHANGED))
-		{
-			removetext(v->vm->um,"Hello");
 		}
 		
 	}
