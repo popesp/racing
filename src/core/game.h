@@ -6,15 +6,16 @@
 #include	"input.h"
 #include	"win.h"
 #include	"../objects/camera.h"
-#include	"../objects/entities.h"
-#include	"../objects/vehicle.h"
+#include	"../objects/entities/entity.h"
+#include	"../objects/pickup.h"
 #include	"../objects/skybox.h"
 #include	"../objects/track.h"
+#include	"../objects/vehicle.h"
 #include	"../physics/physics.h"
 #include	"player.h"
 #include	"../render/render.h"
-#include	"../render/texture.h"
 #include	"../render/window.h"
+#include	"ui.h"
 
 
 #define	GAME_DEFAULT_WIDTH		1280
@@ -46,26 +47,31 @@
 #define	GAME_MUSIC_3_FILENAME	"res/music/Full Force Forward.mp3"
 #define	GAME_MUSIC_4_FILENAME	"res/music/Daft Punk & Boys Noize - End Of Line.mp3"
 
-#define GAME_WINCONDITION_LAPS	3
+#define GAME_WINCONDITION_LAPS	2
 
-#define	GAME_FLAG_INIT			0x00
 #define	GAME_FLAG_TERMINATED	0x01
 #define	GAME_FLAG_WIREFRAME		0x02	// TEMP
 #define	GAME_FLAG_DEBUGCAM		0x04
 #define	GAME_FLAG_PAUSED		0x08
 #define	GAME_FLAG_WINCONDITION	0x10
+#define	GAME_FLAG_YOULOSE		0x20
+//#define GAME_FLAG_YOUWIN		0x64
+#define	GAME_FLAG_INIT			(GAME_FLAG_WINCONDITION)
 
 
 struct game
 {
 	struct window window;
 	struct renderer renderer;
+
 	struct physicsmanager physicsmanager;
 	struct inputmanager inputmanager;
 	struct audiomanager audiomanager;
+	struct uimanager uimanager;
 
 	struct entitymanager entitymanager;
 	struct vehiclemanager vehiclemanager;
+	struct pickupmanager pickupmanager;
 
 	struct skybox skybox;
 	struct track track;

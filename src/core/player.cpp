@@ -1,7 +1,7 @@
 #include	"player.h"
 
 #include	"../mem.h"
-
+#include	"../random.h"
 
 static void resetcontroller(struct aiplayer* p)
 {
@@ -22,9 +22,7 @@ void player_init(struct player* p, struct vehiclemanager* vm, controller* contro
 	vec3f zero, up;
 
 	// initialize vehicle
-	p->vehicle = vehiclemanager_newvehicle(vm, index_track, offs);
-
-	p->vehicle->controller = controller;
+	p->vehicle = vehiclemanager_newvehicle(vm, controller, index_track, offs);
 
 	vec3f_set(zero, 0.f, 0.f, 0.f);
 	vec3f_set(up, 0.f, 1.f, 0.f);
@@ -32,19 +30,20 @@ void player_init(struct player* p, struct vehiclemanager* vm, controller* contro
 	camera_init(&p->camera, zero, zero, up);
 
 	
-
+	/*
 	//initialize lap
 	p->vehicle->lap = 1;
 	p->vehicle->checkpoint1 = false;
 	p->vehicle->checkpoint2 = false;
 
 	p->vehicle->haspickup = 100;
+	*/
 }
 
 void aiplayer_init(struct aiplayer* p, struct vehiclemanager* vm, int index_track, vec3f offs)
 {
 	// initialize vehicle
-	p->vehicle = vehiclemanager_newvehicle(vm, index_track, offs);
+	p->vehicle = vehiclemanager_newvehicle(vm, &p->controller, index_track, offs);
 
 	p->track = vm->track;
 
@@ -56,17 +55,17 @@ void aiplayer_init(struct aiplayer* p, struct vehiclemanager* vm, int index_trac
 	p->controller.buttons = (unsigned char*)mem_alloc(sizeof(unsigned char) * INPUT_CONTROLLER_BUTTONS);
 	p->controller.axes = (float*)mem_alloc(sizeof(float) * INPUT_CONTROLLER_AXES);
 
-	// connect controller to the cart
-	p->vehicle->controller = &p->controller;
-
 	resetcontroller(p);
 
-	//initialize lap
-	p->vehicle->lap = 1;
-	p->vehicle->checkpoint1 = false;
-	p->vehicle->checkpoint2 = false;
+	p->turn = 50/(random_int(15)+7.5);
+	p->speed = -(1-(1/(random_int(15)+2.5)));
+	p->next = (random_int(4)+3);
+	//printf("turn=%f speed=%f next=%d\n",p->turn,p->speed,p->next);
 
-	p->vehicle->haspickup = 100;
+	vec3f zero, up;
+	vec3f_set(zero, 0.f, 0.f, 0.f);
+	vec3f_set(up, 0.f, 1.f, 0.f);
+	camera_init(&p->camera, zero, zero, up);
 }
 
 
@@ -93,35 +92,27 @@ void aiplayer_updateinput(struct aiplayer* p)
 
 	resetcontroller(p);
 
-	next_index = (p->vehicle->index_track + 3) % (int)p->track->num_pathpoints;
+	next_index = (p->vehicle->index_track + p->next) % (int)p->track->num_pathpoints;
 	vec3f_copy(next_point, p->track->pathpoints[next_index].pos);
 
-	// future point based on current speed
+	// IDEA: future point based on current speed
 
 	vec3f_subtractn(diff, next_point, p->vehicle->pos);
 
 	vec3f_set(right, VEHICLE_RIGHT);
 	mat4f_transformvec3f(right, (float*)&pose);
 
-	p->controller.axes[INPUT_AXIS_LEFT_LR] = vec3f_dot(right, diff) * 4.f / vec3f_length(diff);
+	p->controller.axes[INPUT_AXIS_LEFT_LR] = vec3f_dot(right, diff) * p->turn / vec3f_length(diff);
 
-	//-0.8f 2fast4me
-	p->controller.axes[INPUT_AXIS_TRIGGERS] = -0.8f;
+	p->controller.axes[INPUT_AXIS_TRIGGERS] = p->speed;
 
-	//0=mine, 1=missile, 2=speed
-	if(p->vehicle->haspickup==2){
-		if(p->vehicle->index_track==90 ||p->vehicle->index_track==0){
-
-			p->controller.buttons[INPUT_BUTTON_A] = (INPUT_STATE_DOWN | INPUT_STATE_CHANGED);
-
+	if(p->vehicle->powerup==VEHICLE_POWERUP_BOOST||p->vehicle->powerup==VEHICLE_POWERUP_LONGBOOST){
+		if(p->vehicle->index_track==140||p->vehicle->index_track==160||p->vehicle->index_track==729){
+			p->controller.buttons[INPUT_BUTTON_A] = (INPUT_STATE_CHANGED | INPUT_STATE_DOWN);
+			//printf("he used it\n");
 		}
 	}
-
-	if(p->vehicle->haspickup==0||p->vehicle->haspickup==1){
-		if(p->vehicle->index_track%11==1){
-			p->controller.buttons[INPUT_BUTTON_A] = (INPUT_STATE_DOWN | INPUT_STATE_CHANGED);
-		}
-	}
+	
 
 }
 
@@ -139,4 +130,19 @@ void player_updatecamera(struct player* p)
 
 	vec3f_set(up, 0.f, 1.f, 0.f);
 	camera_lookat(&p->camera, (float*)&t_player.getPosition(), up);
+}
+
+void aiwin_camera(struct aiplayer* aip)
+{
+	vec3f diff, up;
+
+	physx::PxMat44 t_player(aip->vehicle->body->getGlobalPose());
+	physx::PxVec3 targetpos = t_player.transform(physx::PxVec3(PLAYER_CAMERA_TARGETPOS));
+
+	vec3f_subtractn(diff, (float*)&targetpos, aip->camera.pos);
+	vec3f_scale(diff, AI_CAMERA_EASING);
+	vec3f_add(aip->camera.pos, diff);
+
+	vec3f_set(up, 0.f, 1.f, 0.f);
+	camera_lookat(&aip->camera, (float*)&t_player.getPosition(), up);
 }

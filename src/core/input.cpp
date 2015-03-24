@@ -7,10 +7,6 @@
 #include	"../render/window.h"
 
 
-/*	start up the texture manager
-	param:	im				input manager (modified)
-	param:	win				window to receive events from
-*/
 void inputmanager_startup(struct inputmanager* im, struct window* win)
 {
 	int i;
@@ -47,9 +43,6 @@ void inputmanager_startup(struct inputmanager* im, struct window* win)
 	inputmanager_update(im);
 }
 
-/*	shut down the input manager
-	param:	im				input manager (modified)
-*/
 void inputmanager_shutdown(struct inputmanager* im)
 {
 	struct controller* c;
@@ -70,9 +63,6 @@ void inputmanager_shutdown(struct inputmanager* im)
 }
 
 
-/*	update the input
-	param:	im				input manager (modified)
-*/
 void inputmanager_update(struct inputmanager* im)
 {
 	struct controller* c;
@@ -158,11 +148,6 @@ void inputmanager_update(struct inputmanager* im)
 }
 
 
-/*	get the name of a given joystick
-	param:	im				input manager
-	param:	id_joyst		id of the joystick to query
-	return:	const char*		name of the joystick
-*/
 const char* inputmanager_joystickname(struct inputmanager* im, int id_joyst)
 {
 	(void)im;

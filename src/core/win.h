@@ -1,14 +1,13 @@
-#ifndef	WIN
-#define	WIN
+#ifndef RACE
+#define	RACE
 
-
-#include	<stdlib.h>
-#include	"game.h"
+#include "game.h"
 
 
 void checkplace(struct game* game);
 
 void checkwin(struct game* game);
 
-void setblimp(struct game* game);
+
+
 #endif

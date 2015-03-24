@@ -3,36 +3,33 @@
 #include	<float.h>
 #include	<math.h>				// cosf, sinf
 #include	"../error.h"
+#include	"../math/vec2f.h"
 #include	"../math/mat4f.h"		// identity
-#include	"../math/vec3f.h"		// set, normalize
 #include	"../mem.h"				// free
-#include	"../physics/physics.h"
-#include	"../render/render.h"	// renderable: init, allocate, deallocate
+#include	"../physics/collision.h"
 
 
 static vec3f segment_pos[TRACK_SEGMENT_VERTCOUNT] = {
 	{ 0.f, 0.f, 0.f },
 	{ 0.5f, 1.f, 0.f },
 	{ 1.f, 1.f, 0.f },
-	{ 1.f, -2.f, 0.f },
-	{ -2.5f, -2.f, 0.f } };
+	{ 1.f, -2.f, 0.f }};
 
 static vec3f segment_nor[TRACK_SEGMENT_VERTCOUNT] = {
-	{ 0.f, 1.f, 0.f },
+	{0.f, 1.f, 0.f},
 	{ -0.894427f, 0.447214f, 0.f },
 	{ 0.f, 1.f, 0.f },
-	{ 1.f, 0.f, 0.f },
-	{0.f, -1.f, 0.f} };
+	{ 1.f, 0.f, 0.f }};
 
 
 void track_init(struct track* t, struct physicsmanager* pm, vec3f up)
 {
-	(void)pm;
+	t->pm = pm;
 
 	t->num_points = 0;
 	t->points = NULL;
 
-	t->num_pathpoints = TRACK_NUMPOINTS;
+	t->num_pathpoints = 0;
 	t->pathpoints = NULL;
 
 	t->p_track = NULL;
@@ -46,7 +43,7 @@ void track_init(struct track* t, struct physicsmanager* pm, vec3f up)
 	t->r_track.material.shn = 100.f;
 
 	texture_init(&t->normal);
-	texture_loadfile(&t->normal, TRACK_TEXT_SLATE);
+	texture_loadfile(&t->normal, TRACK_TEXTURE_FILENAME_NORMAL);
 	texture_upload(&t->normal, RENDER_TEXTURE_NORMAL);
 	t->r_track.textures[RENDER_TEXTURE_NORMAL] = &t->normal;
 
@@ -66,12 +63,6 @@ void track_delete(struct track* t)
 }
 
 
-/*	find the closest point on the track to a given position
-	param:	t					track object
-	param:	pos					position in space to search around
-	param:	last				last known "closest" index (used so as to not search every point on the track)
-	return:	unsigned			index of the closest track point
-*/
 int track_closestindex(struct track* t, vec3f pos, int last)
 {
 	float d, least;
@@ -119,7 +110,32 @@ int track_closestindex(struct track* t, vec3f pos, int last)
 }
 
 
-void track_loadpointsfile(struct track* t, const char* filename)
+void track_transformindex(struct track* t, mat4f res, int index)
+{
+	vec3f tan, bin, nor;
+
+	// find negated tangent
+	vec3f_copy(tan, t->pathpoints[index].tan);
+	vec3f_negate(tan);
+
+	vec3f_cross(bin, t->up, tan);
+	vec3f_normalize(bin);
+
+	vec3f_cross(nor, tan, bin);
+
+	// find the change of basis matrix
+	mat4f_identity(res);
+	vec3f_copy(res + C0, bin);
+	vec3f_copy(res + C1, nor);
+	vec3f_copy(res + C2, tan);
+	vec3f_copy(res + C3, t->pathpoints[index].pos);
+
+	// rotate to the track angle
+	mat4f_rotatezmul(res, -t->pathpoints[index].angle);
+}
+
+
+void track_loadpointsfile(struct track* t, const char* filename, struct renderer* r)
 {
 	FILE* file;
 	char s[64];
@@ -133,9 +149,9 @@ void track_loadpointsfile(struct track* t, const char* filename)
 
 	while (fscanf(file, "%s = ", s) != EOF)
 	{
-		if (!strncmp(s, "npoints", 7))
+		if (!strcmp(s, "npoints"))
 		{
-			if (fscanf(file, "%d;", &t->num_points) != 1)
+			if (fscanf(file, "%d", &t->num_points) != 1)
 			{
 				PRINT_ERROR("Track file is malformed.\n");
 				fclose(file);
@@ -144,18 +160,18 @@ void track_loadpointsfile(struct track* t, const char* filename)
 
 			// allocate space for points
 			t->points = (struct track_point*)mem_realloc(t->points, sizeof(struct track_point) * t->num_points);
-		} else if (!strncmp(s, "looped", 6))
+		} else if (!strcmp(s, "looped"))
 		{
-			if (fscanf(file, "%s;", s) != 1)
+			if (fscanf(file, "%s", s) != 1)
 			{
 				PRINT_ERROR("Track file is malformed.\n");
 				fclose(file);
 				return;
 			}
 
-			if (!strncmp(s, "true", 4))
+			if (!strcmp(s, "true"))
 				t->flags |= TRACK_FLAG_LOOPED;
-			else if (!strncmp(s, "false", 5))
+			else if (!strcmp(s, "false"))
 				t->flags &= ~TRACK_FLAG_LOOPED;
 			else
 			{
@@ -163,10 +179,8 @@ void track_loadpointsfile(struct track* t, const char* filename)
 				fclose(file);
 				return;
 			}
-		} else if (!strncmp(s, "point", 5))
+		} else if (!strcmp(s, "point"))
 		{
-			sscanf(s, "point");
-
 			fscanf(file, "pos(%f, %f, %f), ", t->points[p].pos + VX, t->points[p].pos + VY, t->points[p].pos + VZ);
 			fscanf(file, "tan(%f, %f, %f), ", t->points[p].tan + VX, t->points[p].tan + VY, t->points[p].tan + VZ);
 			vec3f_normalize(t->points[p].tan);
@@ -174,12 +188,15 @@ void track_loadpointsfile(struct track* t, const char* filename)
 			fscanf(file, "angle(%f), ", &t->points[p].angle);
 			fscanf(file, "weight(%f), ", &t->points[p].weight);
 			fscanf(file, "width(%f), ", &t->points[p].width);
-			fscanf(file, "subdivisions(%d), ", &t->points[p].subdivisions);
+			fscanf(file, "subdivisions(%d)", &t->points[p].subdivisions);
+
 			p++;
 		}
 	}
 
 	fclose(file);
+
+	track_generate(t, r);
 }
 
 
@@ -273,15 +290,15 @@ static inline float* fillbuffer(float* vptr, mat4f basis, vec3f p0, vec3f p1, ve
 
 static float* addverts(struct track* t, struct track_point* p, float* vptr)
 {
-	vec3f bin, nor, p0, p1, n0, n1;
+	vec3f nor, bin, p0, p1, n;
 	mat4f basis;
 	int i;
 
-	// find binormal vector for the track (before rotation)
+	// find binormal vector for the track
 	vec3f_cross(bin, t->up, p->tan);
 	vec3f_normalize(bin);
 
-	// find normal vector (before rotation)
+	// find normal
 	vec3f_cross(nor, p->tan, bin);
 
 	// construct change of basis and translation transformation matrix
@@ -291,40 +308,59 @@ static float* addverts(struct track* t, struct track_point* p, float* vptr)
 	vec3f_copy(basis + C2, p->tan);
 	vec3f_copy(basis + C3, p->pos); // translation
 
-	// rotate the track
 	mat4f_rotatezmul(basis, p->angle);
 
-	// TODO: redo this to copy all vertex attributes per segment
+	/* --- left side --- */
+	// far left
+	// positions
+	vec3f_set(p0, 0.f, segment_pos[TRACK_SEGMENT_VERTCOUNT-1][VY], 0.f);
+	vec3f_copy(p1, segment_pos[TRACK_SEGMENT_VERTCOUNT-1]);
+	p1[VX] = p1[VX] + p->width*0.5f;
 
-	// left side of track
+	// normal
+	vec3f_set(n, 0.f, -1.f, 0.f);
+
+	// fill buffer
+	vptr = fillbuffer(vptr, basis, p0, p1, n, n);
+
+	// left segment
 	for (i = TRACK_SEGMENT_VERTCOUNT - 1; i > 0; i--)
 	{
 		// positions
 		vec3f_copy(p0, segment_pos[i]);
 		p0[VX] = p0[VX] + p->width*0.5f;
-		vec3f_copy(p1, segment_pos[i - 1]);
+		vec3f_copy(p1, segment_pos[i-1]);
 		p1[VX] = p1[VX] + p->width*0.5f;
 
 		// fill buffer
 		vptr = fillbuffer(vptr, basis, p0, p1, segment_nor[i], segment_nor[i]);
 	}
 
-	// center of track
-
+	// left center
 	// positions
 	vec3f_copy(p0, segment_pos[0]);
 	p0[VX] = p0[VX] + p->width*0.5f;
+	vec3f_set(p1, 0.f, 0.f, 0.f);
+
+	// fill buffer
+	vptr = fillbuffer(vptr, basis, p0, p1, segment_nor[0], segment_nor[0]);
+	/* --- end left side --- */
+
+	/* --- right side --- */
+	// right center
+	// positions
+	vec3f_set(p0, 0.f, 0.f, 0.f);
 	vec3f_copy(p1, segment_pos[0]);
 	p1[VX] = -1.f*(p1[VX] + p->width*0.5f);
 
-	// normals
-	vec3f_copy(n0, segment_nor[0]);
-	vec3f_copy(n1, segment_nor[0]);
-	n1[VX] *= -1.f;
+	// normal
+	vec3f_copy(n, segment_nor[0]);
+	n[VX] *= -1.f;
 
-	vptr = fillbuffer(vptr, basis, p0, p1, n0, n1);
+	// fill buffer
+	vptr = fillbuffer(vptr, basis, p0, p1, n, n);
 
-	// right side of track
+	// right segment
 	for (i = 0; i < TRACK_SEGMENT_VERTCOUNT - 1; i++)
 	{
 		// positions
@@ -333,13 +369,25 @@ static float* addverts(struct track* t, struct track_point* p, float* vptr)
 		vec3f_copy(p1, segment_pos[i + 1]);
 		p1[VX] = -1.f*(p1[VX] + p->width*0.5f);
 
-		// normals
-		vec3f_copy(n0, segment_nor[i + 1]);
-		n0[VX] *= -1.f;
+		// normal
+		vec3f_copy(n, segment_nor[i + 1]);
+		n[VX] *= -1.f;
 
 		// fill buffer
-		vptr = fillbuffer(vptr, basis, p0, p1, n0, n0);
+		vptr = fillbuffer(vptr, basis, p0, p1, n, n);
 	}
+
+	// far right
+	// positions
+	vec3f_copy(p0, segment_pos[TRACK_SEGMENT_VERTCOUNT-1]);
+	p0[VX] = -1.f*(p0[VX] + p->width*0.5f);
+	vec3f_set(p1, 0.f, segment_pos[TRACK_SEGMENT_VERTCOUNT-1][VY], 0.f);
+	
+	// normal
+	vec3f_set(n, 0.f, -1.f, 0.f);
+
+	// fill buffer
+	vptr = fillbuffer(vptr, basis, p0, p1, n, n);
 
 	return vptr;
 }
@@ -352,13 +400,13 @@ static float* copyvert(float* vptr, float* srcptr)
 	vptr += RENDER_ATTRIBSIZE_NOR;
 	vec3f_copy(vptr, srcptr + RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_NOR);
 	vptr += RENDER_ATTRIBSIZE_TAN;
-	vec3f_copy(vptr, srcptr + RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_NOR + RENDER_ATTRIBSIZE_TAN);
+	vec2f_copy(vptr, srcptr + RENDER_ATTRIBSIZE_POS + RENDER_ATTRIBSIZE_NOR + RENDER_ATTRIBSIZE_TAN);
 	vptr += RENDER_ATTRIBSIZE_TEX;
 
 	return vptr;
 }
 
-void track_generate(struct renderer* r, struct track* t)
+void track_generate(struct track* t, struct renderer* r)
 {
 	struct track_point p;
 	unsigned i, j, n, s, ps;
@@ -378,14 +426,14 @@ void track_generate(struct renderer* r, struct track* t)
 
 	// allocate mesh renderable vertex buffer
 	// the second parameter here looks complicated but is just calculating the required number of vertices to triangle strip the track
-	renderable_allocate(r, &t->r_track, 2 * ((2 * TRACK_SEGMENT_VERTCOUNT - 1)*s + 2 * (TRACK_SEGMENT_VERTCOUNT - 1)));
+	renderable_allocate(r, &t->r_track, 4 * (TRACK_SEGMENT_VERTCOUNT + 1) * (s + 1));
 
 	// allocate space for the search points (underlying track spline, independent from rendered/physical mesh)
 	t->num_pathpoints = n * (TRACK_SEARCHDIVIDE + 1);
-	t->pathpoints = (struct path_point*)mem_calloc(t->num_pathpoints, sizeof(struct path_point));
+	t->pathpoints = (struct path_point*)mem_alloc(t->num_pathpoints * sizeof(struct path_point));
 
 	// temporary vertex buffer
-	verts = (float*)mem_calloc(2 * (2 * TRACK_SEGMENT_VERTCOUNT - 1)*s, RENDER_VERTSIZE_BUMP_L * sizeof(float));
+	verts = (float*)mem_alloc(s * 4 * (TRACK_SEGMENT_VERTCOUNT + 1) * r->vertsize[t->r_track.type] * sizeof(float));
 
 	// place vertex attributes into buffer
 	ptr = verts;
@@ -409,6 +457,7 @@ void track_generate(struct renderer* r, struct track* t)
 			vec3f_copy(t->pathpoints[i*(TRACK_SEARCHDIVIDE+1) + j].pos, p.pos);
 			vec3f_copy(t->pathpoints[i*(TRACK_SEARCHDIVIDE+1) + j].tan, p.tan);
 			t->pathpoints[i*(TRACK_SEARCHDIVIDE+1) + j].angle = p.angle;
+			t->pathpoints[i*(TRACK_SEARCHDIVIDE+1) + j].width = p.width;
 		}
 	}
 
@@ -417,28 +466,35 @@ void track_generate(struct renderer* r, struct track* t)
 	ptr = addverts(t, &p, ptr);
 
 	// copy vector attributes into renderable buffer
+	int temp = 0;
 	ptr = t->r_track.buf_verts;
-	for (i = 0; i < 2 * TRACK_SEGMENT_VERTCOUNT - 1; i++)
+	for (i = 0; i < 2 * (TRACK_SEGMENT_VERTCOUNT + 1); i++)
 	{
 		offs = (int)i * 2;
-
-		if (i)
-		{
-			// repeat points at start and end of track
-			ptr = copyvert(ptr, ptr - RENDER_VERTSIZE_BUMP_L);
-			ptr = copyvert(ptr, verts + offs*RENDER_VERTSIZE_BUMP_L);
-		}
 
 		// loop through each segment
 		for (j = 0; j < s; j++)
 		{
 			// copy points
-			ptr = copyvert(ptr, verts + offs*RENDER_VERTSIZE_BUMP_L);
-			ptr = copyvert(ptr, verts + (offs + 1)*RENDER_VERTSIZE_BUMP_L);
+			ptr = copyvert(ptr, verts + offs*r->vertsize[t->r_track.type]);
+			ptr = copyvert(ptr, verts + (offs + 1)*r->vertsize[t->r_track.type]);
+			temp += 2;
 
-			offs += 2 * (2 * TRACK_SEGMENT_VERTCOUNT - 1);
+			offs += 4 * (TRACK_SEGMENT_VERTCOUNT + 1);
 		}
+
+		// repeat points at start and end of track
+		ptr = copyvert(ptr, ptr - r->vertsize[t->r_track.type]);
+		ptr = copyvert(ptr, verts + 2*(i + 1)*r->vertsize[t->r_track.type]);
+		temp += 2;
 	}
 
 	mem_free(verts);
+
+	// send renderable buffer to OpenGL
+	renderable_sendbuffer(r, &t->r_track);
+
+	// send mesh to physics manager
+	t->p_track = physicsmanager_addstatic_trianglestrip(t->pm, t->r_track.num_verts, sizeof(float)*r->vertsize[t->r_track.type], t->r_track.buf_verts);
+	collision_setupactor(t->p_track, COLLISION_FILTER_STATIC, 0);
 }

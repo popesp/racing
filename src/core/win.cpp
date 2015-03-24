@@ -1,19 +1,17 @@
 #include	"win.h"
+#include	"ui.h"
 
-
-void checkwin(struct game* game){
-	setblimp(game);
+void checkwin(struct game* game)
+{
+	
 
 	unsigned int cp1 = game->track.num_pathpoints / 3;
 	unsigned int cp2 = game->track.num_pathpoints / 2;
 
 	if(game->player.vehicle->lap==GAME_WINCONDITION_LAPS){
 		printf("Player has won the game!\nGame's over\n\n");
-
-		entitymanager_removeblimp(&game->entitymanager,game->player.vehicle->ownblimp,game->player.vehicle);
-
 		//reset laps
-		game->player.vehicle->lap=1;
+		//game->player.vehicle->lap=1;
 		for(int i=0; i<game->num_aiplayers-1;i++){
 			game->aiplayers[i].vehicle->lap=1;
 		}
@@ -21,20 +19,14 @@ void checkwin(struct game* game){
 		game->flags &= ~GAME_FLAG_WINCONDITION;
 	}
 
+
 	for(int i=0;i<=game->num_aiplayers-1;i++){
 		//printf("%d\n", game->aiplayers[i].vehicle->lap);
 		if(game->aiplayers[i].vehicle->lap==GAME_WINCONDITION_LAPS){
 			printf("Computer-%d has won the game!\nGame's over\n\n", i);
-
-			entitymanager_removeblimp(&game->entitymanager,game->player.vehicle->ownblimp,game->player.vehicle);
-
-			//reset laps
-			game->player.vehicle->lap=1;
-			for(int i=0; i<=game->num_aiplayers-1;i++){
-				game->aiplayers[i].vehicle->lap=1;
-			}
 			
 			game->flags &= ~GAME_FLAG_WINCONDITION;
+			game->flags |= GAME_FLAG_YOULOSE;
 		}
 	}
 
@@ -53,7 +45,7 @@ void checkwin(struct game* game){
 
 	if(game->player.vehicle->checkpoint2==true&&game->player.vehicle->checkpoint1==true&&(unsigned)game->player.vehicle->index_track==game->track.num_pathpoints-1){
 		game->player.vehicle->lap++;
-		printf("Player is on lap %d\n", game->player.vehicle->lap);
+		//printf("Player is on lap %d\n", game->player.vehicle->lap);
 		game->player.vehicle->checkpoint1=false;
 		game->player.vehicle->checkpoint2=false;
 	}
@@ -74,7 +66,7 @@ void checkwin(struct game* game){
 
 		if(game->aiplayers[i].vehicle->checkpoint2==true&&game->aiplayers[i].vehicle->checkpoint1==true&&(unsigned)game->aiplayers[i].vehicle->index_track==game->track.num_pathpoints-1){
 			game->aiplayers[i].vehicle->lap++;
-			printf("AI %d is on lap %d\n", i, game->aiplayers[i].vehicle->lap);
+			//printf("AI %d is on lap %d\n", i, game->aiplayers[i].vehicle->lap);
 			game->aiplayers[i].vehicle->checkpoint1=false;
 			game->aiplayers[i].vehicle->checkpoint2=false;
 		}
@@ -83,9 +75,8 @@ void checkwin(struct game* game){
 }
 
 void checkplace(struct game* game){
-	
-	setblimp(game);
 
+	
 	//init everyone to last place
 	for(int i=0;i<=game->num_aiplayers-1;i++){
 		game->aiplayers[i].vehicle->place=game->num_aiplayers+1;
@@ -136,17 +127,17 @@ void checkplace(struct game* game){
 				}
 
 			}
-
-			//printf("Players place %d     AI[0] %d\n ", game->player.vehicle->place, game->aiplayers[0].vehicle->place);
 		}
-		
 
 		// IF MORE THAN ONE AI
 		if(game->num_aiplayers-1 > 0){
-			entitymanager_removeblimp(&game->entitymanager,game->player.vehicle->ownblimp,game->player.vehicle);
+
 			for(int j=0; j<=game->num_aiplayers-1;j++){
 
 
+
+
+				
 				//FIXING INDEX BEFORE LAPS
 
 				//check index first
@@ -187,49 +178,43 @@ void checkplace(struct game* game){
 			}
 		}
 	}
-	setblimp(game);
-}
-void setblimp(struct game* game){
-	if(game->player.vehicle->place==2){
-		game->entitymanager.r_blimp.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_place2;
+
+	removetext(&game->uimanager, "placer");
+	vec3f color;
+	vec3f_set(color, 1.0f,1.0f,.0f);
+	if(game->player.vehicle->place==21||game->player.vehicle->place==31||game->player.vehicle->place==41||game->player.vehicle->place==51||game->player.vehicle->place==61||game->player.vehicle->place==71||game->player.vehicle->place==81||game->player.vehicle->place==91){
+		addtext(&game->uimanager, "placer", 225, 580,color,&game->uimanager.font_placer,-3);
 	}
 	else if(game->player.vehicle->place==1){
-		game->entitymanager.r_blimp.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_place1;
+		addtext(&game->uimanager, "placer", 170, 580,color,&game->uimanager.font_placer,-3);
+	}
+	else if(game->player.vehicle->place==2){
+		addtext(&game->uimanager, "placer", 200, 580,color,&game->uimanager.font_placer,-4);
+	}
+	else if(game->player.vehicle->place==22||game->player.vehicle->place==32||game->player.vehicle->place==42||game->player.vehicle->place==52||game->player.vehicle->place==62||game->player.vehicle->place==72||game->player.vehicle->place==82||game->player.vehicle->place==92){
+		addtext(&game->uimanager, "placer", 270, 580,color,&game->uimanager.font_placer,-4);
+	}
+	else if(game->player.vehicle->place==3){
+		addtext(&game->uimanager, "placer", 200, 580,color,&game->uimanager.font_placer,-5);
+	}
+	else if(game->player.vehicle->place==23||game->player.vehicle->place==33||game->player.vehicle->place==43||game->player.vehicle->place==53||game->player.vehicle->place==63||game->player.vehicle->place==73||game->player.vehicle->place==83||game->player.vehicle->place==93){
+		addtext(&game->uimanager, "placer", 270, 580,color,&game->uimanager.font_placer,-5);
+	}
+	else if(game->player.vehicle->place<20&&game->player.vehicle->place!=10){
+		addtext(&game->uimanager, "placer", 225, 580,color,&game->uimanager.font_placer,-6);
+	}
+	else if(game->player.vehicle->place==20){
+		addtext(&game->uimanager, "placer", 300, 580,color,&game->uimanager.font_placer,-6);
+	}
+	else if(game->player.vehicle->place<30){
+		addtext(&game->uimanager, "placer", 280, 580,color,&game->uimanager.font_placer,-6);
+	}
+	else if(game->player.vehicle->place%10==0){
+		addtext(&game->uimanager, "placer", 315, 580,color,&game->uimanager.font_placer,-6);
 	}
 	else{
-		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_blimp;
+		addtext(&game->uimanager, "placer", 290, 580,color,&game->uimanager.font_placer,-6);
 	}
-
-
-	if(game->player.vehicle->lap==1 && game->flags != GAME_FLAG_WINCONDITION){
-		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_win;
-	}
-	else if(game->flags != GAME_FLAG_WINCONDITION){
-		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_lose;
-	}
-
-	else if(game->player.vehicle->lap==1){
-		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_lap1;
-	}
-	else if(game->player.vehicle->lap==2){
-		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_lap2;
-	}
-	else if(game->player.vehicle->lap==3){
-		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_lap3;
-	}
-	else if(game->player.vehicle->lap==4){
-		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_lap4;
-	}
-	else if(game->player.vehicle->lap==5){
-		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_lap5;
-	}
-	else{
-		game->entitymanager.r_blimplap.textures[RENDER_TEXTURE_DIFFUSE] = &game->entitymanager.diffuse_blimp;
-	}
-
-
-	//if(game->player.vehicle->hasblimp==true){
-	//	entitymanager_removeblimp(&game->entitymanager,game->player.vehicle->ownblimp,game->player.vehicle);
-	//}
-	//entitymanager_newblimp(game->player.vehicle,&game->entitymanager,game->track.pathpoints[0].pos);
+	
 }
+

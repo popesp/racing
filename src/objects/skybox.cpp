@@ -1,7 +1,7 @@
 #include	"skybox.h"
-#include	<time.h>
-#include	<stdlib.h>		
-#include	<stdio.h>				// printf
+
+#include	"../random.h"
+
 
 static vec3f skybox_pos[8] =
 {
@@ -36,6 +36,16 @@ static float skybox_uv[36][2] =
 };
 
 
+static char* skybox_texture_filename[SKYBOX_TEXTURE_COUNT] =
+{
+	SKYBOX_TEXTURE0,
+	SKYBOX_TEXTURE1,
+	SKYBOX_TEXTURE2,
+	SKYBOX_TEXTURE3,
+	SKYBOX_TEXTURE4
+};
+
+
 void skybox_init(struct skybox* sb, struct renderer* r)
 {
 	float* ptr;
@@ -60,38 +70,10 @@ void skybox_init(struct skybox* sb, struct renderer* r)
 	renderable_sendbuffer(r, &sb->r_skybox);
 
 	// load texture file for the skybox
-	
-
-
-	int seed = static_cast<int>(time(0));
-	srand(seed);
-	seed = seed%5;
-	//printf("%d\n",seed);
-	if(seed==0){
-		texture_init(&sb->diffuse);
-		texture_loadfile(&sb->diffuse, SKYBOX_NIGHT);
-		texture_upload(&sb->diffuse, RENDER_TEXTURE_DIFFUSE);
-		sb->r_skybox.textures[RENDER_TEXTURE_DIFFUSE] = &sb->diffuse;}
-	else if(seed==1){
-		texture_init(&sb->diffuse);
-		texture_loadfile(&sb->diffuse, SKYBOX_INTERSTELLAR);
-		texture_upload(&sb->diffuse, RENDER_TEXTURE_DIFFUSE);
-		sb->r_skybox.textures[RENDER_TEXTURE_DIFFUSE] = &sb->diffuse;}
-	else if(seed==2){
-		texture_init(&sb->diffuse);
-		texture_loadfile(&sb->diffuse, SKYBOX_STORMYDAY);
-		texture_upload(&sb->diffuse, RENDER_TEXTURE_DIFFUSE);
-		sb->r_skybox.textures[RENDER_TEXTURE_DIFFUSE] = &sb->diffuse;}
-	else if(seed==3){
-		texture_init(&sb->diffuse);
-		texture_loadfile(&sb->diffuse, SKYBOX_VIOLENTDAY);
-		texture_upload(&sb->diffuse, RENDER_TEXTURE_DIFFUSE);
-		sb->r_skybox.textures[RENDER_TEXTURE_DIFFUSE] = &sb->diffuse;}
-	else if(seed==4){
-		texture_init(&sb->diffuse);
-		texture_loadfile(&sb->diffuse, SKYBOX_MIRAMAR);
-		texture_upload(&sb->diffuse, RENDER_TEXTURE_DIFFUSE);
-		sb->r_skybox.textures[RENDER_TEXTURE_DIFFUSE] = &sb->diffuse;}
+	texture_init(&sb->diffuse);
+	texture_loadfile(&sb->diffuse, skybox_texture_filename[random_int(SKYBOX_TEXTURE_COUNT)]);
+	texture_upload(&sb->diffuse, RENDER_TEXTURE_DIFFUSE);
+	sb->r_skybox.textures[RENDER_TEXTURE_DIFFUSE] = &sb->diffuse;
 }
 
 void skybox_delete(struct skybox* sb)

@@ -1,13 +1,18 @@
 #ifndef SKYBOX
 #define	SKYBOX
 
-#include	"../render/render.h"
 
-#define SKYBOX_NIGHT		"res/images/night.jpg"
-#define	SKYBOX_INTERSTELLAR	"res/images/interstellar.jpg"
-#define	SKYBOX_STORMYDAY	"res/images/stormydays.jpg"
-#define SKYBOX_VIOLENTDAY	"res/images/violentdays.jpg"
-#define SKYBOX_MIRAMAR		"res/images/miramar.jpg"
+#include	"../render/render.h"
+#include	"../render/texture.h"
+
+
+#define	SKYBOX_TEXTURE_COUNT	5
+#define SKYBOX_TEXTURE0			"res/images/night.jpg"
+#define	SKYBOX_TEXTURE1			"res/images/interstellar.jpg"
+#define	SKYBOX_TEXTURE2			"res/images/stormydays.jpg"
+#define	SKYBOX_TEXTURE3			"res/images/violentdays.jpg"
+#define	SKYBOX_TEXTURE4			"res/images/miramar.jpg"
+
 
 struct skybox
 {

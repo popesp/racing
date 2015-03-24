@@ -19,6 +19,7 @@ void texture_init(struct texture* t)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
 }
 
 void texture_delete(struct texture* t)
@@ -29,16 +30,24 @@ void texture_delete(struct texture* t)
 }
 
 
+void texture_allocate(struct texture* t, unsigned width, unsigned height)
+{
+	t->width = width;
+	t->height = height;
+
+	t->data = (pixel*)mem_realloc(t->data, sizeof(pixel) * width * height);
+}
+
 void texture_soliddiffuse(struct texture* t, unsigned char r, unsigned char g, unsigned char b)
 {
 	t->width = 1;
 	t->height = 1;
 
-	t->data = (unsigned char*)mem_realloc(t->data, 4);
-	t->data[TB] = b;
-	t->data[TG] = g;
-	t->data[TR] = r;
-	t->data[TA] = 255u;
+	t->data = (pixel*)mem_realloc(t->data, sizeof(pixel));
+	t->data[0][TB] = b;
+	t->data[0][TG] = g;
+	t->data[0][TR] = r;
+	t->data[0][TA] = 255;
 }
 
 void texture_defaultnormal(struct texture* t)
@@ -46,11 +55,11 @@ void texture_defaultnormal(struct texture* t)
 	t->width = 1;
 	t->height = 1;
 
-	t->data = (unsigned char*)mem_realloc(t->data, 4);
-	t->data[TB] = 255u;
-	t->data[TG] = 127u;
-	t->data[TR] = 127u;
-	t->data[TA] = 255u;
+	t->data = (pixel*)mem_realloc(t->data, sizeof(pixel));
+	t->data[0][TB] = 255;
+	t->data[0][TG] = 127;
+	t->data[0][TR] = 127;
+	t->data[0][TA] = 255;
 }
 
 void texture_loadfile(struct texture* t, const char* filename)
@@ -73,9 +82,40 @@ void texture_loadfile(struct texture* t, const char* filename)
 	t->height = FreeImage_GetHeight(bmp32);
 
 	// allocate and fill texture buffer
-	t->data = (unsigned char*)mem_realloc(t->data, sizeof(unsigned char) * t->width * t->height * 32);
-	FreeImage_ConvertToRawBits(t->data, bmp32, (int)t->width * 4, 32, FI_RGBA_RED_MASK, FI_RGBA_GREEN_MASK, FI_RGBA_BLUE_MASK, true);
+	t->data = (pixel*)mem_realloc(t->data, sizeof(pixel) * t->width * t->height);
+	FreeImage_ConvertToRawBits((unsigned char*)t->data, bmp32, (int)t->width * sizeof(pixel), 32, FI_RGBA_RED_MASK, FI_RGBA_GREEN_MASK, FI_RGBA_BLUE_MASK, true);
 	FreeImage_Unload(bmp32);
+}
+
+
+void texture_fill(struct texture* t, unsigned char r, unsigned char g, unsigned char b, unsigned char a)
+{
+	unsigned i;
+
+	for (i = 0; i < t->width*t->height; i++)
+	{
+		t->data[i][TR] = r;
+		t->data[i][TG] = g;
+		t->data[i][TB] = b;
+		t->data[i][TA] = a;
+	}
+}
+
+
+void texture_blitalpha(struct texture* t, unsigned char* data, unsigned width, unsigned height, unsigned x, unsigned y)
+{
+	unsigned i, j;
+
+	for (i = 0; i < height; i++)
+	{
+		for (j = 0; j < width; j++)
+		{
+			t->data[(y+i)*t->width + (x+j)][TR] = 0;
+			t->data[(y+i)*t->width + (x+j)][TG] = 0;
+			t->data[(y+i)*t->width + (x+j)][TB] = 0;
+			t->data[(y+i)*t->width + (x+j)][TA] = data[i*width + j];
+		}
+	}
 }
 
 

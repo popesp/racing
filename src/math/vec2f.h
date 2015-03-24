@@ -8,8 +8,8 @@
 #define	VX	0
 #define	VY	1
 
-#define	U	0
-#define	V	1
+#define	VU	0
+#define	VV	1
 
 
 typedef float vec2f[2];
