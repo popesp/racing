@@ -19,6 +19,7 @@ void uimanager_startup(struct uimanager* um, struct window* window)
 	font_generate(&um->font_playerlap, um, UI_FONT_FILENAME_PAUSE, UI_PLAYERLAP_FONTSIZE);
 	font_generate(&um->font_place, um, UI_FONT_FILENAME_PLACE, UI_PLACE_FONTSIZE);
 	font_generate(&um->font_placer, um, UI_FONT_FILENAME_PLACE, UI_PLACER_FONTSIZE);
+	font_generate(&um->font_youlost, um, UI_FONT_FILENAME_YOULOSE, UI_YOULOSE_FONTSIZE);
 
 	for(int i=0;i<UI_TEXT_COUNT;i++){
 		um->texts[i].flags=UI_TEXT_FLAG_INIT;
@@ -32,6 +33,7 @@ void uimanager_shutdown(struct uimanager* um)
 	font_delete(&um->font_playerlap);
 	font_delete(&um->font_place);
 	font_delete(&um->font_placer);
+	font_delete(&um->font_youlost);
 
 	FT_Done_FreeType(um->freetype);
 }
@@ -157,6 +159,13 @@ void uimanager_render(struct uimanager* um, struct game* game)
 			}
 			else if(um->texts[j].numberadder==-6){
 				sprintf(rendertext, "th");
+			}
+			else if(um->texts[j].numberadder==666){
+				for(int i=0;i<=game->num_aiplayers-1;i++){
+					if(game->aiplayers[i].vehicle->lap==GAME_WINCONDITION_LAPS){
+						sprintf(rendertext, "Computer   %d   won   the   race", i);
+					}
+				}
 			}else{
 				sprintf(rendertext, um->texts[j].inputtext);
 			}

@@ -62,14 +62,10 @@ void aiplayer_init(struct aiplayer* p, struct vehiclemanager* vm, int index_trac
 	p->next = (random_int(4)+3);
 	//printf("turn=%f speed=%f next=%d\n",p->turn,p->speed,p->next);
 
-	/*
-	//initialize lap
-	p->vehicle->lap = 1;
-	p->vehicle->checkpoint1 = false;
-	p->vehicle->checkpoint2 = false;
-
-	p->vehicle->haspickup = 100;
-	*/
+	vec3f zero, up;
+	vec3f_set(zero, 0.f, 0.f, 0.f);
+	vec3f_set(up, 0.f, 1.f, 0.f);
+	camera_init(&p->camera, zero, zero, up);
 }
 
 
@@ -134,4 +130,19 @@ void player_updatecamera(struct player* p)
 
 	vec3f_set(up, 0.f, 1.f, 0.f);
 	camera_lookat(&p->camera, (float*)&t_player.getPosition(), up);
+}
+
+void aiwin_camera(struct aiplayer* aip)
+{
+	vec3f diff, up;
+
+	physx::PxMat44 t_player(aip->vehicle->body->getGlobalPose());
+	physx::PxVec3 targetpos = t_player.transform(physx::PxVec3(PLAYER_CAMERA_TARGETPOS));
+
+	vec3f_subtractn(diff, (float*)&targetpos, aip->camera.pos);
+	vec3f_scale(diff, AI_CAMERA_EASING);
+	vec3f_add(aip->camera.pos, diff);
+
+	vec3f_set(up, 0.f, 1.f, 0.f);
+	camera_lookat(&aip->camera, (float*)&t_player.getPosition(), up);
 }

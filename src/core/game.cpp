@@ -230,6 +230,8 @@ static void update(struct game* game)
 			}
 		}
 	}
+	
+	
 
 	vec3f_set(up, 0.f, 1.f, 0.f);
 
@@ -240,20 +242,28 @@ static void update(struct game* game)
 		move[VY] = 0.f;
 		vec3f_normalize(move);
 		if (game->inputmanager.controllers[GLFW_JOYSTICK_1].flags & INPUT_FLAG_ENABLED){
-			vec3f_scale(move, -0.2f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_UD]);
-			move[VY] = - 0.1f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_TRIGGERS];
-			vec3f_add(game->cam_debug.pos, move);
+			if(!(game->flags&GAME_FLAG_YOULOSE)){
+				vec3f_scale(move, -0.2f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_UD]);
+				move[VY] = - 0.1f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_TRIGGERS];
+				vec3f_add(game->cam_debug.pos, move);
 
-			camera_strafe(&game->cam_debug, 0.3f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_LR]);
+				camera_strafe(&game->cam_debug, 0.3f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_LR]);
 
-			camera_rotate(&game->cam_debug, up, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_LR]);
-			camera_rotate(&game->cam_debug, game->cam_debug.right, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_UD]);
+				camera_rotate(&game->cam_debug, up, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_LR]);
+				camera_rotate(&game->cam_debug, game->cam_debug.right, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_UD]);
+			}
+			else{
+				if(game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_UD]==(INPUT_STATE_CHANGED | INPUT_STATE_DOWN)){
+
+				}
+			}
 		}
 
 		// disable cart controls if debug camera is enabled
 		game->player.vehicle->controller = NULL;
 		} else
 			game->player.vehicle->controller = &game->inputmanager.controllers[GLFW_JOYSTICK_1];
+
 
 
 	if(!(game->flags&GAME_FLAG_PAUSED)){
@@ -273,9 +283,33 @@ static void update(struct game* game)
 		// update physics simulation
 		physicsmanager_update(&game->physicsmanager, GAME_SPU);
 
-		// update player camera
-		player_updatecamera(&game->player);
+		if(!(game->flags&GAME_FLAG_YOULOSE)){
+			// update player camera
+			player_updatecamera(&game->player);
+		}
 		
+	}
+
+	if(game->flags & GAME_FLAG_YOULOSE){
+
+		removetext(&game->uimanager, "laps");
+		removetext(&game->uimanager, "place");
+		removetext(&game->uimanager, "placer");
+
+		for(int i=0;i<=game->num_aiplayers-1;i++){
+			if(game->aiplayers[i].vehicle->lap==GAME_WINCONDITION_LAPS){
+				aiwin_camera(&game->aiplayers[i]);
+			}
+		}
+		vec3f color;
+		vec3f_set(color,1.0f,0.0f,0.0f);
+		addtext(&game->uimanager,"YOU LOST",200,200,color,&game->uimanager.font_youlost,0);
+
+		vec3f_set(color,1.0f,1.0f,1.0f);
+		addtext(&game->uimanager,"computerwon",345,280,color,&game->uimanager.font_playerlap,666);
+
+		addtext(&game->uimanager,"Would  you  like  to  play  again?",300,700,color,&game->uimanager.font_playerlap,0);
+
 	}
 
 	//check who has won the game
@@ -300,6 +334,13 @@ static void render(struct game* game)
 	// get camera transform
 	if (game->flags & GAME_FLAG_DEBUGCAM)
 		camera_gettransform(&game->cam_debug, global_wv);
+	else if (game->flags & GAME_FLAG_YOULOSE){
+		for(int i=0;i<=game->num_aiplayers-1;i++){
+			if(game->aiplayers[i].vehicle->lap==GAME_WINCONDITION_LAPS){
+				camera_gettransform(&game->aiplayers[i].camera, global_wv);
+			}
+		}	
+	}
 	else
 		camera_gettransform(&game->player.camera, global_wv);
 
@@ -525,11 +566,11 @@ int game_startup(struct game* game)
 	vec3f color;
 	vec3f_set(color, 1.0f,1.0f,1.0f);
 	//laps
-	addtext(&game->uimanager,"",100,700,color,&game->uimanager.font_playerlap,-1);
+	addtext(&game->uimanager,"laps",100,700,color,&game->uimanager.font_playerlap,-1);
 
 	//place
 	vec3f_set(color, 1.0f,1.0f,.0f);
-	addtext(&game->uimanager,"",100,650,color,&game->uimanager.font_place,-2);
+	addtext(&game->uimanager,"place",100,650,color,&game->uimanager.font_place,-2);
 
 
 	game->flags = GAME_FLAG_INIT;

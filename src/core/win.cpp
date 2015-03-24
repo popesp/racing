@@ -25,14 +25,8 @@ void checkwin(struct game* game)
 		if(game->aiplayers[i].vehicle->lap==GAME_WINCONDITION_LAPS){
 			printf("Computer-%d has won the game!\nGame's over\n\n", i);
 			
-			//reset laps
-			game->player.vehicle->lap=1;
-			for(int j=0; j<=game->num_aiplayers-1;j++){
-				if (i!=j)
-					game->aiplayers[j].vehicle->lap=1;
-			}
-			
 			game->flags &= ~GAME_FLAG_WINCONDITION;
+			game->flags |= GAME_FLAG_YOULOSE;
 		}
 	}
 
@@ -133,10 +127,7 @@ void checkplace(struct game* game){
 				}
 
 			}
-
-			//printf("Players place %d     AI[0] %d\n ", game->player.vehicle->place, game->aiplayers[0].vehicle->place);
 		}
-		
 
 		// IF MORE THAN ONE AI
 		if(game->num_aiplayers-1 > 0){
@@ -144,6 +135,9 @@ void checkplace(struct game* game){
 			for(int j=0; j<=game->num_aiplayers-1;j++){
 
 
+
+
+				
 				//FIXING INDEX BEFORE LAPS
 
 				//check index first
@@ -192,7 +186,7 @@ void checkplace(struct game* game){
 		addtext(&game->uimanager, "placer", 225, 580,color,&game->uimanager.font_placer,-3);
 	}
 	else if(game->player.vehicle->place==1){
-		addtext(&game->uimanager, "placer", 200, 580,color,&game->uimanager.font_placer,-3);
+		addtext(&game->uimanager, "placer", 170, 580,color,&game->uimanager.font_placer,-3);
 	}
 	else if(game->player.vehicle->place==2){
 		addtext(&game->uimanager, "placer", 200, 580,color,&game->uimanager.font_placer,-4);

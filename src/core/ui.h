@@ -12,12 +12,14 @@
 #define	UI_FONT_FILENAME_DEFAULT	"res/fonts/labtsec.ttf"
 #define	UI_FONT_FILENAME_PAUSE		"res/fonts/bebas.ttf"
 #define	UI_FONT_FILENAME_PLACE		"res/fonts/seasrn.ttf"
+#define	UI_FONT_FILENAME_YOULOSE	"res/fonts/Aero.ttf"
 
 #define	UI_DEFAULT_FONTSIZE			48
 #define	UI_PAUSE_FONTSIZE			78
 #define UI_PLAYERLAP_FONTSIZE		48
 #define UI_PLACE_FONTSIZE			120
 #define UI_PLACER_FONTSIZE			40
+#define UI_YOULOSE_FONTSIZE			180
 
 #define	UI_FONT_GLYPH_COUNT			128
 #define	UI_FONT_TEXTURE_WIDTH		16
@@ -67,6 +69,7 @@ struct uimanager
 	struct font font_playerlap;
 	struct font font_place;
 	struct font font_placer;
+	struct font font_youlost;
 
 	struct text texts[UI_TEXT_COUNT];
 };
