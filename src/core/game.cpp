@@ -338,6 +338,7 @@ static void render(struct game* game)
 	// render pickups
 	pickupmanager_render(&game->pickupmanager, &game->renderer, global_wv);
 
+	
 	uimanager_render(&game->uimanager, game);
 
 	glfwSwapBuffers(game->window.w);
@@ -444,6 +445,12 @@ static int start_subsystems(struct game* game)
 	uimanager_startup(&game->uimanager, &game->window);
 	printf("...done.\n");
 
+	vec3f color;
+	vec3f_set(color,1.0f,0.0f,.0f);
+	addtext(&game->uimanager, "Hello", 100, 100, color);
+	
+	addtext(&game->uimanager, "something else", 200, 100, color);
+
 	return 1;
 }
 
@@ -472,7 +479,7 @@ int game_startup(struct game* game)
 	entitymanager_startup(&game->entitymanager, &game->physicsmanager, &game->audiomanager, &game->renderer);
 
 	// start up the vehicle manager for the track
-	vehiclemanager_startup(&game->vehiclemanager, &game->physicsmanager, &game->entitymanager, &game->audiomanager, &game->renderer, &game->track);
+	vehiclemanager_startup(&game->vehiclemanager, &game->physicsmanager, &game->entitymanager, &game->audiomanager, &game->renderer, &game->track, &game->uimanager);
 
 	// start up the pickup manager for the track
 	int track_indices[] = {50, 100, 150}; // test values

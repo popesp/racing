@@ -4,6 +4,7 @@
 
 #include	"../audio/audio.h"
 #include	"../core/input.h"
+#include	"../core/ui.h"
 #include	"entities/entity.h"
 #include	"../physics/physics.h"
 #include	"../render/render.h"
@@ -131,6 +132,8 @@ struct vehiclemanager
 	struct physicsmanager* pm;
 	struct entitymanager* em;
 	struct audiomanager* am;
+	struct uimanager* um;
+
 	struct track* track;
 
 	struct renderable r_vehicle;
@@ -154,7 +157,7 @@ struct vehiclemanager
 	param:	r				renderer
 	param:	track			track object
 */
-void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm, struct entitymanager* em, struct audiomanager* am, struct renderer* r, struct track* track);
+void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm, struct entitymanager* em, struct audiomanager* am, struct renderer* r, struct track* track, struct uimanager* um);
 
 /*	shut down the vehicle manager
 	param:	vm				vehicle manager

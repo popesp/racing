@@ -16,6 +16,12 @@ void uimanager_startup(struct uimanager* um, struct window* window)
 
 	font_generate(&um->font_default, um, UI_FONT_FILENAME_DEFAULT, UI_DEFAULT_FONTSIZE);
 	um->activefont = &um->font_default;
+
+	um->num_texts=0;
+
+	for(int i=0;i<UI_TEXT_COUNT;i++){
+		um->texts[i].flags=UI_TEXT_FLAG_INIT;
+	}
 }
 
 void uimanager_shutdown(struct uimanager* um)
@@ -84,37 +90,70 @@ static float* renderchar(struct uimanager* um, int x, int y, char c, vec3f color
 	return ptr;
 }
 
+void addtext(struct uimanager* um, char* inputtext, int x, int y, vec3f color){
+	int i;
+	for (i = 0; i < UI_TEXT_COUNT; i++)
+		if (!(um->texts[i].flags & UI_TEXT_FLAG_ENABLED))
+			break;
+
+	if (i == UI_TEXT_COUNT)
+		return;
+
+	struct text* t = um->texts + i;
+
+	t->inputtext = inputtext;
+	t->x = x;
+	t->y = y;
+	vec3f_copy(t->color, color);
+	t->flags = UI_TEXT_FLAG_ENABLED;
+
+	um->num_texts++;
+}
+
+void removetext(struct uimanager* um, char* inputtext){
+	int i;
+
+	for (i = 0; i < UI_TEXT_COUNT; i++)
+		if ((um->texts + i)->inputtext==inputtext)
+		{
+			um->texts[i].inputtext = "";
+			um->texts[i].flags = UI_TEXT_FLAG_INIT;
+		}
+}
+
 void uimanager_render(struct uimanager* um, struct game* game)
 {
-	char velocity[256];
+	char rendertext[256];
 	mat4f dummy;
-	vec3f color;
-	unsigned i;
+	unsigned i,j;
 	float* ptr;
-	int x, y;
 	char c;
 
-	sprintf(velocity, "Velocity: %d\n", (int)game->player.vehicle->speed);
+	if(um->num_texts>0){
+		for(j=0;j<um->num_texts;j++){
 
-	renderable_allocate(&game->renderer, &um->activefont->renderable, strlen(velocity) * 6);
-	
-	ptr = um->activefont->renderable.buf_verts;
+			sprintf(rendertext, um->texts[j].inputtext);
 
-	vec3f_set(color, 1.f, 0.f, 0.f);
+			renderable_allocate(&game->renderer, &um->activefont->renderable, strlen(rendertext) * 6);
 
-	x = 100;
-	y = 100;
-	for (i = 0; i < strlen(velocity); i++)
-	{
-		c = velocity[i];
+			ptr = um->activefont->renderable.buf_verts;
 
-		ptr = renderchar(um, x + um->activefont->glyphs[c].left, y - um->activefont->glyphs[c].top, velocity[i], color, ptr);
+			int x = um->texts[j].x;
+			int y = um->texts[j].y;
 
-		x += um->activefont->glyphs[c].xadvance;
+			for (i = 0; i < strlen(rendertext); i++)
+			{
+				c = rendertext[i];
+
+				ptr = renderchar(um, x + um->activefont->glyphs[c].left, y - um->activefont->glyphs[c].top, rendertext[i], um->texts[j].color, ptr);
+
+				x += um->activefont->glyphs[c].xadvance;
+			}
+
+			renderable_sendbuffer(&game->renderer, &um->activefont->renderable);
+			renderable_render(&game->renderer, &um->activefont->renderable, dummy, dummy, 0);
+		}
 	}
-
-	renderable_sendbuffer(&game->renderer, &um->activefont->renderable);
-	renderable_render(&game->renderer, &um->activefont->renderable, dummy, dummy, 0);
 }
 
 

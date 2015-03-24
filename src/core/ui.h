@@ -17,6 +17,18 @@
 #define	UI_FONT_TEXTURE_WIDTH		16
 #define	UI_FONT_TEXTURE_ROWS		8
 
+#define UI_TEXT_COUNT				20
+#define	UI_TEXT_FLAG_INIT			0x00
+#define	UI_TEXT_FLAG_ENABLED		0x01
+
+struct text
+{
+	int x, y;
+	char* inputtext;
+	vec3f color;
+
+	unsigned char flags;
+};
 
 struct glyph
 {
@@ -43,6 +55,10 @@ struct uimanager
 	struct font* activefont;
 
 	struct font font_default;
+
+	struct text texts[UI_TEXT_COUNT];
+
+	int num_texts;
 };
 
 
@@ -58,5 +74,7 @@ void font_generate(struct font* font, struct uimanager* um, const char* filename
 
 void font_delete(struct font* font);
 
+void addtext(struct uimanager* um, char* inputtext, int x, int y, vec3f color);
+void removetext(struct uimanager* um, char* inputtext);
 
 #endif

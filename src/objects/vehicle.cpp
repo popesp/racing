@@ -108,7 +108,7 @@ static void (* powerupfunction[VEHICLE_POWERUP_COUNT])(struct vehicle*) =
 };
 
 
-void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm, struct entitymanager* em, struct audiomanager* am, struct renderer* r, struct track* track)
+void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm, struct entitymanager* em, struct audiomanager* am, struct renderer* r, struct track* track, struct uimanager* um)
 {
 	vec3f dim, center;
 	int i;
@@ -117,6 +117,7 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 	vm->pm = pm;
 	vm->em = em;
 	vm->am = am;
+	vm->um = um;
 	vm->track = track;
 
 	// initialize vehicle mesh
@@ -240,6 +241,11 @@ static void vehicleinput(struct vehicle* v)
 		{
 			if (v->flags & VEHICLE_FLAG_HASPOWERUP)
 				powerupfunction[v->powerup](v);
+		}
+
+		if (v->controller->buttons[INPUT_BUTTON_X] == (INPUT_STATE_DOWN | INPUT_STATE_CHANGED))
+		{
+			removetext(v->vm->um,"Hello");
 		}
 		
 	}
