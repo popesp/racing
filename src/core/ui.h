@@ -20,6 +20,7 @@
 #define UI_PLACE_FONTSIZE			120
 #define UI_PLACER_FONTSIZE			40
 #define UI_YOULOSE_FONTSIZE			180
+#define UI_VELOCITY_FONTSIZE		100
 
 #define	UI_FONT_GLYPH_COUNT			128
 #define	UI_FONT_TEXTURE_WIDTH		16
@@ -70,6 +71,7 @@ struct uimanager
 	struct font font_place;
 	struct font font_placer;
 	struct font font_youlost;
+	struct font font_velocity;
 
 	struct text texts[UI_TEXT_COUNT];
 };

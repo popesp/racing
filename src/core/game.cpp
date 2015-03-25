@@ -205,14 +205,14 @@ static void update(struct game* game)
 				removetext(&game->uimanager, "Game   Paused");
 				game->flags &= ~GAME_FLAG_PAUSED;
 			}else{
-				if(!(game->flags & GAME_FLAG_YOULOSE)){
+				if(!(game->flags & GAME_FLAG_YOULOSE || game->flags & GAME_FLAG_YOUWIN)){
 					addtext(&game->uimanager, "Game   Paused", 440, 350, color, &game->uimanager.font_pause,0);
 					game->flags |= GAME_FLAG_PAUSED;
 				}
 			}
 		}
 
-		//temp
+		//possibly temp
 		if(game->inputmanager.controllers[GLFW_JOYSTICK_1].buttons[INPUT_BUTTON_X] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN)){
 			if(game->flags & GAME_FLAG_YOULOSE || game->flags & GAME_FLAG_YOUWIN){
 				vec3f color;
@@ -270,6 +270,10 @@ static void update(struct game* game)
 
 					vec3f_set(color, 1.0f,1.0f,.0f);
 					addtext(&game->uimanager,"place",100,650,color,&game->uimanager.font_place,-2);
+					//speed
+					vec3f_set(color, 0.0f,0.0f,1.0f);
+					addtext(&game->uimanager,"Speed",1050,600,color,&game->uimanager.font_playerlap,0);
+					addtext(&game->uimanager,"velocity",1060,700,color,&game->uimanager.font_velocity,9001);
 
 					//delete player and ai
 					player_delete(&game->player, &game->vehiclemanager);
@@ -354,7 +358,6 @@ static void update(struct game* game)
 			// update player camera
 			player_updatecamera(&game->player);
 		}
-		
 	}
 
 	if(game->flags & GAME_FLAG_YOULOSE || game->flags & GAME_FLAG_YOUWIN){
@@ -363,6 +366,8 @@ static void update(struct game* game)
 		removetext(&game->uimanager, "laps");
 		removetext(&game->uimanager, "place");
 		removetext(&game->uimanager, "placer");
+		removetext(&game->uimanager, "Speed");
+		removetext(&game->uimanager, "velocity");
 		vec3f color;
 
 		if(game->flags & GAME_FLAG_YOULOSE){
@@ -656,6 +661,11 @@ int game_startup(struct game* game)
 	//place
 	vec3f_set(color, 1.0f,1.0f,.0f);
 	addtext(&game->uimanager,"place",100,650,color,&game->uimanager.font_place,-2);
+
+	//speed
+	vec3f_set(color, 0.0f,0.0f,1.0f);
+	addtext(&game->uimanager,"Speed",1050,600,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"velocity",1060,700,color,&game->uimanager.font_velocity,9001);
 
 
 	game->flags = GAME_FLAG_INIT;
