@@ -1,12 +1,21 @@
-npoints = 8;
-looped = true;
+npoints = 18
+looped = false
 
-point = pos(0.0, 0.0, 0.0), tan(0.0, 0.0, 1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
-point = pos(-20.0, 5.0, 100.0), tan(0.0, 0.0, 1.0), angle(0.1745), weight(50.0), width(12.0), subdivisions(20)
-point = pos(-40.0, 10.0, 120.0), tan(-1.0, 0.0, 0.0), angle(0.3491), weight(50.0), width(12.0), subdivisions(20)
-point = pos(-60.0, 5.0, 100.0), tan(0.0, 0.0, -1.0), angle(0.1745), weight(50.0), width(12.0), subdivisions(20)
-point = pos(-60.0, 0.0, 0.0), tan(0.0, 0.0, -1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
-point = pos(-60.0, 0.0, -60.0), tan(0.0, 0.0, -1.0), angle(0.1745), weight(50.0), width(12.0), subdivisions(20)
-point = pos(-40.0, 1.0, -80.0), tan(1.0, 0.0, 0.0), angle(0.3491), weight(50.0), width(12.0), subdivisions(20)
-point = pos(-20.0, 0.0, -60.0), tan(0.0, 0.0, 1.0), angle(0.1745), weight(50.0), width(12.0), subdivisions(20)
-
+point = pos(-20.0, 0.0, 0.0), tan(0.0, 0.0, -1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
+point = pos(-20.0, 0.0, -60.0), tan(0.0, 0.0, -1.0), angle(0.1745), weight(50.0), width(12.0), subdivisions(20)
+point = pos(0.0, 0.0, -100.0), tan(0.0, 0.0, -1.0), angle(0.1745), weight(50.0), width(12.0), subdivisions(20)
+point = pos(20.0, 0.0, -120.0), tan(0.0, 0.0, -1.0), angle(0.1745), weight(50.0), width(12.0), subdivisions(20)
+point = pos(60.0, 0.0, -120.0), tan(1.0, 0.0, 0.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
+point = pos(100.0, 5.0, -120.0), tan(1.0, 0.0, 0.0), angle(0.1745), weight(50.0), width(12.0), subdivisions(20)
+point = pos(120.0, 10.0, -100.0), tan(0.0, 0.0, 1.0), angle(0.3491), weight(50.0), width(12.0), subdivisions(20)
+point = pos(120.0, 15.0, -60.0), tan(0.0, 0.0, 1.0), angle(0.3491), weight(50.0), width(12.0), subdivisions(20)
+point = pos(80.0, 20.0, -40.0), tan(-1.0, 0.0, 0.0), angle(0.1745), weight(50.0), width(12.0), subdivisions(20)
+point = pos(40.0, 20.0, -40.0), tan(-1.0, 0.0, 0.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
+point = pos(0.0, 20.0, -40.0), tan(-1.0, 0.0, 0.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
+point = pos(-40.0, 20.0, -40.0), tan(-1.0, 0.0, 0.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
+point = pos(-80.0, 20.0, -40.0), tan(-1.0, 0.0, 0.0), angle(0.3491), weight(50.0), width(12.0), subdivisions(20)
+point = pos(-120.0, 15.0, -40.0), tan(-1.0, 0.0, 0.0), angle(0.5581), weight(50.0), width(12.0), subdivisions(20)
+point = pos(-80.0, 10.0, 0.0), tan(0.0, 0.0, 1.0), angle(0.5581), weight(50.0), width(12.0), subdivisions(20)
+point = pos(-80.0, 7.0, 20.0), tan(1.0, 0.0, 0.0), angle(0.5581), weight(50.0), width(12.0), subdivisions(20)
+point = pos(-80.0, 3.0, 0.0), tan(0.0, 0.0, -1.0), angle(0.3491), weight(50.0), width(12.0), subdivisions(20)
+point = pos(-80.0, 0.0, -80.0), tan(0.0, 0.0, -1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
