@@ -214,7 +214,7 @@ static void update(struct game* game)
 
 		//temp
 		if(game->inputmanager.controllers[GLFW_JOYSTICK_1].buttons[INPUT_BUTTON_X] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN)){
-			if(game->flags & GAME_FLAG_YOULOSE){
+			if(game->flags & GAME_FLAG_YOULOSE || game->flags & GAME_FLAG_YOUWIN){
 				vec3f color;
 				vec3f_set(color,.0f,.0f,1.0f);
 
@@ -233,17 +233,19 @@ static void update(struct game* game)
 
 		if(game->inputmanager.controllers[GLFW_JOYSTICK_1].buttons[INPUT_BUTTON_A] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN)){
 	
-			if(game->flags & GAME_FLAG_YOULOSE){
+			if(game->flags & GAME_FLAG_YOULOSE || game->flags & GAME_FLAG_YOUWIN){
 				if(game->flags & GAME_FLAG_SWITCHON){
 					//Currently get out
 					//SUPPOSED TO BE MAIN MENU IN FUTURE
 					game->flags &= ~GAME_FLAG_YOULOSE;
+					game->flags &= ~GAME_FLAG_YOUWIN;
 					game->flags |= GAME_FLAG_TERMINATED;
 				}
 				else{
 					//RESTART RACE
 					game->flags &= ~GAME_FLAG_SWITCHON;
 					game->flags &= ~GAME_FLAG_YOULOSE;
+					game->flags &= ~GAME_FLAG_YOUWIN;
 					game->flags |= GAME_FLAG_WINCONDITION;
 					//reset laps
 					game->player.vehicle->lap=1;
@@ -251,24 +253,23 @@ static void update(struct game* game)
 						game->aiplayers[i].vehicle->lap=1;
 					}
 
-
+					//remove all the text
 					removetext(&game->uimanager,"[                                                    ]");
 					removetext(&game->uimanager,"[                                                              ]");
 					removetext(&game->uimanager,"Main   Menu");
 					removetext(&game->uimanager,"Restart");
 					removetext(&game->uimanager,"computerwon");
 					removetext(&game->uimanager,"YOU LOST");
-						
+					removetext(&game->uimanager,"youwon");
+					removetext(&game->uimanager,"YOU WON");
+					removetext(&game->uimanager,"Nice job!");	
 
 					vec3f color;
 					vec3f_set(color, 1.0f,1.0f,1.0f);
-					//laps
 					addtext(&game->uimanager,"laps",100,700,color,&game->uimanager.font_playerlap,-1);
 
-					//place
 					vec3f_set(color, 1.0f,1.0f,.0f);
 					addtext(&game->uimanager,"place",100,650,color,&game->uimanager.font_place,-2);
-
 
 					//delete player and ai
 					player_delete(&game->player, &game->vehiclemanager);
@@ -356,29 +357,37 @@ static void update(struct game* game)
 		
 	}
 
-	if(game->flags & GAME_FLAG_YOULOSE){
+	if(game->flags & GAME_FLAG_YOULOSE || game->flags & GAME_FLAG_YOUWIN){
 
 		//remove lap/place text
 		removetext(&game->uimanager, "laps");
 		removetext(&game->uimanager, "place");
 		removetext(&game->uimanager, "placer");
-
-		//set camera on winning AI
-		for(int i=0;i<=game->num_aiplayers-1;i++){
-			if(game->aiplayers[i].vehicle->lap==GAME_WINCONDITION_LAPS){
-				aiwin_camera(&game->aiplayers[i]);
-			}
-		}
-
-		//"You Lose"
 		vec3f color;
-		vec3f_set(color,1.0f,0.0f,0.0f);
-		addtext(&game->uimanager,"YOU LOST",200,200,color,&game->uimanager.font_youlost,0);
 
-		//"Computer x has won"
+		if(game->flags & GAME_FLAG_YOULOSE){
+			//set camera on winning AI
+			for(int i=0;i<=game->num_aiplayers-1;i++){
+				if(game->aiplayers[i].vehicle->lap==GAME_WINCONDITION_LAPS){
+					aiwin_camera(&game->aiplayers[i]);
+				}
+			}
+
+			vec3f_set(color,1.0f,0.0f,0.0f);
+			addtext(&game->uimanager,"YOU LOST",200,200,color,&game->uimanager.font_youlost,0);
+
+			vec3f_set(color,1.0f,1.0f,1.0f);
+			addtext(&game->uimanager,"computerwon",345,280,color,&game->uimanager.font_playerlap,666);
+
+		}else{
+			vec3f_set(color,1.0f,0.0f,0.0f);
+			addtext(&game->uimanager,"YOU WON",200,200,color,&game->uimanager.font_youlost,0);
+
+			vec3f_set(color,1.0f,1.0f,1.0f);
+			addtext(&game->uimanager,"Nice job!",345,280,color,&game->uimanager.font_playerlap,0);
+		}
+		
 		vec3f_set(color,1.0f,1.0f,1.0f);
-		addtext(&game->uimanager,"computerwon",345,280,color,&game->uimanager.font_playerlap,666);
-
 		//"Restart" "Main Menu"
 		addtext(&game->uimanager,"Restart",550,600,color,&game->uimanager.font_playerlap,0);
 		addtext(&game->uimanager,"Main   Menu",530,700,color,&game->uimanager.font_playerlap,0);
