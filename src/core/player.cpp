@@ -30,14 +30,14 @@ void player_init(struct player* p, struct vehiclemanager* vm, controller* contro
 	camera_init(&p->camera, zero, zero, up);
 
 	
-	/*
+	
 	//initialize lap
 	p->vehicle->lap = 1;
 	p->vehicle->checkpoint1 = false;
 	p->vehicle->checkpoint2 = false;
 
-	p->vehicle->haspickup = 100;
-	*/
+	//p->vehicle->haspickup = 100;
+	
 }
 
 void aiplayer_init(struct aiplayer* p, struct vehiclemanager* vm, int index_track, vec3f offs)

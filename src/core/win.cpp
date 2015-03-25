@@ -11,8 +11,8 @@ void checkwin(struct game* game)
 	if(game->player.vehicle->lap==GAME_WINCONDITION_LAPS){
 		printf("Player has won the game!\nGame's over\n\n");
 		//reset laps
-		//game->player.vehicle->lap=1;
-		for(int i=0; i<game->num_aiplayers-1;i++){
+		game->player.vehicle->lap=1;
+		for(int i=0; i<game->num_aiplayers;i++){
 			game->aiplayers[i].vehicle->lap=1;
 		}
 		
@@ -20,7 +20,7 @@ void checkwin(struct game* game)
 	}
 
 
-	for(int i=0;i<=game->num_aiplayers-1;i++){
+	for(int i=0;i<game->num_aiplayers;i++){
 		//printf("%d\n", game->aiplayers[i].vehicle->lap);
 		if(game->aiplayers[i].vehicle->lap==GAME_WINCONDITION_LAPS){
 			printf("Computer-%d has won the game!\nGame's over\n\n", i);
@@ -51,7 +51,7 @@ void checkwin(struct game* game)
 	}
 
 	//AI win logic
-	for(int i=0;i<=game->num_aiplayers-1;i++){
+	for(int i=0;i<game->num_aiplayers;i++){
 		if(game->aiplayers[i].vehicle->checkpoint1==false && (unsigned)game->aiplayers[i].vehicle->index_track==cp1){
 			game->aiplayers[i].vehicle->checkpoint1=true;
 		}
@@ -78,13 +78,13 @@ void checkplace(struct game* game){
 
 	
 	//init everyone to last place
-	for(int i=0;i<=game->num_aiplayers-1;i++){
+	for(int i=0;i<game->num_aiplayers;i++){
 		game->aiplayers[i].vehicle->place=game->num_aiplayers+1;
 		game->player.vehicle->place=game->num_aiplayers+1;
 	}
 
 	
-	for(int i=0; i<=game->num_aiplayers-1;i++){
+	for(int i=0; i<game->num_aiplayers;i++){
 
 		////////////////////////////////////
 		//if only one AI
@@ -134,42 +134,79 @@ void checkplace(struct game* game){
 
 			for(int j=0; j<=game->num_aiplayers-1;j++){
 
+				
 
+				if(game->aiplayers[j].vehicle->lap == game->player.vehicle->lap){
+					if(game->aiplayers[j].vehicle->checkpoint1 == game->player.vehicle->checkpoint1){
+						if(game->aiplayers[j].vehicle->checkpoint2 == game->player.vehicle->checkpoint2){
+
+							if(game->aiplayers[j].vehicle->index_track > game->player.vehicle->index_track){
+								game->aiplayers[j].vehicle->place = game->player.vehicle->place-1;
+								game->player.vehicle->place = game->aiplayers[j].vehicle->place+1;
+							}
+							else if(game->aiplayers[j].vehicle->index_track < game->player.vehicle->index_track){
+								game->player.vehicle->place = game->aiplayers[j].vehicle->place-1;
+								game->aiplayers[j].vehicle->place = game->player.vehicle->place+1;
+							}else if(game->aiplayers[j].vehicle->index_track == game->player.vehicle->index_track){
+								game->player.vehicle->place = game->aiplayers[j].vehicle->place-1;
+								game->aiplayers[j].vehicle->place = game->player.vehicle->place+1;
+							}
+						}
+						else if(game->aiplayers[j].vehicle->checkpoint2 == false && game->player.vehicle->checkpoint2 == true){
+							game->aiplayers[j].vehicle->place = game->player.vehicle->place-1;
+						}
+						else if(game->aiplayers[j].vehicle->checkpoint2 == true && game->player.vehicle->checkpoint2 == false){
+							game->player.vehicle->place = game->aiplayers[j].vehicle->place-1;
+						}
+					}
+					else if(game->aiplayers[j].vehicle->checkpoint1 == false && game->player.vehicle->checkpoint1 == true){
+						game->aiplayers[j].vehicle->place = game->player.vehicle->place-1;
+					}
+					else if(game->aiplayers[j].vehicle->checkpoint1 == true && game->player.vehicle->checkpoint1 == false){
+						game->player.vehicle->place = game->aiplayers[j].vehicle->place-1;
+					}
+
+						
+				}else if(game->aiplayers[j].vehicle->lap < game->player.vehicle->lap){
+					game->aiplayers[j].vehicle->place = game->player.vehicle->place-1;
+				}else if(game->aiplayers[j].vehicle->lap > game->player.vehicle->lap){
+					game->player.vehicle->place = game->aiplayers[j].vehicle->place-1;
+				}
 
 
 				
-				//FIXING INDEX BEFORE LAPS
+				////FIXING INDEX BEFORE LAPS
 
-				//check index first
-				//AI has larger index than player
-				if(game->aiplayers[i].vehicle->index_track > game->player.vehicle->index_track){
-					game->aiplayers[i].vehicle->place = game->player.vehicle->place-1;
-					game->player.vehicle->place = game->aiplayers[i].vehicle->place+1;
-				}
+				////check index first
+				////AI has larger index than player
+				//if(game->aiplayers[j].vehicle->index_track > game->player.vehicle->index_track){
+				//	game->aiplayers[j].vehicle->place = game->player.vehicle->place-1;
+				//	game->player.vehicle->place = game->aiplayers[j].vehicle->place+1;
+				//}
 
-				//player has larger index
-				else if(game->aiplayers[i].vehicle->index_track < game->player.vehicle->index_track){
-					game->player.vehicle->place = game->aiplayers[i].vehicle->place-1;
-					game->aiplayers[i].vehicle->place = game->player.vehicle->place+1;
-				}
+				////player has larger index
+				//else if(game->aiplayers[j].vehicle->index_track < game->player.vehicle->index_track){
+				//	game->player.vehicle->place = game->aiplayers[j].vehicle->place-1;
+				//	game->aiplayers[j].vehicle->place = game->player.vehicle->place+1;
+				//}
 
-				//same index player ahead
-				else if(game->aiplayers[i].vehicle->index_track == game->player.vehicle->index_track){
-					game->player.vehicle->place = game->aiplayers[i].vehicle->place-1;
-					game->aiplayers[i].vehicle->place = game->player.vehicle->place+1;
-				}
+				////same index player ahead
+				//else if(game->aiplayers[j].vehicle->index_track == game->player.vehicle->index_track){
+				//	game->player.vehicle->place = game->aiplayers[j].vehicle->place-1;
+				//	game->aiplayers[j].vehicle->place = game->player.vehicle->place+1;
+				//}
 
-								if(game->aiplayers[i].vehicle->index_track > game->aiplayers[j].vehicle->index_track){
+				//else if(game->aiplayers[j].vehicle->index_track > game->aiplayers[j].vehicle->index_track){
 
-									game->aiplayers[i].vehicle->place = game->aiplayers[j].vehicle->place-1;
-									game->aiplayers[j].vehicle->place = game->aiplayers[i].vehicle->place+1;
+				//	game->aiplayers[j].vehicle->place = game->aiplayers[j].vehicle->place-1;
+				//	game->aiplayers[j].vehicle->place = game->aiplayers[j].vehicle->place+1;
 
-								}
-								else if(game->aiplayers[i].vehicle->index_track < game->aiplayers[j].vehicle->index_track){
-									game->aiplayers[j].vehicle->place = game->aiplayers[i].vehicle->place-1;
-									game->aiplayers[i].vehicle->place = game->aiplayers[j].vehicle->place+1;
+				//}
+				//else if(game->aiplayers[j].vehicle->index_track < game->aiplayers[j].vehicle->index_track){
+				//	game->aiplayers[j].vehicle->place = game->aiplayers[j].vehicle->place-1;
+				//	game->aiplayers[j].vehicle->place = game->aiplayers[j].vehicle->place+1;
 
-								}
+				//}
 															
 			}
 
