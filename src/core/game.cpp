@@ -118,30 +118,7 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 			break;
 
 		case GLFW_KEY_SPACE:
-			/*
-			// toggle win condition
-			if (game->flags & GAME_FLAG_WINCONDITION)
-			{
-				printf("Win condition deactivated.\n");
-				game->flags &= ~GAME_FLAG_WINCONDITION;
-
-				entitymanager_removeblimp(&game->entitymanager,game->player.vehicle->ownblimp,game->player.vehicle);
-			} else
-			{
-				printf("Win condition activated.\n");
-				printf("Player is on lap %d\n", game->player.vehicle->lap);
-
-				entitymanager_placeblimp(game->player.vehicle,&game->entitymanager,game->track.pathpoints[0].pos);
-
-				for (i = 0; i < game->num_aiplayers; i++)
-				{
-					game->aiplayers[i].vehicle->lap = 1;
-					printf("Computer-%d is on lap %d\n", i+1, game->aiplayers[i].vehicle->lap);
-				}
-
-				game->flags |= GAME_FLAG_WINCONDITION;
-			}
-			*/
+			
 			break;
 
 		case GLFW_KEY_BACKSPACE:
@@ -211,27 +188,123 @@ static void update(struct game* game)
 	{
 		if (game->inputmanager.controllers[GLFW_JOYSTICK_1].buttons[INPUT_BUTTON_Y] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
 		{
-			if (game->flags & GAME_FLAG_DEBUGCAM)
-				game->flags &= ~GAME_FLAG_DEBUGCAM;
-			else
-				game->flags |= GAME_FLAG_DEBUGCAM;
+			if(!(game->flags & GAME_FLAG_YOULOSE)){
+				if (game->flags & GAME_FLAG_DEBUGCAM)
+					game->flags &= ~GAME_FLAG_DEBUGCAM;
+				else
+					game->flags |= GAME_FLAG_DEBUGCAM;
 			}
+		}
+
 		if (game->inputmanager.controllers[GLFW_JOYSTICK_1].buttons[INPUT_BUTTON_START] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
 		{
 			vec3f color;
 			vec3f_set(color,1.0f,1.0f,1.0f);
 	
 			if (game->flags & GAME_FLAG_PAUSED){
-				removetext(&game->uimanager, "Game Paused");
+				removetext(&game->uimanager, "Game   Paused");
 				game->flags &= ~GAME_FLAG_PAUSED;
 			}else{
-				addtext(&game->uimanager, "Game Paused", 450, 350, color, &game->uimanager.font_pause,0);
-				game->flags |= GAME_FLAG_PAUSED;
+				if(!(game->flags & GAME_FLAG_YOULOSE)){
+					addtext(&game->uimanager, "Game   Paused", 440, 350, color, &game->uimanager.font_pause,0);
+					game->flags |= GAME_FLAG_PAUSED;
+				}
+			}
+		}
+
+		//temp
+		if(game->inputmanager.controllers[GLFW_JOYSTICK_1].buttons[INPUT_BUTTON_X] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN)){
+			if(game->flags & GAME_FLAG_YOULOSE){
+				vec3f color;
+				vec3f_set(color,.0f,.0f,1.0f);
+
+				if(game->flags & GAME_FLAG_SWITCHON){
+					game->flags &= ~GAME_FLAG_SWITCHON;
+					removetext(&game->uimanager,"[                                                              ]");
+					addtext(&game->uimanager,"[                                                    ]",520,600,color,&game->uimanager.font_playerlap,0);
+				}
+				else{
+					game->flags |= GAME_FLAG_SWITCHON;
+					removetext(&game->uimanager,"[                                                    ]");
+					addtext(&game->uimanager,"[                                                              ]",500,700,color,&game->uimanager.font_playerlap,0);
+				}			
+			}
+		}
+
+		if(game->inputmanager.controllers[GLFW_JOYSTICK_1].buttons[INPUT_BUTTON_A] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN)){
+	
+			if(game->flags & GAME_FLAG_YOULOSE){
+				if(game->flags & GAME_FLAG_SWITCHON){
+					//Currently get out
+					//SUPPOSED TO BE MAIN MENU IN FUTURE
+					game->flags &= ~GAME_FLAG_YOULOSE;
+					game->flags |= GAME_FLAG_TERMINATED;
+				}
+				else{
+					//RESTART RACE
+					game->flags &= ~GAME_FLAG_SWITCHON;
+					game->flags &= ~GAME_FLAG_YOULOSE;
+					game->flags |= GAME_FLAG_WINCONDITION;
+					//reset laps
+					game->player.vehicle->lap=1;
+					for(int i=0; i<game->num_aiplayers;i++){
+						game->aiplayers[i].vehicle->lap=1;
+					}
+
+
+					removetext(&game->uimanager,"[                                                    ]");
+					removetext(&game->uimanager,"[                                                              ]");
+					removetext(&game->uimanager,"Main   Menu");
+					removetext(&game->uimanager,"Restart");
+					removetext(&game->uimanager,"computerwon");
+					removetext(&game->uimanager,"YOU LOST");
+						
+
+					vec3f color;
+					vec3f_set(color, 1.0f,1.0f,1.0f);
+					//laps
+					addtext(&game->uimanager,"laps",100,700,color,&game->uimanager.font_playerlap,-1);
+
+					//place
+					vec3f_set(color, 1.0f,1.0f,.0f);
+					addtext(&game->uimanager,"place",100,650,color,&game->uimanager.font_place,-2);
+
+
+					//delete player and ai
+					player_delete(&game->player, &game->vehiclemanager);
+					for (int i = 0; i < game->num_aiplayers; i++){
+						aiplayer_delete(&game->aiplayers[i], &game->vehiclemanager);
+					}
+
+					// initialize player objects
+					vec3f offs,aioffs;
+					vec3f_set(offs, 1.f, 0.f, 0.f);
+			
+					if (game->inputmanager.controllers[0].flags & INPUT_FLAG_ENABLED)
+						player_init(&game->player, &game->vehiclemanager, &game->inputmanager.controllers[0], 0, offs);
+					else
+						player_init(&game->player, &game->vehiclemanager, &game->inputmanager.keyboard, 0, offs);
+
+					game->num_aiplayers = 8;
+					int track_indices[] = {50, 100, 150};
+					float w;
+					for (int i=0; i < 4; i++)
+					{
+						if(i<3){
+							w =game->track.pathpoints[track_indices[i]].width * .25f;
+						}else{
+							w =game->track.pathpoints[track_indices[i-1]].width * .25f;
+						}
+						vec3f_set(aioffs, -w, 0.f, 0.f);
+						aiplayer_init(game->aiplayers+i*2+0, &game->vehiclemanager, i, aioffs);
+
+						vec3f_set(aioffs, w, 0.f, 0.f);
+						aiplayer_init(game->aiplayers+i*2+1, &game->vehiclemanager, i, aioffs);
+					}
+				}
 			}
 		}
 	}
-	
-	
 
 	vec3f_set(up, 0.f, 1.f, 0.f);
 
@@ -242,7 +315,7 @@ static void update(struct game* game)
 		move[VY] = 0.f;
 		vec3f_normalize(move);
 		if (game->inputmanager.controllers[GLFW_JOYSTICK_1].flags & INPUT_FLAG_ENABLED){
-			if(!(game->flags&GAME_FLAG_YOULOSE)){
+			if(!(game->flags & GAME_FLAG_YOULOSE)){
 				vec3f_scale(move, -0.2f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_UD]);
 				move[VY] = - 0.1f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_TRIGGERS];
 				vec3f_add(game->cam_debug.pos, move);
@@ -252,19 +325,12 @@ static void update(struct game* game)
 				camera_rotate(&game->cam_debug, up, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_LR]);
 				camera_rotate(&game->cam_debug, game->cam_debug.right, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_UD]);
 			}
-			else{
-				if(game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_UD]==(INPUT_STATE_CHANGED | INPUT_STATE_DOWN)){
-
-				}
-			}
 		}
 
 		// disable cart controls if debug camera is enabled
 		game->player.vehicle->controller = NULL;
 		} else
 			game->player.vehicle->controller = &game->inputmanager.controllers[GLFW_JOYSTICK_1];
-
-
 
 	if(!(game->flags&GAME_FLAG_PAUSED)){
 
@@ -292,24 +358,33 @@ static void update(struct game* game)
 
 	if(game->flags & GAME_FLAG_YOULOSE){
 
+		//remove lap/place text
 		removetext(&game->uimanager, "laps");
 		removetext(&game->uimanager, "place");
 		removetext(&game->uimanager, "placer");
 
+		//set camera on winning AI
 		for(int i=0;i<=game->num_aiplayers-1;i++){
 			if(game->aiplayers[i].vehicle->lap==GAME_WINCONDITION_LAPS){
 				aiwin_camera(&game->aiplayers[i]);
 			}
 		}
+
+		//"You Lose"
 		vec3f color;
 		vec3f_set(color,1.0f,0.0f,0.0f);
 		addtext(&game->uimanager,"YOU LOST",200,200,color,&game->uimanager.font_youlost,0);
 
+		//"Computer x has won"
 		vec3f_set(color,1.0f,1.0f,1.0f);
 		addtext(&game->uimanager,"computerwon",345,280,color,&game->uimanager.font_playerlap,666);
 
-		addtext(&game->uimanager,"Would  you  like  to  play  again?",300,700,color,&game->uimanager.font_playerlap,0);
-
+		//"Restart" "Main Menu"
+		addtext(&game->uimanager,"Restart",550,600,color,&game->uimanager.font_playerlap,0);
+		addtext(&game->uimanager,"Main   Menu",530,700,color,&game->uimanager.font_playerlap,0);
+		
+		vec3f_set(color,.0f,.0f,1.0f);
+		addtext(&game->uimanager,"[                                                    ]",520,600,color,&game->uimanager.font_playerlap,0);
 	}
 
 	//check who has won the game
@@ -518,6 +593,7 @@ int game_startup(struct game* game)
 
 	game->num_aiplayers = 8;
 	float w;
+
 	// create ai
 	for (int i=0; i < 4; i++)
 	{
