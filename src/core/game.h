@@ -17,6 +17,7 @@
 #include	"../render/window.h"
 #include	"ui.h"
 
+#define GAME_WINCONDITION_LAPS	4
 
 #define	GAME_DEFAULT_WIDTH		1280
 #define	GAME_DEFAULT_HEIGHT		800
@@ -46,8 +47,6 @@
 #define	GAME_MUSIC_2_FILENAME	"res/music/Daft Punk & The Glitch Mob - Derezzed.mp3"
 #define	GAME_MUSIC_3_FILENAME	"res/music/Full Force Forward.mp3"
 #define	GAME_MUSIC_4_FILENAME	"res/music/Daft Punk & Boys Noize - End Of Line.mp3"
-
-#define GAME_WINCONDITION_LAPS	2
 
 #define	GAME_FLAG_TERMINATED	0x01
 #define	GAME_FLAG_WIREFRAME		0x02	// TEMP

@@ -14,13 +14,13 @@ void uimanager_startup(struct uimanager* um, struct window* window)
 
 	um->window = window;
 
-	font_generate(&um->font_default, um, UI_FONT_FILENAME_DEFAULT, UI_DEFAULT_FONTSIZE);
-	font_generate(&um->font_pause, um, UI_FONT_FILENAME_PAUSE, UI_PAUSE_FONTSIZE);
-	font_generate(&um->font_playerlap, um, UI_FONT_FILENAME_PAUSE, UI_PLAYERLAP_FONTSIZE);
-	font_generate(&um->font_place, um, UI_FONT_FILENAME_PLACE, UI_PLACE_FONTSIZE);
-	font_generate(&um->font_placer, um, UI_FONT_FILENAME_PLACE, UI_PLACER_FONTSIZE);
-	font_generate(&um->font_youlost, um, UI_FONT_FILENAME_YOULOSE, UI_YOULOSE_FONTSIZE);
-	font_generate(&um->font_velocity, um, UI_FONT_FILENAME_PAUSE, UI_VELOCITY_FONTSIZE);
+	font_generate(&um->font_default, um, UI_FONT_FILENAME_LABTSEC, UI_DEFAULT_FONTSIZE);
+	font_generate(&um->font_pause, um, UI_FONT_FILENAME_BEBAS, UI_PAUSE_FONTSIZE);
+	font_generate(&um->font_playerlap, um, UI_FONT_FILENAME_BEBAS, UI_PLAYERLAP_FONTSIZE);
+	font_generate(&um->font_place, um, UI_FONT_FILENAME_SEASRN, UI_PLACE_FONTSIZE);
+	font_generate(&um->font_placer, um, UI_FONT_FILENAME_SEASRN, UI_PLACER_FONTSIZE);
+	font_generate(&um->font_youwinlost, um, UI_FONT_FILENAME_AERO, UI_YOULOSE_FONTSIZE);
+	font_generate(&um->font_velocity, um, UI_FONT_FILENAME_BEBAS, UI_VELOCITY_FONTSIZE);
 
 	for(int i=0;i<UI_TEXT_COUNT;i++){
 		um->texts[i].flags=UI_TEXT_FLAG_INIT;
@@ -34,7 +34,7 @@ void uimanager_shutdown(struct uimanager* um)
 	font_delete(&um->font_playerlap);
 	font_delete(&um->font_place);
 	font_delete(&um->font_placer);
-	font_delete(&um->font_youlost);
+	font_delete(&um->font_youwinlost);
 	font_delete(&um->font_velocity);
 
 	FT_Done_FreeType(um->freetype);

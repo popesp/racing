@@ -9,10 +9,10 @@
 #include	"../render/texture.h"
 
 
-#define	UI_FONT_FILENAME_DEFAULT	"res/fonts/labtsec.ttf"
-#define	UI_FONT_FILENAME_PAUSE		"res/fonts/bebas.ttf"
-#define	UI_FONT_FILENAME_PLACE		"res/fonts/seasrn.ttf"
-#define	UI_FONT_FILENAME_YOULOSE	"res/fonts/Aero.ttf"
+#define	UI_FONT_FILENAME_LABTSEC	"res/fonts/labtsec.ttf"
+#define	UI_FONT_FILENAME_BEBAS		"res/fonts/bebas.ttf"
+#define	UI_FONT_FILENAME_SEASRN		"res/fonts/seasrn.ttf"
+#define	UI_FONT_FILENAME_AERO		"res/fonts/Aero.ttf"
 
 #define	UI_DEFAULT_FONTSIZE			48
 #define	UI_PAUSE_FONTSIZE			78
@@ -70,7 +70,7 @@ struct uimanager
 	struct font font_playerlap;
 	struct font font_place;
 	struct font font_placer;
-	struct font font_youlost;
+	struct font font_youwinlost;
 	struct font font_velocity;
 
 	struct text texts[UI_TEXT_COUNT];

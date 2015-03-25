@@ -228,6 +228,9 @@ void checkplace(struct game* game){
 	else if(game->player.vehicle->place==23||game->player.vehicle->place==33||game->player.vehicle->place==43||game->player.vehicle->place==53||game->player.vehicle->place==63||game->player.vehicle->place==73||game->player.vehicle->place==83||game->player.vehicle->place==93){
 		addtext(&game->uimanager, "placer", 270, 580,color,&game->uimanager.font_placer,-5);
 	}
+	else if(game->player.vehicle->place<10){
+		addtext(&game->uimanager, "placer", 215, 580,color,&game->uimanager.font_placer,-6);
+	}
 	else if(game->player.vehicle->place<20&&game->player.vehicle->place!=10){
 		addtext(&game->uimanager, "placer", 225, 580,color,&game->uimanager.font_placer,-6);
 	}
