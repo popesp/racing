@@ -217,7 +217,6 @@ static void restart(struct game* game){
 	else
 		player_init(&game->player, &game->vehiclemanager, &game->inputmanager.keyboard, 0, offs);
 
-	game->num_aiplayers = 8;
 	int track_indices[] = {50, 100, 150};
 	float w;
 	for (int i=0; i < 4; i++){

@@ -66,6 +66,7 @@
 #define	MENU_FLAG_EXITGAME		0x08
 #define	MENU_FLAG_SHUTDOWN		0x10
 #define GAME_FLAG_INCREDITS		0x20
+#define GAME_FLAG_INSETTINGS	0x40
 
 
 struct game
@@ -93,6 +94,7 @@ struct game
 
 	struct light track_lights[2];
 
+	bool soundon;
 	FMOD_CHANNEL* currentchannel;
 	int index_currentsong;
 	int songs[GAME_MUSIC_COUNT];

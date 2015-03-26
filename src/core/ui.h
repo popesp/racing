@@ -27,7 +27,7 @@
 #define	UI_FONT_TEXTURE_WIDTH		16
 #define	UI_FONT_TEXTURE_ROWS		8
 
-#define UI_TEXT_COUNT				20
+#define UI_TEXT_COUNT				30
 #define	UI_TEXT_FLAG_INIT			0x00
 #define	UI_TEXT_FLAG_ENABLED		0x01
 
@@ -92,11 +92,14 @@ void font_generate(struct font* font, struct uimanager* um, const char* filename
 void font_delete(struct font* font);
 
 void addtext(struct uimanager* um, char* inputtext, int x, int y, vec3f color, struct font* font, int numberadder);
+
 void removetext(struct uimanager* um, char* inputtext);
 void removealltext(struct uimanager* um);
 void removebrackets(struct uimanager* um);
+
 void displaymenu(struct game* game);
 void displaycredits(struct game* game);
+void displaysettings(struct game* game);
 
 int menu_startup(struct game* game);
 
