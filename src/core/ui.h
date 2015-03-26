@@ -17,6 +17,7 @@
 #define MENU_FLAG_INSETTINGS	0x40
 #define MENU_FLAG_SOUND			0x80
 #define MENU_FLAG_NUMAI			0x1b
+#define MENU_FLAG_NUMLAPS		0x10
 
 #define	UI_FONT_FILENAME_LABTSEC	"res/fonts/labtsec.ttf"
 #define	UI_FONT_FILENAME_BEBAS		"res/fonts/bebas.ttf"

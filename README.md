@@ -1,10 +1,11 @@
 # Warped Steel
 Winter 2015, CPSC 585 - Games Programming
-# Requires gamepad to play
+
+Requires gamepad to play
 
 
-Keyboard controls
------------------
+#Keyboard controls
+----------------
 
 Q -		Wireframe rendering
 
@@ -25,7 +26,7 @@ ESC -	Exit game
 
 
 
-Gamepad controls
+#Gamepad controls
 ----------------
 
 #Menu

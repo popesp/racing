@@ -257,7 +257,7 @@ static void winlose(struct game* game){
 	if(game->flags & GAME_FLAG_YOULOSE){
 		//set camera on winning AI
 		for(int i=0;i<=game->num_aiplayers-1;i++){
-			if(game->aiplayers[i].vehicle->lap==GAME_WINCONDITION_LAPS){
+			if(game->aiplayers[i].vehicle->lap==game->num_laps){
 				aiwin_camera(&game->aiplayers[i]);
 			}
 		}
@@ -440,7 +440,7 @@ static void render(struct game* game)
 	// camera for AI if you lose
 	else if (game->flags & GAME_FLAG_YOULOSE){
 		for(int i=0;i<=game->num_aiplayers-1;i++){
-			if(game->aiplayers[i].vehicle->lap==GAME_WINCONDITION_LAPS){
+			if(game->aiplayers[i].vehicle->lap==game->num_laps){
 				camera_gettransform(&game->aiplayers[i].camera, global_wv);
 			}
 		}	
