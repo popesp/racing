@@ -26,7 +26,6 @@ static void update(struct game*);
 static void render(struct game*);
 
 
-
 static void resetplayers(struct game* game)
 {
 	int i;
@@ -654,7 +653,7 @@ int game_startup(struct game* game)
 	game->songs[GAME_MUSIC_4_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_4_FILENAME);
 	game->index_currentsong = 0;
 	game->currentchannel = audiomanager_playmusic(&game->audiomanager, game->songs[game->index_currentsong], -1);
-	audiomanager_setmusicvolume(&game->audiomanager, 0.06f);
+	audiomanager_setmusicvolume(&game->audiomanager, 0.2f);
 	
 	vec3f color;
 	vec3f_set(color, 1.0f,1.0f,1.0f);
