@@ -56,15 +56,20 @@ static void updatemenu(struct game* game)
 				}else{
 
 					removebrackets(&game->uimanager);
+					
+					//move down to sound
 					if(game->menuflags & MENU_FLAG_NUMAI){
 						game->menuflags &= ~MENU_FLAG_NUMAI;
 						game->menuflags |= MENU_FLAG_SOUND;
 						addtext(&game->uimanager,"[                                                                                  ]",480,450,color,&game->uimanager.font_playerlap,0);//sound
 					}
+
+					//move down to back
 					else if(game->menuflags & MENU_FLAG_SOUND){
 						game->menuflags &= ~MENU_FLAG_SOUND;
 						addtext(&game->uimanager,"[                                  ]",560,600,color,&game->uimanager.font_playerlap,0);//back
 					}else{
+						//move to numai
 						game->menuflags |= MENU_FLAG_NUMAI;
 						addtext(&game->uimanager,"[                                                                                                                                      ]",360,350,color,&game->uimanager.font_playerlap,0);//numai
 					}
@@ -188,6 +193,17 @@ static void updatemenu(struct game* game)
 				}
 			}
 
+		}
+		//B Button
+		if(game->inputmanager.controllers[GLFW_JOYSTICK_1].buttons[INPUT_BUTTON_B] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN)){
+			if(game->menuflags & MENU_FLAG_INSETTINGS){
+				//decrease AI if on numAItoggle
+				if(game->menuflags & MENU_FLAG_NUMAI){
+					if(game->num_aiplayers > 1){
+						game->num_aiplayers--;
+					}
+				}
+			}
 		}
 	}
 }
