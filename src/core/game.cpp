@@ -333,7 +333,6 @@ static void update(struct game* game)
 				}
 				else{
 					game->flags |= GAME_FLAG_SWITCHON;
-					removealltext(&game->uimanager);
 					addtext(&game->uimanager,"[                                                              ]",500,700,color,&game->uimanager.font_playerlap,0);
 				}			
 			}

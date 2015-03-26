@@ -53,6 +53,21 @@ static void updatemenu(struct game* game)
 						removebrackets(&game->uimanager);
 						addtext(&game->uimanager,"[                                                                    ]",430,300,color,&game->uimanager.font_playerlap,0);
 					}		
+				}else{
+
+					removebrackets(&game->uimanager);
+					if(game->menuflags & MENU_FLAG_NUMAI){
+						game->menuflags &= ~MENU_FLAG_NUMAI;
+						game->menuflags |= MENU_FLAG_SOUND;
+						addtext(&game->uimanager,"[                                                                                  ]",480,450,color,&game->uimanager.font_playerlap,0);//sound
+					}
+					else if(game->menuflags & MENU_FLAG_SOUND){
+						game->menuflags &= ~MENU_FLAG_SOUND;
+						addtext(&game->uimanager,"[                                  ]",560,600,color,&game->uimanager.font_playerlap,0);//back
+					}else{
+						game->menuflags |= MENU_FLAG_NUMAI;
+						addtext(&game->uimanager,"[                                                                                                                                      ]",360,350,color,&game->uimanager.font_playerlap,0);//numai
+					}
 				}
 			}
 		}
@@ -88,45 +103,91 @@ static void updatemenu(struct game* game)
 						removebrackets(&game->uimanager);
 						addtext(&game->uimanager,"[                                                 ]",460,400,color,&game->uimanager.font_playerlap,0);
 					}
+				}else{
+					removebrackets(&game->uimanager);
+					if(game->menuflags & MENU_FLAG_NUMAI){
+						game->menuflags &= ~MENU_FLAG_NUMAI;
+						addtext(&game->uimanager,"[                                  ]",560,600,color,&game->uimanager.font_playerlap,0);//back
+					}
+					else if(game->menuflags & MENU_FLAG_SOUND){
+						game->menuflags &= ~MENU_FLAG_SOUND;
+						game->menuflags |= MENU_FLAG_NUMAI;
+						addtext(&game->uimanager,"[                                                                                                                                      ]",360,350,color,&game->uimanager.font_playerlap,0);//numai
+					}else{
+						game->menuflags |= MENU_FLAG_SOUND;
+						addtext(&game->uimanager,"[                                                                                  ]",480,450,color,&game->uimanager.font_playerlap,0);//sound
+					}
 				}
 			}
 		}
 
 		if(game->inputmanager.controllers[GLFW_JOYSTICK_1].buttons[INPUT_BUTTON_A] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN)){
-			if(game->menuflags & MENU_FLAG_STARTGAME){
-				game->flags &= ~GAME_FLAG_MAINMENU;
-				removealltext(&game->uimanager);
-			}
-			else if (game->menuflags & MENU_FLAG_SETTINGS){
-				removealltext(&game->uimanager);
-				displaysettings(game);
+			if(!(game->menuflags & MENU_FLAG_INSETTINGS)){
+				if(game->menuflags & MENU_FLAG_STARTGAME){
+					game->flags &= ~GAME_FLAG_MAINMENU;
+					removealltext(&game->uimanager);
+				}
+				else if (game->menuflags & MENU_FLAG_SETTINGS){
+					removealltext(&game->uimanager);
+					displaysettings(game);
 				
-				game->menuflags &= ~MENU_FLAG_SETTINGS;
-				game->menuflags |= MENU_FLAG_INSETTINGS;
-			}
-			else if (game->menuflags & MENU_FLAG_INSETTINGS){
-				removealltext(&game->uimanager);
-				displaymenu(game);
-				game->menuflags &= ~MENU_FLAG_INSETTINGS;
-				game->menuflags &= ~MENU_FLAG_CREDITS;
-			}
-			else if (game->menuflags & MENU_FLAG_CREDITS){
-				removealltext(&game->uimanager);
-				displaycredits(game);
+					game->menuflags &= ~MENU_FLAG_NUMAI;
+					game->menuflags &= ~MENU_FLAG_SOUND;
+
+					game->menuflags &= ~MENU_FLAG_SETTINGS;
+					game->menuflags |= MENU_FLAG_INSETTINGS;
+				}
+				else if (game->menuflags & MENU_FLAG_CREDITS){
+					removealltext(&game->uimanager);
+					displaycredits(game);
 				
-				game->menuflags &= ~MENU_FLAG_CREDITS;
-				game->menuflags |= MENU_FLAG_INCREDITS;
-			}	
-			else if (game->menuflags & MENU_FLAG_INCREDITS){
-				removealltext(&game->uimanager);
-				displaymenu(game);
-				game->menuflags &= ~MENU_FLAG_INCREDITS;
+					game->menuflags &= ~MENU_FLAG_CREDITS;
+					game->menuflags |= MENU_FLAG_INCREDITS;
+				}	
+				else if (game->menuflags & MENU_FLAG_INCREDITS){
+					removealltext(&game->uimanager);
+					displaymenu(game);
+					game->menuflags &= ~MENU_FLAG_INCREDITS;
+				}
+				else if (game->menuflags & MENU_FLAG_EXITGAME){
+					game_shutdown(game);
+					game->flags &= ~GAME_FLAG_MAINMENU;
+					game->menuflags |= MENU_FLAG_SHUTDOWN;
+				}
+			}else{
+				if(game->menuflags & MENU_FLAG_NUMAI){
+					if(game->num_aiplayers <= GAME_AIPLAYER_COUNT){
+						game->num_aiplayers++;
+					}
+				}
+				else if(game->menuflags & MENU_FLAG_SOUND){
+					removetext(&game->uimanager, "On");
+					removetext(&game->uimanager, "Off");
+					if(game->soundon==false){
+						game->soundon=true;
+					}else{
+						game->soundon=false;
+					}
+
+					vec3f_set(color,.0f,.0f,1.0f); //BLUE
+					if(game->soundon==false){
+						vec3f_set(color,1.0f,1.0f,1.0f); //whitE
+					}
+					addtext(&game->uimanager,"On",660,450,color,&game->uimanager.font_playerlap,0);
+
+					vec3f_set(color,.0f,.0f,1.0f); //BLUE
+					if(game->soundon==true){
+						vec3f_set(color,1.0f,1.0f,1.0f); //whitE
+					}
+					addtext(&game->uimanager,"Off",740,450,color,&game->uimanager.font_playerlap,0);
+				}else{
+					removealltext(&game->uimanager);
+					displaymenu(game);
+					game->menuflags &= ~MENU_FLAG_INSETTINGS;
+					game->menuflags &= ~MENU_FLAG_CREDITS;
+				}
 			}
-			else if (game->menuflags & MENU_FLAG_EXITGAME){
-				game_shutdown(game);
-				game->flags &= ~GAME_FLAG_MAINMENU;
-				game->menuflags |= MENU_FLAG_SHUTDOWN;
-			}
+
 		}
 	}
 }
@@ -288,6 +349,7 @@ void removealltext(struct uimanager* um){
 		um->texts[i].flags = UI_TEXT_FLAG_INIT;
 	}
 }
+
 void removebrackets(struct uimanager* um){
 	
 	removetext(um,"[                                                              ]");
@@ -296,6 +358,10 @@ void removebrackets(struct uimanager* um){
 	removetext(um,"[                                          ]");
 	removetext(um,"[                                                 ]");
 	removetext(um,"[                                                                    ]");
+	removetext(um,"[                                  ]");
+	removetext(um,"[                                                                                                                                      ]");
+	removetext(um,"[                                                                                  ]");
+
 }
 
 void uimanager_render(struct uimanager* um, struct game* game)
@@ -486,19 +552,26 @@ void displaysettings(struct game* game){
 	vec3f_set(color,.0f,.0f,1.0f); //BLUE
 	addtext(&game->uimanager,"Settings",550,250,color,&game->uimanager.font_playerlap,0);
 
-	vec3f_set(color,1.0f,1.0f,1.0f); //whitE
+	vec3f_set(color,.0f,.0f,.0f); //BLack
 	addtext(&game->uimanager,"Number of Computers: ",380,350,color,&game->uimanager.font_playerlap,0);
 
 	addtext(&game->uimanager,"Sound: ",500,450,color,&game->uimanager.font_playerlap,0);
-	addtext(&game->uimanager,"On",660,450,color,&game->uimanager.font_playerlap,0);
 	addtext(&game->uimanager,"/",710,450,color,&game->uimanager.font_playerlap,0);
-	addtext(&game->uimanager,"Off",740,450,color,&game->uimanager.font_playerlap,0);
 
 	addtext(&game->uimanager,"Back",590,600,color,&game->uimanager.font_playerlap,0);
 
-	vec3f_set(color,.0f,.0f,.0f); //BLack
+	vec3f_set(color,.0f,.0f,1.0f); //BLUE
 	addtext(&game->uimanager,"numcomps",860,350,color,&game->uimanager.font_playerlap,8);
+	if(game->soundon==false){
+		vec3f_set(color,1.0f,1.0f,1.0f); //whitE
+	}
+	addtext(&game->uimanager,"On",660,450,color,&game->uimanager.font_playerlap,0);
+	vec3f_set(color,.0f,.0f,1.0f); //BLUE
+	if(game->soundon==true){
+		vec3f_set(color,1.0f,1.0f,1.0f); //whitE
+	}
+	addtext(&game->uimanager,"Off",740,450,color,&game->uimanager.font_playerlap,0);
 
 	vec3f_set(color,.0f,.0f,1.0f); //BLUE
-	addtext(&game->uimanager,"[                                  ]",560,600,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"[                                  ]",560,600,color,&game->uimanager.font_playerlap,0);//back
 }
