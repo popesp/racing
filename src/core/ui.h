@@ -21,6 +21,7 @@
 #define UI_PLACER_FONTSIZE			40
 #define UI_YOULOSE_FONTSIZE			180
 #define UI_VELOCITY_FONTSIZE		100
+#define UI_WARPEDSTEEL_FONTSIZE		175
 
 #define	UI_FONT_GLYPH_COUNT			128
 #define	UI_FONT_TEXTURE_WIDTH		16
@@ -72,6 +73,7 @@ struct uimanager
 	struct font font_placer;
 	struct font font_youwinlost;
 	struct font font_velocity;
+	struct font font_warpedsteel;
 
 	struct text texts[UI_TEXT_COUNT];
 };
@@ -91,5 +93,10 @@ void font_delete(struct font* font);
 
 void addtext(struct uimanager* um, char* inputtext, int x, int y, vec3f color, struct font* font, int numberadder);
 void removetext(struct uimanager* um, char* inputtext);
+void removealltext(struct uimanager* um);
+void removebrackets(struct uimanager* um);
+void displaymenu(struct game* game);
+
+int menu_startup(struct game* game);
 
 #endif

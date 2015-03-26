@@ -1,5 +1,6 @@
 #include	"core/game.h"
-
+#include	"core/ui.h"
+#include	"error.h"			// PRINT_ERROR
 
 int main(int argc, char** argv)
 {
@@ -8,11 +9,22 @@ int main(int argc, char** argv)
 	(void)argc;
 	(void)argv;
 
-	if (!game_startup(&game))
+	if (!start_subsystems(&game))
+	{
+		PRINT_ERROR("Problem starting game subsystems.\n");
+		return 0;
+	}
+
+	if (!menu_startup(&game))
 		return 0;
 
-	game_mainloop(&game);
-	game_shutdown(&game);
+	if(!(game.menuflags & MENU_FLAG_SHUTDOWN)){
+		if (!game_startup(&game))
+		return 0;
+
+		game_mainloop(&game);
+		game_shutdown(&game);
+	}
 
 	return 0;
 }

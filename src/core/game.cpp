@@ -26,6 +26,7 @@ static void update(struct game*);
 static void render(struct game*);
 
 
+
 static void resetplayers(struct game* game)
 {
 	int i;
@@ -173,10 +174,13 @@ static void scroll(GLFWwindow* window, double xoffset, double yoffset)
 static void mainmenu(struct game* game){
 	game->flags &= ~GAME_FLAG_YOULOSE;
 	game->flags &= ~GAME_FLAG_YOUWIN;
-	game->flags |= GAME_FLAG_TERMINATED;
+	game->flags |= GAME_FLAG_MAINMENU;
 }
 
 static void restart(struct game* game){
+	vec3f color;
+
+	//turn off flags and turn back on wincondition
 	game->flags &= ~GAME_FLAG_SWITCHON;
 	game->flags &= ~GAME_FLAG_YOULOSE;
 	game->flags &= ~GAME_FLAG_YOUWIN;
@@ -188,24 +192,13 @@ static void restart(struct game* game){
 		game->aiplayers[i].vehicle->lap=1;
 	}
 
-	//remove all the text
-	removetext(&game->uimanager,"[                                                    ]");
-	removetext(&game->uimanager,"[                                                              ]");
-	removetext(&game->uimanager,"Main   Menu");
-	removetext(&game->uimanager,"Restart");
-	removetext(&game->uimanager,"computerwon");
-	removetext(&game->uimanager,"YOU LOST");
-	removetext(&game->uimanager,"youwon");
-	removetext(&game->uimanager,"YOU WON");
-	removetext(&game->uimanager,"Nice job!");	
+	removealltext(&game->uimanager);
 
-	vec3f color;
+	//rewrite race text
 	vec3f_set(color, 1.0f,1.0f,1.0f);
 	addtext(&game->uimanager,"laps",100,700,color,&game->uimanager.font_playerlap,-1);
-
 	vec3f_set(color, 1.0f,1.0f,.0f);
 	addtext(&game->uimanager,"place",100,650,color,&game->uimanager.font_place,-2);
-	//speed
 	vec3f_set(color, 0.0f,0.0f,1.0f);
 	addtext(&game->uimanager,"Speed",1050,600,color,&game->uimanager.font_playerlap,0);
 	addtext(&game->uimanager,"velocity",1060,700,color,&game->uimanager.font_velocity,9001);
@@ -216,7 +209,7 @@ static void restart(struct game* game){
 		aiplayer_delete(&game->aiplayers[i], &game->vehiclemanager);
 	}
 
-	// initialize player objects
+	// initialize player 
 	vec3f offs,aioffs;
 	vec3f_set(offs, 1.f, 0.f, 0.f);
 			
@@ -243,43 +236,45 @@ static void restart(struct game* game){
 }
 
 static void winlose(struct game* game){
-	//remove lap/place text
-		removetext(&game->uimanager, "laps");
-		removetext(&game->uimanager, "place");
-		removetext(&game->uimanager, "placer");
-		removetext(&game->uimanager, "Speed");
-		removetext(&game->uimanager, "velocity");
-		vec3f color;
 
-		if(game->flags & GAME_FLAG_YOULOSE){
-			//set camera on winning AI
-			for(int i=0;i<=game->num_aiplayers-1;i++){
-				if(game->aiplayers[i].vehicle->lap==GAME_WINCONDITION_LAPS){
-					aiwin_camera(&game->aiplayers[i]);
-				}
+	vec3f color;
+
+	//remove race text
+	removetext(&game->uimanager, "laps");
+	removetext(&game->uimanager, "place");
+	removetext(&game->uimanager, "placer");
+	removetext(&game->uimanager, "Speed");
+	removetext(&game->uimanager, "velocity");
+
+	//Case: Game is lost
+	if(game->flags & GAME_FLAG_YOULOSE){
+		//set camera on winning AI
+		for(int i=0;i<=game->num_aiplayers-1;i++){
+			if(game->aiplayers[i].vehicle->lap==GAME_WINCONDITION_LAPS){
+				aiwin_camera(&game->aiplayers[i]);
 			}
-
-			vec3f_set(color,1.0f,0.0f,0.0f);
-			addtext(&game->uimanager,"YOU LOST",200,200,color,&game->uimanager.font_youwinlost,0);
-
-			vec3f_set(color,1.0f,1.0f,1.0f);
-			addtext(&game->uimanager,"computerwon",345,280,color,&game->uimanager.font_playerlap,666);
-
-		}else{
-			vec3f_set(color,1.0f,0.0f,0.0f);
-			addtext(&game->uimanager,"YOU WON",200,200,color,&game->uimanager.font_youwinlost,0);
-
-			vec3f_set(color,1.0f,1.0f,1.0f);
-			addtext(&game->uimanager,"Nice job!",550,280,color,&game->uimanager.font_playerlap,0);
 		}
-		
+
+		vec3f_set(color,1.0f,0.0f,0.0f);
+		addtext(&game->uimanager,"YOU LOST",200,200,color,&game->uimanager.font_youwinlost,0);
+
 		vec3f_set(color,1.0f,1.0f,1.0f);
-		//"Restart" "Main Menu"
-		addtext(&game->uimanager,"Restart",550,600,color,&game->uimanager.font_playerlap,0);
-		addtext(&game->uimanager,"Main   Menu",530,700,color,&game->uimanager.font_playerlap,0);
+		addtext(&game->uimanager,"computerwon",345,280,color,&game->uimanager.font_playerlap,666);
+
+	//Case: Game is won
+	}else{
+		vec3f_set(color,1.0f,0.0f,0.0f);
+		addtext(&game->uimanager,"YOU WON",200,200,color,&game->uimanager.font_youwinlost,0);
+
+		vec3f_set(color,1.0f,1.0f,1.0f);
+		addtext(&game->uimanager,"Nice job!",550,280,color,&game->uimanager.font_playerlap,0);
+	}
 		
-		vec3f_set(color,.0f,.0f,1.0f);
-		addtext(&game->uimanager,"[                                                    ]",520,600,color,&game->uimanager.font_playerlap,0);
+	vec3f_set(color,1.0f,1.0f,1.0f);
+	addtext(&game->uimanager,"Restart",550,600,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"Main   Menu",530,700,color,&game->uimanager.font_playerlap,0);
+	vec3f_set(color,.0f,.0f,1.0f);
+	addtext(&game->uimanager,"[                                                    ]",520,600,color,&game->uimanager.font_playerlap,0);
 }
 
 static void update(struct game* game)
@@ -476,7 +471,7 @@ static void render(struct game* game)
 	glfwSwapBuffers(game->window.w);
 }
 
-static int start_subsystems(struct game* game)
+int start_subsystems(struct game* game)
 {
 	int major, minor, rev;
 	int i;
@@ -566,16 +561,16 @@ static int start_subsystems(struct game* game)
 		if (game->inputmanager.controllers[GLFW_JOYSTICK_1+i].flags & INPUT_FLAG_ENABLED)
 			printf("Joystick %d enabled. Name: %s\n", i+1, inputmanager_joystickname(&game->inputmanager, i));
 	}
-
-	// initialize audio manager
-	printf("Starting up audio manager...");
-	audiomanager_startup(&game->audiomanager);
-	printf("...done. Using FMOD version %d.\n", audiomanager_getlibversion(&game->audiomanager));
 	
 	// initialize ui manager
 	printf("Starting up user interface manager...");
 	uimanager_startup(&game->uimanager, &game->window);
 	printf("...done.\n");
+
+	// initialize audio manager
+	printf("Starting up audio manager...");
+	audiomanager_startup(&game->audiomanager);
+	printf("...done. Using FMOD version %d.\n", audiomanager_getlibversion(&game->audiomanager));
 
 	return 1;
 }
@@ -586,14 +581,8 @@ int game_startup(struct game* game)
 
 	vec3f_set(up, 0.f, 1.f, 0.f);
 
-	if (!start_subsystems(game))
-	{
-		PRINT_ERROR("Problem starting game subsystems.\n");
-		return 0;
-	}
-
 	random_timeseed();
-
+	
 	// initialize skybox
 	skybox_init(&game->skybox, &game->renderer);
 
@@ -613,7 +602,7 @@ int game_startup(struct game* game)
 
 	// initialize player objects
 	vec3f_set(offs, 1.f, 0.f, 0.f);
-	//vec3f_set(aioffs, -1.f, 0.f, 0.f);
+	
 	if (game->inputmanager.controllers[0].flags & INPUT_FLAG_ENABLED)
 		player_init(&game->player, &game->vehiclemanager, &game->inputmanager.controllers[0], 0, offs);
 	else
@@ -681,7 +670,6 @@ int game_startup(struct game* game)
 	addtext(&game->uimanager,"Speed",1050,600,color,&game->uimanager.font_playerlap,0);
 	addtext(&game->uimanager,"velocity",1060,700,color,&game->uimanager.font_velocity,9001);
 
-
 	game->flags = GAME_FLAG_INIT;
 
 	return 1;
@@ -727,33 +715,35 @@ void game_mainloop(struct game* game)
 		// render as frequently as possible
 		render(game);
 		fps++;
-
 	}
 }
 
-void game_shutdown(struct game* game)
-{
+void game_shutdown(struct game* game){
 	int i;
 
-	// delete players
-	player_delete(&game->player, &game->vehiclemanager);
-	for (i = 0; i < game->num_aiplayers; i++){
-		aiplayer_delete(&game->aiplayers[i], &game->vehiclemanager);}
+	if(!(game->flags & GAME_FLAG_MAINMENU)){
+		// delete players
+		player_delete(&game->player, &game->vehiclemanager);
+		for (i = 0; i < game->num_aiplayers; i++){
+			aiplayer_delete(&game->aiplayers[i], &game->vehiclemanager);}
 	
-	pickupmanager_shutdown(&game->pickupmanager);
-	vehiclemanager_shutdown(&game->vehiclemanager);
-	entitymanager_shutdown(&game->entitymanager);
+		pickupmanager_shutdown(&game->pickupmanager);
+		vehiclemanager_shutdown(&game->vehiclemanager);
+		entitymanager_shutdown(&game->entitymanager);
 
-	// delete world objects
-	track_delete(&game->track);
-	skybox_delete(&game->skybox);
+		// delete world objects
+		track_delete(&game->track);
+		skybox_delete(&game->skybox);
 
+		audiomanager_shutdown(&game->audiomanager);
+		physicsmanager_shutdown(&game->physicsmanager);
+	}
+	
 	// shut down all the game subsytems
 	uimanager_shutdown(&game->uimanager);
-	audiomanager_shutdown(&game->audiomanager);
 	inputmanager_shutdown(&game->inputmanager);
-	physicsmanager_shutdown(&game->physicsmanager);
 	
 	glfwDestroyWindow(game->window.w);
 	glfwTerminate();
 }
+

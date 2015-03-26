@@ -3,6 +3,148 @@
 #include	"game.h"
 #include	"../mem.h"
 
+static void rendermenu(struct game* game)
+{
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	uimanager_render(&game->uimanager, game);//render text
+
+	glfwSwapBuffers(game->window.w);
+}
+
+static void updatemenu(struct game* game)
+{
+	inputmanager_update(&game->inputmanager);
+
+	if (game->inputmanager.controllers[GLFW_JOYSTICK_1].flags & INPUT_FLAG_ENABLED)
+	{
+		vec3f color;
+		vec3f_set(color,0.0f,0.0f,1.0f); //BLUE
+
+		if(game->inputmanager.controllers[GLFW_JOYSTICK_1].buttons[INPUT_BUTTON_DDOWN] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN)){
+
+			if(game->menuflags & MENU_FLAG_STARTGAME){
+				game->menuflags &= ~MENU_FLAG_STARTGAME;
+				game->menuflags |= MENU_FLAG_SETTINGS;
+
+				removebrackets(&game->uimanager);
+				addtext(&game->uimanager,"[                                                 ]",460,400,color,&game->uimanager.font_playerlap,0);
+			}
+
+			else if (game->menuflags & MENU_FLAG_SETTINGS){
+				game->menuflags &= ~MENU_FLAG_SETTINGS;
+				game->menuflags |= MENU_FLAG_CREDITS;
+
+				removebrackets(&game->uimanager);
+				addtext(&game->uimanager,"[                                          ]",470,500,color,&game->uimanager.font_playerlap,0);
+			}
+			else if (game->menuflags & MENU_FLAG_CREDITS){
+				game->menuflags &= ~MENU_FLAG_CREDITS;
+				game->menuflags |= MENU_FLAG_EXITGAME;
+
+				removebrackets(&game->uimanager);
+				addtext(&game->uimanager,"[                                                         ]",440,600,color,&game->uimanager.font_playerlap,0);
+			}
+			else if (game->menuflags & MENU_FLAG_EXITGAME){
+				game->menuflags &= ~MENU_FLAG_EXITGAME;
+				game->menuflags |= MENU_FLAG_STARTGAME;
+
+				removebrackets(&game->uimanager);
+				addtext(&game->uimanager,"[                                                                    ]",430,300,color,&game->uimanager.font_playerlap,0);
+			}		
+		}
+
+		if(game->inputmanager.controllers[GLFW_JOYSTICK_1].buttons[INPUT_BUTTON_DUP] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN)){
+
+			if(game->menuflags & MENU_FLAG_STARTGAME){
+				game->menuflags &= ~MENU_FLAG_STARTGAME;
+				game->menuflags |= MENU_FLAG_EXITGAME;
+
+				removebrackets(&game->uimanager);
+				addtext(&game->uimanager,"[                                                         ]",440,600,color,&game->uimanager.font_playerlap,0);
+			}
+			else if (game->menuflags & MENU_FLAG_EXITGAME){
+				game->menuflags &= ~MENU_FLAG_EXITGAME;
+				game->menuflags |= MENU_FLAG_CREDITS;
+
+				removebrackets(&game->uimanager);
+				addtext(&game->uimanager,"[                                          ]",470,500,color,&game->uimanager.font_playerlap,0);
+			}	
+			else if (game->menuflags & MENU_FLAG_SETTINGS){
+				game->menuflags &= ~MENU_FLAG_SETTINGS;
+				game->menuflags |= MENU_FLAG_STARTGAME;
+
+				removebrackets(&game->uimanager);
+				addtext(&game->uimanager,"[                                                                    ]",430,300,color,&game->uimanager.font_playerlap,0);
+			}
+			else if (game->menuflags & MENU_FLAG_CREDITS){
+				game->menuflags &= ~MENU_FLAG_CREDITS;
+				game->menuflags |= MENU_FLAG_SETTINGS;
+
+				removebrackets(&game->uimanager);
+				addtext(&game->uimanager,"[                                                 ]",460,400,color,&game->uimanager.font_playerlap,0);
+			}
+				
+		}
+
+		if(game->inputmanager.controllers[GLFW_JOYSTICK_1].buttons[INPUT_BUTTON_A] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN)){
+			if(game->menuflags & MENU_FLAG_STARTGAME){
+				game->flags &= ~GAME_FLAG_MAINMENU;
+				removealltext(&game->uimanager);
+			}
+			else if (game->menuflags & MENU_FLAG_SETTINGS){
+				printf("settings\n");
+			}
+			else if (game->menuflags & MENU_FLAG_CREDITS){
+				removealltext(&game->uimanager);
+				vec3f_set(color, 1.0f,.0f,.0f);//RED
+				addtext(&game->uimanager, "Warped Steel", 30, 170, color, &game->uimanager.font_warpedsteel, 0);
+
+				vec3f_set(color,.0f,.0f,1.0f); //BLUE
+				addtext(&game->uimanager,"CPSC   585   Winter   2015",420,250,color,&game->uimanager.font_playerlap,0);
+				vec3f_set(color,0.0f,0.0f,.0f); //BLACK
+				addtext(&game->uimanager,"Kyle   Kajorinne",100,400,color,&game->uimanager.font_playerlap,0);
+				addtext(&game->uimanager,"Kurtis   Danyluk",480,400,color,&game->uimanager.font_playerlap,0);
+				addtext(&game->uimanager,"Shawn   Sutherland",850,400,color,&game->uimanager.font_playerlap,0);
+				addtext(&game->uimanager,"Samuel   Evans",300,500,color,&game->uimanager.font_playerlap,0);
+				addtext(&game->uimanager,"Kyle   Orton",680,500,color,&game->uimanager.font_playerlap,0);
+
+				vec3f_set(color,1.0f,1.0f,1.0f); //whitE
+				addtext(&game->uimanager,"Back",590,600,color,&game->uimanager.font_playerlap,0);
+				vec3f_set(color,.0f,.0f,1.0f); //BLUE
+				addtext(&game->uimanager,"[                                  ]",560,600,color,&game->uimanager.font_playerlap,0);
+				
+				game->menuflags &= ~MENU_FLAG_CREDITS;
+				game->menuflags |= GAME_FLAG_INCREDITS;
+			}	
+			else if (game->menuflags & GAME_FLAG_INCREDITS){
+				game->flags &= ~GAME_FLAG_INCREDITS;
+				removealltext(&game->uimanager);
+				displaymenu(game);
+			}
+			else if (game->menuflags & MENU_FLAG_EXITGAME){
+				game_shutdown(game);
+				game->flags &= ~GAME_FLAG_MAINMENU;
+				game->menuflags |= MENU_FLAG_SHUTDOWN;
+			}
+		}
+	}
+}
+
+int menu_startup(struct game* game){
+
+	displaymenu(game);
+	game->flags = GAME_FLAG_MAINMENU;
+
+	while (game->flags&GAME_FLAG_MAINMENU){
+		updatemenu(game);
+		if(!(game->flags&GAME_FLAG_MAINMENU))
+			break;
+		rendermenu(game);
+	}
+
+	return 1;
+}
 
 void uimanager_startup(struct uimanager* um, struct window* window)
 {
@@ -21,6 +163,7 @@ void uimanager_startup(struct uimanager* um, struct window* window)
 	font_generate(&um->font_placer, um, UI_FONT_FILENAME_SEASRN, UI_PLACER_FONTSIZE);
 	font_generate(&um->font_youwinlost, um, UI_FONT_FILENAME_AERO, UI_YOULOSE_FONTSIZE);
 	font_generate(&um->font_velocity, um, UI_FONT_FILENAME_BEBAS, UI_VELOCITY_FONTSIZE);
+	font_generate(&um->font_warpedsteel, um, UI_FONT_FILENAME_AERO, UI_WARPEDSTEEL_FONTSIZE);
 
 	for(int i=0;i<UI_TEXT_COUNT;i++){
 		um->texts[i].flags=UI_TEXT_FLAG_INIT;
@@ -36,6 +179,7 @@ void uimanager_shutdown(struct uimanager* um)
 	font_delete(&um->font_placer);
 	font_delete(&um->font_youwinlost);
 	font_delete(&um->font_velocity);
+	font_delete(&um->font_warpedsteel);
 
 	FT_Done_FreeType(um->freetype);
 }
@@ -132,6 +276,19 @@ void removetext(struct uimanager* um, char* inputtext){
 		}
 }
 
+void removealltext(struct uimanager* um){
+	for (int i =0; i < UI_TEXT_COUNT; i++){
+		um->texts[i].inputtext = "";
+		um->texts[i].flags = UI_TEXT_FLAG_INIT;
+	}
+}
+void removebrackets(struct uimanager* um){
+	removetext(um,"[                                                         ]");
+	removetext(um,"[                                          ]");
+	removetext(um,"[                                                 ]");
+	removetext(um,"[                                                                    ]");
+}
+
 void uimanager_render(struct uimanager* um, struct game* game)
 {
 	char rendertext[256];
@@ -163,7 +320,7 @@ void uimanager_render(struct uimanager* um, struct game* game)
 				sprintf(rendertext, "th");
 			}
 			else if(um->texts[j].numberadder==9001){
-				sprintf(rendertext, "%d", (int)game->player.vehicle->speed);
+				sprintf(rendertext, "%d", (int)(game->player.vehicle->speed*10.7));
 			}
 			else if(um->texts[j].numberadder==666){
 				for(int i=0;i<=game->num_aiplayers-1;i++){
@@ -270,4 +427,21 @@ void font_delete(struct font* font)
 {
 	texture_delete(&font->texture);
 	renderable_deallocate(&font->renderable);
+}
+
+void displaymenu(struct game* game){
+	vec3f color;
+	vec3f_set(color, 1.0f,.0f,.0f);
+	
+	addtext(&game->uimanager, "Warped Steel", 30, 170, color, &game->uimanager.font_warpedsteel, 0);
+
+	vec3f_set(color, .0f,.0f,.0f);
+	addtext(&game->uimanager,"Start     Game",450,300,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"Settings",480,400,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"Credits",490,500,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"Exit     Game",460,600,color,&game->uimanager.font_playerlap,0);
+
+	vec3f_set(color, .0f,.0f,1.0f);
+	addtext(&game->uimanager,"[                                                                    ]",430,300,color,&game->uimanager.font_playerlap,0);
+	game->menuflags |= MENU_FLAG_STARTGAME;
 }

@@ -17,7 +17,7 @@
 #include	"../render/window.h"
 #include	"ui.h"
 
-#define GAME_WINCONDITION_LAPS	4
+#define GAME_WINCONDITION_LAPS	2
 
 #define	GAME_DEFAULT_WIDTH		1280
 #define	GAME_DEFAULT_HEIGHT		800
@@ -56,7 +56,16 @@
 #define	GAME_FLAG_YOULOSE		0x20
 #define	GAME_FLAG_YOUWIN		0x40
 #define GAME_FLAG_SWITCHON		0x80
+#define GAME_FLAG_MAINMENU		0x1b
+
 #define	GAME_FLAG_INIT			(GAME_FLAG_WINCONDITION)
+
+#define	MENU_FLAG_STARTGAME		0x01
+#define	MENU_FLAG_SETTINGS		0x02
+#define	MENU_FLAG_CREDITS		0x04
+#define	MENU_FLAG_EXITGAME		0x08
+#define	MENU_FLAG_SHUTDOWN		0x10
+#define GAME_FLAG_INCREDITS		0x20
 
 
 struct game
@@ -89,12 +98,13 @@ struct game
 	int songs[GAME_MUSIC_COUNT];
 
 	unsigned char flags;
+
+	unsigned char menuflags;
 };
 
-
+int start_subsystems(struct game* game);
 int game_startup(struct game* game);
 void game_mainloop(struct game* game);
 void game_shutdown(struct game* game);
-
 
 #endif
