@@ -96,6 +96,7 @@ void removetext(struct uimanager* um, char* inputtext);
 void removealltext(struct uimanager* um);
 void removebrackets(struct uimanager* um);
 void displaymenu(struct game* game);
+void displaycredits(struct game* game);
 
 int menu_startup(struct game* game);
 
