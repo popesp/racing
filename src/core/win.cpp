@@ -181,6 +181,7 @@ void checkplace(struct game* game){
 				//	game->aiplayers[j].vehicle->place = game->player.vehicle->place+1;
 				//}
 
+<<<<<<< HEAD
 				////same index player ahead
 				//else if(game->aiplayers[j].vehicle->index_track == game->player.vehicle->index_track){
 				//	game->player.vehicle->place = game->aiplayers[j].vehicle->place-1;
@@ -188,6 +189,12 @@ void checkplace(struct game* game){
 				//}
 
 				//else if(game->aiplayers[j].vehicle->index_track > game->aiplayers[j].vehicle->index_track){
+=======
+			
+				if(game->num_aiplayers-1>1){
+					//printf("Player   %d    AI[%d] %d\n", game->player.vehicle->place,j, game->aiplayers[j].vehicle->place);
+				}
+>>>>>>> 28d32767818933570ea5961f6150dbfa82e6f210
 
 				//	game->aiplayers[j].vehicle->place = game->aiplayers[j].vehicle->place-1;
 				//	game->aiplayers[j].vehicle->place = game->aiplayers[j].vehicle->place+1;

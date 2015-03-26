@@ -2,6 +2,7 @@
 #define	PICKUP
 
 
+#include	"../audio/audio.h"
 #include	"../objects/track.h"
 #include	"../physics/physics.h"
 #include	"../render/render.h"
@@ -15,6 +16,9 @@
 #define	PICKUP_TEXTURE_FILENAME_MISSILE	"res/models/powerup/missile.png"
 #define	PICKUP_TEXTURE_FILENAME_MINE	"res/models/powerup/mine.png"
 #define	PICKUP_TEXTURE_FILENAME_BOOST	"res/models/powerup/boost.png"
+
+#define	PICKUP_SFX_FILENAME_TAKEN		"res/soundfx/power_up.wav"
+#define	PICKUP_SFX_FILENAME_UPGRADE		"res/soundfx/power_up2.wav"
 
 #define	PICKUP_TYPE_COUNT				3
 #define	PICKUP_TYPE_MISSILE				0
@@ -35,7 +39,7 @@ struct pickup
 	physx::PxRigidDynamic* body;
 
 	struct vehicle* collector;
-
+	vec3f pos;
 	unsigned timer;
 
 	unsigned char type;
@@ -46,6 +50,11 @@ struct pickupmanager
 {
 	unsigned num_pickups;
 	struct pickup* pickups;
+
+	struct audiomanager* am;
+	
+	int sfx_pickup_taken;
+	int sfx_pickup_upgrade;
 
 	struct renderable renderable;
 
@@ -61,7 +70,7 @@ struct pickupmanager
 	param:	num_pickups		number of pickup objects
 	param:	track_indices	array of track inddices for the powerups
 */
-void pickupmanager_startup(struct pickupmanager* pum, struct physicsmanager* pm, struct renderer* r, struct track* t, unsigned num_pickups, int* track_indices);
+void pickupmanager_startup(struct pickupmanager* pum,struct audiomanager* am, struct physicsmanager* pm, struct renderer* r, struct track* t, unsigned num_pickups, int* track_indices);
 
 /*	shut down the pickup manager
 	param:	pum				pickup manager

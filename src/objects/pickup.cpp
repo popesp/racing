@@ -18,6 +18,7 @@ static char* pickup_texture_filename[PICKUP_TYPE_COUNT] =
 static void createpickup(struct pickup* p, struct physicsmanager* pm, struct track* t, int track_index, vec3f offs)
 {
 	mat4f basis;
+	physx::PxTransform pose;
 
 	// get the pickup global transform
 	track_transformindex(t, basis, track_index);
@@ -31,19 +32,31 @@ static void createpickup(struct pickup* p, struct physicsmanager* pm, struct tra
 	p->body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, true);
 	p->body->userData = p;
 
+	
+
 	// add actor to the scene
 	pm->scene->addActor(*p->body);
+
+	pose = p->body->getGlobalPose();
+	// store position
+	vec3f_set(p->pos, pose.p.x, pose.p.y, pose.p.z);
+
 
 	p->type = (unsigned char)random_int(PICKUP_TYPE_COUNT);
 
 	p->flags = PICKUP_FLAG_INIT;
+
+	
+
 }
 
-void pickupmanager_startup(struct pickupmanager* pum, struct physicsmanager* pm, struct renderer* r, struct track* t, unsigned num_pickupgroups, int* track_indices)
+void pickupmanager_startup(struct pickupmanager* pum,struct audiomanager* am, struct physicsmanager* pm, struct renderer* r, struct track* t, unsigned num_pickupgroups, int* track_indices)
 {
 	vec3f dim, center, offs;
 	unsigned i;
 	float w;
+
+	pum->am = am;
 
 	// initialize pickup array
 	pum->num_pickups = num_pickupgroups * 2;
@@ -79,6 +92,10 @@ void pickupmanager_startup(struct pickupmanager* pum, struct physicsmanager* pm,
 		vec3f_set(offs, w, 0.f, 0.f);
 		createpickup(pum->pickups + i*2 + 1, pm, t, track_indices[i], offs);
 	}
+
+	
+	pum->sfx_pickup_taken = audiomanager_newsfx(am, PICKUP_SFX_FILENAME_TAKEN);
+	pum->sfx_pickup_upgrade = audiomanager_newsfx(am, PICKUP_SFX_FILENAME_UPGRADE);
 }
 
 void pickupmanager_shutdown(struct pickupmanager* pum)
@@ -126,39 +143,66 @@ void pickupmanager_update(struct pickupmanager* pum)
 
 			v = p->collector;
 
+			
+			
 			// powerup upgrade logic
 			if (v->flags & VEHICLE_FLAG_HASPOWERUP)
 			{
+				
 				switch (v->powerup)
 				{
 				case VEHICLE_POWERUP_MISSILE:
 				case VEHICLE_POWERUP_MISSILEX2:
 				case VEHICLE_POWERUP_MISSILEX3:
-					if (p->type == PICKUP_TYPE_MISSILE)
+					if (p->type == PICKUP_TYPE_MISSILE){
 						v->powerup = VEHICLE_POWERUP_MISSILEX3;
-					else
+						// play pickup upgrade
+						audiomanager_playsfx(pum->am, pum->sfx_pickup_upgrade, p->pos, 0);
+
+					}
+					else{
 						v->powerup = p->type;
+						// play pickup taken
+						audiomanager_playsfx(pum->am, pum->sfx_pickup_taken, p->pos, 0);
+					}
 					break;
 
 				case VEHICLE_POWERUP_MINE:
 				case VEHICLE_POWERUP_TURRET:
-					if (p->type == PICKUP_TYPE_MINE)
+					if (p->type == PICKUP_TYPE_MINE){
 						v->powerup = VEHICLE_POWERUP_TURRET;
-					else
+						// play pickup upgrade
+						audiomanager_playsfx(pum->am, pum->sfx_pickup_upgrade, p->pos, 0);
+
+					}
+					else{
 						v->powerup = p->type;
+						// play pickup taken
+						audiomanager_playsfx(pum->am, pum->sfx_pickup_taken, p->pos, 0);
+					}
 					break;
 
 				case VEHICLE_POWERUP_BOOST:
 				case VEHICLE_POWERUP_LONGBOOST:
-					if (p->type == PICKUP_TYPE_BOOST)
+					if (p->type == PICKUP_TYPE_BOOST){
 						v->powerup = VEHICLE_POWERUP_LONGBOOST;
-					else
+						// play pickup upgrade
+						audiomanager_playsfx(pum->am, pum->sfx_pickup_upgrade, p->pos, 0);
+
+					}
+					else{
 						v->powerup = p->type;
+						// play pickup taken
+						audiomanager_playsfx(pum->am, pum->sfx_pickup_taken, p->pos, 0);
+					}
 					break;
 				}
-			} else
+			} else{
 				v->powerup = p->type;
-			
+				// play pickup taken
+				audiomanager_playsfx(pum->am, pum->sfx_pickup_taken, p->pos, 0);
+
+			}
 			v->flags |= VEHICLE_FLAG_HASPOWERUP;
 		}
 	}

@@ -25,7 +25,7 @@ void mine_init(struct entity* e, struct entitymanager* em, struct vehicle* v, ph
 	e->owner = v;
 
 	// play sound effect and store the audio channel
-	e->channel = audiomanager_playsfx(em->am, em->sfx_mine_idle, e->pos, -1);
+	e->idle_channel = audiomanager_playsfx(em->am, em->sfx_mine_idle, e->pos, -1);
 
 	// set the despawn timer
 	e->timer = MINE_DESPAWNTIME;
@@ -38,7 +38,7 @@ void mine_init(struct entity* e, struct entitymanager* em, struct vehicle* v, ph
 void mine_delete(struct entity* e)
 {
 	e->body->release();
-	soundchannel_stop(e->channel);
+	soundchannel_stop(e->idle_channel);
 	e->flags = ENTITY_FLAG_INIT;
 }
 
@@ -61,4 +61,6 @@ void mine_update(struct entity* e, struct entitymanager* em)
 		mine_delete(e);
 		return;
 	}
+	
+	soundchannel_setposition(e->idle_channel, e->pos);
 }

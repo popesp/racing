@@ -26,8 +26,8 @@ struct entity
 {
 	physx::PxRigidDynamic* body;
 	struct vehicle* owner;
-	FMOD_CHANNEL* channel;
-
+	FMOD_CHANNEL* idle_channel;
+	FMOD_CHANNEL* launch_channel;
 	vec3f pos;
 
 	unsigned timer;
@@ -47,6 +47,7 @@ struct entitymanager
 	struct renderable renderables[ENTITY_TYPE_COUNT];
 	struct texture diffuse[ENTITY_TYPE_COUNT];
 
+	int sfx_missile_launch;
 	int sfx_missile_idle;
 	int sfx_missile_explode;
 	int sfx_mine_idle;

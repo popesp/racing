@@ -113,6 +113,8 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 	}
 
 	// initialize sound effects
+	
+	em->sfx_missile_launch = audiomanager_newsfx(am, MISSILE_SFX_FILENAME_LAUNCH);
 	em->sfx_missile_idle = audiomanager_newsfx(am, MISSILE_SFX_FILENAME_IDLE);
 	em->sfx_missile_explode = audiomanager_newsfx(am, MISSILE_SFX_FILENAME_EXPLODE);
 	em->sfx_mine_idle = audiomanager_newsfx(am, MINE_SFX_FILENAME_IDLE);

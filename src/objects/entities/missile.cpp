@@ -30,9 +30,9 @@ void missile_init(struct entity* e, struct entitymanager* em, struct vehicle* v,
 
 	// store pointer to owner
 	e->owner = v;
-
+	e->launch_channel = audiomanager_playsfx(em->am, em->sfx_missile_launch, e->pos, 1);
 	// play sound effect and store the audio channel
-	e->channel = audiomanager_playsfx(em->am, em->sfx_missile_idle, e->pos, -1);
+	e->idle_channel = audiomanager_playsfx(em->am, em->sfx_missile_idle, e->pos, -1);
 
 	// set the despawn timer
 	e->timer = MISSILE_DESPAWNTIME;
@@ -45,7 +45,8 @@ void missile_init(struct entity* e, struct entitymanager* em, struct vehicle* v,
 void missile_delete(struct entity* e)
 {
 	e->body->release();
-	soundchannel_stop(e->channel);
+	soundchannel_stop(e->idle_channel);
+	soundchannel_stop(e->launch_channel);
 	e->flags = ENTITY_FLAG_INIT;
 }
 
@@ -73,5 +74,6 @@ void missile_update(struct entity* e, struct entitymanager* em)
 	pose = e->body->getGlobalPose();
 	vec3f_set(e->pos, pose.p.x, pose.p.y, pose.p.z);
 
-	soundchannel_setposition(e->channel, e->pos);
+	soundchannel_setposition(e->idle_channel, e->pos);
+	soundchannel_setposition(e->launch_channel, e->pos);
 }
