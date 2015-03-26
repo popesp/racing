@@ -217,19 +217,28 @@ static void restart(struct game* game){
 	else
 		player_init(&game->player, &game->vehiclemanager, &game->inputmanager.keyboard, 0, offs);
 
-	int track_indices[] = {50, 100, 150};
 	float w;
-	for (int i=0; i < 4; i++){
-		if(i<3){
-			w =game->track.pathpoints[track_indices[i]].width * .25f;
-		}else{
-			w =game->track.pathpoints[track_indices[i-1]].width * .25f;
-		}
+	int track_indice[] = {1, 2, 3, 4, 5, 6, 7, 8, 9,
+	10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+	20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+	30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
+	40, 41, 42, 43, 44, 45, 46, 47, 48, 49,
+	50, 51}; // test values
+	
+	// create ai for if even amount
+	if(game->num_aiplayers%2==0){
+		for (int i=0; i < game->num_aiplayers/2; i++)
+		{
+			w =game->track.pathpoints[track_indice[i]].width * .25f;
+			
 			vec3f_set(aioffs, -w, 0.f, 0.f);
 			aiplayer_init(game->aiplayers+i*2+0, &game->vehiclemanager, i, aioffs);
 
 			vec3f_set(aioffs, w, 0.f, 0.f);
 			aiplayer_init(game->aiplayers+i*2+1, &game->vehiclemanager, i, aioffs);
+		}
+	}else{
+		//CURRENTLY BROKEN FOR AN ODD AMOUNT OF AI
 	}
 }
 
@@ -607,23 +616,30 @@ int game_startup(struct game* game)
 	else
 		player_init(&game->player, &game->vehiclemanager, &game->inputmanager.keyboard, 0, offs);
 
-	game->num_aiplayers = 8;
 	float w;
+	int track_indice[] = {1, 2, 3, 4, 5, 6, 7, 8, 9,
+	10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+	20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+	30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
+	40, 41, 42, 43, 44, 45, 46, 47, 48, 49,
+	50, 51}; // test values
+	
+	// create ai for if even amount
+	if(game->num_aiplayers%2==0){
+		for (int i=0; i < game->num_aiplayers/2; i++)
+		{
+			w =game->track.pathpoints[track_indice[i]].width * .25f;
+			
+			vec3f_set(aioffs, -w, 0.f, 0.f);
+			aiplayer_init(game->aiplayers+i*2+0, &game->vehiclemanager, i, aioffs);
 
-	// create ai
-	for (int i=0; i < 4; i++)
-	{
-		if(i<3){
-			w =game->track.pathpoints[track_indices[i]].width * .25f;
-		}else{
-			w =game->track.pathpoints[track_indices[i-1]].width * .25f;
+			vec3f_set(aioffs, w, 0.f, 0.f);
+			aiplayer_init(game->aiplayers+i*2+1, &game->vehiclemanager, i, aioffs);
 		}
-		vec3f_set(aioffs, -w, 0.f, 0.f);
-		aiplayer_init(game->aiplayers+i*2+0, &game->vehiclemanager, i, aioffs);
-
-		vec3f_set(aioffs, w, 0.f, 0.f);
-		aiplayer_init(game->aiplayers+i*2+1, &game->vehiclemanager, i, aioffs);
+	}else{
+		//CURRENTLY BROKEN FOR AN ODD AMOUNT OF AI
 	}
+	
 
 	// initialize debug camera
 	vec3f_set(pos, 0.f, 0.f, -30.f);
@@ -666,7 +682,7 @@ int game_startup(struct game* game)
 
 	//speed
 	vec3f_set(color, 0.0f,0.0f,1.0f);
-	addtext(&game->uimanager,"Speed",1050,600,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"Speed",1080,600,color,&game->uimanager.font_playerlap,0);
 	addtext(&game->uimanager,"velocity",1060,700,color,&game->uimanager.font_velocity,9001);
 
 	game->flags = GAME_FLAG_INIT;

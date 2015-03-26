@@ -1,6 +1,6 @@
 # Warped Steel
 Winter 2015, CPSC 585 - Games Programming
-# Needs Gamepad
+# Requires gamepad to play
 
 
 Keyboard controls
@@ -28,6 +28,18 @@ ESC -	Exit game
 Gamepad controls
 ----------------
 
+#Menu
+
+Dpad Down - Scroll down
+
+Dpad Up - Scroll up
+
+A - Select / Increment number of computers
+
+B - Decrement number of computers
+
+#Gameplay
+
 Right Trigger -		Accelerate
 
 Left Trigger -		Brake/Reverse
@@ -40,5 +52,7 @@ Start - Pause game
 
 Y -			Debug camera mode
 
-A -         Use powerup
+A -         Use powerup / select
+
+X - Toggle between restart / menu 
 

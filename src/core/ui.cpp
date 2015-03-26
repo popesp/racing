@@ -161,8 +161,8 @@ static void updatemenu(struct game* game)
 				}
 			}else{
 				if(game->menuflags & MENU_FLAG_NUMAI){
-					if(game->num_aiplayers <= GAME_AIPLAYER_COUNT){
-						game->num_aiplayers++;
+					if(game->num_aiplayers < GAME_AIPLAYER_COUNT){
+						game->num_aiplayers+=2;
 					}
 				}
 				else if(game->menuflags & MENU_FLAG_SOUND){
@@ -199,9 +199,12 @@ static void updatemenu(struct game* game)
 			if(game->menuflags & MENU_FLAG_INSETTINGS){
 				//decrease AI if on numAItoggle
 				if(game->menuflags & MENU_FLAG_NUMAI){
-					if(game->num_aiplayers > 1){
-						game->num_aiplayers--;
+					if(game->num_aiplayers > 2){
+						game->num_aiplayers-=2;
 					}
+				}
+				else if(game->menuflags & MENU_FLAG_SOUND){
+					printf("%d\n", (game->num_aiplayers/2));
 				}
 			}
 		}
