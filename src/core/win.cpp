@@ -137,7 +137,7 @@ void checkplace(struct game* game){
 
 			
 				if(game->num_aiplayers-1>1){
-					printf("Player   %d    AI[%d] %d\n", game->player.vehicle->place,j, game->aiplayers[j].vehicle->place);
+					//printf("Player   %d    AI[%d] %d\n", game->player.vehicle->place,j, game->aiplayers[j].vehicle->place);
 				}
 
 			}

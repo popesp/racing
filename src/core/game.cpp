@@ -609,7 +609,7 @@ int game_startup(struct game* game)
 
 	// start up the pickup manager for the track
 	int track_indices[] = {50, 100, 150}; // test values
-	pickupmanager_startup(&game->pickupmanager, &game->physicsmanager, &game->renderer, &game->track, 3, track_indices);
+	pickupmanager_startup(&game->pickupmanager, &game->audiomanager, &game->physicsmanager, &game->renderer, &game->track, 3, track_indices);
 
 	// initialize player objects
 	vec3f_set(offs, 1.f, 0.f, 0.f);
@@ -665,7 +665,7 @@ int game_startup(struct game* game)
 	game->songs[GAME_MUSIC_4_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_4_FILENAME);
 	game->index_currentsong = 0;
 	game->currentchannel = audiomanager_playmusic(&game->audiomanager, game->songs[game->index_currentsong], -1);
-	audiomanager_setmusicvolume(&game->audiomanager, 0.2f);
+	audiomanager_setmusicvolume(&game->audiomanager, 0.06f);
 	
 	vec3f color;
 	vec3f_set(color, 1.0f,1.0f,1.0f);

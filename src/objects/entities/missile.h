@@ -12,6 +12,7 @@
 
 #define	MISSILE_TEXTURE_FILENAME_DIFFUSE	"res/models/missile/missile.png"
 
+#define	MISSILE_SFX_FILENAME_LAUNCH			"res/soundfx/missile_launch.wav"
 #define	MISSILE_SFX_FILENAME_IDLE			"res/soundfx/missile_idle.wav"
 #define	MISSILE_SFX_FILENAME_EXPLODE		"res/soundfx/missile_explode.wav"
 
