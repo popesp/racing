@@ -22,8 +22,8 @@ static void updatemenu(struct game* game)
 		vec3f_set(color,0.0f,0.0f,1.0f); //BLUE
 
 		if(game->inputmanager.controllers[GLFW_JOYSTICK_1].buttons[INPUT_BUTTON_DDOWN] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN)){
-			if(!(game->menuflags & GAME_FLAG_INCREDITS)){
-				if(!(game->menuflags & GAME_FLAG_INSETTINGS)){
+			if(!(game->menuflags & MENU_FLAG_INCREDITS)){
+				if(!(game->menuflags & MENU_FLAG_INSETTINGS)){
 					if(game->menuflags & MENU_FLAG_STARTGAME){
 						game->menuflags &= ~MENU_FLAG_STARTGAME;
 						game->menuflags |= MENU_FLAG_SETTINGS;
@@ -58,8 +58,8 @@ static void updatemenu(struct game* game)
 		}
 
 		if(game->inputmanager.controllers[GLFW_JOYSTICK_1].buttons[INPUT_BUTTON_DUP] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN)){
-			if(!(game->menuflags & GAME_FLAG_INCREDITS)){
-				if(!(game->menuflags & GAME_FLAG_INSETTINGS)){
+			if(!(game->menuflags & MENU_FLAG_INCREDITS)){
+				if(!(game->menuflags & MENU_FLAG_INSETTINGS)){
 					if(game->menuflags & MENU_FLAG_STARTGAME){
 						game->menuflags &= ~MENU_FLAG_STARTGAME;
 						game->menuflags |= MENU_FLAG_EXITGAME;
@@ -102,12 +102,12 @@ static void updatemenu(struct game* game)
 				displaysettings(game);
 				
 				game->menuflags &= ~MENU_FLAG_SETTINGS;
-				game->menuflags |= GAME_FLAG_INSETTINGS;
+				game->menuflags |= MENU_FLAG_INSETTINGS;
 			}
-			else if (game->menuflags & GAME_FLAG_INSETTINGS){
+			else if (game->menuflags & MENU_FLAG_INSETTINGS){
 				removealltext(&game->uimanager);
 				displaymenu(game);
-				game->menuflags &= ~GAME_FLAG_INSETTINGS;
+				game->menuflags &= ~MENU_FLAG_INSETTINGS;
 				game->menuflags &= ~MENU_FLAG_CREDITS;
 			}
 			else if (game->menuflags & MENU_FLAG_CREDITS){
@@ -115,12 +115,12 @@ static void updatemenu(struct game* game)
 				displaycredits(game);
 				
 				game->menuflags &= ~MENU_FLAG_CREDITS;
-				game->menuflags |= GAME_FLAG_INCREDITS;
+				game->menuflags |= MENU_FLAG_INCREDITS;
 			}	
-			else if (game->menuflags & GAME_FLAG_INCREDITS){
+			else if (game->menuflags & MENU_FLAG_INCREDITS){
 				removealltext(&game->uimanager);
 				displaymenu(game);
-				game->menuflags &= ~GAME_FLAG_INCREDITS;
+				game->menuflags &= ~MENU_FLAG_INCREDITS;
 			}
 			else if (game->menuflags & MENU_FLAG_EXITGAME){
 				game_shutdown(game);
@@ -135,7 +135,7 @@ int menu_startup(struct game* game){
 
 	displaymenu(game);
 	game->flags = GAME_FLAG_MAINMENU;
-	game->menuflags &= ~GAME_FLAG_INSETTINGS;
+	game->menuflags &= ~MENU_FLAG_INSETTINGS;
 
 	game->num_aiplayers = 8;
 	game->soundon = true;
@@ -289,6 +289,9 @@ void removealltext(struct uimanager* um){
 	}
 }
 void removebrackets(struct uimanager* um){
+	
+	removetext(um,"[                                                              ]");
+	removetext(um,"[                                                    ]");
 	removetext(um,"[                                                         ]");
 	removetext(um,"[                                          ]");
 	removetext(um,"[                                                 ]");

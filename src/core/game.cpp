@@ -272,7 +272,9 @@ static void winlose(struct game* game){
 	addtext(&game->uimanager,"Restart",550,600,color,&game->uimanager.font_playerlap,0);
 	addtext(&game->uimanager,"Main   Menu",530,700,color,&game->uimanager.font_playerlap,0);
 	vec3f_set(color,.0f,.0f,1.0f);
-	addtext(&game->uimanager,"[                                                    ]",520,600,color,&game->uimanager.font_playerlap,0);
+	if(!(game->flags & GAME_FLAG_SWITCHON)){
+		addtext(&game->uimanager,"[                                                    ]",520,600,color,&game->uimanager.font_playerlap,0);
+	}
 }
 
 static void update(struct game* game)
@@ -320,18 +322,18 @@ static void update(struct game* game)
 
 		//TEMP, TOGGLE BETWEEN MAINMENU/RESTART
 		if(game->inputmanager.controllers[GLFW_JOYSTICK_1].buttons[INPUT_BUTTON_X] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN)){
+			removebrackets(&game->uimanager);
 			if(game->flags & GAME_FLAG_YOULOSE || game->flags & GAME_FLAG_YOUWIN){
 				vec3f color;
 				vec3f_set(color,.0f,.0f,1.0f);
 
 				if(game->flags & GAME_FLAG_SWITCHON){
 					game->flags &= ~GAME_FLAG_SWITCHON;
-					removetext(&game->uimanager,"[                                                              ]");
 					addtext(&game->uimanager,"[                                                    ]",520,600,color,&game->uimanager.font_playerlap,0);
 				}
 				else{
 					game->flags |= GAME_FLAG_SWITCHON;
-					removetext(&game->uimanager,"[                                                    ]");
+					removealltext(&game->uimanager);
 					addtext(&game->uimanager,"[                                                              ]",500,700,color,&game->uimanager.font_playerlap,0);
 				}			
 			}
