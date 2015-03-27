@@ -67,7 +67,12 @@ static void updatemenu(struct game* game)
 					//move down to back
 					else if(game->menuflags & MENU_FLAG_SOUND){
 						game->menuflags &= ~MENU_FLAG_SOUND;
-						addtext(&game->uimanager,"[                                  ]",560,600,color,&game->uimanager.font_playerlap,0);//back
+						game->anothermenuflag |= MENU_FLAG_NUMLAPS;
+						addtext(&game->uimanager,"[                                                                                                    ]",423,550,color,&game->uimanager.font_playerlap,0);
+					}
+					else if(game->anothermenuflag & MENU_FLAG_NUMLAPS){
+						game->anothermenuflag &= ~MENU_FLAG_NUMLAPS;
+						addtext(&game->uimanager,"[                                  ]",560,650,color,&game->uimanager.font_playerlap,0);//back
 					}else{
 						//move to numai
 						game->menuflags |= MENU_FLAG_NUMAI;
@@ -112,16 +117,25 @@ static void updatemenu(struct game* game)
 					removebrackets(&game->uimanager);
 					if(game->menuflags & MENU_FLAG_NUMAI){
 						game->menuflags &= ~MENU_FLAG_NUMAI;
-						addtext(&game->uimanager,"[                                  ]",560,600,color,&game->uimanager.font_playerlap,0);//back
+						addtext(&game->uimanager,"[                                  ]",560,650,color,&game->uimanager.font_playerlap,0);//back
 					}
 					else if(game->menuflags & MENU_FLAG_SOUND){
 						game->menuflags &= ~MENU_FLAG_SOUND;
 						game->menuflags |= MENU_FLAG_NUMAI;
 						addtext(&game->uimanager,"[                                                                                                                                      ]",360,350,color,&game->uimanager.font_playerlap,0);//numai
-					}else{
+					}
+					else if(game->anothermenuflag & MENU_FLAG_NUMLAPS){
+						game->anothermenuflag &= ~MENU_FLAG_NUMLAPS;
 						game->menuflags |= MENU_FLAG_SOUND;
 						addtext(&game->uimanager,"[                                                                                  ]",480,450,color,&game->uimanager.font_playerlap,0);//sound
 					}
+					
+					else{
+						game->anothermenuflag |= MENU_FLAG_NUMLAPS;
+						addtext(&game->uimanager,"[                                                                                                    ]",423,550,color,&game->uimanager.font_playerlap,0);
+					}
+
+					
 				}
 			}
 		}
@@ -185,6 +199,11 @@ static void updatemenu(struct game* game)
 						vec3f_set(color,1.0f,1.0f,1.0f); //whitE
 					}
 					addtext(&game->uimanager,"Off",740,450,color,&game->uimanager.font_playerlap,0);
+				}
+				else if(game->anothermenuflag & MENU_FLAG_NUMLAPS){
+					if(game->num_laps < 19){
+						game->num_laps++;
+					}
 				}else{
 					removealltext(&game->uimanager);
 					displaymenu(game);
@@ -203,6 +222,11 @@ static void updatemenu(struct game* game)
 						game->num_aiplayers-=2;
 					}
 				}
+				else if(game->anothermenuflag & MENU_FLAG_NUMLAPS){
+					if(game->num_laps > 1){
+						game->num_laps--;
+					}
+				}
 				else if(game->menuflags & MENU_FLAG_SOUND){
 					printf("%d\n", (game->num_aiplayers/2));
 				}
@@ -218,6 +242,7 @@ int menu_startup(struct game* game){
 	game->menuflags &= ~MENU_FLAG_INSETTINGS;
 
 	game->num_aiplayers = 8;
+	game->num_laps = 4;
 	game->soundon = true;
 
 	while (game->flags & GAME_FLAG_MAINMENU){
@@ -380,6 +405,7 @@ void removebrackets(struct uimanager* um){
 	removetext(um,"[                                  ]");
 	removetext(um,"[                                                                                                                                      ]");
 	removetext(um,"[                                                                                  ]");
+	removetext(um,"[                                                                                                    ]");
 
 }
 
@@ -396,10 +422,13 @@ void uimanager_render(struct uimanager* um, struct game* game)
 
 
 			if(um->texts[j].numberadder==-1){
-				sprintf(rendertext, "Lap   %d /%d", game->player.vehicle->lap, GAME_WINCONDITION_LAPS);
+				sprintf(rendertext, "Lap   %d /%d", game->player.vehicle->lap, game->num_laps);
 			}
 			else if(um->texts[j].numberadder==8){
 				sprintf(rendertext, "%d", game->num_aiplayers);
+			}
+			else if(um->texts[j].numberadder==999){
+				sprintf(rendertext, "%d", game->num_laps);
 			}
 			else if(um->texts[j].numberadder==-2){
 				sprintf(rendertext, "%d", game->player.vehicle->place);
@@ -421,7 +450,7 @@ void uimanager_render(struct uimanager* um, struct game* game)
 			}
 			else if(um->texts[j].numberadder==666){
 				for(int i=0;i<=game->num_aiplayers-1;i++){
-					if(game->aiplayers[i].vehicle->lap==GAME_WINCONDITION_LAPS){
+					if(game->aiplayers[i].vehicle->lap==game->num_laps){
 						sprintf(rendertext, "Computer   %d   won   the   race", i);
 					}
 				}
@@ -573,14 +602,17 @@ void displaysettings(struct game* game){
 
 	vec3f_set(color,.0f,.0f,.0f); //BLack
 	addtext(&game->uimanager,"Number of Computers: ",380,350,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"Number of Laps: ",450,550,color,&game->uimanager.font_playerlap,0);
 
 	addtext(&game->uimanager,"Sound: ",500,450,color,&game->uimanager.font_playerlap,0);
 	addtext(&game->uimanager,"/",710,450,color,&game->uimanager.font_playerlap,0);
 
-	addtext(&game->uimanager,"Back",590,600,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"Back",590,650,color,&game->uimanager.font_playerlap,0);
 
 	vec3f_set(color,.0f,.0f,1.0f); //BLUE
 	addtext(&game->uimanager,"numcomps",860,350,color,&game->uimanager.font_playerlap,8);
+	addtext(&game->uimanager,"numlaps",800,550,color,&game->uimanager.font_playerlap,999);
+
 	if(game->soundon==false){
 		vec3f_set(color,1.0f,1.0f,1.0f); //whitE
 	}
@@ -592,5 +624,5 @@ void displaysettings(struct game* game){
 	addtext(&game->uimanager,"Off",740,450,color,&game->uimanager.font_playerlap,0);
 
 	vec3f_set(color,.0f,.0f,1.0f); //BLUE
-	addtext(&game->uimanager,"[                                  ]",560,600,color,&game->uimanager.font_playerlap,0);//back
+	addtext(&game->uimanager,"[                                  ]",560,650,color,&game->uimanager.font_playerlap,0);//back
 }

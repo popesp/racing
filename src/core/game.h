@@ -17,7 +17,6 @@
 #include	"../render/window.h"
 #include	"ui.h"
 
-#define GAME_WINCONDITION_LAPS	15
 
 #define	GAME_DEFAULT_WIDTH		1280
 #define	GAME_DEFAULT_HEIGHT		800
@@ -92,8 +91,10 @@ struct game
 	int songs[GAME_MUSIC_COUNT];
 
 	unsigned char flags;
-
 	unsigned char menuflags;
+	unsigned char anothermenuflag;
+
+	int num_laps;
 };
 
 int start_subsystems(struct game* game);
