@@ -170,13 +170,7 @@ static void scroll(GLFWwindow* window, double xoffset, double yoffset)
 	// scroll processing
 }
 
-static void mainmenu(struct game* game){
-	game->flags &= ~GAME_FLAG_YOULOSE;
-	game->flags &= ~GAME_FLAG_YOUWIN;
-	game->flags |= GAME_FLAG_MAINMENU;
-}
-
-static void restart(struct game* game){
+void restart(struct game* game){
 	vec3f color;
 
 	//turn off flags and turn back on wincondition
@@ -184,12 +178,6 @@ static void restart(struct game* game){
 	game->flags &= ~GAME_FLAG_YOULOSE;
 	game->flags &= ~GAME_FLAG_YOUWIN;
 	game->flags |= GAME_FLAG_WINCONDITION;
-	
-	//reset laps
-	game->player.vehicle->lap=1;
-	for(int i=0; i<game->num_aiplayers;i++){
-		game->aiplayers[i].vehicle->lap=1;
-	}
 
 	removealltext(&game->uimanager);
 
@@ -240,49 +228,12 @@ static void restart(struct game* game){
 	}else{
 		//CURRENTLY BROKEN FOR AN ODD AMOUNT OF AI
 	}
-}
 
-static void winlose(struct game* game){
-
-	vec3f color;
-
-	//remove race text
-	removetext(&game->uimanager, "laps");
-	removetext(&game->uimanager, "place");
-	removetext(&game->uimanager, "placer");
-	removetext(&game->uimanager, "Speed");
-	removetext(&game->uimanager, "velocity");
-
-	//Case: Game is lost
-	if(game->flags & GAME_FLAG_YOULOSE){
-		//set camera on winning AI
-		for(int i=0;i<=game->num_aiplayers-1;i++){
-			if(game->aiplayers[i].vehicle->lap==game->num_laps){
-				aiwin_camera(&game->aiplayers[i]);
-			}
-		}
-
-		vec3f_set(color,1.0f,0.0f,0.0f);
-		addtext(&game->uimanager,"YOU LOST",200,200,color,&game->uimanager.font_youwinlost,0);
-
-		vec3f_set(color,1.0f,1.0f,1.0f);
-		addtext(&game->uimanager,"computerwon",345,280,color,&game->uimanager.font_playerlap,666);
-
-	//Case: Game is won
-	}else{
-		vec3f_set(color,1.0f,0.0f,0.0f);
-		addtext(&game->uimanager,"YOU WON",200,200,color,&game->uimanager.font_youwinlost,0);
-
-		vec3f_set(color,1.0f,1.0f,1.0f);
-		addtext(&game->uimanager,"Nice job!",550,280,color,&game->uimanager.font_playerlap,0);
-	}
-		
-	vec3f_set(color,1.0f,1.0f,1.0f);
-	addtext(&game->uimanager,"Restart",550,600,color,&game->uimanager.font_playerlap,0);
-	addtext(&game->uimanager,"Main   Menu",530,700,color,&game->uimanager.font_playerlap,0);
-	vec3f_set(color,.0f,.0f,1.0f);
-	if(!(game->flags & GAME_FLAG_SWITCHON)){
-		addtext(&game->uimanager,"[                                                    ]",520,600,color,&game->uimanager.font_playerlap,0);
+	//reset laps BUGS FOR WHEN YOU GO MAIN MENU AND INCREMENT AI AFTER RACE HAS ALREADY STARTED
+	//POSSIBLY SET RESTART FLAG AS A FIX
+	game->player.vehicle->lap=1;
+	for(int i=0; i<game->num_aiplayers;i++){
+		game->aiplayers[i].vehicle->lap=1;
 	}
 }
 
@@ -351,7 +302,15 @@ static void update(struct game* game)
 		if(game->inputmanager.controllers[GLFW_JOYSTICK_1].buttons[INPUT_BUTTON_A] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN)){
 			if(game->flags & GAME_FLAG_YOULOSE || game->flags & GAME_FLAG_YOUWIN){
 				if(game->flags & GAME_FLAG_SWITCHON){
-					mainmenu(game);
+					game->flags &= ~GAME_FLAG_YOULOSE;
+					game->flags &= ~GAME_FLAG_YOUWIN;
+					game->flags |= GAME_FLAG_MAINMENU;
+
+					game->soundon = false;
+					removealltext(&game->uimanager);
+					menu_startup(game);
+
+					restart(game);
 				}else{
 					restart(game);
 				}

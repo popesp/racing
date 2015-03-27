@@ -1,5 +1,5 @@
 #include	"core/game.h"
-#include	"core/ui.h"
+#include	"core/menu.h"
 #include	"error.h"			// PRINT_ERROR
 
 int main(int argc, char** argv)
@@ -14,6 +14,10 @@ int main(int argc, char** argv)
 		PRINT_ERROR("Problem starting game subsystems.\n");
 		return 0;
 	}
+
+	game.num_aiplayers = GAME_INIT_AI;
+	game.num_laps = GAME_INIT_LAPS;
+	game.soundon = GAME_INIT_SOUNDON;
 
 	if (!menu_startup(&game))
 		return 0;

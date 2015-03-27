@@ -5,6 +5,7 @@
 #include	"../audio/audio.h"
 #include	"input.h"
 #include	"win.h"
+#include	"menu.h"
 #include	"../objects/camera.h"
 #include	"../objects/entities/entity.h"
 #include	"../objects/pickup.h"
@@ -17,6 +18,10 @@
 #include	"../render/window.h"
 #include	"ui.h"
 
+
+#define GAME_INIT_LAPS			4
+#define GAME_INIT_AI			8
+#define GAME_INIT_SOUNDON		true
 
 #define	GAME_DEFAULT_WIDTH		1280
 #define	GAME_DEFAULT_HEIGHT		800
@@ -101,5 +106,7 @@ int start_subsystems(struct game* game);
 int game_startup(struct game* game);
 void game_mainloop(struct game* game);
 void game_shutdown(struct game* game);
+
+void restart(struct game* game);
 
 #endif

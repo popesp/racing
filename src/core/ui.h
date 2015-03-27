@@ -93,9 +93,7 @@ void uimanager_startup(struct uimanager* um, struct window* window);
 
 void uimanager_shutdown(struct uimanager* um);
 
-
 void uimanager_render(struct uimanager* um, struct game* game);
-
 
 void font_generate(struct font* font, struct uimanager* um, const char* filename, unsigned size);
 
@@ -110,7 +108,6 @@ void removebrackets(struct uimanager* um);
 void displaymenu(struct game* game);
 void displaycredits(struct game* game);
 void displaysettings(struct game* game);
-
-int menu_startup(struct game* game);
+void winlose(struct game* game);
 
 #endif

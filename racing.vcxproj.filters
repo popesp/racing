@@ -125,6 +125,9 @@
     <ClCompile Include="src\core\ui.cpp">
       <Filter>src\core</Filter>
     </ClCompile>
+    <ClCompile Include="src\core\menu.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\debug.h">
@@ -215,6 +218,9 @@
       <Filter>headers\physics</Filter>
     </ClInclude>
     <ClInclude Include="src\core\ui.h">
+      <Filter>headers\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\menu.h">
       <Filter>headers\core</Filter>
     </ClInclude>
   </ItemGroup>
