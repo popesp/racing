@@ -420,6 +420,11 @@ static void update(struct game* game)
 		checkplace(game);
 	}
 
+	//Sound On Off
+	if (!game->soundon){
+		audiomanager_setmusicvolume(&game->audiomanager,0);
+		audiomanager_setsfxvolume(&game->audiomanager,0);
+	}
 	// check for window close messages
 	if (glfwWindowShouldClose(game->window.w))
 		game->flags |= GAME_FLAG_TERMINATED;

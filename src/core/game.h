@@ -17,7 +17,7 @@
 #include	"../render/window.h"
 #include	"ui.h"
 
-#define GAME_WINCONDITION_LAPS	2
+#define GAME_WINCONDITION_LAPS	15
 
 #define	GAME_DEFAULT_WIDTH		1280
 #define	GAME_DEFAULT_HEIGHT		800
