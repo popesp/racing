@@ -2,6 +2,7 @@
 
 #include	"../mem.h"
 #include	"../random.h"
+#include	"../objects/entities/missile.h"
 
 static void resetcontroller(struct aiplayer* p)
 {
@@ -82,8 +83,53 @@ void aiplayer_delete(struct aiplayer* p, struct vehiclemanager* vm)
 	mem_free(p->controller.axes);
 }
 
+//Tries to predict if shooting a missile will result in a hit on another, quite basic and doesnt work
+bool aiplayer_missilehit(struct aiplayer* p, struct vehiclemanager* vm) {
 
-void aiplayer_updateinput(struct aiplayer* p)
+	struct vehicle* v;
+
+	vec3f missile;
+	physx::PxMat44 transform(p->vehicle->body->getGlobalPose());
+
+	for (int i = 1; i <= 5; i++) {
+
+		//Where a missile should be after i seconds, the 60 is for frames since we calculate this 60 times a second
+		vec3f_set(missile, ENTITY_FORWARD*MISSILE_SPEED*i*60);
+		mat4f_transformvec3f(missile, (float*)&transform);
+
+		for (int j = 0; j < VEHICLE_COUNT; j++) {
+			v = vm->vehicles + j;
+
+			if (!(v->flags & VEHICLE_FLAG_ENABLED)) {
+				continue;
+			}
+			//Ignore this vehicle as it is the one shooting, no point calculating how to shoot yourself!
+			if (v == p->vehicle) {
+				continue;
+			}
+			//advance advance this vehicle i seconds into the future
+			vec3f vehicle_position;
+			physx::PxMat44 vehicle_transform(v->body->getGlobalPose());
+			vec3f_set(vehicle_position, VEHICLE_FORWARD*v->speed*i*60);
+			mat4f_transformvec3f(vehicle_position, (float*)&vehicle_transform);
+
+			//These check if the missile will be within 1 of another vehicle after i seconds, if so shoot the missile
+			if (missile[0] - vehicle_position[0] < 1 && missile[0] - vehicle_position[0] > -1) {
+				return true;
+			}
+			if (missile[1] - vehicle_position[1] < 0.5 && missile[1] - vehicle_position[1] > -1) {
+				return true;
+			}
+			if (missile[2] - vehicle_position[2] < 1 && missile[2] - vehicle_position[2] > -1) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+void aiplayer_updateinput(struct aiplayer* p, struct vehiclemanager* vm)
 {
 	vec3f next_point, right, diff;
 	int next_index;
@@ -96,7 +142,6 @@ void aiplayer_updateinput(struct aiplayer* p)
 	vec3f_copy(next_point, p->track->pathpoints[next_index].pos);
 
 	// IDEA: future point based on current speed
-
 	vec3f_subtractn(diff, next_point, p->vehicle->pos);
 
 	vec3f_set(right, VEHICLE_RIGHT);
@@ -110,6 +155,14 @@ void aiplayer_updateinput(struct aiplayer* p)
 		if(p->vehicle->index_track==140||p->vehicle->index_track==160||p->vehicle->index_track==729){
 			p->controller.buttons[INPUT_BUTTON_A] = (INPUT_STATE_CHANGED | INPUT_STATE_DOWN);
 			//printf("he used it\n");
+		}
+	}
+	else if(p->vehicle->powerup==VEHICLE_POWERUP_MINE||p->vehicle->powerup==VEHICLE_POWERUP_TURRET){
+		p->controller.buttons[INPUT_BUTTON_A] = (INPUT_STATE_CHANGED | INPUT_STATE_DOWN);
+	}
+	else if(p->vehicle->powerup==VEHICLE_POWERUP_MISSILE||p->vehicle->powerup==VEHICLE_POWERUP_MISSILEX2||p->vehicle->powerup==VEHICLE_POWERUP_MISSILEX3){
+		if(aiplayer_missilehit(p, vm)){
+			p->controller.buttons[INPUT_BUTTON_A] = (INPUT_STATE_CHANGED | INPUT_STATE_DOWN);
 		}
 	}
 	

@@ -248,7 +248,7 @@ static void update(struct game* game)
 	// update player and ai input
 	inputmanager_update(&game->inputmanager);
 	for(i = 0; i < game->num_aiplayers; i++)
-		aiplayer_updateinput(&game->aiplayers[i]);
+		aiplayer_updateinput(&game->aiplayers[i], &game->vehiclemanager);
 	
 	if (game->inputmanager.controllers[GLFW_JOYSTICK_1].flags & INPUT_FLAG_ENABLED)
 	{

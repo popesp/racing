@@ -43,7 +43,7 @@ void aiplayer_init(struct aiplayer* p, struct vehiclemanager* vm, int index_trac
 void player_delete(struct player* p, struct vehiclemanager* vm);
 void aiplayer_delete(struct aiplayer* p, struct vehiclemanager* vm);
 
-void aiplayer_updateinput(struct aiplayer* p);
+void aiplayer_updateinput(struct aiplayer* p, struct vehiclemanager* vm);
 
 void player_updatecamera(struct player* p);
 void aiwin_camera(struct aiplayer* aip);
