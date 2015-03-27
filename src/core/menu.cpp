@@ -6,15 +6,19 @@
 
 static void rendermenu(struct game* game)
 {
+	//Clear screen
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	uimanager_render(&game->uimanager, game);//render text
+	//render text
+	uimanager_render(&game->uimanager, game);
 
+	//update window
 	glfwSwapBuffers(game->window.w);
 }
 
 static void updatemenu(struct game* game)
 {
+	//update controller
 	inputmanager_update(&game->inputmanager);
 
 	if (game->inputmanager.controllers[GLFW_JOYSTICK_1].flags & INPUT_FLAG_ENABLED)
@@ -22,9 +26,15 @@ static void updatemenu(struct game* game)
 		vec3f color;
 		vec3f_set(color,0.0f,0.0f,1.0f); //BLUE
 
+		//Dpad down
 		if(game->inputmanager.controllers[GLFW_JOYSTICK_1].buttons[INPUT_BUTTON_DDOWN] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN)){
+			
+			//check to make sure not in credits screen
 			if(!(game->menuflags & MENU_FLAG_INCREDITS)){
+				//check to make sure not in settings screen
 				if(!(game->menuflags & MENU_FLAG_INSETTINGS)){
+					
+					//Dpad down "Start Game"
 					if(game->menuflags & MENU_FLAG_STARTGAME){
 						game->menuflags &= ~MENU_FLAG_STARTGAME;
 						game->menuflags |= MENU_FLAG_SETTINGS;
@@ -32,7 +42,7 @@ static void updatemenu(struct game* game)
 						removebrackets(&game->uimanager);
 						addtext(&game->uimanager,"[                                                 ]",460,400,color,&game->uimanager.font_playerlap,0);
 					}
-
+					//Dpad down "Settings"
 					else if (game->menuflags & MENU_FLAG_SETTINGS){
 						game->menuflags &= ~MENU_FLAG_SETTINGS;
 						game->menuflags |= MENU_FLAG_CREDITS;
@@ -40,6 +50,7 @@ static void updatemenu(struct game* game)
 						removebrackets(&game->uimanager);
 						addtext(&game->uimanager,"[                                          ]",470,500,color,&game->uimanager.font_playerlap,0);
 					}
+					//Dpad down "Credits"
 					else if (game->menuflags & MENU_FLAG_CREDITS){
 						game->menuflags &= ~MENU_FLAG_CREDITS;
 						game->menuflags |= MENU_FLAG_EXITGAME;
@@ -47,6 +58,7 @@ static void updatemenu(struct game* game)
 						removebrackets(&game->uimanager);
 						addtext(&game->uimanager,"[                                                         ]",440,600,color,&game->uimanager.font_playerlap,0);
 					}
+					//Dpad down "Exit Game"
 					else if (game->menuflags & MENU_FLAG_EXITGAME){
 						game->menuflags &= ~MENU_FLAG_EXITGAME;
 						game->menuflags |= MENU_FLAG_STARTGAME;
@@ -55,7 +67,7 @@ static void updatemenu(struct game* game)
 						addtext(&game->uimanager,"[                                                                    ]",430,300,color,&game->uimanager.font_playerlap,0);
 					}		
 				}else{
-
+					//In Settings screen
 					removebrackets(&game->uimanager);
 					
 					//move down to sound
@@ -64,13 +76,13 @@ static void updatemenu(struct game* game)
 						game->menuflags |= MENU_FLAG_SOUND;
 						addtext(&game->uimanager,"[                                                                                  ]",480,450,color,&game->uimanager.font_playerlap,0);//sound
 					}
-
-					//move down to back
+					//move down to num laps
 					else if(game->menuflags & MENU_FLAG_SOUND){
 						game->menuflags &= ~MENU_FLAG_SOUND;
 						game->anothermenuflag |= MENU_FLAG_NUMLAPS;
 						addtext(&game->uimanager,"[                                                                                                    ]",423,550,color,&game->uimanager.font_playerlap,0);
 					}
+					//move down to back
 					else if(game->anothermenuflag & MENU_FLAG_NUMLAPS){
 						game->anothermenuflag &= ~MENU_FLAG_NUMLAPS;
 						addtext(&game->uimanager,"[                                  ]",560,650,color,&game->uimanager.font_playerlap,0);//back
@@ -83,6 +95,7 @@ static void updatemenu(struct game* game)
 			}
 		}
 
+		//DPAD UP
 		if(game->inputmanager.controllers[GLFW_JOYSTICK_1].buttons[INPUT_BUTTON_DUP] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN)){
 			if(!(game->menuflags & MENU_FLAG_INCREDITS)){
 				if(!(game->menuflags & MENU_FLAG_INSETTINGS)){
@@ -141,6 +154,7 @@ static void updatemenu(struct game* game)
 			}
 		}
 
+		//A BUTTON
 		if(game->inputmanager.controllers[GLFW_JOYSTICK_1].buttons[INPUT_BUTTON_A] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN)){
 			if(!(game->menuflags & MENU_FLAG_INSETTINGS)){
 				if(game->menuflags & MENU_FLAG_STARTGAME){
@@ -229,7 +243,7 @@ static void updatemenu(struct game* game)
 					}
 				}
 				else if(game->menuflags & MENU_FLAG_SOUND){
-					printf("%d\n", (game->num_aiplayers/2));
+					printf("%d\n", (game->num_aiplayers/2)); //test
 				}
 			}
 		}
@@ -238,10 +252,14 @@ static void updatemenu(struct game* game)
 
 int menu_startup(struct game* game){
 
+	//render menu text
 	displaymenu(game);
+	
+	//set flags for menu
 	game->flags = GAME_FLAG_MAINMENU;
 	game->menuflags &= ~MENU_FLAG_INSETTINGS;
 
+	//loop until not in menu
 	while (game->flags & GAME_FLAG_MAINMENU){
 		updatemenu(game);
 
