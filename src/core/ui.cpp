@@ -103,6 +103,15 @@ static float* renderchar(struct uimanager* um, int x, int y, char c, vec3f color
 	return ptr;
 }
 
+/*	adds a text that will be rendered on screen
+	param:	um			uimanager
+	param:	inputtext		text to be added
+	param:	x			x coordinate
+	param:	y			y coordinate
+	param:  color			color of the text
+	param:  font			font type and size
+	param:  numberadder		for specialized font that can be automodified
+*/
 void addtext(struct uimanager* um, char* inputtext, int x, int y, vec3f color, struct font* font, int numberadder){
 	int i;
 	for (i = 0; i < UI_TEXT_COUNT; i++)
@@ -121,9 +130,12 @@ void addtext(struct uimanager* um, char* inputtext, int x, int y, vec3f color, s
 	vec3f_copy(t->color, color);
 	t->activefont= font;
 	t->flags = UI_TEXT_FLAG_ENABLED;
-
 }
 
+/*	removes a text on screen
+	param:	um			uimanager
+	param:	inputtext		the text to be removed
+*/
 void removetext(struct uimanager* um, char* inputtext){
 	int i;
 
@@ -135,6 +147,9 @@ void removetext(struct uimanager* um, char* inputtext){
 		}
 }
 
+/*	removes all text on screen
+	param:	um			uimanager
+*/
 void removealltext(struct uimanager* um){
 	for (int i =0; i < UI_TEXT_COUNT; i++){
 		um->texts[i].inputtext = "";
@@ -142,6 +157,9 @@ void removealltext(struct uimanager* um){
 	}
 }
 
+/*	a simpler call to remove brackets for menus
+	param:	um			uimanager
+*/
 void removebrackets(struct uimanager* um){
 	
 	removetext(um,"[                                                              ]");
@@ -168,7 +186,7 @@ void uimanager_render(struct uimanager* um, struct game* game)
 	for(j=0;j<UI_TEXT_COUNT;j++){
 		if(um->texts[j].flags & UI_TEXT_FLAG_ENABLED){
 
-
+			//See: numberadder in addtext()
 			if(um->texts[j].numberadder==-1){
 				sprintf(rendertext, "Lap   %d /%d", game->player.vehicle->lap, game->num_laps);
 			}
