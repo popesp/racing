@@ -25,6 +25,7 @@ static void scroll(GLFWwindow*, double, double);
 static void update(struct game*);
 static void render(struct game*);
 
+static int countdown = 300;
 
 static void resetplayers(struct game* game)
 {
@@ -241,15 +242,31 @@ static void update(struct game* game)
 {
 	vec3f move, up;
 	int i;
-
+	vec3f color;
+	vec3f_set(color, 1.0f,1.0f,1.0f);
 	// check for callback events
 	glfwPollEvents();
 
+	char str[15];
+	int dis= 5;
+
+	if(countdown-- <0){
+	//	removetext(&game->uimanager,str);
 	// update player and ai input
 	inputmanager_update(&game->inputmanager);
 	for(i = 0; i < game->num_aiplayers; i++)
-		aiplayer_updateinput(&game->aiplayers[i], &game->vehiclemanager);
-	
+		aiplayer_updateinput(&game->aiplayers[i]);
+	}
+	else{
+		int tem = (countdown / 60) + 1;
+		if(tem != dis){
+			dis = tem;
+			//removetext(&game->uimanager,str);
+			//sprintf(str, "%d", dis);
+			printf("%d", dis);
+			//addtext(&game->uimanager,str,500,650,color,&game->uimanager.font_place,0);
+		}
+	}
 	if (game->inputmanager.controllers[GLFW_JOYSTICK_1].flags & INPUT_FLAG_ENABLED)
 	{
 		// temporary debug button

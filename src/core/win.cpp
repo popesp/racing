@@ -57,7 +57,7 @@ void checkwin(struct game* game)
 
 		if(game->aiplayers[i].vehicle->checkpoint2==true&&game->aiplayers[i].vehicle->checkpoint1==true&&(unsigned)game->aiplayers[i].vehicle->index_track==game->track.num_pathpoints-1){
 			game->aiplayers[i].vehicle->lap++;
-			//printf("AI %d is on lap %d\n", i, game->aiplayers[i].vehicle->lap);
+			printf("AI %d is on lap %d and place %d\n", i, game->aiplayers[i].vehicle->lap,game->aiplayers[i].vehicle->place );
 			game->aiplayers[i].vehicle->checkpoint1=false;
 			game->aiplayers[i].vehicle->checkpoint2=false;
 		}
@@ -68,82 +68,50 @@ void checkwin(struct game* game)
 void checkplace(struct game* game){
 
 	
-	//init everyone to last place
-	for(int i=0;i<game->num_aiplayers;i++){
-		game->aiplayers[i].vehicle->place=i+1;
-		game->player.vehicle->place=game->num_aiplayers+1;
-	}
-
+	//init to last place
+	game->player.vehicle->place=game->num_aiplayers+1;
+	
+	int count_behind_player = 0;
 	
 	for(int i=0; i<game->num_aiplayers;i++){
-
-		////////////////////////////////////
-		//if only one AI
-		if(game->num_aiplayers-1==0){
-
-			//first check for laps
-			//AI has larger lap he's ahead
-			if(game->aiplayers[i].vehicle->lap > game->player.vehicle->lap){
-				game->aiplayers[i].vehicle->place = game->player.vehicle->place-1;
-				game->player.vehicle->place = game->aiplayers[i].vehicle->place+1;
-
+		if(game->aiplayers[i].vehicle->lap == game->player.vehicle->lap){
+			if(game->aiplayers[i].vehicle->checkpoint1 == game->player.vehicle->checkpoint1){
+				if(game->aiplayers[i].vehicle->checkpoint2 == game->player.vehicle->checkpoint2){
+					if(game->aiplayers[i].vehicle->index_track > game->player.vehicle->index_track){
+					
+					}
+					else if(game->aiplayers[i].vehicle->index_track < game->player.vehicle->index_track){
+						count_behind_player++;
+						
+					}else if(game->aiplayers[i].vehicle->index_track == game->player.vehicle->index_track){
+					
+					}
+				
+					//game->aiplayers[j].vehicle->place = game->player.vehicle->place-1;
+				
+				}
+				else if(game->aiplayers[i].vehicle->checkpoint2 == false && game->player.vehicle->checkpoint2 == true){
+					count_behind_player++;
+				}
+				else if(game->aiplayers[i].vehicle->checkpoint2 == true && game->player.vehicle->checkpoint2 == false){
+					//vh2->place--;
+				}
+			}
+			else if(game->aiplayers[i].vehicle->checkpoint1 == false && game->player.vehicle->checkpoint1 == true){
+				count_behind_player++;
+			}
+			else if(game->aiplayers[i].vehicle->checkpoint1 == true && game->player.vehicle->checkpoint1 == false){
+				//vh2->place--;
 			}
 
-			//player has larger lap
-			else if(game->aiplayers[i].vehicle->lap < game->player.vehicle->lap){
-				game->player.vehicle->place = game->aiplayers[i].vehicle->place-1;
-				game->aiplayers[i].vehicle->place = game->player.vehicle->place+1;
-			}
-
-			//if laps are the same
-			else if(game->aiplayers[i].vehicle->lap == game->player.vehicle->lap){
-
-				//now check for index
-				//AI has larger index
-				if(game->aiplayers[i].vehicle->index_track > game->player.vehicle->index_track){
-					game->aiplayers[i].vehicle->place = game->player.vehicle->place-1;
-					game->player.vehicle->place = game->aiplayers[i].vehicle->place+1;
-				}
-
-				//player has larger index
-				else if(game->aiplayers[i].vehicle->index_track < game->player.vehicle->index_track){
-					game->player.vehicle->place = game->aiplayers[i].vehicle->place-1;
-					game->aiplayers[i].vehicle->place = game->player.vehicle->place+1;
-				}
-
-				//same index player ahead
-				else if(game->aiplayers[i].vehicle->index_track == game->player.vehicle->index_track){
-					game->player.vehicle->place = game->aiplayers[i].vehicle->place-1;
-					game->aiplayers[i].vehicle->place = game->player.vehicle->place+1;
-				}
-
-			}
+						
+		}else if(game->aiplayers[i].vehicle->lap < game->player.vehicle->lap){
+			count_behind_player++;
+		}else if(game->aiplayers[i].vehicle->lap > game->player.vehicle->lap){
+			//vh2->place--;
 		}
 	}
-		// IF MORE THAN ONE AI
-		if(game->num_aiplayers-1 > 0){
-
-			for(int j=0; j<=game->num_aiplayers-1;j++){
-
-				
-				check_ai_vs_other(game->aiplayers[j].vehicle,game->player.vehicle,game->num_aiplayers);
-
-
-				//for(int k=0; k<=game->num_aiplayers-1;k++){
-				//	if (k!=j)
-				//		check_ai_vs_other(game->aiplayers[k].vehicle,game->aiplayers[j].vehicle,game->num_aiplayers);
-				//}
-
-
-			
-				if(game->num_aiplayers-1>1){
-					//printf("Player   %d    AI[%d] %d\n", game->player.vehicle->place,j, game->aiplayers[j].vehicle->place);
-				}
-
-			}
-
-		}
-	
+	game->player.vehicle->place = game->num_aiplayers +1 - count_behind_player;
 
 	removetext(&game->uimanager, "placer");
 	vec3f color;
@@ -185,64 +153,4 @@ void checkplace(struct game* game){
 		addtext(&game->uimanager, "placer", 290, 580,color,&game->uimanager.font_placer,-6);
 	}
 	
-}
-
-void check_ai_vs_other(struct vehicle* vh1,struct vehicle* vh2, int num_aiplayers){
-	
-	if(vh1->lap == vh2->lap){
-		if(vh1->checkpoint1 == vh2->checkpoint1){
-			if(vh1->checkpoint2 == vh2->checkpoint2){
-				if(vh1->index_track > vh2->index_track){
-					if (vh1->place - vh2->place == 1){
-						if(vh1->place +1 <= num_aiplayers+1)
-							vh2->place = vh1->place +1;
-						if(vh2->place - 1 > 0)
-							vh1->place = vh2->place -1;
-						//printf("Player moved from %d place to %d place\n",vh1->place,vh2->place);
-					}
-				}
-				else if(vh1->index_track < vh2->index_track){
-					if (vh2->place - vh1->place == 1){
-						if(vh2->place +1 <= num_aiplayers+1)
-							vh1->place = vh2->place +1;
-						if(vh1->place - 1 > 0)
-							vh2->place = vh1->place -1;
-					
-						//printf("Player moved from %d place to %d place\n",vh2->place,vh1->place);
-					}
-				}else if(vh1->index_track == vh2->index_track){
-					if (vh1->place - vh2->place == 1){
-						if(vh1->place +1 <= num_aiplayers+1)
-							vh2->place = vh1->place +1;
-						if(vh2->place - 1 > 0)
-							vh1->place = vh2->place -1;
-					
-						//printf("Player moved from %d place to %d place\n",vh1->place,vh2->place);
-					}
-				}
-				//game->aiplayers[j].vehicle->place = game->player.vehicle->place-1;
-				//	game->player.vehicle->place = game->aiplayers[j].vehicle->place+1;
-			}
-			else if(vh1->checkpoint2 == false && vh2->checkpoint2 == true){
-				//vh1->place--;
-			}
-			else if(vh1->checkpoint2 == true && vh2->checkpoint2 == false){
-				//vh2->place--;
-			}
-		}
-		else if(vh1->checkpoint1 == false && vh2->checkpoint1 == true){
-			//vh1->place--;
-		}
-		else if(vh1->checkpoint1 == true && vh2->checkpoint1 == false){
-			//vh2->place--;
-		}
-
-						
-	}else if(vh1->lap < vh2->lap){
-		//vh1->place--;
-	}else if(vh1->lap > vh2->lap){
-		//vh2->place--;
-	}
-
-
 }
