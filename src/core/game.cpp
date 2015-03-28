@@ -249,9 +249,13 @@ static void update(struct game* game)
 	vec3f move, up;
 	int i;
 	vec3f color;
-	vec3f_set(color, 1.0f,1.0f,1.0f);
+
 	// check for callback events
 	glfwPollEvents();
+
+	printf("window width %d window height %d\r", game->window.width, game->window.height);
+
+	vec3f_set(color, 1.0f,1.0f,1.0f);
 
 	game->dis= 5;
 
@@ -270,10 +274,30 @@ static void update(struct game* game)
 			
 			//update text
 			removetext(&game->uimanager,"countdown");
-			addtext(&game->uimanager,"countdown",580,350,color,&game->uimanager.font_youwinlost,111);
-
+			addtext(&game->uimanager,"countdown",(game->window.width/2)-60,(game->window.height-450),color,&game->uimanager.font_youwinlost,111);
 		}
 	}
+
+	//constantly remove text except for countdown
+	removealltext(&game->uimanager);
+
+	vec3f_set(color, 1.0f,1.0f,1.0f);
+	//laps
+	addtext(&game->uimanager,"laps",100,(game->window.height-100),color,&game->uimanager.font_playerlap,-1);
+	
+	//if paused
+	if(game->flags & GAME_FLAG_PAUSED){
+		addtext(&game->uimanager, "Game   Paused", (game->window.width/2)-200, (game->window.height/2), color, &game->uimanager.font_pause,0);}
+	//place
+	vec3f_set(color, 1.0f,1.0f,.0f);
+	addtext(&game->uimanager,"place",100,(game->window.height-150),color,&game->uimanager.font_place,-2);
+
+	//speed
+	vec3f_set(color, 0.0f,0.0f,1.0f);
+	addtext(&game->uimanager,"Speed",(game->window.width-200),(game->window.height-200),color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"velocity",(game->window.width-220),(game->window.height-100),color,&game->uimanager.font_velocity,9001);
+
+
 	if (game->inputmanager.controllers[GLFW_JOYSTICK_1].flags & INPUT_FLAG_ENABLED)
 	{
 		// temporary debug button
@@ -298,7 +322,6 @@ static void update(struct game* game)
 				game->flags &= ~GAME_FLAG_PAUSED;
 			}else{
 				if(!(game->flags & GAME_FLAG_YOULOSE || game->flags & GAME_FLAG_YOUWIN)){
-					addtext(&game->uimanager, "Game   Paused", 440, 350, color, &game->uimanager.font_pause,0);
 					game->flags |= GAME_FLAG_PAUSED;
 				}
 			}
@@ -313,11 +336,11 @@ static void update(struct game* game)
 
 				if(game->flags & GAME_FLAG_SWITCHON){
 					game->flags &= ~GAME_FLAG_SWITCHON;
-					addtext(&game->uimanager,"[                                                    ]",520,600,color,&game->uimanager.font_playerlap,0);
+					addtext(&game->uimanager,"[                                                    ]",(game->window.width/2)-120,600,color,&game->uimanager.font_playerlap,0);
 				}
 				else{
 					game->flags |= GAME_FLAG_SWITCHON;
-					addtext(&game->uimanager,"[                                                              ]",500,700,color,&game->uimanager.font_playerlap,0);
+					addtext(&game->uimanager,"[                                                              ]",(game->window.width/2)-140,700,color,&game->uimanager.font_playerlap,0);
 				}			
 			}
 		}
@@ -658,20 +681,6 @@ int game_startup(struct game* game)
 	game->index_currentsong = 0;
 	game->currentchannel = audiomanager_playmusic(&game->audiomanager, game->songs[game->index_currentsong], -1);
 	audiomanager_setmusicvolume(&game->audiomanager, 0.2f);
-	
-	vec3f color;
-	vec3f_set(color, 1.0f,1.0f,1.0f);
-	//laps
-	addtext(&game->uimanager,"laps",100,700,color,&game->uimanager.font_playerlap,-1);
-
-	//place
-	vec3f_set(color, 1.0f,1.0f,.0f);
-	addtext(&game->uimanager,"place",100,650,color,&game->uimanager.font_place,-2);
-
-	//speed
-	vec3f_set(color, 0.0f,0.0f,1.0f);
-	addtext(&game->uimanager,"Speed",1080,600,color,&game->uimanager.font_playerlap,0);
-	addtext(&game->uimanager,"velocity",1060,700,color,&game->uimanager.font_velocity,9001);
 
 	game->flags = GAME_FLAG_INIT;
 

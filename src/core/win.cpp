@@ -57,7 +57,7 @@ void checkwin(struct game* game)
 
 		if(game->aiplayers[i].vehicle->checkpoint2==true&&game->aiplayers[i].vehicle->checkpoint1==true&&(unsigned)game->aiplayers[i].vehicle->index_track==game->track.num_pathpoints-1){
 			game->aiplayers[i].vehicle->lap++;
-			printf("AI %d is on lap %d and place %d\n", i, game->aiplayers[i].vehicle->lap,game->aiplayers[i].vehicle->place );
+			//printf("AI %d is on lap %d and place %d\n", i, game->aiplayers[i].vehicle->lap,game->aiplayers[i].vehicle->place );
 			game->aiplayers[i].vehicle->checkpoint1=false;
 			game->aiplayers[i].vehicle->checkpoint2=false;
 		}
@@ -117,40 +117,40 @@ void checkplace(struct game* game){
 	vec3f color;
 	vec3f_set(color, 1.0f,1.0f,.0f);
 	if(game->player.vehicle->place==21||game->player.vehicle->place==31||game->player.vehicle->place==41||game->player.vehicle->place==51||game->player.vehicle->place==61||game->player.vehicle->place==71||game->player.vehicle->place==81||game->player.vehicle->place==91){
-		addtext(&game->uimanager, "placer", 240, 580,color,&game->uimanager.font_placer,-3);
+		addtext(&game->uimanager, "placer", 240, (game->window.height-220),color,&game->uimanager.font_placer,-3);
 	}
 	else if(game->player.vehicle->place==1){
-		addtext(&game->uimanager, "placer", 170, 580,color,&game->uimanager.font_placer,-3);
+		addtext(&game->uimanager, "placer", 170, (game->window.height-220),color,&game->uimanager.font_placer,-3);
 	}
 	else if(game->player.vehicle->place==2){
-		addtext(&game->uimanager, "placer", 200, 580,color,&game->uimanager.font_placer,-4);
+		addtext(&game->uimanager, "placer", 200, (game->window.height-220),color,&game->uimanager.font_placer,-4);
 	}
 	else if(game->player.vehicle->place==22||game->player.vehicle->place==32||game->player.vehicle->place==42||game->player.vehicle->place==52||game->player.vehicle->place==62||game->player.vehicle->place==72||game->player.vehicle->place==82||game->player.vehicle->place==92){
-		addtext(&game->uimanager, "placer", 270, 580,color,&game->uimanager.font_placer,-4);
+		addtext(&game->uimanager, "placer", 270, (game->window.height-220),color,&game->uimanager.font_placer,-4);
 	}
 	else if(game->player.vehicle->place==3){
-		addtext(&game->uimanager, "placer", 200, 580,color,&game->uimanager.font_placer,-5);
+		addtext(&game->uimanager, "placer", 200, (game->window.height-220),color,&game->uimanager.font_placer,-5);
 	}
 	else if(game->player.vehicle->place==23||game->player.vehicle->place==33||game->player.vehicle->place==43||game->player.vehicle->place==53||game->player.vehicle->place==63||game->player.vehicle->place==73||game->player.vehicle->place==83||game->player.vehicle->place==93){
-		addtext(&game->uimanager, "placer", 270, 580,color,&game->uimanager.font_placer,-5);
+		addtext(&game->uimanager, "placer", 270, (game->window.height-220),color,&game->uimanager.font_placer,-5);
 	}
 	else if(game->player.vehicle->place<10){
-		addtext(&game->uimanager, "placer", 215, 580,color,&game->uimanager.font_placer,-6);
+		addtext(&game->uimanager, "placer", 215, (game->window.height-220),color,&game->uimanager.font_placer,-6);
 	}
 	else if(game->player.vehicle->place<20){
-		addtext(&game->uimanager, "placer", 235, 580,color,&game->uimanager.font_placer,-6);
+		addtext(&game->uimanager, "placer", 235, (game->window.height-220),color,&game->uimanager.font_placer,-6);
 	}
 	else if(game->player.vehicle->place==20){
-		addtext(&game->uimanager, "placer", 280, 580,color,&game->uimanager.font_placer,-6);
+		addtext(&game->uimanager, "placer", 280, (game->window.height-220),color,&game->uimanager.font_placer,-6);
 	}
 	else if(game->player.vehicle->place<30){
-		addtext(&game->uimanager, "placer", 280, 580,color,&game->uimanager.font_placer,-6);
+		addtext(&game->uimanager, "placer", 280, (game->window.height-220),color,&game->uimanager.font_placer,-6);
 	}
 	else if(game->player.vehicle->place%10==0){
-		addtext(&game->uimanager, "placer", 280, 580,color,&game->uimanager.font_placer,-6);
+		addtext(&game->uimanager, "placer", 280, (game->window.height-220),color,&game->uimanager.font_placer,-6);
 	}
 	else{
-		addtext(&game->uimanager, "placer", 280, 580,color,&game->uimanager.font_placer,-6);
+		addtext(&game->uimanager, "placer", 280, (game->window.height-220),color,&game->uimanager.font_placer,-6);
 	}
 	
 }

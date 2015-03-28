@@ -152,8 +152,10 @@ void removetext(struct uimanager* um, char* inputtext){
 */
 void removealltext(struct uimanager* um){
 	for (int i =0; i < UI_TEXT_COUNT; i++){
-		um->texts[i].inputtext = "";
-		um->texts[i].flags = UI_TEXT_FLAG_INIT;
+		if(!((um->texts + i)->inputtext == "countdown")){
+			um->texts[i].inputtext = "";
+			um->texts[i].flags = UI_TEXT_FLAG_INIT;
+		}
 	}
 }
 
@@ -328,72 +330,94 @@ void displaymenu(struct game* game){
 	vec3f color;
 	vec3f_set(color, 1.0f,.0f,.0f);
 	
-	addtext(&game->uimanager, "Warped Steel", 30, 170, color, &game->uimanager.font_warpedsteel, 0);
+	addtext(&game->uimanager, "Warped Steel", (game->window.width/2)-590, 170, color, &game->uimanager.font_warpedsteel, 0);
 
 	vec3f_set(color, .0f,.0f,.0f);
-	addtext(&game->uimanager,"Start     Game",450,300,color,&game->uimanager.font_playerlap,0);
-	addtext(&game->uimanager,"Settings",480,400,color,&game->uimanager.font_playerlap,0);
-	addtext(&game->uimanager,"Credits",490,500,color,&game->uimanager.font_playerlap,0);
-	addtext(&game->uimanager,"Exit     Game",460,600,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"Start     Game",(game->window.width/2)-90,300,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"Settings",(game->window.width/2)-60,400,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"Credits",(game->window.width/2)-50,500,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"Exit     Game",(game->window.width/2)-80,600,color,&game->uimanager.font_playerlap,0);
 
 	vec3f_set(color, .0f,.0f,1.0f);
-	addtext(&game->uimanager,"[                                                                    ]",430,300,color,&game->uimanager.font_playerlap,0);
-	game->menuflags |= MENU_FLAG_STARTGAME;
+	if(game->menuflags & MENU_FLAG_STARTGAME){
+		addtext(&game->uimanager,"[                                                                    ]",(game->window.width/2)-110,300,color,&game->uimanager.font_playerlap,0);
+	}
+	else if(game->menuflags & MENU_FLAG_SETTINGS){
+		addtext(&game->uimanager,"[                                                 ]",(game->window.width/2)-80,400,color,&game->uimanager.font_playerlap,0);
+	}
+	else if(game->menuflags & MENU_FLAG_CREDITS){
+		addtext(&game->uimanager,"[                                          ]",(game->window.width/2)-70,500,color,&game->uimanager.font_playerlap,0);
+	}
+	else if(game->menuflags & MENU_FLAG_EXITGAME){
+		addtext(&game->uimanager,"[                                                         ]",(game->window.width/2)-100,600,color,&game->uimanager.font_playerlap,0);
+	}
+	
 }
 
 void displaycredits(struct game* game){
 	vec3f color;
 	vec3f_set(color, 1.0f,.0f,.0f);//RED
-	addtext(&game->uimanager, "Warped Steel", 30, 170, color, &game->uimanager.font_warpedsteel, 0);
+	addtext(&game->uimanager, "Warped Steel", (game->window.width/2)-590, 170, color, &game->uimanager.font_warpedsteel, 0);
 
 	vec3f_set(color,.0f,.0f,1.0f); //BLUE
-	addtext(&game->uimanager,"CPSC   585   Winter   2015",420,250,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"CPSC   585   Winter   2015",(game->window.width/2)-220,250,color,&game->uimanager.font_playerlap,0);
 	vec3f_set(color,0.0f,0.0f,.0f); //BLACK
-	addtext(&game->uimanager,"Kyle   Kajorinne",100,400,color,&game->uimanager.font_playerlap,0);
-	addtext(&game->uimanager,"Kurtis   Danyluk",480,400,color,&game->uimanager.font_playerlap,0);
-	addtext(&game->uimanager,"Shawn   Sutherland",850,400,color,&game->uimanager.font_playerlap,0);
-	addtext(&game->uimanager,"Samuel   Evans",300,500,color,&game->uimanager.font_playerlap,0);
-	addtext(&game->uimanager,"Kyle   Orton",680,500,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"Kyle   Kajorinne",(game->window.width/2)-540,400,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"Kurtis   Danyluk",(game->window.width/2)-160,400,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"Shawn   Sutherland",(game->window.width/2)+210,400,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"Samuel   Evans",(game->window.width/2)-340,500,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"Kyle   Orton",(game->window.width/2)+40,500,color,&game->uimanager.font_playerlap,0);
 
-	vec3f_set(color,1.0f,1.0f,1.0f); //whitE
-	addtext(&game->uimanager,"Back",590,600,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"Back",(game->window.width/2)-50,600,color,&game->uimanager.font_playerlap,0);
 	vec3f_set(color,.0f,.0f,1.0f); //BLUE
-	addtext(&game->uimanager,"[                                  ]",560,600,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"[                                  ]",(game->window.width/2)-80,600,color,&game->uimanager.font_playerlap,0);
 }
 
 void displaysettings(struct game* game){
 	vec3f color;
 	vec3f_set(color, 1.0f,.0f,.0f);//RED
-	addtext(&game->uimanager, "Warped Steel", 30, 170, color, &game->uimanager.font_warpedsteel, 0);
+	addtext(&game->uimanager, "Warped Steel", (game->window.width/2)-590, 170, color, &game->uimanager.font_warpedsteel, 0);
 
 	vec3f_set(color,.0f,.0f,1.0f); //BLUE
-	addtext(&game->uimanager,"Settings",550,250,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"Settings",(game->window.width/2)-90,250,color,&game->uimanager.font_playerlap,0);
 
 	vec3f_set(color,.0f,.0f,.0f); //BLack
-	addtext(&game->uimanager,"Number of Computers: ",380,350,color,&game->uimanager.font_playerlap,0);
-	addtext(&game->uimanager,"Number of Laps: ",450,550,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"Number of Computers: ",(game->window.width/2)-260,350,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"Number of Laps: ",(game->window.width/2)-190,550,color,&game->uimanager.font_playerlap,0);
 
-	addtext(&game->uimanager,"Sound: ",500,450,color,&game->uimanager.font_playerlap,0);
-	addtext(&game->uimanager,"/",710,450,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"Sound: ",(game->window.width/2)-140,450,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"/",(game->window.width/2)+70,450,color,&game->uimanager.font_playerlap,0);
 
-	addtext(&game->uimanager,"Back",590,650,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"Back",(game->window.width/2)-50,650,color,&game->uimanager.font_playerlap,0);
 
 	vec3f_set(color,.0f,.0f,1.0f); //BLUE
-	addtext(&game->uimanager,"numcomps",860,350,color,&game->uimanager.font_playerlap,8);
-	addtext(&game->uimanager,"numlaps",800,550,color,&game->uimanager.font_playerlap,999);
+	addtext(&game->uimanager,"numcomps",(game->window.width/2)+220,350,color,&game->uimanager.font_playerlap,8);
+	addtext(&game->uimanager,"numlaps",(game->window.width/2)+160,550,color,&game->uimanager.font_playerlap,999);
 
 	if(game->soundon==false){
 		vec3f_set(color,1.0f,1.0f,1.0f); //whitE
 	}
-	addtext(&game->uimanager,"On",660,450,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"On",(game->window.width/2)+20,450,color,&game->uimanager.font_playerlap,0);
 	vec3f_set(color,.0f,.0f,1.0f); //BLUE
 	if(game->soundon==true){
 		vec3f_set(color,1.0f,1.0f,1.0f); //whitE
 	}
-	addtext(&game->uimanager,"Off",740,450,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"Off",(game->window.width/2)+100,450,color,&game->uimanager.font_playerlap,0);
 
 	vec3f_set(color,.0f,.0f,1.0f); //BLUE
-	addtext(&game->uimanager,"[                                  ]",560,650,color,&game->uimanager.font_playerlap,0);//back
+	if(game->menuflags & MENU_FLAG_NUMAI){
+		addtext(&game->uimanager,"[                                                                                                                                      ]",(game->window.width/2)-280,350,color,&game->uimanager.font_playerlap,0);//numai
+	}
+	else if(game->menuflags & MENU_FLAG_SOUND){
+		addtext(&game->uimanager,"[                                                                                  ]",(game->window.width/2)-160,450,color,&game->uimanager.font_playerlap,0);//sound
+	}
+	else if(game->anothermenuflag & MENU_FLAG_NUMLAPS){
+		addtext(&game->uimanager,"[                                                                                                    ]",(game->window.width/2)-217,550,color,&game->uimanager.font_playerlap,0);
+	}
+	else{
+		addtext(&game->uimanager,"[                                  ]",(game->window.width/2)-80,650,color,&game->uimanager.font_playerlap,0);//back
+	}
+	
 }
 
 void winlose(struct game* game){
@@ -417,25 +441,27 @@ void winlose(struct game* game){
 		}
 
 		vec3f_set(color,1.0f,0.0f,0.0f);
-		addtext(&game->uimanager,"YOU LOST",200,200,color,&game->uimanager.font_youwinlost,0);
+		addtext(&game->uimanager,"YOU LOST",(game->window.width/2)-440,200,color,&game->uimanager.font_youwinlost,0);
 
 		vec3f_set(color,1.0f,1.0f,1.0f);
-		addtext(&game->uimanager,"computerwon",345,280,color,&game->uimanager.font_playerlap,666);
+		addtext(&game->uimanager,"computerwon",(game->window.width/2)-295,280,color,&game->uimanager.font_playerlap,666);
 
 	//Case: Game is won
 	}else{
 		vec3f_set(color,1.0f,0.0f,0.0f);
-		addtext(&game->uimanager,"YOU WON",200,200,color,&game->uimanager.font_youwinlost,0);
+		addtext(&game->uimanager,"YOU WON",(game->window.width/2)-440,200,color,&game->uimanager.font_youwinlost,0);
 
 		vec3f_set(color,1.0f,1.0f,1.0f);
-		addtext(&game->uimanager,"Nice job!",550,280,color,&game->uimanager.font_playerlap,0);
+		addtext(&game->uimanager,"Nice job!",(game->window.width/2)-90,280,color,&game->uimanager.font_playerlap,0);
 	}
 		
 	vec3f_set(color,1.0f,1.0f,1.0f);
-	addtext(&game->uimanager,"Restart",550,600,color,&game->uimanager.font_playerlap,0);
-	addtext(&game->uimanager,"Main   Menu",530,700,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"Restart",(game->window.width/2)-90,600,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"Main   Menu",(game->window.width/2)-110,700,color,&game->uimanager.font_playerlap,0);
 	vec3f_set(color,.0f,.0f,1.0f);
 	if(!(game->flags & GAME_FLAG_SWITCHON)){
-		addtext(&game->uimanager,"[                                                    ]",520,600,color,&game->uimanager.font_playerlap,0);
+		addtext(&game->uimanager,"[                                                    ]",(game->window.width/2)-120,600,color,&game->uimanager.font_playerlap,0);
+	}else{
+		addtext(&game->uimanager,"[                                                              ]",(game->window.width/2)-140,700,color,&game->uimanager.font_playerlap,0);
 	}
 }
