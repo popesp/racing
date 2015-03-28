@@ -20,7 +20,7 @@
 
 
 #define GAME_INIT_LAPS			7
-#define GAME_INIT_AI			40
+#define GAME_INIT_AI			8
 #define GAME_INIT_SOUNDON		true
 #define GAME_INIT_COUNTDOWN		301
 

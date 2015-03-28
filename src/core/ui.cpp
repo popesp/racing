@@ -366,7 +366,7 @@ void displaycredits(struct game* game){
 	addtext(&game->uimanager,"Kurtis   Danyluk",(game->window.width/2)-160,400,color,&game->uimanager.font_playerlap,0);
 	addtext(&game->uimanager,"Shawn   Sutherland",(game->window.width/2)+210,400,color,&game->uimanager.font_playerlap,0);
 	addtext(&game->uimanager,"Samuel   Evans",(game->window.width/2)-340,500,color,&game->uimanager.font_playerlap,0);
-	addtext(&game->uimanager,"Kyle   Orton",(game->window.width/2)+40,500,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"John   Orton",(game->window.width/2)+40,500,color,&game->uimanager.font_playerlap,0);
 
 	addtext(&game->uimanager,"Back",(game->window.width/2)-50,600,color,&game->uimanager.font_playerlap,0);
 	vec3f_set(color,.0f,.0f,1.0f); //BLUE

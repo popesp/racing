@@ -42,7 +42,7 @@ static void createpickup(struct pickup* p, struct physicsmanager* pm, struct tra
 	vec3f_set(p->pos, pose.p.x, pose.p.y, pose.p.z);
 
 
-	p->type = (unsigned char)random_int(PICKUP_TYPE_COUNT);
+	p->type = (unsigned char)random_int(PICKUP_TYPE_COUNT);//ENTITY_TYPE_MISSILE;
 
 	p->flags = PICKUP_FLAG_INIT;
 

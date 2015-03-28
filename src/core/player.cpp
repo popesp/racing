@@ -90,12 +90,20 @@ bool aiplayer_missilehit(struct aiplayer* p, struct vehiclemanager* vm) {
 
 	vec3f missile;
 	physx::PxMat44 transform(p->vehicle->body->getGlobalPose());
+	float x_accuracy_max = 10;
+	float x_accuracy_min = -10;
+	float y_accuracy_max = 10;
+	float y_accuracy_min = -10;
+	float z_accuracy_max = 50;
+	float z_accuracy_min = -50;
 
+	//The next 5 seconds of frames
 	for (int i = 1; i <= 5; i++) {
 
 		//Where a missile should be after i seconds, the 60 is for frames since we calculate this 60 times a second
-		vec3f_set(missile, ENTITY_FORWARD*MISSILE_SPEED*i*60);
+		vec3f_set(missile, ENTITY_FORWARD);
 		mat4f_transformvec3f(missile, (float*)&transform);
+		vec3f_scale(missile, (MISSILE_SPEED*(float)i));
 
 		for (int j = 0; j < VEHICLE_COUNT; j++) {
 			v = vm->vehicles + j;
@@ -110,19 +118,27 @@ bool aiplayer_missilehit(struct aiplayer* p, struct vehiclemanager* vm) {
 			//advance advance this vehicle i seconds into the future
 			vec3f vehicle_position;
 			physx::PxMat44 vehicle_transform(v->body->getGlobalPose());
-			vec3f_set(vehicle_position, VEHICLE_FORWARD*v->speed*i*60);
+			vec3f_set(vehicle_position, VEHICLE_FORWARD);
 			mat4f_transformvec3f(vehicle_position, (float*)&vehicle_transform);
+			vec3f_scale(vehicle_position, (v->speed*(float)i));
 
-			//These check if the missile will be within 1 of another vehicle after i seconds, if so shoot the missile
-			if (missile[0] - vehicle_position[0] < 1 && missile[0] - vehicle_position[0] > -1) {
+			//These check if the missile will be close to another vehicle after i seconds, if so shoot the missile
+			if ((missile[0] - vehicle_position[0] < x_accuracy_max) && (missile[0] - vehicle_position[0] > x_accuracy_min)) {
+				if ((missile[1] - vehicle_position[1] < y_accuracy_max) && (missile[1] - vehicle_position[1] > y_accuracy_min)) {
+					if ((missile[2] - vehicle_position[2] < z_accuracy_max) && (missile[2] - vehicle_position[2] > z_accuracy_min)){
+						//printf("Accuracy = %f %f %f\n", missile[0] - vehicle_position[0], missile[1] - vehicle_position[1], missile[2] - vehicle_position[2]);
+						return true;
+					}
+				}
+			}
+			/*if ((missile[1] - vehicle_position[1] < accuracy_max) && (missile[1] - vehicle_position[1] > accuracy_min)) {
+				printf("Firing witn an accuracy of: %f in the y\n", missile[1] - vehicle_position[1]);
 				return true;
 			}
-			if (missile[1] - vehicle_position[1] < 0.5 && missile[1] - vehicle_position[1] > -1) {
+			if ((missile[2] - vehicle_position[2] < accuracy_max) && (missile[2] - vehicle_position[2] > accuracy_min)) {
+				printf("Firing witn an accuracy of: %f in the z\n", missile[2] - vehicle_position[2]);
 				return true;
-			}
-			if (missile[2] - vehicle_position[2] < 1 && missile[2] - vehicle_position[2] > -1) {
-				return true;
-			}
+			}*/
 		}
 	}
 
