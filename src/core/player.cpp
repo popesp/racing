@@ -158,7 +158,10 @@ void aiplayer_updateinput(struct aiplayer* p, struct vehiclemanager* vm)
 		}
 	}
 	else if(p->vehicle->powerup==VEHICLE_POWERUP_MINE||p->vehicle->powerup==VEHICLE_POWERUP_TURRET){
-		p->controller.buttons[INPUT_BUTTON_A] = (INPUT_STATE_CHANGED | INPUT_STATE_DOWN);
+		int usemine = random_int(1500);
+		if(usemine%1499==0){
+			p->controller.buttons[INPUT_BUTTON_A] = (INPUT_STATE_CHANGED | INPUT_STATE_DOWN);
+		}
 	}
 	else if(p->vehicle->powerup==VEHICLE_POWERUP_MISSILE||p->vehicle->powerup==VEHICLE_POWERUP_MISSILEX2||p->vehicle->powerup==VEHICLE_POWERUP_MISSILEX3){
 		if(aiplayer_missilehit(p, vm)){

@@ -18,6 +18,7 @@ int main(int argc, char** argv)
 	game.num_aiplayers = GAME_INIT_AI;
 	game.num_laps = GAME_INIT_LAPS;
 	game.soundon = GAME_INIT_SOUNDON;
+	game.countdown = GAME_INIT_COUNTDOWN;
 
 	if (!menu_startup(&game))
 		return 0;

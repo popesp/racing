@@ -238,7 +238,7 @@ static void updatemenu(struct game* game)
 					}
 				}
 				else if(game->anothermenuflag & MENU_FLAG_NUMLAPS){
-					if(game->num_laps > 1){
+					if(game->num_laps > 2){
 						game->num_laps--;
 					}
 				}

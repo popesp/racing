@@ -117,7 +117,7 @@ void checkplace(struct game* game){
 	vec3f color;
 	vec3f_set(color, 1.0f,1.0f,.0f);
 	if(game->player.vehicle->place==21||game->player.vehicle->place==31||game->player.vehicle->place==41||game->player.vehicle->place==51||game->player.vehicle->place==61||game->player.vehicle->place==71||game->player.vehicle->place==81||game->player.vehicle->place==91){
-		addtext(&game->uimanager, "placer", 225, 580,color,&game->uimanager.font_placer,-3);
+		addtext(&game->uimanager, "placer", 240, 580,color,&game->uimanager.font_placer,-3);
 	}
 	else if(game->player.vehicle->place==1){
 		addtext(&game->uimanager, "placer", 170, 580,color,&game->uimanager.font_placer,-3);
@@ -137,20 +137,20 @@ void checkplace(struct game* game){
 	else if(game->player.vehicle->place<10){
 		addtext(&game->uimanager, "placer", 215, 580,color,&game->uimanager.font_placer,-6);
 	}
-	else if(game->player.vehicle->place<20&&game->player.vehicle->place!=10){
-		addtext(&game->uimanager, "placer", 225, 580,color,&game->uimanager.font_placer,-6);
+	else if(game->player.vehicle->place<20){
+		addtext(&game->uimanager, "placer", 235, 580,color,&game->uimanager.font_placer,-6);
 	}
 	else if(game->player.vehicle->place==20){
-		addtext(&game->uimanager, "placer", 300, 580,color,&game->uimanager.font_placer,-6);
+		addtext(&game->uimanager, "placer", 280, 580,color,&game->uimanager.font_placer,-6);
 	}
 	else if(game->player.vehicle->place<30){
 		addtext(&game->uimanager, "placer", 280, 580,color,&game->uimanager.font_placer,-6);
 	}
 	else if(game->player.vehicle->place%10==0){
-		addtext(&game->uimanager, "placer", 315, 580,color,&game->uimanager.font_placer,-6);
+		addtext(&game->uimanager, "placer", 280, 580,color,&game->uimanager.font_placer,-6);
 	}
 	else{
-		addtext(&game->uimanager, "placer", 290, 580,color,&game->uimanager.font_placer,-6);
+		addtext(&game->uimanager, "placer", 280, 580,color,&game->uimanager.font_placer,-6);
 	}
 	
 }

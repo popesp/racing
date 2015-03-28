@@ -25,7 +25,6 @@ static void scroll(GLFWwindow*, double, double);
 static void update(struct game*);
 static void render(struct game*);
 
-static int countdown = 300;
 
 static void resetplayers(struct game* game)
 {
@@ -182,6 +181,9 @@ void restart(struct game* game){
 
 	removealltext(&game->uimanager);
 
+	//reset countdown
+	game->countdown = GAME_INIT_COUNTDOWN;
+
 	//rewrite race text
 	vec3f_set(color, 1.0f,1.0f,1.0f);
 	addtext(&game->uimanager,"laps",100,700,color,&game->uimanager.font_playerlap,-1);
@@ -247,24 +249,25 @@ static void update(struct game* game)
 	// check for callback events
 	glfwPollEvents();
 
-	char str[15];
-	int dis= 5;
+	game->dis= 5;
 
-	if(countdown-- <0){
-	//	removetext(&game->uimanager,str);
-	// update player and ai input
-	inputmanager_update(&game->inputmanager);
-	for(i = 0; i < game->num_aiplayers; i++)
-		aiplayer_updateinput(&game->aiplayers[i], &game->vehiclemanager);
+	if(game->countdown-- <0){
+		removetext(&game->uimanager,"countdown");
+
+		// update player and ai input
+		inputmanager_update(&game->inputmanager);
+		for(i = 0; i < game->num_aiplayers; i++)
+			aiplayer_updateinput(&game->aiplayers[i], &game->vehiclemanager);
 	}
 	else{
-		int tem = (countdown / 60) + 1;
-		if(tem != dis){
-			dis = tem;
-			//removetext(&game->uimanager,str);
-			//sprintf(str, "%d", dis);
-			printf("%d", dis);
-			//addtext(&game->uimanager,str,500,650,color,&game->uimanager.font_place,0);
+		int tem = (game->countdown / 60) + 1;
+		if(tem != game->dis){
+			game->dis = tem;
+			
+			//update text
+			removetext(&game->uimanager,"countdown");
+			addtext(&game->uimanager,"countdown",580,350,color,&game->uimanager.font_youwinlost,111);
+
 		}
 	}
 	if (game->inputmanager.controllers[GLFW_JOYSTICK_1].flags & INPUT_FLAG_ENABLED)
@@ -298,7 +301,7 @@ static void update(struct game* game)
 		}
 
 		//TEMP, TOGGLE BETWEEN MAINMENU/RESTART
-		if(game->inputmanager.controllers[GLFW_JOYSTICK_1].buttons[INPUT_BUTTON_X] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN)){
+		if((game->inputmanager.controllers[GLFW_JOYSTICK_1].buttons[INPUT_BUTTON_DDOWN] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))||(game->inputmanager.controllers[GLFW_JOYSTICK_1].buttons[INPUT_BUTTON_DUP] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))){
 			removebrackets(&game->uimanager);
 			if(game->flags & GAME_FLAG_YOULOSE || game->flags & GAME_FLAG_YOUWIN){
 				vec3f color;
@@ -345,11 +348,11 @@ static void update(struct game* game)
 		vec3f_normalize(move);
 		if (game->inputmanager.controllers[GLFW_JOYSTICK_1].flags & INPUT_FLAG_ENABLED){
 			if(!(game->flags & GAME_FLAG_YOULOSE)){
-				vec3f_scale(move, -0.2f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_UD]);
+				vec3f_scale(move, -0.4f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_UD]);
 				move[VY] = - 0.1f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_TRIGGERS];
 				vec3f_add(game->cam_debug.pos, move);
 
-				camera_strafe(&game->cam_debug, 0.3f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_LR]);
+				camera_strafe(&game->cam_debug, 0.6f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_LEFT_LR]);
 
 				camera_rotate(&game->cam_debug, up, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_LR]);
 				camera_rotate(&game->cam_debug, game->cam_debug.right, -0.03f * game->inputmanager.controllers[GLFW_JOYSTICK_1].axes[INPUT_AXIS_RIGHT_UD]);
@@ -644,9 +647,9 @@ int game_startup(struct game* game)
 	game->vehiclemanager.r_vehicle.lights[1] = game->track_lights + 1;
 
 	// add background music
-	game->songs[GAME_MUSIC_1_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_3_FILENAME);
+	game->songs[GAME_MUSIC_1_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_5_FILENAME);
 	game->songs[GAME_MUSIC_2_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_2_FILENAME);
-	game->songs[GAME_MUSIC_3_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_1_FILENAME);
+	game->songs[GAME_MUSIC_3_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_3_FILENAME);
 	game->songs[GAME_MUSIC_4_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_4_FILENAME);
 	game->index_currentsong = 0;
 	game->currentchannel = audiomanager_playmusic(&game->audiomanager, game->songs[game->index_currentsong], -1);

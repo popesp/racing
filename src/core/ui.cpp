@@ -18,8 +18,8 @@ void uimanager_startup(struct uimanager* um, struct window* window)
 	font_generate(&um->font_default, um, UI_FONT_FILENAME_LABTSEC, UI_DEFAULT_FONTSIZE);
 	font_generate(&um->font_pause, um, UI_FONT_FILENAME_BEBAS, UI_PAUSE_FONTSIZE);
 	font_generate(&um->font_playerlap, um, UI_FONT_FILENAME_BEBAS, UI_PLAYERLAP_FONTSIZE);
-	font_generate(&um->font_place, um, UI_FONT_FILENAME_SEASRN, UI_PLACE_FONTSIZE);
-	font_generate(&um->font_placer, um, UI_FONT_FILENAME_SEASRN, UI_PLACER_FONTSIZE);
+	font_generate(&um->font_place, um, UI_FONT_FILENAME_AERO, UI_PLACE_FONTSIZE);
+	font_generate(&um->font_placer, um, UI_FONT_FILENAME_AERO, UI_PLACER_FONTSIZE);
 	font_generate(&um->font_youwinlost, um, UI_FONT_FILENAME_AERO, UI_YOULOSE_FONTSIZE);
 	font_generate(&um->font_velocity, um, UI_FONT_FILENAME_BEBAS, UI_VELOCITY_FONTSIZE);
 	font_generate(&um->font_warpedsteel, um, UI_FONT_FILENAME_AERO, UI_WARPEDSTEEL_FONTSIZE);
@@ -189,6 +189,9 @@ void uimanager_render(struct uimanager* um, struct game* game)
 			//See: numberadder in addtext()
 			if(um->texts[j].numberadder==-1){
 				sprintf(rendertext, "Lap   %d /%d", game->player.vehicle->lap, game->num_laps);
+			}
+			else if(um->texts[j].numberadder==111){
+				sprintf(rendertext, "%d", game->dis);
 			}
 			else if(um->texts[j].numberadder==8){
 				sprintf(rendertext, "%d", game->num_aiplayers);
