@@ -151,7 +151,6 @@ void aiplayer_updateinput(struct aiplayer* p, struct vehiclemanager* vm)
 	int next_index;
 
 	physx::PxMat44 pose(p->vehicle->body->getGlobalPose());
-
 	resetcontroller(p);
 
 	next_index = (p->vehicle->index_track + p->next) % (int)p->track->num_pathpoints;
@@ -167,19 +166,18 @@ void aiplayer_updateinput(struct aiplayer* p, struct vehiclemanager* vm)
 
 	p->controller.axes[INPUT_AXIS_TRIGGERS] = p->speed;
 
-	if(p->vehicle->powerup==VEHICLE_POWERUP_BOOST||p->vehicle->powerup==VEHICLE_POWERUP_LONGBOOST){
+	if((p->vehicle->powerup==VEHICLE_POWERUP_BOOST||p->vehicle->powerup==VEHICLE_POWERUP_LONGBOOST)&&(p->vehicle->flags & VEHICLE_FLAG_HASPOWERUP)){
 		if(p->vehicle->index_track==140||p->vehicle->index_track==160||p->vehicle->index_track==729){
 			p->controller.buttons[INPUT_BUTTON_A] = (INPUT_STATE_CHANGED | INPUT_STATE_DOWN);
-			//printf("he used it\n");
 		}
 	}
-	else if(p->vehicle->powerup==VEHICLE_POWERUP_MINE||p->vehicle->powerup==VEHICLE_POWERUP_TURRET){
+	else if((p->vehicle->powerup==VEHICLE_POWERUP_MINE||p->vehicle->powerup==VEHICLE_POWERUP_TURRET)&&(p->vehicle->flags & VEHICLE_FLAG_HASPOWERUP)){
 		int usemine = random_int(1500);
 		if(usemine%1499==0){
 			p->controller.buttons[INPUT_BUTTON_A] = (INPUT_STATE_CHANGED | INPUT_STATE_DOWN);
 		}
 	}
-	else if(p->vehicle->powerup==VEHICLE_POWERUP_MISSILE||p->vehicle->powerup==VEHICLE_POWERUP_MISSILEX2||p->vehicle->powerup==VEHICLE_POWERUP_MISSILEX3){
+	else if((p->vehicle->powerup==VEHICLE_POWERUP_MISSILE||p->vehicle->powerup==VEHICLE_POWERUP_MISSILEX2||p->vehicle->powerup==VEHICLE_POWERUP_MISSILEX3)&&(p->vehicle->flags & VEHICLE_FLAG_HASPOWERUP)){
 		if(aiplayer_missilehit(p, vm)){
 			p->controller.buttons[INPUT_BUTTON_A] = (INPUT_STATE_CHANGED | INPUT_STATE_DOWN);
 		}
