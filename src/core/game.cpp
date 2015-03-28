@@ -199,6 +199,10 @@ void restart(struct game* game){
 		aiplayer_delete(&game->aiplayers[i], &game->vehiclemanager);
 	}
 
+	//delete and reinit skybox
+	skybox_delete(&game->skybox);
+	skybox_init(&game->skybox, &game->renderer);
+
 	// initialize player 
 	vec3f offs,aioffs;
 	vec3f_set(offs, 1.f, 0.f, 0.f);
