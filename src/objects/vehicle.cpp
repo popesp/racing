@@ -28,7 +28,8 @@ static char* powerup_texture_filename[VEHICLE_POWERUP_COUNT] =
 	VEHICLE_POWERUP_TEXTURE_FILENAME_TURRET,
 	VEHICLE_POWERUP_TEXTURE_FILENAME_LONGBOOST,
 	VEHICLE_POWERUP_TEXTURE_FILENAME_MINEX2,
-	VEHICLE_POWERUP_TEXTURE_FILENAME_MINEX3
+	VEHICLE_POWERUP_TEXTURE_FILENAME_MINEX3,
+	VEHICLE_POWERUP_TEXTURE_FILENAME_UBER
 };
 
 
@@ -103,6 +104,17 @@ static void longboostfunction(struct vehicle* v)
 	v->flags &= ~VEHICLE_FLAG_HASPOWERUP;
 }
 
+static void ubermodefunction(struct vehicle* v)
+{
+	v->timer_boost = VEHICLE_POWERUP_BOOST_DURATION;
+	v->flags |= VEHICLE_FLAG_BOOSTING;
+
+	v->timer_uber = VEHICLE_POWERUP_UBER_DURATION;
+	v->flags |= VEHICLE_FLAG_UBER;
+
+	v->flags &= ~VEHICLE_FLAG_HASPOWERUP;
+}
+
 static void (* powerupfunction[VEHICLE_POWERUP_COUNT])(struct vehicle*) =
 {
 	missilefunction,
@@ -113,7 +125,8 @@ static void (* powerupfunction[VEHICLE_POWERUP_COUNT])(struct vehicle*) =
 	turretfunction,
 	longboostfunction,
 	minefunction,
-	minefunction
+	minefunction,
+	ubermodefunction
 };
 
 
@@ -222,6 +235,15 @@ static void vehicleinput(struct vehicle* v)
 
 					if (v->timer_boost == 0)
 						v->flags &= ~VEHICLE_FLAG_BOOSTING;
+				}
+				if (v->flags & VEHICLE_FLAG_UBER)
+				{
+					v->timer_uber--;
+					if (v->timer_uber == 0)
+					{
+						v->flags &= ~VEHICLE_FLAG_UBER;
+						v->body;
+					}
 				}
 
 				// change engine sound frequency
@@ -449,7 +471,7 @@ struct vehicle* vehiclemanager_newvehicle(struct vehiclemanager* vm, struct cont
 
 	// create a physics object and add it to the scene
 	v->body = physx::PxCreateDynamic(*vm->pm->sdk, pose, physx::PxBoxGeometry(VEHICLE_DIMENSIONS), *vm->pm->default_material, VEHICLE_DENSITY);
-	collision_setupactor(v->body, COLLISION_FILTER_VEHICLE, COLLISION_FILTER_MISSILE | COLLISION_FILTER_MINE | COLLISION_FILTER_PICKUP);
+	collision_setupactor(v->body, COLLISION_FILTER_VEHICLE, COLLISION_FILTER_MISSILE | COLLISION_FILTER_MINE | COLLISION_FILTER_PICKUP | COLLISION_FILTER_VEHICLE);
 	v->body->userData = v;
 
 	// store position
@@ -490,7 +512,7 @@ struct vehicle* vehiclemanager_newvehicle(struct vehiclemanager* vm, struct cont
 
 	// enabled flag
 	v->flags = VEHICLE_FLAG_ENABLED;
-
+	v->timer_uber = 0;
 	return v;
 }
 

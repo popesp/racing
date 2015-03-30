@@ -42,7 +42,7 @@
 #define	VEHICLE_TEXTURE_DIFFUSE_FILENAME5			"res/models/car/carUVr.png"
 #define	VEHICLE_TEXTURE_DIFFUSE_FILENAME6			"res/models/car/carUVw.png"
 
-#define	VEHICLE_POWERUP_COUNT						9
+#define	VEHICLE_POWERUP_COUNT						10
 #define	VEHICLE_POWERUP_MISSILE						0
 #define	VEHICLE_POWERUP_MINE						1
 #define	VEHICLE_POWERUP_BOOST						2
@@ -52,6 +52,7 @@
 #define	VEHICLE_POWERUP_LONGBOOST					6
 #define VEHICLE_POWERUP_MINEX2						7
 #define VEHICLE_POWERUP_MINEX3						8
+#define VEHICLE_POWERUP_UBERMODE					9
 
 #define	VEHICLE_POWERUP_TEXTURE_FILENAME_MISSILE	"res/models/powerup/attached/missile.png"
 #define	VEHICLE_POWERUP_TEXTURE_FILENAME_MINE		"res/models/powerup/attached/mine.png"
@@ -62,6 +63,7 @@
 #define	VEHICLE_POWERUP_TEXTURE_FILENAME_LONGBOOST	"res/models/powerup/attached/boost_long.png"
 #define	VEHICLE_POWERUP_TEXTURE_FILENAME_MINEX2		"res/models/powerup/attached/mine_x2.png"
 #define	VEHICLE_POWERUP_TEXTURE_FILENAME_MINEX3		"res/models/powerup/attached/mine_x3.png"
+#define	VEHICLE_POWERUP_TEXTURE_FILENAME_UBER		"res/models/powerup/attached/rocket_boost.png"
 
 #define	VEHICLE_POWERUP_MESH_FILENAME				"res/models/powerup/attached/attached.obj"
 #define	VEHICLE_POWERUP_MESH_SCALE					0.4f
@@ -77,6 +79,8 @@
 #define	VEHICLE_POWERUP_BOOST_STRENGTH				20.f
 
 #define	VEHICLE_POWERUP_LONGBOOST_DURATION			360
+
+#define VEHICLE_POWERUP_UBER_DURATION				180
 
 #define	VEHICLE_DIMENSIONS							0.7254f, 0.3056f, 1.3884f
 #define	VEHICLE_DENSITY								0.8f
@@ -103,6 +107,7 @@
 #define	VEHICLE_FLAG_HASPOWERUP						0x04
 #define	VEHICLE_FLAG_MISSILEHIT						0x08
 #define	VEHICLE_FLAG_MINEHIT						0x10
+#define VEHICLE_FLAG_UBER							0x20
 #define	VEHICLE_FLAG_INIT							0x00
 
 
@@ -125,6 +130,7 @@ struct vehicle
 	int index_diffuse;
 
 	unsigned timer_boost;
+	unsigned timer_uber;
 
 	unsigned powerup;
 
