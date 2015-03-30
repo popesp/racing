@@ -42,7 +42,7 @@ static void createpickup(struct pickup* p, struct physicsmanager* pm, struct tra
 	vec3f_set(p->pos, pose.p.x, pose.p.y, pose.p.z);
 
 
-	p->type = (unsigned char)random_int(PICKUP_TYPE_COUNT);//ENTITY_TYPE_MISSILE;
+	p->type = ENTITY_TYPE_MINE;//(unsigned char)random_int(PICKUP_TYPE_COUNT);//
 
 	p->flags = PICKUP_FLAG_INIT;
 
@@ -160,6 +160,11 @@ void pickupmanager_update(struct pickupmanager* pum)
 						audiomanager_playsfx(pum->am, pum->sfx_pickup_upgrade, p->pos, 0);
 
 					}
+					else if(p->type == VEHICLE_POWERUP_MINE) {
+						v->powerup = VEHICLE_POWERUP_TURRET;
+						// play pickup upgrade
+						audiomanager_playsfx(pum->am, pum->sfx_pickup_upgrade, p->pos, 0);
+					}
 					else{
 						v->powerup = p->type;
 						// play pickup taken
@@ -168,12 +173,19 @@ void pickupmanager_update(struct pickupmanager* pum)
 					break;
 
 				case VEHICLE_POWERUP_MINE:
-				case VEHICLE_POWERUP_TURRET:
+				case VEHICLE_POWERUP_MINEX2:
+				case VEHICLE_POWERUP_MINEX3:
+				//case VEHICLE_POWERUP_TURRET:
 					if (p->type == PICKUP_TYPE_MINE){
-						v->powerup = VEHICLE_POWERUP_TURRET;
+						v->powerup = VEHICLE_POWERUP_MINEX3;
 						// play pickup upgrade
 						audiomanager_playsfx(pum->am, pum->sfx_pickup_upgrade, p->pos, 0);
 
+					}
+					else if(p->type == VEHICLE_POWERUP_MISSILE) {
+						v->powerup = VEHICLE_POWERUP_TURRET;
+						// play pickup upgrade
+						audiomanager_playsfx(pum->am, pum->sfx_pickup_upgrade, p->pos, 0);
 					}
 					else{
 						v->powerup = p->type;

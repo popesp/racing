@@ -171,7 +171,7 @@ void aiplayer_updateinput(struct aiplayer* p, struct vehiclemanager* vm)
 			p->controller.buttons[INPUT_BUTTON_A] = (INPUT_STATE_CHANGED | INPUT_STATE_DOWN);
 		}
 	}
-	else if((p->vehicle->powerup==VEHICLE_POWERUP_MINE||p->vehicle->powerup==VEHICLE_POWERUP_TURRET)&&(p->vehicle->flags & VEHICLE_FLAG_HASPOWERUP)){
+	else if((p->vehicle->powerup==VEHICLE_POWERUP_MINE||p->vehicle->powerup==VEHICLE_POWERUP_TURRET||p->vehicle->powerup==VEHICLE_POWERUP_MINEX2||p->vehicle->powerup==VEHICLE_POWERUP_MINEX3)&&(p->vehicle->flags & VEHICLE_FLAG_HASPOWERUP)){
 		int usemine = random_int(1500);
 		if(usemine%1499==0){
 			p->controller.buttons[INPUT_BUTTON_A] = (INPUT_STATE_CHANGED | INPUT_STATE_DOWN);

@@ -15,7 +15,7 @@ static char* vehicle_texture_filename[VEHICLE_TEXTURE_DIFFUSE_COUNT] =
 	VEHICLE_TEXTURE_DIFFUSE_FILENAME3,
 	VEHICLE_TEXTURE_DIFFUSE_FILENAME4,
 	VEHICLE_TEXTURE_DIFFUSE_FILENAME5,
-	VEHICLE_TEXTURE_DIFFUSE_FILENAME6
+	VEHICLE_TEXTURE_DIFFUSE_FILENAME6,
 };
 
 static char* powerup_texture_filename[VEHICLE_POWERUP_COUNT] =
@@ -26,7 +26,9 @@ static char* powerup_texture_filename[VEHICLE_POWERUP_COUNT] =
 	VEHICLE_POWERUP_TEXTURE_FILENAME_MISSILEX2,
 	VEHICLE_POWERUP_TEXTURE_FILENAME_MISSILEX3,
 	VEHICLE_POWERUP_TEXTURE_FILENAME_TURRET,
-	VEHICLE_POWERUP_TEXTURE_FILENAME_LONGBOOST
+	VEHICLE_POWERUP_TEXTURE_FILENAME_LONGBOOST,
+	VEHICLE_POWERUP_TEXTURE_FILENAME_MINEX2,
+	VEHICLE_POWERUP_TEXTURE_FILENAME_MINEX3
 };
 
 
@@ -62,7 +64,12 @@ static void minefunction(struct vehicle* v)
 
 	entitymanager_newentity(v->vm->em, ENTITY_TYPE_MINE, v, pose_spawn);
 
-	v->flags &= ~VEHICLE_FLAG_HASPOWERUP;
+	if (v->powerup == VEHICLE_POWERUP_MINEX3)
+		v->powerup = VEHICLE_POWERUP_MINEX2;
+	else if (v->powerup == VEHICLE_POWERUP_MINEX2)
+		v->powerup = VEHICLE_POWERUP_MINE;
+	else
+		v->flags &= ~VEHICLE_FLAG_HASPOWERUP;
 }
 
 static void boostfunction(struct vehicle* v)
@@ -104,7 +111,9 @@ static void (* powerupfunction[VEHICLE_POWERUP_COUNT])(struct vehicle*) =
 	missilefunction,
 	missilefunction,
 	turretfunction,
-	longboostfunction
+	longboostfunction,
+	minefunction,
+	minefunction
 };
 
 
