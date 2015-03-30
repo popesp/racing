@@ -88,6 +88,19 @@ void CustomCollisions::onContact(const physx::PxContactPairHeader& pairHeader, c
 					((struct entity*)pairHeader.actors[0]->userData)->flags |= ENTITY_FLAG_HIT;
 					((struct vehicle*)pairHeader.actors[1]->userData)->flags |= VEHICLE_FLAG_MINEHIT;
 				}
+			} else if (fd0.word0 == COLLISION_FILTER_SLOWMINE)
+			{
+				if (fd1.word0 == COLLISION_FILTER_MISSILE || fd1.word0 == COLLISION_FILTER_MINE)
+				{
+					((struct entity*)pairHeader.actors[0]->userData)->flags |= ENTITY_FLAG_HIT;
+					((struct entity*)pairHeader.actors[1]->userData)->flags |= ENTITY_FLAG_HIT;
+				} else if (fd1.word0 == COLLISION_FILTER_VEHICLE)
+				{
+					((struct vehicle*)pairHeader.actors[1]->userData)->flags |= VEHICLE_FLAG_SLOWED;
+					((struct vehicle*)pairHeader.actors[1]->userData)->flags |= VEHICLE_FLAG_SLOWEDHIT;
+					((struct vehicle*)pairHeader.actors[1]->userData)->timer_slow = 180;
+					((struct entity*)pairHeader.actors[0]->userData)->flags |= ENTITY_FLAG_HIT;
+				}
 			} else if (fd0.word0 == COLLISION_FILTER_VEHICLE)
 			{
 				if (fd1.word0 == COLLISION_FILTER_MISSILE)
@@ -98,7 +111,13 @@ void CustomCollisions::onContact(const physx::PxContactPairHeader& pairHeader, c
 				{
 					((struct vehicle*)pairHeader.actors[0]->userData)->flags |= VEHICLE_FLAG_MINEHIT;
 					((struct entity*)pairHeader.actors[1]->userData)->flags |= ENTITY_FLAG_HIT;
-				} else if (fd1.word0 == COLLISION_FILTER_PICKUP)
+				} else if (fd1.word0 == COLLISION_FILTER_SLOWMINE)
+				{
+					((struct vehicle*)pairHeader.actors[0]->userData)->flags |= VEHICLE_FLAG_SLOWED;
+					((struct vehicle*)pairHeader.actors[0]->userData)->flags |= VEHICLE_FLAG_SLOWEDHIT;
+					((struct vehicle*)pairHeader.actors[0]->userData)->timer_slow = 360;
+					((struct entity*)pairHeader.actors[1]->userData)->flags |= ENTITY_FLAG_HIT;
+				}else if (fd1.word0 == COLLISION_FILTER_PICKUP)
 				{
 					((struct pickup*)pairHeader.actors[1]->userData)->flags |= PICKUP_FLAG_VEHICLEHIT;
 					((struct pickup*)pairHeader.actors[1]->userData)->collector = ((struct vehicle*)pairHeader.actors[0]->userData);

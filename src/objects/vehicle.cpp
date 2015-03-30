@@ -29,7 +29,8 @@ static char* powerup_texture_filename[VEHICLE_POWERUP_COUNT] =
 	VEHICLE_POWERUP_TEXTURE_FILENAME_LONGBOOST,
 	VEHICLE_POWERUP_TEXTURE_FILENAME_MINEX2,
 	VEHICLE_POWERUP_TEXTURE_FILENAME_MINEX3,
-	VEHICLE_POWERUP_TEXTURE_FILENAME_UBER
+	VEHICLE_POWERUP_TEXTURE_FILENAME_UBER,
+	VEHICLE_POWERUP_TEXTURE_FILENAME_SLOWMINE
 };
 
 
@@ -115,6 +116,21 @@ static void ubermodefunction(struct vehicle* v)
 	v->flags &= ~VEHICLE_FLAG_HASPOWERUP;
 }
 
+static void slowminefunction(struct vehicle* v)
+{
+	physx::PxTransform pose_vehicle, pose_spawn;
+	vec3f dim;
+
+	pose_vehicle = v->body->getGlobalPose();
+
+	vec3f_set(dim, VEHICLE_DIMENSIONS);
+	pose_spawn = pose_vehicle.transform(physx::PxTransform(0.f, 0.f, dim[VZ] + VEHICLE_POWERUP_MINE_SPAWNDIST));
+
+	entitymanager_newentity(v->vm->em, ENTITY_TYPE_SLOWMINE, v, pose_spawn);
+
+	v->flags &= ~VEHICLE_FLAG_HASPOWERUP;
+}
+
 static void (* powerupfunction[VEHICLE_POWERUP_COUNT])(struct vehicle*) =
 {
 	missilefunction,
@@ -126,7 +142,8 @@ static void (* powerupfunction[VEHICLE_POWERUP_COUNT])(struct vehicle*) =
 	longboostfunction,
 	minefunction,
 	minefunction,
-	ubermodefunction
+	ubermodefunction,
+	slowminefunction
 };
 
 
@@ -211,7 +228,7 @@ void vehiclemanager_shutdown(struct vehiclemanager* vm)
 
 static void vehicleinput(struct vehicle* v)
 {
-	vec3f force, boost, dim;
+	vec3f force, boost, slow, dim;
 	float freq;
 	int i;
 
@@ -244,6 +261,16 @@ static void vehicleinput(struct vehicle* v)
 						v->flags &= ~VEHICLE_FLAG_UBER;
 						v->body;
 					}
+				}
+				if (v->flags & VEHICLE_FLAG_SLOWED) {
+					vec3f_set(slow, VEHICLE_FORWARD);
+					vec3f_scale(slow, VEHICLE_POWERUP_SLOW_STRENGTH);
+					vec3f_add(force, slow);
+
+					v->timer_slow--;
+
+					if (v->timer_slow == 0)
+						v->flags &= ~VEHICLE_FLAG_SLOWED;
 				}
 
 				// change engine sound frequency
@@ -417,6 +444,12 @@ void vehiclemanager_update(struct vehiclemanager* vm)
 			physx::PxRigidBodyExt::addForceAtLocalPos(*v->body, physx::PxVec3(MINE_LOCALFORCE), physx::PxVec3(0.f, 0.f, 0.f));
 			v->flags &= ~VEHICLE_FLAG_MINEHIT;
 		}
+		if (v->flags & VEHICLE_FLAG_SLOWEDHIT)
+		{
+			v->body->clearForce();
+			v->body->setLinearVelocity(physx::PxVec3(0.f));
+			v->flags &= ~VEHICLE_FLAG_SLOWEDHIT;
+		}
 	}
 }
 
@@ -471,7 +504,7 @@ struct vehicle* vehiclemanager_newvehicle(struct vehiclemanager* vm, struct cont
 
 	// create a physics object and add it to the scene
 	v->body = physx::PxCreateDynamic(*vm->pm->sdk, pose, physx::PxBoxGeometry(VEHICLE_DIMENSIONS), *vm->pm->default_material, VEHICLE_DENSITY);
-	collision_setupactor(v->body, COLLISION_FILTER_VEHICLE, COLLISION_FILTER_MISSILE | COLLISION_FILTER_MINE | COLLISION_FILTER_PICKUP | COLLISION_FILTER_VEHICLE);
+	collision_setupactor(v->body, COLLISION_FILTER_VEHICLE, COLLISION_FILTER_MISSILE | COLLISION_FILTER_MINE | COLLISION_FILTER_PICKUP | COLLISION_FILTER_VEHICLE | COLLISION_FILTER_SLOWMINE);
 	v->body->userData = v;
 
 	// store position

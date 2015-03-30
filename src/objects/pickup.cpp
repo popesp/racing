@@ -191,6 +191,11 @@ void pickupmanager_update(struct pickupmanager* pum)
 						// play pickup upgrade
 						audiomanager_playsfx(pum->am, pum->sfx_pickup_upgrade, p->pos, 0);
 					}
+					else if(p->type == VEHICLE_POWERUP_BOOST) {
+						v->powerup = VEHICLE_POWERUP_SLOWMINE;
+						// play pickup upgrade
+						audiomanager_playsfx(pum->am, pum->sfx_pickup_upgrade, p->pos, 0);
+					}
 					else{
 						v->powerup = p->type;
 						// play pickup taken
@@ -211,6 +216,11 @@ void pickupmanager_update(struct pickupmanager* pum)
 						// play pickup upgrade
 						audiomanager_playsfx(pum->am, pum->sfx_pickup_upgrade, p->pos, 0);
 					}
+					else if(p->type == PICKUP_TYPE_MINE) {
+						v->powerup = VEHICLE_POWERUP_SLOWMINE;
+						// play pickup upgrade
+						audiomanager_playsfx(pum->am, pum->sfx_pickup_upgrade, p->pos, 0);
+					}
 					else{
 						v->powerup = p->type;
 						// play pickup taken
@@ -224,6 +234,11 @@ void pickupmanager_update(struct pickupmanager* pum)
 					audiomanager_playsfx(pum->am, pum->sfx_pickup_taken, p->pos, 0);
 					break;
 				case VEHICLE_POWERUP_TURRET:
+					v->powerup = p->type;
+					// play pickup taken
+					audiomanager_playsfx(pum->am, pum->sfx_pickup_taken, p->pos, 0);
+					break;
+				case VEHICLE_POWERUP_SLOWMINE:
 					v->powerup = p->type;
 					// play pickup taken
 					audiomanager_playsfx(pum->am, pum->sfx_pickup_taken, p->pos, 0);
