@@ -32,6 +32,7 @@
 
 #define	VEHICLE_SFX_FILENAME_ENGINESTART			"res/soundfx/engine_start.wav"
 #define	VEHICLE_SFX_FILENAME_ENGINEIDLE				"res/soundfx/engine_idle.wav"
+#define	VEHICLE_SFX_FILENAME_COLLISION				"res/soundfx/collision.wav"
 
 #define	VEHICLE_TEXTURE_DIFFUSE_COUNT				7
 #define	VEHICLE_TEXTURE_DIFFUSE_FILENAME0			"res/models/car/carUVy.png"
@@ -114,7 +115,7 @@
 #define VEHICLE_FLAG_SLOWED							0x40
 #define VEHICLE_FLAG_SLOWEDHIT						0x80
 #define	VEHICLE_FLAG_INIT							0x00
-
+#define VEHICLE_COLLISION_SOUND						0x100
 
 struct vehicle
 {
@@ -122,6 +123,7 @@ struct vehicle
 	struct vehiclemanager* vm;
 	struct controller* controller;
 	FMOD_CHANNEL* channel;
+	FMOD_CHANNEL* collision_channel;
 
 	vec3f ray_origins[VEHICLE_COUNT_RAYCASTS];
 	vec3f ray_dirs[VEHICLE_COUNT_RAYCASTS];
@@ -140,7 +142,7 @@ struct vehicle
 
 	unsigned powerup;
 
-	unsigned char flags;
+	unsigned short flags;
 
 	int lap, place;
 	
@@ -164,7 +166,8 @@ struct vehiclemanager
 
 	int sfx_engine_start;
 	int sfx_engine_idle;
-	
+	int sfx_collision;
+
 	struct vehicle vehicles[VEHICLE_COUNT];
 };
 

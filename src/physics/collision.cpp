@@ -132,6 +132,7 @@ void CustomCollisions::onContact(const physx::PxContactPairHeader& pairHeader, c
 							((struct vehicle*)pairHeader.actors[0]->userData)->flags |= VEHICLE_FLAG_MISSILEHIT;
 						}
 					}
+					((struct vehicle*)pairHeader.actors[0]->userData)->flags |= VEHICLE_COLLISION_SOUND;
 				}
 			} else if (fd0.word0 == COLLISION_FILTER_PICKUP)
 			{

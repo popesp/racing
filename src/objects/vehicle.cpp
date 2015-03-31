@@ -196,8 +196,10 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 	// initialize sound effects
 	vm->sfx_engine_start = audiomanager_newsfx(am, VEHICLE_SFX_FILENAME_ENGINESTART);
 	vm->sfx_engine_idle = audiomanager_newsfx(am, VEHICLE_SFX_FILENAME_ENGINEIDLE);
+	vm->sfx_collision = audiomanager_newsfx(am, VEHICLE_SFX_FILENAME_COLLISION);
 
 	// initialize vehicle array
+
 	for (i = 0; i < VEHICLE_COUNT; i++){
 		vm->vehicles[i].flags = VEHICLE_FLAG_INIT;
 		vm->vehicles[i].lap = 1;
@@ -223,6 +225,7 @@ void vehiclemanager_shutdown(struct vehiclemanager* vm)
 		{
 			vm->vehicles[i].body->release();
 			soundchannel_stop(vm->vehicles[i].channel);
+			soundchannel_stop(vm->vehicles[i].collision_channel);
 		}
 }
 
@@ -381,6 +384,7 @@ void vehiclemanager_update(struct vehiclemanager* vm)
 
 		// update channel position
 		soundchannel_setposition(v->channel, v->pos);
+		soundchannel_setposition(v->collision_channel, v->pos);
 
 		// update track path index
 		v->index_track = track_closestindex(vm->track, v->pos, v->index_track);
@@ -450,6 +454,16 @@ void vehiclemanager_update(struct vehiclemanager* vm)
 			v->body->setLinearVelocity(physx::PxVec3(0.f));
 			v->flags &= ~VEHICLE_FLAG_SLOWEDHIT;
 		}
+		
+		if (v->flags & VEHICLE_COLLISION_SOUND)
+		{
+			bool isPlaying;
+			
+			v->collision_channel = audiomanager_playsfx(vm->am,vm->sfx_collision,v->pos,1);
+			
+			v->flags &= ~VEHICLE_COLLISION_SOUND;
+			
+		}
 	}
 }
 
@@ -466,7 +480,7 @@ static FMOD_RESULT F_CALLBACK enginecallback(FMOD_CHANNEL *channel, FMOD_CHANNEL
 
 	// if the channel ended, start the idle engine sound
 	if (type == FMOD_CHANNEL_CALLBACKTYPE_END)
-		v->channel = audiomanager_playsfx(v->vm->am, v->vm->sfx_engine_idle, v->pos, -1);
+		v->channel = audiomanager_playsfx(v->vm->am, v->vm->sfx_engine_idle, v->pos, -1,1.5);
 
 	return FMOD_OK;
 }

@@ -43,7 +43,7 @@ struct pickup
 	unsigned timer;
 
 	unsigned char type;
-	unsigned char flags;
+	unsigned short flags;
 };
 
 struct pickupmanager
