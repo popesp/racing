@@ -32,14 +32,6 @@
 */
 void missile_init(struct entity* e, struct entitymanager* em, struct vehicle* v, physx::PxTransform pose, int turretmissile);
 
-/*	initialize a turretmissile entity
-	param:	e			missile entity to initialize
-	param:	em			entity manager
-	param:	v			vehicle (owner of the missile)
-	param:	pose		global pose of the missile
-*/
-void turretmissile_init(struct entity* e, struct entitymanager* em, struct vehicle* v, physx::PxTransform pose);
-
 /*	delete a missile entity
 	param:	e			missile entity to delete
 */
