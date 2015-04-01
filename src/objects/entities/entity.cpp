@@ -8,7 +8,7 @@
 
 
 // initialization function pointers
-static void (* initentity[ENTITY_TYPE_COUNT])(struct entity*, struct entitymanager*, struct vehicle*, physx::PxTransform) =
+static void (* initentity[ENTITY_TYPE_COUNT])(struct entity*, struct entitymanager*, struct vehicle*, physx::PxTransform, int dummy) =
 {
 	missile_init,
 	mine_init,
@@ -88,8 +88,9 @@ void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, 
 	em->am = am;
 
 	// initialize entity array
-	for (i = 0; i < ENTITY_MAX; i++)
+	for (i = 0; i < ENTITY_MAX; i++){
 		em->entities[i].flags = ENTITY_FLAG_INIT;
+	}
 
 	// initialize renderables
 	for (i = 0; i < ENTITY_TYPE_COUNT; i++)
@@ -174,7 +175,7 @@ void entitymanager_render(struct entitymanager* em, struct renderer* r, mat4f wo
 }
 
 
-void entitymanager_newentity(struct entitymanager* em, unsigned char type, struct vehicle* v, physx::PxTransform pose)
+void entitymanager_newentity(struct entitymanager* em, unsigned char type, struct vehicle* v, physx::PxTransform pose, int dummy)
 {
 	int i;
 
@@ -185,7 +186,7 @@ void entitymanager_newentity(struct entitymanager* em, unsigned char type, struc
 	if (i == ENTITY_MAX)
 		return;
 
-	initentity[type](em->entities + i, em, v, pose);
+	initentity[type](em->entities + i, em, v, pose, dummy);
 }
 
 

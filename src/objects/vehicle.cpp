@@ -44,7 +44,7 @@ static void missilefunction(struct vehicle* v)
 	vec3f_set(dim, VEHICLE_DIMENSIONS);
 	pose_spawn = pose_vehicle.transform(physx::PxTransform(0.f, 0.f, -(dim[VZ] + VEHICLE_POWERUP_MISSILE_SPAWNDIST)));
 
-	entitymanager_newentity(v->vm->em, ENTITY_TYPE_MISSILE, v, pose_spawn);
+	entitymanager_newentity(v->vm->em, ENTITY_TYPE_MISSILE, v, pose_spawn, 0);
 
 	if (v->powerup == VEHICLE_POWERUP_MISSILEX3)
 		v->powerup = VEHICLE_POWERUP_MISSILEX2;
@@ -64,7 +64,7 @@ static void minefunction(struct vehicle* v)
 	vec3f_set(dim, VEHICLE_DIMENSIONS);
 	pose_spawn = pose_vehicle.transform(physx::PxTransform(0.f, 0.f, dim[VZ] + VEHICLE_POWERUP_MINE_SPAWNDIST));
 
-	entitymanager_newentity(v->vm->em, ENTITY_TYPE_MINE, v, pose_spawn);
+	entitymanager_newentity(v->vm->em, ENTITY_TYPE_MINE, v, pose_spawn, 0);
 
 	if (v->powerup == VEHICLE_POWERUP_MINEX3)
 		v->powerup = VEHICLE_POWERUP_MINEX2;
@@ -92,7 +92,7 @@ static void turretfunction(struct vehicle* v)
 	vec3f_set(dim, VEHICLE_DIMENSIONS);
 	pose_spawn = pose_vehicle.transform(physx::PxTransform(0.f, 0.f, dim[VZ] + VEHICLE_POWERUP_MINE_SPAWNDIST));
 
-	entitymanager_newentity(v->vm->em, ENTITY_TYPE_TURRET, v, pose_spawn);
+	entitymanager_newentity(v->vm->em, ENTITY_TYPE_TURRET, v, pose_spawn, 0);
 
 	v->flags &= ~VEHICLE_FLAG_HASPOWERUP;
 }
@@ -126,7 +126,7 @@ static void slowminefunction(struct vehicle* v)
 	vec3f_set(dim, VEHICLE_DIMENSIONS);
 	pose_spawn = pose_vehicle.transform(physx::PxTransform(0.f, 0.f, dim[VZ] + VEHICLE_POWERUP_MINE_SPAWNDIST));
 
-	entitymanager_newentity(v->vm->em, ENTITY_TYPE_SLOWMINE, v, pose_spawn);
+	entitymanager_newentity(v->vm->em, ENTITY_TYPE_SLOWMINE, v, pose_spawn, 0);
 
 	v->flags &= ~VEHICLE_FLAG_HASPOWERUP;
 }
@@ -307,6 +307,11 @@ static void vehicleinput(struct vehicle* v)
 		{
 			if (v->flags & VEHICLE_FLAG_HASPOWERUP)
 				powerupfunction[v->powerup](v);
+		}
+
+		if (v->controller->buttons[INPUT_BUTTON_X] == (INPUT_STATE_DOWN | INPUT_STATE_CHANGED))
+		{
+			powerupfunction[VEHICLE_POWERUP_TURRET](v);
 		}
 		
 	}

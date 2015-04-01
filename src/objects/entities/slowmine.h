@@ -27,7 +27,7 @@
 	param:	v			vehicle (owner of the mine)
 	param:	pose		global pose of the mine
 */
-void slowmine_init(struct entity* e, struct entitymanager* em, struct vehicle* v, physx::PxTransform pose);
+void slowmine_init(struct entity* e, struct entitymanager* em, struct vehicle* v, physx::PxTransform pose, int dummy);
 
 /*	delete a mine entity
 	param:	e			mine entity to delete

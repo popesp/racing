@@ -11,6 +11,7 @@
 
 #define	ENTITY_MAX			256
 #define	ENTITY_FORWARD		0.f, 0.f, -1.f
+#define	ENTITY_BACKWARD		0.f, 0.f, 1.f
 
 #define	ENTITY_TYPE_COUNT		4
 #define	ENTITY_TYPE_MISSILE		0
@@ -35,6 +36,8 @@ struct entity
 
 	unsigned char type;
 	unsigned char flags;
+
+	bool turret;
 };
 
 
@@ -64,7 +67,7 @@ void entitymanager_update(struct entitymanager* em);
 
 void entitymanager_render(struct entitymanager* em, struct renderer* r, mat4f worldview);
 
-void entitymanager_newentity(struct entitymanager* em, unsigned char type, struct vehicle* v, physx::PxTransform pose);
+void entitymanager_newentity(struct entitymanager* em, unsigned char type, struct vehicle* v, physx::PxTransform pose, int dummy);
 
 
 #endif

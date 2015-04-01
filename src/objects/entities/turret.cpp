@@ -1,7 +1,7 @@
 #include	"turret.h"
 
 
-void turret_init(struct entity* e, struct entitymanager* em, struct vehicle* v, physx::PxTransform pose)
+void turret_init(struct entity* e, struct entitymanager* em, struct vehicle* v, physx::PxTransform pose, int dummy)
 {
 	physx::PxMat44 mat_pose;
 
@@ -52,6 +52,6 @@ void turret_update(struct entity* e, struct entitymanager* em)
 		pose_turret = e->body->getGlobalPose();
 		pose_spawn = pose_turret.transform(physx::PxTransform(0.f, 0.f, -(TURRET_RADIUS + TURRET_MISSILE_SPAWNDIST)));
 
-		entitymanager_newentity(em, ENTITY_TYPE_MISSILE, e->owner, pose_spawn);
+		entitymanager_newentity(em, ENTITY_TYPE_MISSILE, e->owner, pose_spawn, 1);
 	}
 }

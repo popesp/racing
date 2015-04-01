@@ -3,7 +3,7 @@
 #include	"../../physics/collision.h"
 
 
-void mine_init(struct entity* e, struct entitymanager* em, struct vehicle* v, physx::PxTransform pose)
+void mine_init(struct entity* e, struct entitymanager* em, struct vehicle* v, physx::PxTransform pose, int dummy)
 {
 	physx::PxMat44 mat_pose;
 
