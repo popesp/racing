@@ -173,6 +173,19 @@ static void scroll(GLFWwindow* window, double xoffset, double yoffset)
 void restart(struct game* game){
 	vec3f color;
 
+	//Reset the players controller inputs
+	{
+		controller * cont = game->player.vehicle->controller;
+		for(int axes = 0; axes < cont->num_axes; axes++){
+			cont->axes[axes] = 0.f;
+		}
+		for(int buttons = 0; buttons < cont->num_buttons; buttons++){
+			cont->buttons[buttons] = 0;
+		}
+	}
+	
+
+
 	//turn off flags and turn back on wincondition
 	game->flags &= ~GAME_FLAG_SWITCHON;
 	game->flags &= ~GAME_FLAG_YOULOSE;
@@ -602,6 +615,20 @@ int game_startup(struct game* game)
 
 	random_timeseed();
 	
+	//Reset the players controller inputs
+	{
+	for(int i = 0; i < 16; i++){
+		controller * cont = &game->inputmanager.controllers[i];
+		for(int axes = 0; axes < cont->num_axes; axes++){
+			cont->axes[axes] = 0.f;
+		}
+		for(int buttons = 0; buttons < cont->num_buttons; buttons++){
+			cont->buttons[buttons] = 0;
+		}
+		}
+	}
+
+
 	// initialize skybox
 	skybox_init(&game->skybox, &game->renderer);
 
@@ -662,7 +689,7 @@ int game_startup(struct game* game)
 	vec3f_set(game->track_lights[0].dif, 1.f, 1.f, 1.f);
 	vec3f_set(game->track_lights[0].spc, 1.f, 1.f, 1.f);
 
-	vec3f_set(game->track_lights[1].pos, 0.f, 0.f, 0.f);
+	vec3f_set(game->track_lights[1].pos, 0.f, 10.f, 10.f);
 	vec3f_set(game->track_lights[1].dif, 1.f, 1.f, 1.f);
 	vec3f_set(game->track_lights[1].spc, 1.f, 1.f, 1.f);
 

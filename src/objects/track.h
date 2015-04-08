@@ -16,8 +16,8 @@
 
 #define	TRACK_FLAG_INIT					0x00
 #define	TRACK_FLAG_LOOPED				0x01
-
-#define TRACK_TEXTURE_FILENAME_NORMAL	"res/images/slate.jpg"
+//#define TRACK_TEXTURE_FILENAME_NORMAL	"res/images/slate.jpg"
+#define TRACK_TEXTURE_FILENAME_NORMAL	"res/images/track-tex.png"
 
 struct physicsmanager;
 
