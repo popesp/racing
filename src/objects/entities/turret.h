@@ -8,7 +8,7 @@
 #define	TURRET_MESH_FILENAME				"res/models/turret/scifiturret.obj"
 #define	TURRET_MESH_SCALE					0.5f
 #define	TURRET_MESH_YROTATE					-1.57080f
-#define	TURRET_MESH_OFFSET					0.f, 1.f, 0.f
+#define	TURRET_MESH_OFFSET					0.f, 0.f, 0.f
 
 #define	TURRET_TEXTURE_FILENAME_DIFFUSE		"res/models/turret/scifiturret.png"
 

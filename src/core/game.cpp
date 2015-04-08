@@ -183,8 +183,6 @@ void restart(struct game* game){
 			cont->buttons[buttons] = 0;
 		}
 	}
-	
-
 
 	//turn off flags and turn back on wincondition
 	game->flags &= ~GAME_FLAG_SWITCHON;

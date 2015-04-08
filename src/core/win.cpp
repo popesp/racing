@@ -8,14 +8,14 @@ void checkwin(struct game* game)
 	unsigned int cp1 = game->track.num_pathpoints / 3;
 	unsigned int cp2 = game->track.num_pathpoints / 2;
 
-	if(game->player.vehicle->lap==game->num_laps){
+	if(game->player.vehicle->lap==game->num_laps+1){
 		game->flags &= ~GAME_FLAG_WINCONDITION;
 		game->flags |= GAME_FLAG_YOUWIN;
 	}
 
 
 	for(int i=0;i<game->num_aiplayers;i++){
-		if(game->aiplayers[i].vehicle->lap==game->num_laps){
+		if(game->aiplayers[i].vehicle->lap==game->num_laps+1){
 			game->flags &= ~GAME_FLAG_WINCONDITION;
 			game->flags |= GAME_FLAG_YOULOSE;
 		}
