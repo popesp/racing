@@ -23,6 +23,7 @@
 #define GAME_INIT_AI			8
 #define GAME_INIT_SOUNDON		true
 #define GAME_INIT_COUNTDOWN		301
+#define GAME_INIT_DIFFICULTY	GAME_DIFFICULTY_NORMAL
 
 #define	GAME_DEFAULT_WIDTH		1280
 #define	GAME_DEFAULT_HEIGHT		800
@@ -103,8 +104,8 @@ struct game
 
 	int num_laps;
 
-	int countdown;
-	int dis;
+	int countdown, dis;
+	int difficulty;
 };
 
 int start_subsystems(struct game* game);

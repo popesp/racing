@@ -72,9 +72,13 @@ static void updatemenu(struct game* game)
 						game->menuflags &= ~MENU_FLAG_SOUND;
 						game->anothermenuflag |= MENU_FLAG_NUMLAPS;
 					}
-					//move down to back
+					//move down to difficulty
 					else if(game->anothermenuflag & MENU_FLAG_NUMLAPS){
 						game->anothermenuflag &= ~MENU_FLAG_NUMLAPS;
+						game->anothermenuflag |= MENU_FLAG_DIFFICULTY;
+					}
+					else if(game->anothermenuflag & MENU_FLAG_DIFFICULTY){
+						game->anothermenuflag &= ~MENU_FLAG_DIFFICULTY;
 					}else{
 						//move to numai
 						game->menuflags |= MENU_FLAG_NUMAI;
@@ -115,9 +119,11 @@ static void updatemenu(struct game* game)
 						game->anothermenuflag &= ~MENU_FLAG_NUMLAPS;
 						game->menuflags |= MENU_FLAG_SOUND;
 					}
-					
-					else{
+					else if(game->anothermenuflag & MENU_FLAG_DIFFICULTY){
+						game->anothermenuflag &= ~MENU_FLAG_DIFFICULTY;
 						game->anothermenuflag |= MENU_FLAG_NUMLAPS;
+					}else{
+						game->anothermenuflag |= MENU_FLAG_DIFFICULTY;
 					}
 				}
 			}
@@ -154,21 +160,26 @@ static void updatemenu(struct game* game)
 				}
 			}else{
 				if(game->menuflags & MENU_FLAG_NUMAI){
-					if(game->num_aiplayers < GAME_AIPLAYER_COUNT){
+					if(game->num_aiplayers < GAME_AIPLAYER_COUNT)
 						game->num_aiplayers+=2;
-					}
 				}
 				else if(game->menuflags & MENU_FLAG_SOUND){
-					if(game->soundon==false){
+					if(game->soundon==false)
 						game->soundon=true;
-					}else{
+					else
 						game->soundon=false;
-					}
 				}
 				else if(game->anothermenuflag & MENU_FLAG_NUMLAPS){
-					if(game->num_laps < 19){
+					if(game->num_laps < 19)
 						game->num_laps++;
-					}
+				}
+				else if(game->anothermenuflag & MENU_FLAG_DIFFICULTY){
+					if(game->difficulty==GAME_DIFFICULTY_EASY)
+						game->difficulty = GAME_DIFFICULTY_NORMAL;
+					else if(game->difficulty==GAME_DIFFICULTY_NORMAL)
+						game->difficulty = GAME_DIFFICULTY_HARD;
+					else
+						game->difficulty = GAME_DIFFICULTY_EASY;
 				}else{
 					game->menuflags &= ~MENU_FLAG_INSETTINGS;
 					game->menuflags |= MENU_FLAG_STARTGAME;
@@ -190,8 +201,19 @@ static void updatemenu(struct game* game)
 						game->num_laps--;
 					}
 				}
+				else if(game->anothermenuflag & MENU_FLAG_DIFFICULTY){
+					if(game->difficulty==GAME_DIFFICULTY_EASY)
+						game->difficulty = GAME_DIFFICULTY_HARD;
+					else if(game->difficulty==GAME_DIFFICULTY_NORMAL)
+						game->difficulty = GAME_DIFFICULTY_EASY;
+					else
+						game->difficulty = GAME_DIFFICULTY_NORMAL;
+				}
 				else if(game->menuflags & MENU_FLAG_SOUND){
-					printf("%d\n", (game->num_aiplayers/2)); //test
+					if(game->soundon==false)
+						game->soundon=true;
+					else
+						game->soundon=false;
 				}
 			}
 		}
@@ -226,10 +248,10 @@ int menu_startup(struct game* game){
 
 		updatemenu(game);
 
+		rendermenu(game);
+
 		if(!(game->flags & GAME_FLAG_MAINMENU))
 			break;//for exit game and shutdown
-
-		rendermenu(game);
 	}
 
 	return 1;

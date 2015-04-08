@@ -388,12 +388,17 @@ void displaysettings(struct game* game){
 	addtext(&game->uimanager,"Sound: ",(game->window.width/2)-140,450,color,&game->uimanager.font_playerlap,0);
 	addtext(&game->uimanager,"/",(game->window.width/2)+70,450,color,&game->uimanager.font_playerlap,0);
 
-	addtext(&game->uimanager,"Back",(game->window.width/2)-50,650,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"Difficulty:",(game->window.width/2)-350,650,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"/",(game->window.width/2)+0,650,color,&game->uimanager.font_playerlap,0);
+	addtext(&game->uimanager,"/",(game->window.width/2)+190,650,color,&game->uimanager.font_playerlap,0);
+
+	addtext(&game->uimanager,"Back",(game->window.width/2)-50,750,color,&game->uimanager.font_playerlap,0);
 
 	vec3f_set(color,.0f,.0f,1.0f); //BLUE
 	addtext(&game->uimanager,"numcomps",(game->window.width/2)+220,350,color,&game->uimanager.font_playerlap,8);
 	addtext(&game->uimanager,"numlaps",(game->window.width/2)+160,550,color,&game->uimanager.font_playerlap,999);
 
+	//SOUND StUFF
 	if(game->soundon==false){
 		vec3f_set(color,1.0f,1.0f,1.0f); //whitE
 	}
@@ -404,6 +409,23 @@ void displaysettings(struct game* game){
 	}
 	addtext(&game->uimanager,"Off",(game->window.width/2)+100,450,color,&game->uimanager.font_playerlap,0);
 
+	//DIFFICULTY
+	vec3f_set(color,.0f,.0f,1.0f); //BLUE
+	if(game->difficulty != GAME_DIFFICULTY_EASY)
+		vec3f_set(color,1.0f,1.0f,1.0f); //WHITE
+	addtext(&game->uimanager,"Easy",(game->window.width/2)-100,650,color,&game->uimanager.font_playerlap,0);
+
+	vec3f_set(color,.0f,.0f,1.0f); //BLUE
+	if(game->difficulty != GAME_DIFFICULTY_NORMAL)
+		vec3f_set(color,1.0f,1.0f,1.0f); //WHITE
+	addtext(&game->uimanager,"Normal",(game->window.width/2)+30,650,color,&game->uimanager.font_playerlap,0);
+
+	vec3f_set(color,.0f,.0f,1.0f); //BLUE
+	if(game->difficulty != GAME_DIFFICULTY_HARD)
+		vec3f_set(color,1.0f,1.0f,1.0f); //WHITE
+	addtext(&game->uimanager,"Hard",(game->window.width/2)+220,650,color,&game->uimanager.font_playerlap,0);
+
+	//BRACKETS
 	vec3f_set(color,.0f,.0f,1.0f); //BLUE
 	if(game->menuflags & MENU_FLAG_NUMAI){
 		addtext(&game->uimanager,"[                                                                                                                                      ]",(game->window.width/2)-280,350,color,&game->uimanager.font_playerlap,0);//numai
@@ -414,8 +436,12 @@ void displaysettings(struct game* game){
 	else if(game->anothermenuflag & MENU_FLAG_NUMLAPS){
 		addtext(&game->uimanager,"[                                                                                                    ]",(game->window.width/2)-217,550,color,&game->uimanager.font_playerlap,0);
 	}
+	else if(game->anothermenuflag & MENU_FLAG_DIFFICULTY){
+		addtext(&game->uimanager,"[                                                                                                                                                                             ]",(game->window.width/2)-375,650,color,&game->uimanager.font_playerlap,0);
+	}
+	//back
 	else{
-		addtext(&game->uimanager,"[                                  ]",(game->window.width/2)-80,650,color,&game->uimanager.font_playerlap,0);//back
+		addtext(&game->uimanager,"[                                  ]",(game->window.width/2)-80,750,color,&game->uimanager.font_playerlap,0);//back
 	}
 	
 }

@@ -30,15 +30,10 @@ void player_init(struct player* p, struct vehiclemanager* vm, controller* contro
 
 	camera_init(&p->camera, zero, zero, up);
 
-	
-	
 	//initialize lap
 	p->vehicle->lap = 1;
 	p->vehicle->checkpoint1 = false;
-	p->vehicle->checkpoint2 = false;
-
-	//p->vehicle->haspickup = 100;
-	
+	p->vehicle->checkpoint2 = false;	
 }
 
 void aiplayer_init(struct aiplayer* p, struct vehiclemanager* vm, int index_track, vec3f offs)
@@ -145,10 +140,19 @@ bool aiplayer_missilehit(struct aiplayer* p, struct vehiclemanager* vm) {
 	return false;
 }
 
-void aiplayer_updateinput(struct aiplayer* p, struct vehiclemanager* vm)
+void aiplayer_updateinput(struct aiplayer* p, struct vehiclemanager* vm, int aidifficulty)
 {
 	vec3f next_point, right, diff;
 	int next_index;
+
+	float difficultyspeed;
+
+	if(aidifficulty == GAME_DIFFICULTY_EASY)
+		difficultyspeed = 0.9f;
+	else if(aidifficulty == GAME_DIFFICULTY_NORMAL)
+		difficultyspeed = 1.0f;
+	else
+		difficultyspeed = 1.1f;//Hard
 
 	physx::PxMat44 pose(p->vehicle->body->getGlobalPose());
 	resetcontroller(p);
@@ -164,7 +168,7 @@ void aiplayer_updateinput(struct aiplayer* p, struct vehiclemanager* vm)
 
 	p->controller.axes[INPUT_AXIS_LEFT_LR] = vec3f_dot(right, diff) * p->turn / vec3f_length(diff);
 
-	p->controller.axes[INPUT_AXIS_TRIGGERS] = p->speed;
+	p->controller.axes[INPUT_AXIS_TRIGGERS] = (p->speed)*difficultyspeed;
 
 	if((p->vehicle->powerup==VEHICLE_POWERUP_BOOST||p->vehicle->powerup==VEHICLE_POWERUP_LONGBOOST)&&(p->vehicle->flags & VEHICLE_FLAG_HASPOWERUP)){
 		if(p->vehicle->index_track==140||p->vehicle->index_track==160||p->vehicle->index_track==729){

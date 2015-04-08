@@ -19,6 +19,7 @@ int main(int argc, char** argv)
 	game.num_laps = GAME_INIT_LAPS;
 	game.soundon = GAME_INIT_SOUNDON;
 	game.countdown = GAME_INIT_COUNTDOWN;
+	game.difficulty = GAME_INIT_DIFFICULTY;
 
 	if (!menu_startup(&game))
 		return 0;

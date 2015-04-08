@@ -14,6 +14,9 @@
 #define	PLAYER_CAMERA_EASING	0.1f
 #define	AI_CAMERA_EASING		1.1f
 
+#define GAME_DIFFICULTY_EASY	1
+#define GAME_DIFFICULTY_NORMAL	2
+#define GAME_DIFFICULTY_HARD	3
 
 struct player
 {
@@ -43,7 +46,7 @@ void aiplayer_init(struct aiplayer* p, struct vehiclemanager* vm, int index_trac
 void player_delete(struct player* p, struct vehiclemanager* vm);
 void aiplayer_delete(struct aiplayer* p, struct vehiclemanager* vm);
 
-void aiplayer_updateinput(struct aiplayer* p, struct vehiclemanager* vm);
+void aiplayer_updateinput(struct aiplayer* p, struct vehiclemanager* vm, int aidifficulty);
 
 void player_updatecamera(struct player* p);
 void aiwin_camera(struct aiplayer* aip);

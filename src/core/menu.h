@@ -11,6 +11,7 @@
 #define MENU_FLAG_SOUND			0x80
 #define MENU_FLAG_NUMAI			0x1b
 #define MENU_FLAG_NUMLAPS		0x10
+#define MENU_FLAG_DIFFICULTY	0x20
 
 int menu_startup(struct game* game);
 

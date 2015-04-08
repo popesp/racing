@@ -276,7 +276,7 @@ static void update(struct game* game)
 		// update player and ai input
 		inputmanager_update(&game->inputmanager);
 		for(i = 0; i < game->num_aiplayers; i++)
-			aiplayer_updateinput(&game->aiplayers[i], &game->vehiclemanager);
+			aiplayer_updateinput(&game->aiplayers[i], &game->vehiclemanager, game->difficulty);
 	}
 	else{
 		int tem = (game->countdown / 60) + 1;
