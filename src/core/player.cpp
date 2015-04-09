@@ -148,7 +148,7 @@ void aiplayer_updateinput(struct aiplayer* p, struct vehiclemanager* vm, int aid
 	float difficultyspeed;
 
 	if(aidifficulty == GAME_DIFFICULTY_EASY)
-		difficultyspeed = 0.9f;
+		difficultyspeed = 0.95f;
 	else if(aidifficulty == GAME_DIFFICULTY_NORMAL)
 		difficultyspeed = 1.0f;
 	else
