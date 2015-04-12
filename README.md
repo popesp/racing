@@ -6,9 +6,9 @@ Winter 2015, CPSC 585 - Games Programming
 Gamepad controls
 ----------------
 
-Right Trigger - Accelerate
-Left Trigger -  Brake/Reverse
-Left Stick -    Turn
+Right Trigger - Accelerate<br>
+Left Trigger -  Brake/Reverse<br>
+Left Stick -    Turn<br>
 A -             Use item, confirm selection
 B -             Back to previous screen
 Start -         Pause game
