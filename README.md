@@ -1,6 +1,6 @@
 # Warped Steel
-Winter 2015, CPSC 585 - Games Programming
-# Playable with a gamepad or keyboard
+Winter 2015, CPSC 585 - Games Programming<br>
+Playable with a gamepad or keyboard
 
 
 Gamepad controls
@@ -9,36 +9,36 @@ Gamepad controls
 Right Trigger - Accelerate<br>
 Left Trigger -  Brake/Reverse<br>
 Left Stick -    Turn<br>
-A -             Use item, confirm selection
-B -             Back to previous screen
-Start -         Pause game
-LB -            Previous song
-RB -            Next song
-DPad -          Navigate menu, change settings
+A -             Use item, confirm selection<br>
+B -             Back to previous screen<br>
+Start -         Pause game<br>
+Left Bumper -   Previous song<br>
+RIght Bumper -  Next song<br>
+DPad -          Navigate menu, change settings<br>
 
 Debug Controls
 
-Back -              Reset your vehicle
-Y -			        Enter debug camera mode
+Back -              Reset your vehicle<br>
+Y -			        Enter debug camera mode<br>
 
 
 Keyboard controls
 -----------------
 
-W -             Accelerate
-S -             Brake/Reverse
-A/D -           Turn
-Space -         Use item, confirm selection
-Backspace -     Back to previous screen
-ESC -           Pause game
-, -             Previous song
-. -             Next song
-Arrow keys -    Navigate menu, change settings
+W -             Accelerate<br>
+S -             Brake/Reverse<br>
+A/D -           Turn<br>
+Space -         Use item, confirm selection<br>
+Backspace -     Back to previous screen<br>
+ESC -           Pause game<br>
+, -             Previous song<br>
+. -             Next song<br>
+Arrow keys -    Navigate menu, change settings<br>
 
 Debug Controls
 
-R -		Reset your vehicle
-C -     Enter debug camera mode
+R -		Reset your vehicle<br>
+C -     Enter debug camera mode<br>
 
-Q -		Wireframe rendering
-P -		Pause music track
+Q -		Wireframe rendering<br>
+P -		Pause music track<br>
