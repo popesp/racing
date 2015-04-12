@@ -35,12 +35,15 @@ void main()
 {
 	vec3 amb, dif, spc;
 	vec3 n, e, l;
+	vec4 sample;
 	float d;
 	
 	n = normalize(pass_normal);
 	e = normalize(pass_toeye);
 
-	dif = texture2D(tex_diffuse, pass_uv).rgb;
+	sample = texture2D(tex_diffuse, pass_uv);
+
+	dif = sample.rgb;
 	spc = vec3(0.f);
 	for (int i = 0; i < MAX_LIGHTS; i++)
 	{
@@ -58,5 +61,5 @@ void main()
 	dif *= material.dif;
 	spc *= material.spc;
 	
-	fragcol = vec4(amb + dif + spc, 1.f);
+	fragcol = vec4(amb + dif + spc, sample.a);
 }

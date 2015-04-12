@@ -101,9 +101,6 @@
     <ClCompile Include="src\render\primitives.cpp">
       <Filter>src\render</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\win.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
     <ClCompile Include="src\objects\entities\missile.cpp">
       <Filter>src\objects\entities</Filter>
     </ClCompile>
@@ -189,9 +186,6 @@
     </ClInclude>
     <ClInclude Include="src\render\primitives.h">
       <Filter>headers\render</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\win.h">
-      <Filter>headers\core</Filter>
     </ClInclude>
     <ClInclude Include="src\objects\entities\missile.h">
       <Filter>headers\objects\entities</Filter>

@@ -1,53 +1,37 @@
 #include	"audio.h"
 
-
-static void resetsound(struct sound* s)
-{
-	s->track = 0;
-	s->enabled = false;
-}
-
-
 #include	<stdio.h>
+
+
 void audiomanager_startup(struct audiomanager* am)
 {
-	int i;
+	FMOD_CHANNELGROUP* master;
 
 	// create audio system
 	FMOD_System_Create(&am->system);
 
 	// initialize sound system
 	FMOD_System_Init(am->system, 100, FMOD_INIT_3D_RIGHTHANDED, 0);
+	FMOD_System_Set3DSettings(am->system, 1.f, 5.f, 1.f);
 
-	// create channel groups
-	FMOD_System_CreateChannelGroup(am->system, "music", &am->group_music);
-	FMOD_System_CreateChannelGroup(am->system, "sfx", &am->group_sfx);
-	
-	// initialize music sounds
-	for (i = 0; i < AUDIO_MUSIC_COUNT; i++)
-		resetsound(&am->music[i]);
+	// create channel and sound groups
+	FMOD_System_CreateChannelGroup(am->system, NULL, &am->group_ingame);
+	FMOD_System_CreateSoundGroup(am->system, NULL, &am->group_music);
+	FMOD_System_CreateSoundGroup(am->system, NULL, &am->group_sfx);
 
-	// initialize sfx sounds
-	for (i = 0; i < AUDIO_SFX_COUNT; i++)
-		resetsound(&am->sfx[i]);
+	// add in-game channel group to master
+	FMOD_System_GetMasterChannelGroup(am->system, &master);
+	FMOD_ChannelGroup_AddGroup(master, am->group_ingame);
+
+	FMOD_SoundGroup_SetVolume(am->group_music, AUDIO_MUSIC_VOLUMESCALE);
+	FMOD_SoundGroup_SetVolume(am->group_sfx, AUDIO_SFX_VOLUMESCALE);
 }
 
 void audiomanager_shutdown(struct audiomanager* am)
 {
-	int i;
-
-	// release music sounds
-	for (i = 0; i < AUDIO_MUSIC_COUNT; i++)
-		if (am->music[i].enabled)
-			FMOD_Sound_Release(am->music[i].track);
-
-	// release sfx sounds
-	for (i = 0; i < AUDIO_SFX_COUNT; i++)
-		if (am->sfx[i].enabled)
-			FMOD_Sound_Release(am->sfx[i].track);
-
-	FMOD_ChannelGroup_Release(am->group_music);
-	FMOD_ChannelGroup_Release(am->group_sfx);
+	FMOD_ChannelGroup_Release(am->group_ingame);
+	FMOD_SoundGroup_Release(am->group_music);
+	FMOD_SoundGroup_Release(am->group_sfx);
 
 	FMOD_System_Release(am->system);
 }
@@ -72,49 +56,41 @@ void audiomanager_update(struct audiomanager* am, vec3f pos, vec3f dir, vec3f up
 }
 
 
-int audiomanager_newmusic(struct audiomanager* am, const char* filename)
+FMOD_SOUND* audiomanager_newmusic(struct audiomanager* am, const char* filename)
 {
-	int i;
+	FMOD_SOUND* sound;
 
-	for (i = 0; i < AUDIO_MUSIC_COUNT; i++)
-	{
-		if (!am->music[i].enabled)
-		{
-			FMOD_System_CreateStream(am->system, filename, FMOD_LOOP_NORMAL, 0, &am->music[i].track);
-			am->music[i].enabled = true;
+	FMOD_System_CreateStream(am->system, filename, FMOD_LOOP_NORMAL, 0, &sound);
+	FMOD_Sound_SetSoundGroup(sound, am->group_music);
 
-			return i;
-		}
-	}
-
-	return -1;
+	return sound;
 }
 
-int audiomanager_newsfx(struct audiomanager* am, const char* filename)
+FMOD_SOUND* audiomanager_newsfx(struct audiomanager* am, const char* filename, bool is3D)
 {
-	int i;
+	FMOD_SOUND* sound;
 
-	for (i = 0; i < AUDIO_SFX_COUNT; i++)
-	{
-		if (!am->sfx[i].enabled)
-		{
-			FMOD_System_CreateSound(am->system, filename, (FMOD_3D | FMOD_LOOP_NORMAL), 0, &am->sfx[i].track);
-			am->sfx[i].enabled = true;
+	if (is3D)
+		FMOD_System_CreateSound(am->system, filename, FMOD_LOOP_NORMAL | FMOD_3D | FMOD_3D_LINEARROLLOFF, 0, &sound);
+	else
+		FMOD_System_CreateSound(am->system, filename, FMOD_LOOP_NORMAL, 0, &sound);
 
-			return i;
-		}
-	}
+	FMOD_Sound_SetSoundGroup(sound, am->group_sfx);
 
-	return -1;
+	FMOD_Sound_Set3DMinMaxDistance(sound, 1.f, 50.f);
+
+	return sound;
 }
 
 
-FMOD_CHANNEL* audiomanager_playmusic(struct audiomanager* am, int id, int loops, float volume)
+FMOD_CHANNEL* audiomanager_playmusic(struct audiomanager* am, FMOD_SOUND* music, int loops, bool ingame, float volume)
 {
 	FMOD_CHANNEL* channel;
 
-	FMOD_System_PlaySound(am->system, FMOD_CHANNEL_FREE, am->music[id].track, true, &channel);
-	FMOD_Channel_SetChannelGroup(channel, am->group_music);
+	FMOD_System_PlaySound(am->system, FMOD_CHANNEL_FREE, music, true, &channel);
+
+	if (ingame)
+		FMOD_Channel_SetChannelGroup(channel, am->group_ingame);
 
 	// set channel properties
 	FMOD_Channel_SetLoopCount(channel, loops);
@@ -126,15 +102,18 @@ FMOD_CHANNEL* audiomanager_playmusic(struct audiomanager* am, int id, int loops,
 	return channel;
 }
 
-FMOD_CHANNEL* audiomanager_playsfx(struct audiomanager* am, int id, vec3f pos, int loops, float volume)
+FMOD_CHANNEL* audiomanager_playsfx(struct audiomanager* am, FMOD_SOUND* sfx, vec3f pos, int loops, bool ingame, float volume)
 {
 	FMOD_CHANNEL* channel;
 	
-	FMOD_System_PlaySound(am->system, FMOD_CHANNEL_FREE, am->sfx[id].track, true, &channel);
-	FMOD_Channel_SetChannelGroup(channel, am->group_sfx);
+	FMOD_System_PlaySound(am->system, FMOD_CHANNEL_FREE, sfx, true, &channel);
+	
+	if (ingame)
+		FMOD_Channel_SetChannelGroup(channel, am->group_ingame);
 
 	// position the sound effect in space
-	soundchannel_setposition(channel, pos);
+	if (pos)
+		soundchannel_setposition(channel, pos);
 
 	// set channel properties
 	FMOD_Channel_SetLoopCount(channel, loops);
@@ -146,15 +125,44 @@ FMOD_CHANNEL* audiomanager_playsfx(struct audiomanager* am, int id, vec3f pos, i
 	return channel;
 }
 
+
+float audiomanager_getmusicvolume(struct audiomanager* am)
+{
+	float volume;
+
+	FMOD_SoundGroup_GetVolume(am->group_music, &volume);
+
+	return volume / AUDIO_MUSIC_VOLUMESCALE;
+}
 
 void audiomanager_setmusicvolume(struct audiomanager* am, float volume)
 {
-	FMOD_ChannelGroup_SetVolume(am->group_music, volume);
+	FMOD_SoundGroup_SetVolume(am->group_music, AUDIO_MUSIC_VOLUMESCALE * volume);
+}
+
+float audiomanager_getsfxvolume(struct audiomanager* am)
+{
+	float volume;
+
+	FMOD_SoundGroup_GetVolume(am->group_sfx, &volume);
+
+	return volume / AUDIO_SFX_VOLUMESCALE;
 }
 
 void audiomanager_setsfxvolume(struct audiomanager* am, float volume)
 {
-	FMOD_ChannelGroup_SetVolume(am->group_sfx, volume);
+	FMOD_SoundGroup_SetVolume(am->group_sfx, AUDIO_SFX_VOLUMESCALE * volume);
+}
+
+float audiomanager_getmastervolume(struct audiomanager* am)
+{
+	FMOD_CHANNELGROUP* master;
+	float volume;
+
+	FMOD_System_GetMasterChannelGroup(am->system, &master);
+	FMOD_ChannelGroup_GetVolume(master, &volume);
+
+	return volume;
 }
 
 void audiomanager_setmastervolume(struct audiomanager* am, float volume)
@@ -163,6 +171,18 @@ void audiomanager_setmastervolume(struct audiomanager* am, float volume)
 
 	FMOD_System_GetMasterChannelGroup(am->system, &master);
 	FMOD_ChannelGroup_SetVolume(master, volume);
+}
+
+
+void audiomanager_ingamepausedstate(struct audiomanager* am, bool paused)
+{
+	FMOD_ChannelGroup_SetPaused(am->group_ingame, paused);
+}
+
+
+void sound_delete(FMOD_SOUND* sound)
+{
+	FMOD_Sound_Release(sound);
 }
 
 
@@ -184,13 +204,18 @@ void soundchannel_setfreq(FMOD_CHANNEL* channel, float freq)
 }
 
 
+void soundchannel_pausedstate(FMOD_CHANNEL* channel, bool paused)
+{
+	FMOD_Channel_SetPaused(channel, paused);
+}
+
 void soundchannel_toggle(FMOD_CHANNEL* channel)
 {
-	FMOD_BOOL state;
+	FMOD_BOOL paused;
 
-	FMOD_Channel_GetPaused(channel, &state);
+	FMOD_Channel_GetPaused(channel, &paused);
 
-	if (state)
+	if (paused)
 		FMOD_Channel_SetPaused(channel, false);
 	else
 		FMOD_Channel_SetPaused(channel, true);

@@ -32,7 +32,7 @@ void missile_init(struct entity* e, struct entitymanager* em, struct vehicle* v,
 	e->owner = v;
 
 	// play sound effect and store the audio channel
-	e->channel = audiomanager_playsfx(em->am, em->sfx_missile_idle, e->pos, -1);
+	e->channel = audiomanager_playsfx(em->am, em->sfx_missile_idle, e->pos, -1, true);
 
 	// set the despawn timer
 	e->timer = MISSILE_DESPAWNTIME;
@@ -56,7 +56,7 @@ void missile_update(struct entity* e, struct entitymanager* em)
 	// check if the missile has hit anything
 	if (e->flags & ENTITY_FLAG_HIT)
 	{
-		audiomanager_playsfx(em->am, em->sfx_missile_explode, e->pos, 0);
+		audiomanager_playsfx(em->am, em->sfx_missile_explode, e->pos, 0, true);
 		missile_delete(e);
 		return;
 	}

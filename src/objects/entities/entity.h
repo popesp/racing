@@ -47,14 +47,15 @@ struct entitymanager
 	struct renderable renderables[ENTITY_TYPE_COUNT];
 	struct texture diffuse[ENTITY_TYPE_COUNT];
 
-	int sfx_missile_idle;
-	int sfx_missile_explode;
-	int sfx_mine_idle;
-	int sfx_mine_explode;
+	FMOD_SOUND* sfx_missile_idle;
+	FMOD_SOUND* sfx_missile_explode;
+	FMOD_SOUND* sfx_mine_idle;
+	FMOD_SOUND* sfx_mine_explode;
 };
 
 
 void entitymanager_startup(struct entitymanager* em, struct physicsmanager* pm, struct audiomanager* am, struct renderer* r);
+void entitymanager_reset(struct entitymanager* em);
 void entitymanager_shutdown(struct entitymanager* em);
 void entitymanager_update(struct entitymanager* em);
 

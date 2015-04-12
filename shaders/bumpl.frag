@@ -1,7 +1,10 @@
 #version	140
 
 
-#define	MAX_LIGHTS	2
+#define	MAX_LIGHTS		8
+
+#define	ATT_LINEAR		0.1
+#define	ATT_QUADRATIC	0.002
 
 
 struct light
@@ -20,8 +23,10 @@ in		vec3		pass_tolight[MAX_LIGHTS];
 
 out		vec4		fragcol;
 
+uniform int			num_lights;
 uniform	light		lights[MAX_LIGHTS];
 uniform	vec3		ambient;
+uniform sampler2D	tex_diffuse;
 uniform	sampler2D	tex_normal;
 uniform	struct
 {
@@ -36,8 +41,8 @@ void main()
 {
 	vec3 amb, dif, spc;
 	vec3 n, t, e, b, l;
+	float d, dist, att;
 	mat3 tan_model;
-	float d;
 	
 	n = normalize(pass_normal);
 	t = normalize(pass_tangent);
@@ -53,16 +58,19 @@ void main()
 	// find new normal vector modified by normal map
 	n = tan_model * (texture2D(tex_normal, pass_uv).rgb*2. - 1.);
 
-	dif = vec3(0.f);
+	dif = texture2D(tex_diffuse, pass_uv).rgb;
 	spc = vec3(0.f);
-	for (int i = 0; i < MAX_LIGHTS; i++)
+	for (int i = 0; i < num_lights; i++)
 	{
-		l = normalize(pass_tolight[i]);
+		dist = length(pass_tolight[i]);
+		l = pass_tolight[i] / dist;
 		d = dot(n, l);
-		
-		dif += lights[i].dif * max(d, 0.f);
+
+		att = 1. / (ATT_LINEAR * dist + ATT_QUADRATIC * dist*dist);
+
+		dif += att * lights[i].dif * max(d, 0.f);
 		if (d > 0.f)
-			spc += lights[i].spc * pow(max(dot(reflect(-l, n), e), 0.f), material.shn);
+			spc += att * lights[i].spc * pow(max(dot(reflect(-l, n), e), 0.f), material.shn);
 	}
 	
 	amb = ambient*material.amb;

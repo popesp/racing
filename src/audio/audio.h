@@ -6,8 +6,8 @@
 #include	"../math/vec3f.h"
 
 
-#define	AUDIO_MUSIC_COUNT		16
-#define	AUDIO_SFX_COUNT			16
+#define	AUDIO_MUSIC_VOLUMESCALE	0.1f
+#define	AUDIO_SFX_VOLUMESCALE	0.1f
 
 
 struct sound
@@ -21,11 +21,9 @@ struct audiomanager
 {
 	FMOD_SYSTEM* system;
 
-	FMOD_CHANNELGROUP* group_music;
-	FMOD_CHANNELGROUP* group_sfx;
-
-	struct sound music[AUDIO_MUSIC_COUNT];
-	struct sound sfx[AUDIO_SFX_COUNT];
+	FMOD_CHANNELGROUP* group_ingame;
+	FMOD_SOUNDGROUP* group_music;
+	FMOD_SOUNDGROUP* group_sfx;
 };
 
 
@@ -58,37 +56,46 @@ void audiomanager_update(struct audiomanager* am, vec3f pos, vec3f dir, vec3f up
 /*	create a new music sound object
 	param:	am				audio manager
 	param:	filename		path to the audio file
-	return:	int				index to the sound object, or -1 if failure
+	return:	FMOD_SOUND*		sound object pointer
 */
-int audiomanager_newmusic(struct audiomanager* am, const char* filename);
+FMOD_SOUND* audiomanager_newmusic(struct audiomanager* am, const char* filename);
 
 /*	create a new sfx sound object
 	param:	am				audio manager
 	param:	filename		path to the audio file
-	return:	int				index to the sound object, or -1 if failure
+	param:	is3D			whether the sound is 3 dimensional
+	return:	FMOD_SOUND*		sound object pointer
 */
-int audiomanager_newsfx(struct audiomanager* am, const char* filename);
+FMOD_SOUND* audiomanager_newsfx(struct audiomanager* am, const char* filename, bool is3D);
 
 
 /*	play a music sound
 	param:	am				audio manager
-	param:	id				index to the sound object
+	param:	music			sound object pointer
 	param:	loops			number of times to loop the song
+	param:	ingame			whether the sound is in-game
 	param:	volume			volume for music channel
 	return:	FMOD_CHANNEL*	pointer to sound channel
 */
-FMOD_CHANNEL* audiomanager_playmusic(struct audiomanager* am, int id, int loops, float volume = 1.f);
+FMOD_CHANNEL* audiomanager_playmusic(struct audiomanager* am, FMOD_SOUND* music, int loops, bool ingame, float volume = 1.f);
 
 /*	play an sfx sound
 	param:	am				audio manager
-	param:	id				index to the sound object
+	param:	sfx				sound object pointer
 	param:	pos				position to play the sound effect
 	param:	loops			number of times to loop the sound effect
+	param:	ingame			whether the sound is in-game
 	param:	volume			volume for sfx channel
 	return:	FMOD_CHANNEL*	pointer to sound channel
 */
-FMOD_CHANNEL* audiomanager_playsfx(struct audiomanager* am, int id, vec3f pos, int loops, float volume = 1.f);
+FMOD_CHANNEL* audiomanager_playsfx(struct audiomanager* am, FMOD_SOUND* sfx, vec3f pos, int loops, bool ingame, float volume = 1.f);
 
+
+/*	get the music volume
+	param:	am				audio manager
+	return:	float			music channel group volume
+*/
+float audiomanager_getmusicvolume(struct audiomanager* am);
 
 /*	set the music volume
 	param:	am				audio manager
@@ -96,17 +103,42 @@ FMOD_CHANNEL* audiomanager_playsfx(struct audiomanager* am, int id, vec3f pos, i
 */
 void audiomanager_setmusicvolume(struct audiomanager* am, float volume);
 
+/*	get the sfx volume
+	param:	am				audio manager
+	return:	float			sfx channel group volume
+*/
+float audiomanager_getsfxvolume(struct audiomanager* am);
+
 /*	set the sfx volume
 	param:	am				audio manager
 	param:	volume			new sfx volume
 */
 void audiomanager_setsfxvolume(struct audiomanager* am, float volume);
 
+/*	get the master volume
+	param:	am				audio manager
+	return:	float			master channel group volume
+*/
+float audiomanager_getmastervolume(struct audiomanager* am);
+
 /*	set the master volume
 	param:	am				audio manager
 	param:	volume			new master volume
 */
 void audiomanager_setmastervolume(struct audiomanager* am, float volume);
+
+
+/*	set the paused state of all in-game sounds
+	param:	am				audio manager
+	param:	paused			paused state
+*/
+void audiomanager_ingamepausedstate(struct audiomanager* am, bool paused);
+
+
+/*	delete a sound object
+	param:	sound			sound object to delete
+*/
+void sound_delete(FMOD_SOUND* sound);
 
 
 /*	set a sound's position in space
@@ -128,7 +160,13 @@ void soundchannel_setvolume(FMOD_CHANNEL* channel, float volume);
 void soundchannel_setfreq(FMOD_CHANNEL* channel, float freq);
 
 
-/*	toggle whether a sound channel is playing
+/*	set a channel's paused state
+	param:	channel			sound channel
+	param:	paused			paused state
+*/
+void soundchannel_pausedstate(FMOD_CHANNEL* channel, bool paused);
+
+/*	toggle whether a sound channel is paused
 	param:	channel			sound channel
 */
 void soundchannel_toggle(FMOD_CHANNEL* channel);

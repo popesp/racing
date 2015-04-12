@@ -100,6 +100,7 @@ void renderable_init(struct renderable* obj, unsigned char mode, unsigned char t
 	obj->num_verts = 0;
 	obj->buf_verts = NULL;
 
+	obj->num_lights = 0;
 	for (i = 0; i < RENDER_MAX_LIGHTS; i++)
 		obj->lights[i] = NULL;
 
@@ -322,8 +323,11 @@ void renderable_render(struct renderer* r, struct renderable* obj, mat4f modelwo
 		glUniformMatrix4fv(r->uniforms_bump_l.transform, 1, GL_FALSE, mvp);
 		glUniform3fv(r->uniforms_bump_l.eyepos, 1, eyepos);
 
+		// number of lights
+		glUniform1iv(r->uniforms_bump_l.num_lights, 1, &obj->num_lights);
+
 		// light property uniforms
-		for (i = 0; i < RENDER_MAX_LIGHTS; i++)
+		for (i = 0; i < obj->num_lights; i++)
 		{
 			if (!obj->lights[i])
 			{
@@ -359,9 +363,13 @@ void renderable_render(struct renderer* r, struct renderable* obj, mat4f modelwo
 			glUniform3fv(r->uniforms_bump_l.ambient, 1, obj->ambient);
 
 		// texture uniforms
+		unit = RENDER_TEXTURE_DIFFUSE;
+		glUniform1iv(r->uniforms_bump_l.tex_diffuse, 1, &unit);
+		glActiveTexture(GL_TEXTURE0 + RENDER_TEXTURE_DIFFUSE);
+		glBindTexture(GL_TEXTURE_2D, obj->textures[RENDER_TEXTURE_DIFFUSE]->gl_id);
+
 		unit = RENDER_TEXTURE_NORMAL;
 		glUniform1iv(r->uniforms_bump_l.tex_normal, 1, &unit);
-
 		glActiveTexture(GL_TEXTURE0 + RENDER_TEXTURE_NORMAL);
 		glBindTexture(GL_TEXTURE_2D, obj->textures[RENDER_TEXTURE_NORMAL]->gl_id);
 
@@ -553,6 +561,8 @@ unsigned renderer_init(struct renderer* r, struct window* window)
 	r->uniforms_bump_l.transform = glGetUniformLocation(r->shader[RENDER_TYPE_BUMP_L], "transform");
 	r->uniforms_bump_l.eyepos = glGetUniformLocation(r->shader[RENDER_TYPE_BUMP_L], "eyepos");
 
+	r->uniforms_bump_l.num_lights = glGetUniformLocation(r->shader[RENDER_TYPE_BUMP_L], "num_lights");
+
 	for (i = 0; i < RENDER_MAX_LIGHTS; i++)
 	{
 		sprintf_s(uniform, 16, "lights[%d].", i);
@@ -568,6 +578,7 @@ unsigned renderer_init(struct renderer* r, struct window* window)
 
 	r->uniforms_bump_l.ambient = glGetUniformLocation(r->shader[RENDER_TYPE_BUMP_L], "ambient");
 
+	r->uniforms_bump_l.tex_diffuse = glGetUniformLocation(r->shader[RENDER_TYPE_BUMP_L], "tex_diffuse");
 	r->uniforms_bump_l.tex_normal = glGetUniformLocation(r->shader[RENDER_TYPE_BUMP_L], "tex_normal");
 
 	r->uniforms_bump_l.material[RENDER_MATERIAL_AMB] = glGetUniformLocation(r->shader[RENDER_TYPE_BUMP_L], "material.amb");

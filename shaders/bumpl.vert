@@ -1,7 +1,7 @@
 #version	140
 
 
-#define	MAX_LIGHTS	2
+#define	MAX_LIGHTS		8
 
 
 struct light
@@ -25,6 +25,7 @@ out		vec3		pass_tolight[MAX_LIGHTS];
 
 uniform	mat4		transform;
 uniform	vec3		eyepos;
+uniform	int			num_lights;
 uniform	light		lights[MAX_LIGHTS];
 
 
@@ -38,7 +39,7 @@ void main()
 
 	pass_toeye = eyepos - vertpos;
 	
-	for (i = 0; i < MAX_LIGHTS; i++)
+	for (i = 0; i < num_lights; i++)
 		pass_tolight[i] = lights[i].pos - vertpos;
 	
 	gl_Position = transform*vec4(vertpos, 1.f);

@@ -10,9 +10,13 @@
 #include	"../physics/physics.h"
 
 
-#define	PLAYER_CAMERA_TARGETPOS	0.f, 1.f, 5.f
-#define	PLAYER_CAMERA_EASING	0.1f
-#define	AI_CAMERA_EASING		1.1f
+#define	PLAYER_CAMERA_TARGETPOS		0.f, 1.f, 5.f
+#define	PLAYER_CAMERA_EASING		0.1f
+
+#define	PLAYER_WINCAMERA_POS		0.f, 4.f, 10.f
+#define	PLAYER_WINCAMERA_ROTATE		-0.01f
+
+#define	AIPLAYER_MISSILE_COOLDOWN	60
 
 
 struct player
@@ -20,6 +24,7 @@ struct player
 	struct vehicle* vehicle;
 
 	struct camera camera;
+	float anglecamera;
 };
 
 struct aiplayer
@@ -30,22 +35,22 @@ struct aiplayer
 
 	struct controller controller;
 
-	struct camera camera;
+	unsigned timer_missile;
+	unsigned timer_mine;
 
 	float turn, speed;
-	int next;
 };
 
 
-void player_init(struct player* p, struct vehiclemanager* vm, controller* controller, int index_track, vec3f offs);
-void aiplayer_init(struct aiplayer* p, struct vehiclemanager* vm, int index_track, vec3f offs);
+void player_init(struct player* p, struct vehicle* v);
+void aiplayer_init(struct aiplayer* p, struct vehicle* v, struct track* track);
 
-void player_delete(struct player* p, struct vehiclemanager* vm);
-void aiplayer_delete(struct aiplayer* p, struct vehiclemanager* vm);
+void player_delete(struct player* p);
+void aiplayer_delete(struct aiplayer* p);
 
-void aiplayer_updateinput(struct aiplayer* p);
+void aiplayer_updateinput(struct aiplayer* p, struct vehiclemanager* vm);
 
 void player_updatecamera(struct player* p);
-void aiwin_camera(struct aiplayer* aip);
+void player_updatewincamera(struct player* p, struct vehicle* v);
 
 #endif

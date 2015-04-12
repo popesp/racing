@@ -6,11 +6,11 @@
 
 
 #define	MINE_MESH_FILENAME				"res/models/mine/mine.obj"
-#define	MINE_MESH_SCALE					0.1f
+#define	MINE_MESH_SCALE					0.5f
 #define	MINE_MESH_YROTATE				0.f
-#define	MINE_MESH_OFFSET				0.f, 1.f, 0.f
+#define	MINE_MESH_OFFSET				0.f, 0.f, 0.f
 
-#define	MINE_TEXTURE_FILENAME_DIFFUSE	"res/models/mine/mine.png"
+#define	MINE_TEXTURE_FILENAME_DIFFUSE	"res/models/mine/uv.png"
 
 #define	MINE_SFX_FILENAME_IDLE			"res/soundfx/mine_idle.wav"
 #define	MINE_SFX_FILENAME_EXPLODE		"res/soundfx/mine_explode.wav"

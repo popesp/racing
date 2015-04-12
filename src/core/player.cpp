@@ -1,7 +1,10 @@
 #include	"player.h"
 
 #include	"../mem.h"
+#include	"../objects/entities/missile.h"
+#include	"../physics/physics.h"
 #include	"../random.h"
+
 
 static void resetcontroller(struct aiplayer* p)
 {
@@ -17,35 +20,27 @@ static void resetcontroller(struct aiplayer* p)
 }
 
 
-void player_init(struct player* p, struct vehiclemanager* vm, controller* controller, int index_track, vec3f offs)
+void player_init(struct player* p, struct vehicle* v)
 {
 	vec3f zero, up;
 
 	// initialize vehicle
-	p->vehicle = vehiclemanager_newvehicle(vm, controller, index_track, offs);
+	p->vehicle = v;
 
 	vec3f_set(zero, 0.f, 0.f, 0.f);
 	vec3f_set(up, 0.f, 1.f, 0.f);
 
 	camera_init(&p->camera, zero, zero, up);
 
-	
-	
-	//initialize lap
-	p->vehicle->lap = 1;
-	p->vehicle->checkpoint1 = false;
-	p->vehicle->checkpoint2 = false;
-
-	//p->vehicle->haspickup = 100;
-	
+	p->anglecamera = 0.f;
 }
 
-void aiplayer_init(struct aiplayer* p, struct vehiclemanager* vm, int index_track, vec3f offs)
+void aiplayer_init(struct aiplayer* p, struct vehicle* v, struct track* track)
 {
 	// initialize vehicle
-	p->vehicle = vehiclemanager_newvehicle(vm, &p->controller, index_track, offs);
+	p->vehicle = v;
 
-	p->track = vm->track;
+	p->track = track;
 
 	p->controller.flags = INPUT_FLAG_ENABLED;
 
@@ -57,33 +52,60 @@ void aiplayer_init(struct aiplayer* p, struct vehiclemanager* vm, int index_trac
 
 	resetcontroller(p);
 
-	p->turn = 50/(random_int(15)+7.5);
-	p->speed = -(1-(1/(random_int(15)+2.5)));
-	p->next = (random_int(4)+3);
-	//printf("turn=%f speed=%f next=%d\n",p->turn,p->speed,p->next);
+	p->timer_missile = 0;
 
-	vec3f zero, up;
-	vec3f_set(zero, 0.f, 0.f, 0.f);
-	vec3f_set(up, 0.f, 1.f, 0.f);
-	camera_init(&p->camera, zero, zero, up);
+	p->turn = 50.f/((float)random_int(15) + 7.5f);
+	p->speed = (1.f / ((float)random_int(15) + 2.5f)) - 1.f;
 }
 
 
-void player_delete(struct player* p, struct vehiclemanager* vm)
+void player_delete(struct player* p)
 {
-	vehiclemanager_removevehicle(vm, p->vehicle);
+	// does nothing
+	(void)p;
 }
 
-void aiplayer_delete(struct aiplayer* p, struct vehiclemanager* vm)
+void aiplayer_delete(struct aiplayer* p)
 {
-	vehiclemanager_removevehicle(vm, p->vehicle);
-
 	mem_free(p->controller.buttons);
 	mem_free(p->controller.axes);
 }
 
 
-void aiplayer_updateinput(struct aiplayer* p)
+bool missiledetection(struct aiplayer* p, struct vehiclemanager* vm)
+{
+	vec3f dir, diff;
+	physx::PxMat44 mat_pose;
+	struct vehicle* v;
+	unsigned i;
+	float dist;
+
+	mat_pose = physx::PxMat44(p->vehicle->body->getGlobalPose());
+	vec3f_set(dir, VEHICLE_FORWARD);
+	mat4f_transformvec3f(dir, (float*)&mat_pose);
+
+	for (i = 0; i < VEHICLE_COUNT; i++)
+	{
+		v = vm->vehicles + i;
+
+		// skip self
+		if (v == p->vehicle)
+			continue;
+
+		// find normalized direction vector to each vehicle
+		vec3f_subtractn(diff, v->pos, p->vehicle->pos);
+		dist = vec3f_length(diff);
+		vec3f_scale(diff, 1.f/dist);
+
+		// if pointing sort of close to an opponent, and they are within range, shoot
+		if (vec3f_dot(diff, dir) > 0.995f && dist < 100.f)
+			return true;
+	}
+
+	return false;
+}
+
+void aiplayer_updateinput(struct aiplayer* p, struct vehiclemanager* vm)
 {
 	vec3f next_point, right, diff;
 	int next_index;
@@ -92,7 +114,7 @@ void aiplayer_updateinput(struct aiplayer* p)
 
 	resetcontroller(p);
 
-	next_index = (p->vehicle->index_track + p->next) % (int)p->track->num_pathpoints;
+	next_index = (p->vehicle->index_track + 5) % (int)p->track->num_pathpoints;
 	vec3f_copy(next_point, p->track->pathpoints[next_index].pos);
 
 	// IDEA: future point based on current speed
@@ -106,14 +128,31 @@ void aiplayer_updateinput(struct aiplayer* p)
 
 	p->controller.axes[INPUT_AXIS_TRIGGERS] = p->speed;
 
-	if(p->vehicle->powerup==VEHICLE_POWERUP_BOOST||p->vehicle->powerup==VEHICLE_POWERUP_LONGBOOST){
-		if(p->vehicle->index_track==140||p->vehicle->index_track==160||p->vehicle->index_track==729){
-			p->controller.buttons[INPUT_BUTTON_A] = (INPUT_STATE_CHANGED | INPUT_STATE_DOWN);
-			//printf("he used it\n");
+	if (p->timer_missile > 0)
+		p->timer_missile--;
+
+	if (p->vehicle->flags & VEHICLE_FLAG_HASPOWERUP)
+	{
+		if(p->vehicle->powerup == VEHICLE_POWERUP_BOOST || p->vehicle->powerup == VEHICLE_POWERUP_LONGBOOST)
+		{
+			if(p->vehicle->index_track==140||p->vehicle->index_track==160||p->vehicle->index_track==729){
+				p->controller.buttons[INPUT_BUTTON_A] = (INPUT_STATE_CHANGED | INPUT_STATE_DOWN);
+				//printf("he used it\n");
+			}
+		} else if (p->vehicle->powerup == VEHICLE_POWERUP_MINE || p->vehicle->powerup == VEHICLE_POWERUP_MINEX2 || p->vehicle->powerup == VEHICLE_POWERUP_MINEX3)
+		{
+			// use mine (this occurs roughly once per 25 seconds)
+			if (random_int(1500) == 0)
+				p->controller.buttons[INPUT_BUTTON_A] = (INPUT_STATE_CHANGED | INPUT_STATE_DOWN);
+		} else if (p->vehicle->powerup == VEHICLE_POWERUP_MISSILE || p->vehicle->powerup == VEHICLE_POWERUP_MISSILEX2 || p->vehicle->powerup == VEHICLE_POWERUP_MISSILEX3)
+		{
+			if (missiledetection(p, vm) && p->timer_missile == 0)
+			{
+				p->controller.buttons[INPUT_BUTTON_A] = (INPUT_STATE_CHANGED | INPUT_STATE_DOWN);
+				p->timer_missile = AIPLAYER_MISSILE_COOLDOWN;
+			}
 		}
 	}
-	
-
 }
 
 
@@ -132,17 +171,21 @@ void player_updatecamera(struct player* p)
 	camera_lookat(&p->camera, (float*)&t_player.getPosition(), up);
 }
 
-void aiwin_camera(struct aiplayer* aip)
+void player_updatewincamera(struct player* p, struct vehicle* v)
 {
-	vec3f diff, up;
+	vec3f offs, up;
+	mat4f rotate;
 
-	physx::PxMat44 t_player(aip->vehicle->body->getGlobalPose());
-	physx::PxVec3 targetpos = t_player.transform(physx::PxVec3(PLAYER_CAMERA_TARGETPOS));
+	vec3f_set(p->camera.pos, PLAYER_WINCAMERA_POS);
+	mat4f_rotatey(rotate, p->anglecamera);
+	mat4f_transformvec3f(p->camera.pos, rotate);
 
-	vec3f_subtractn(diff, (float*)&targetpos, aip->camera.pos);
-	vec3f_scale(diff, AI_CAMERA_EASING);
-	vec3f_add(aip->camera.pos, diff);
+	physx::PxVec3 pos = v->body->getGlobalPose().p;
+	vec3f_set(offs, pos.x, pos.y, pos.z);
+	vec3f_add(p->camera.pos, offs);
 
 	vec3f_set(up, 0.f, 1.f, 0.f);
-	camera_lookat(&aip->camera, (float*)&t_player.getPosition(), up);
+	camera_lookat(&p->camera, offs, up);
+
+	p->anglecamera += PLAYER_WINCAMERA_ROTATE;
 }
