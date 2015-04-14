@@ -177,6 +177,16 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 	mat4f_rotateymul(vm->r_powerup.matrix_model, VEHICLE_POWERUP_MESH_YROTATE);
 	mat4f_translatemul(vm->r_powerup.matrix_model, -center[VX], -center[VY], -center[VZ]);
 
+	//initialize uber ring mesh
+	renderable_init(&vm->r_uberring, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
+	objloader_load(VEHICLE_UBERRING_MESH_FILENAME, r, &vm->r_uberring, dim, center);
+	renderable_sendbuffer(r, &vm->r_uberring);
+	// matrix model transformation
+	mat4f_scalemul(vm->r_uberring.matrix_model, VEHICLE_UBERRING_MESH_SCALE, VEHICLE_UBERRING_MESH_SCALE, VEHICLE_UBERRING_MESH_SCALE);
+	mat4f_rotateymul(vm->r_uberring.matrix_model, VEHICLE_UBERRING_MESH_YROTATE);
+	mat4f_translatemul(vm->r_uberring.matrix_model, -center[VX], -center[VY], -center[VZ]);
+
+
 	// initialize vehicle diffuse textures
 	for (i = 0; i < VEHICLE_TEXTURE_DIFFUSE_COUNT; i++)
 	{
@@ -192,6 +202,11 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 		texture_loadfile(vm->diffuse_powerup + i, powerup_texture_filename[i]);
 		texture_upload(vm->diffuse_powerup + i, RENDER_TEXTURE_DIFFUSE);
 	}
+
+	//initialze uberring diffuse textures
+		texture_init(&vm->diffuse_uberring);
+		texture_loadfile(&vm->diffuse_uberring, VEHICLE_UBERRING_TEXTURE);
+		texture_upload(&vm->diffuse_uberring, RENDER_TEXTURE_DIFFUSE);
 
 	// initialize sound effects
 	vm->sfx_engine_start = audiomanager_newsfx(am, VEHICLE_SFX_FILENAME_ENGINESTART);
@@ -605,6 +620,15 @@ void vehiclemanager_render(struct vehiclemanager* vm, struct renderer* r, mat4f 
 				mat_pose = physx::PxMat44(pose.transform(physx::PxTransform(VEHICLE_POWERUP_ATTACHLOCATION)));
 				vm->r_powerup.textures[RENDER_TEXTURE_DIFFUSE] = vm->diffuse_powerup + v->powerup;
 				renderable_render(r, &vm->r_powerup, (float*)&mat_pose, worldview, 0);
+			}
+			if( v->flags & VEHICLE_FLAG_UBER){
+				mat_pose = physx::PxMat44(pose.transform(physx::PxTransform(VEHICLE_UBERRING_LOCATION)));
+				mat4f_rotateymul(vm->r_uberring.matrix_model, (v->timer_uber)/ 64);
+				vm->r_uberring.textures[RENDER_TEXTURE_DIFFUSE] = &vm->diffuse_uberring;
+				
+				renderable_render(r, &vm->r_uberring, (float*)&mat_pose, worldview, 0);
+
+
 			}
 		}
 	}

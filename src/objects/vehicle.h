@@ -68,11 +68,19 @@
 #define	VEHICLE_POWERUP_TEXTURE_FILENAME_UBER		"res/models/powerup/attached/rocket_boost.png"
 #define	VEHICLE_POWERUP_TEXTURE_FILENAME_SLOWMINE	"res/models/powerup/attached/mine_speed.png"
 
+
 #define	VEHICLE_POWERUP_MESH_FILENAME				"res/models/powerup/attached/attached.obj"
 #define	VEHICLE_POWERUP_MESH_SCALE					0.4f
 #define	VEHICLE_POWERUP_MESH_YROTATE				-1.57080f
 
+#define	VEHICLE_UBERRING_MESH_FILENAME				"res/models/Slowzone/stormring.obj"
+#define VEHICLE_UBERRING_MESH_SCALE					1.5f
+#define VEHICLE_UBERRING_MESH_YROTATE				-1.f
+
+#define VEHICLE_UBERRING_TEXTURE					"res/models/Slowzone/red70%.png"
+
 #define	VEHICLE_POWERUP_ATTACHLOCATION				-0.5f, 0.f, 1.5f
+#define VEHICLE_UBERRING_LOCATION					0.f, -0.5f, 0.f
 
 #define	VEHICLE_POWERUP_MISSILE_SPAWNDIST			1.f
 
@@ -82,9 +90,9 @@
 #define	VEHICLE_POWERUP_BOOST_STRENGTH				20.f
 #define	VEHICLE_POWERUP_SLOW_STRENGTH				-20.0f
 
-#define	VEHICLE_POWERUP_LONGBOOST_DURATION			360
+#define	VEHICLE_POWERUP_LONGBOOST_DURATION			540
 
-#define VEHICLE_POWERUP_UBER_DURATION				180
+#define VEHICLE_POWERUP_UBER_DURATION				360
 
 #define	VEHICLE_DIMENSIONS							0.7254f, 0.3056f, 1.3884f
 #define	VEHICLE_DENSITY								0.8f
@@ -160,9 +168,11 @@ struct vehiclemanager
 
 	struct renderable r_vehicle;
 	struct renderable r_powerup;
+	struct renderable r_uberring;
 
 	struct texture diffuse_vehicle[VEHICLE_TEXTURE_DIFFUSE_COUNT];
 	struct texture diffuse_powerup[VEHICLE_POWERUP_COUNT];
+	struct texture diffuse_uberring;
 
 	int sfx_engine_start;
 	int sfx_engine_idle;

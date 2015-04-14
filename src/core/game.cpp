@@ -632,7 +632,7 @@ int game_startup(struct game* game)
 
 	// initialize track object
 	track_init(&game->track, &game->physicsmanager, up);
-	track_loadpointsfile(&game->track, "res/tracks/BAMF.track", &game->renderer);
+	track_loadpointsfile(&game->track, "res/tracks/bigturn.track", &game->renderer);
 	
 	// start up the entity manager for the track
 	entitymanager_startup(&game->entitymanager, &game->physicsmanager, &game->audiomanager, &game->renderer);

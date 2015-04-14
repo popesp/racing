@@ -15,7 +15,7 @@
 #define	TURRET_RADIUS						1.f
 #define	TURRET_DENSITY						1.f
 #define	TURRET_DESPAWNTIME					600
-#define	TURRET_COOLDOWN						60
+#define	TURRET_COOLDOWN						10
 #define	TURRET_MISSILE_SPAWNDIST			-2.f
 
 

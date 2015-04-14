@@ -4,7 +4,7 @@
 #include	"../objects/entities/entity.h"
 #include	"../objects/pickup.h"
 #include	"../objects/vehicle.h"
-
+#include	"../objects/entities/slowmine.h"
 
 void collision_setupactor(physx::PxRigidActor* actor, unsigned filter_group, unsigned filter_mask)
 {
@@ -98,7 +98,7 @@ void CustomCollisions::onContact(const physx::PxContactPairHeader& pairHeader, c
 				{
 					((struct vehicle*)pairHeader.actors[1]->userData)->flags |= VEHICLE_FLAG_SLOWED;
 					((struct vehicle*)pairHeader.actors[1]->userData)->flags |= VEHICLE_FLAG_SLOWEDHIT;
-					((struct vehicle*)pairHeader.actors[1]->userData)->timer_slow = 180;
+					((struct vehicle*)pairHeader.actors[1]->userData)->timer_slow = SLOWMINE_TIME;
 					((struct entity*)pairHeader.actors[0]->userData)->flags |= ENTITY_FLAG_HIT;
 				}
 			} else if (fd0.word0 == COLLISION_FILTER_VEHICLE)
@@ -115,7 +115,7 @@ void CustomCollisions::onContact(const physx::PxContactPairHeader& pairHeader, c
 				{
 					((struct vehicle*)pairHeader.actors[0]->userData)->flags |= VEHICLE_FLAG_SLOWED;
 					((struct vehicle*)pairHeader.actors[0]->userData)->flags |= VEHICLE_FLAG_SLOWEDHIT;
-					((struct vehicle*)pairHeader.actors[0]->userData)->timer_slow = 360;
+					((struct vehicle*)pairHeader.actors[0]->userData)->timer_slow = SLOWMINE_TIME;
 					((struct entity*)pairHeader.actors[1]->userData)->flags |= ENTITY_FLAG_HIT;
 				}else if (fd1.word0 == COLLISION_FILTER_PICKUP)
 				{

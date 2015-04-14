@@ -19,7 +19,7 @@
 #define	SLOWMINE_RADIUS						0.5f
 #define	SLOWMINE_DENSITY					1.f
 #define	SLOWMINE_DESPAWNTIME				3600
-
+#define	SLOWMINE_TIME						640
 
 /*	initialize a mine entity
 	param:	e			mine entity to initialize
