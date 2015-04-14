@@ -1,9 +1,10 @@
-newmtl initialShadingGroup
+newmtl eball_initialShadingGroup
 illum 4
 Kd 0.00 0.00 0.00
 Ka 0.00 0.00 0.00
 Tf 1.00 1.00 1.00
 map_Kd eball.png
+map_Ka eball.png
 Ni 1.00
 newmtl lightningWhite1ShaderSG
 illum 4

@@ -5,13 +5,13 @@
 #include	"entity.h"
 
 
-#define	MISSILE_MESH_FILENAME				"res/models/missile/missile.obj"
+#define	MISSILE_MESH_FILENAME				"res/models/missile/eball.obj"
 #define	MISSILE_MESH_SCALE					0.35f
 #define	MISSILE_MESH_YROTATE				3.14159f
 #define	TURRETMISSILE_MESH_YROTATE			0.0f
 #define	MISSILE_MESH_OFFSET					0.f, 0.f, 0.f
 
-#define	MISSILE_TEXTURE_FILENAME_DIFFUSE	"res/models/missile/missile.png"
+#define	MISSILE_TEXTURE_FILENAME_DIFFUSE	"res/models/missile/eball.png"
 
 #define	MISSILE_SFX_FILENAME_LAUNCH			"res/soundfx/missile_launch.wav"
 #define	MISSILE_SFX_FILENAME_IDLE			"res/soundfx/missile_idle.wav"

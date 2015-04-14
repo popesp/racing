@@ -54,9 +54,9 @@ void aiplayer_init(struct aiplayer* p, struct vehiclemanager* vm, int index_trac
 	resetcontroller(p);
 
 	p->turn = 50/(random_int(15)+7.5);
-	p->speed = -(1-(1/(random_int(15)+2.5)));
+	p->speed = -(1-(1/(random_int(15)+5.0)));
 	p->next = (random_int(4)+3);
-	//printf("turn=%f speed=%f next=%d\n",p->turn,p->speed,p->next);
+	printf("turn=%f speed=%f next=%d\n",p->turn,p->speed,p->next);
 
 	vec3f zero, up;
 	vec3f_set(zero, 0.f, 0.f, 0.f);

@@ -58,5 +58,5 @@ void main()
 	dif *= material.dif;
 	spc *= material.spc;
 	
-	fragcol = vec4(amb + dif + spc, 1.f);
+	fragcol = vec4(amb + dif + spc, texture2D(tex_diffuse, pass_uv).a);
 }
