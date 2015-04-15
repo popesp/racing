@@ -4,7 +4,6 @@
 #include	"../mem.h"
 
 
-
 void uimanager_startup(struct uimanager* um, struct window* window)
 {
 	FT_Error error;
@@ -222,7 +221,16 @@ void uimanager_render(struct uimanager* um, struct game* game)
 			else if(um->texts[j].numberadder==666){
 				for(int i=0;i<=game->num_aiplayers-1;i++){
 					if(game->aiplayers[i].vehicle->lap==game->num_laps){
-						sprintf(rendertext, "Computer   %d   won   the   race", i);
+						char** scifinames;
+						{
+						char * temp []= {"Darth Vader", "Boba Fett", "Han Solo", "The Doctor",
+										"Luke Skywalker", "Cthulu", "Agent Smith", "Bender",
+										"Optimus Prime", "Commander Sheperd", "Mulder","Spock",
+										"Buck Rojers", "HAL-9000", "James T. Kirk","Marvin the Martian" };
+										scifinames = temp;
+						}
+
+						sprintf(rendertext, "%s   won   the   race", scifinames[i%num_names]);
 					}
 				}
 			}else{

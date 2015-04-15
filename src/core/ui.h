@@ -41,6 +41,10 @@
 #define	UI_TEXT_FLAG_INIT			0x00
 #define	UI_TEXT_FLAG_ENABLED		0x01
 
+#define num_names					16
+
+
+
 struct text
 {
 	int x, y;
