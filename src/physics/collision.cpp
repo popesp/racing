@@ -41,9 +41,13 @@ physx::PxFilterFlags collision_filter(physx::PxFilterObjectAttributes attributes
 
 	pairFlags = physx::PxPairFlag::eCONTACT_DEFAULT;
 
-	if ((filterData0.word0 & filterData1.word1) && (filterData1.word0 & filterData0.word1))
+	if ((filterData0.word0 == COLLISION_FILTER_VEHICLE) && (filterData1.word0 == COLLISION_FILTER_VEHICLE))
+		pairFlags = physx::PxPairFlag::eCONTACT_DEFAULT | physx::PxPairFlag::eNOTIFY_TOUCH_FOUND;
+	else if ((filterData0.word0 & filterData1.word1) && (filterData1.word0 & filterData0.word1))
 		pairFlags = physx::PxPairFlag::eTRIGGER_DEFAULT | physx::PxPairFlag::eNOTIFY_TOUCH_FOUND;
 	else if (filterData0.word0 == COLLISION_FILTER_PICKUP || filterData1.word0 == COLLISION_FILTER_PICKUP)
+		return physx::PxFilterFlag::eKILL;
+	else if (filterData0.word0 == COLLISION_FILTER_TURRET || filterData1.word0 == COLLISION_FILTER_TURRET)
 		return physx::PxFilterFlag::eKILL;
 
 	return physx::PxFilterFlag::eDEFAULT;
@@ -109,6 +113,8 @@ void CustomCollisions::onContact(const physx::PxContactPairHeader& pairHeader, c
 					((struct pickup*)pairHeader.actors[1]->userData)->collector = ((struct vehicle*)pairHeader.actors[0]->userData);
 				} else if (fd1.word0 == COLLISION_FILTER_INVINCIBLE)
 					((struct vehicle*)pairHeader.actors[0]->userData)->flags |= VEHICLE_FLAG_MISSILEHIT;
+				else if (fd1.word0 == COLLISION_FILTER_VEHICLE)
+					((struct vehicle*)pairHeader.actors[0]->userData)->flags |= VEHICLE_FLAG_VEHICLEHIT;
 			} else if (fd0.word0 == COLLISION_FILTER_PICKUP)
 			{
 				if (fd1.word0 == COLLISION_FILTER_VEHICLE || fd1.word0 == COLLISION_FILTER_INVINCIBLE)

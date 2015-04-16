@@ -9,6 +9,7 @@ void turret_init(struct entity* e, struct entitymanager* em, struct vehicle* v, 
 
 	// initialize the physx actor
 	e->body = physx::PxCreateDynamic(*em->pm->sdk, pose, physx::PxSphereGeometry(TURRET_RADIUS), *em->pm->default_material, TURRET_DENSITY);
+	collision_setupactor(e->body, COLLISION_FILTER_TURRET, 0);
 	e->body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, true);
 	e->body->userData = e;
 

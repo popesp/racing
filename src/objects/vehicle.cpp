@@ -108,15 +108,19 @@ static void longboostfunction(struct vehicle* v)
 
 static void turretfunction(struct vehicle* v)
 {
-	physx::PxTransform pose_vehicle, pose_spawn;
+	physx::PxMat44 pose_spawn;
+	mat4f spawn;
 	vec3f dim;
 
-	pose_vehicle = v->body->getGlobalPose();
+	pose_spawn = physx::PxMat44(v->body->getGlobalPose());
+	mat4f_copy(spawn, (float*)&pose_spawn);
 
+	// orient the turret correctly
 	vec3f_set(dim, VEHICLE_DIMENSIONS);
-	pose_spawn = pose_vehicle.transform(physx::PxTransform(0.f, 0.f, dim[VZ] + VEHICLE_POWERUP_MINE_SPAWNDIST));
+	mat4f_translatemul(spawn, 0.f, 0.f, dim[VZ] + VEHICLE_POWERUP_MINE_SPAWNDIST);
+	mat4f_rotateymul(spawn, (float)M_PI);
 
-	entitymanager_newentity(v->vm->em, ENTITY_TYPE_TURRET, v, pose_spawn);
+	entitymanager_newentity(v->vm->em, ENTITY_TYPE_TURRET, v, physx::PxTransform((physx::PxMat44)spawn));
 
 	v->flags &= ~VEHICLE_FLAG_HASPOWERUP;
 }
@@ -273,6 +277,7 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 	vm->sfx_engine_start = audiomanager_newsfx(am, VEHICLE_SFX_FILENAME_ENGINESTART, true);
 	vm->sfx_engine_idle = audiomanager_newsfx(am, VEHICLE_SFX_FILENAME_ENGINEIDLE, true);
 	vm->sfx_missile_launch = audiomanager_newsfx(am, VEHICLE_SFX_FILENAME_MISSILELAUNCH, true);
+	vm->sfx_collision = audiomanager_newsfx(am, VEHICLE_SFX_FILENAME_COLLISION, true);
 
 	// initialize vehicles
 	for (i = 0; i < VEHICLE_COUNT; i++)
@@ -294,7 +299,7 @@ void vehiclemanager_reset(struct vehiclemanager* vm)
 		v->lap = 0;
 		v->index_tracklast = 0;
 		v->controller = NULL;
-		v->place = i+1;
+		v->place = (unsigned)i + 1;
 
 		index = (int)vm->track->num_pathpoints - (i/2 + 1);
 
@@ -319,6 +324,7 @@ void vehiclemanager_shutdown(struct vehiclemanager* vm)
 	sound_delete(vm->sfx_engine_start);
 	sound_delete(vm->sfx_engine_idle);
 	sound_delete(vm->sfx_missile_launch);
+	sound_delete(vm->sfx_collision);
 
 	// delete vehicles
 	for (i = 0; i < VEHICLE_COUNT; i++)
@@ -591,8 +597,6 @@ void vehiclemanager_update(struct vehiclemanager* vm)
 		{
 			collision_setupactor(v->body, COLLISION_FILTER_INVINCIBLE, COLLISION_FILTER_MISSILE | COLLISION_FILTER_MINE | COLLISION_FILTER_SLOWMINE | COLLISION_FILTER_PICKUP | COLLISION_FILTER_VEHICLE);
 
-			printf("test\n");
-
 			v->timer_invincible--;
 
 			if (v->timer_invincible == 0)
@@ -624,6 +628,14 @@ void vehiclemanager_update(struct vehiclemanager* vm)
 			v->body->setLinearVelocity(physx::PxVec3(0.f));
 			physx::PxRigidBodyExt::addForceAtLocalPos(*v->body, physx::PxVec3(MINE_LOCALFORCE), physx::PxVec3(0.f, 0.f, 0.f));
 			v->flags &= ~VEHICLE_FLAG_MINEHIT;
+		}
+
+		// check if a vehicle collision occurred
+		if (v->flags & VEHICLE_FLAG_VEHICLEHIT)
+		{
+			printf("test\n");
+			audiomanager_playsfx(vm->am, vm->sfx_collision, v->pos, 0, true);
+			v->flags &= ~VEHICLE_FLAG_VEHICLEHIT;
 		}
 
 		// check if a slow mine hit the vehicle

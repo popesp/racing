@@ -33,6 +33,7 @@
 #define	VEHICLE_SFX_FILENAME_ENGINESTART				"res/soundfx/engine_start.wav"
 #define	VEHICLE_SFX_FILENAME_ENGINEIDLE					"res/soundfx/engine_idle.wav"
 #define	VEHICLE_SFX_FILENAME_MISSILELAUNCH				"res/soundfx/missile_launch.wav"
+#define	VEHICLE_SFX_FILENAME_COLLISION					"res/soundfx/collision.wav"
 
 #define	VEHICLE_TEXTURE_DIFFUSE_COUNT					8
 #define	VEHICLE_TEXTURE_DIFFUSE_FILENAME0				"res/models/car/uv_black.png"
@@ -113,11 +114,12 @@
 #define	VEHICLE_FLAG_HASPOWERUP							0x0002
 #define	VEHICLE_FLAG_MISSILEHIT							0x0004
 #define	VEHICLE_FLAG_MINEHIT							0x0008
-#define	VEHICLE_FLAG_SLOWMINEHIT						0x0010
-#define	VEHICLE_FLAG_INVINCIBLE							0x0020
-#define	VEHICLE_FLAG_SLOWED								0x0040
-#define	VEHICLE_FLAG_CHECKPOINT1						0x0080
-#define	VEHICLE_FLAG_CHECKPOINT2						0x0100
+#define	VEHICLE_FLAG_VEHICLEHIT							0x0010
+#define	VEHICLE_FLAG_SLOWMINEHIT						0x0020
+#define	VEHICLE_FLAG_INVINCIBLE							0x0040
+#define	VEHICLE_FLAG_SLOWED								0x0080
+#define	VEHICLE_FLAG_CHECKPOINT1						0x0100
+#define	VEHICLE_FLAG_CHECKPOINT2						0x0200
 #define	VEHICLE_FLAG_INIT								(VEHICLE_FLAG_CHECKPOINT1 | VEHICLE_FLAG_CHECKPOINT2)
 
 
@@ -172,6 +174,7 @@ struct vehiclemanager
 	FMOD_SOUND* sfx_engine_start;
 	FMOD_SOUND* sfx_engine_idle;
 	FMOD_SOUND* sfx_missile_launch;
+	FMOD_SOUND* sfx_collision;
 	
 	struct vehicle vehicles[VEHICLE_COUNT];
 };
