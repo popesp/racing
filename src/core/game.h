@@ -35,6 +35,7 @@
 #define	GAME_AIPLAYER_COUNT			7
 
 #define	GAME_DEFAULT_LAPS			2
+#define GAME_DEFAULT_DIFF			.5f
 
 #define	GAME_TIMER_RACESTART		300
 
@@ -98,9 +99,12 @@ struct game
 	unsigned timer_racestart;
 
 	unsigned laps;
+	float difficulty;
 
 	unsigned char flags;
 	unsigned char state;
+
+	bool menupauseswitch;
 };
 
 

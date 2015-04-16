@@ -134,8 +134,6 @@ static void loadrace(struct game* game)
 	game->index_currentsong = 0;
 	game->currentchannel = audiomanager_playmusic(&game->audiomanager, game->songs[game->index_currentsong], -1, true);
 
-	game->laps = GAME_DEFAULT_LAPS;
-
 	game->state = GAME_STATE_RACE;
 	game->timer_racestart = GAME_TIMER_RACESTART;
 
@@ -183,13 +181,18 @@ static void update(struct game* game)
 		break;
 
 	case GAME_STATE_RACE:
-		if (game->timer_racestart == 0)
+		game->menupauseswitch = false;
+
+		if (game->timer_racestart <= 59)
 		{
+			if(game->timer_racestart>0)
+				game->timer_racestart--;
+
 			// set vehicle controllers
 			game->player.vehicle->controller = game->controller_main;
 			for (i = 0; i < GAME_AIPLAYER_COUNT; i++)
 				game->aiplayers[i].vehicle->controller = &game->aiplayers[i].controller;
-		} else
+		}  else
 			game->timer_racestart--;
 
 		// update the debug camera TEMP
@@ -466,6 +469,9 @@ int game_startup(struct game* game)
 
 	game->flags = GAME_FLAG_INIT;
 	game->state = GAME_STATE_MAINMENU;
+	game->laps = GAME_DEFAULT_LAPS;
+	game->difficulty = GAME_DEFAULT_DIFF;
+	game->menupauseswitch = true;
 
 	return 1;
 }
