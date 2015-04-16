@@ -227,7 +227,7 @@ static void update(struct game* game)
 
 		// update computer input processing
 		for(i = 0; i < GAME_AIPLAYER_COUNT; i++)
-			aiplayer_updateinput(&game->aiplayers[i], &game->vehiclemanager);
+			aiplayer_updateinput(&game->aiplayers[i], &game->vehiclemanager, game->difficulty);
 
 		// update the vehicles
 		vehiclemanager_update(&game->vehiclemanager);
@@ -263,7 +263,7 @@ static void update(struct game* game)
 	case GAME_STATE_RACEDONE:
 		// update computer input processing
 		for(i = 0; i < GAME_AIPLAYER_COUNT; i++)
-			aiplayer_updateinput(&game->aiplayers[i], &game->vehiclemanager);
+			aiplayer_updateinput(&game->aiplayers[i], &game->vehiclemanager, game->difficulty);
 
 		// update the vehicles
 		vehiclemanager_update(&game->vehiclemanager);

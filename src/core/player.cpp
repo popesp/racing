@@ -105,7 +105,7 @@ bool missiledetection(struct aiplayer* p, struct vehiclemanager* vm)
 	return false;
 }
 
-void aiplayer_updateinput(struct aiplayer* p, struct vehiclemanager* vm)
+void aiplayer_updateinput(struct aiplayer* p, struct vehiclemanager* vm, float difficulty)
 {
 	vec3f next_point, right, diff;
 	int next_index;
@@ -126,7 +126,9 @@ void aiplayer_updateinput(struct aiplayer* p, struct vehiclemanager* vm)
 
 	p->controller.axes[INPUT_AXIS_LEFT_LR] = vec3f_dot(right, diff) * p->turn / vec3f_length(diff);
 
-	p->controller.axes[INPUT_AXIS_TRIGGERS] = p->speed;
+	float aidiff = difficulty+0.5f;
+
+	p->controller.axes[INPUT_AXIS_TRIGGERS] = p->speed*aidiff;
 
 	if (p->timer_missile > 0)
 		p->timer_missile--;
