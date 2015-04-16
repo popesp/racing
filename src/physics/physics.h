@@ -42,7 +42,7 @@ void physicsmanager_shutdown(struct physicsmanager* pm);
 	param:	pm				physics manager
 	param:	dt				delta time
 */
-void physicsmanager_update(struct physicsmanager* pm, float dt);
+void physicsmanager_update(struct physicsmanager* pm, float dt, struct game* g);
 
 
 /*	probably temporary	*/
