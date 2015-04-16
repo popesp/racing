@@ -367,6 +367,7 @@ static void vehicleinput(struct vehicle* v)
 
 				vec3f_set(force, VEHICLE_FORWARD);
 				vec3f_scale(force, forcemod);
+			
 
 				// change engine sound frequency
 				freq = vec3f_length2(force) * VEHICLE_FREQSCALE;

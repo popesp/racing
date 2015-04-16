@@ -721,7 +721,7 @@ void uimanager_update(struct uimanager* um, struct game* game)
 				setting = 0.f;
 
 			game->difficulty = setting;
-			printf("%f\r",game->difficulty);
+			//printf("%f\r",game->difficulty);
 			//audiomanager_setsfxvolume(um->am, setting);
 			break;
 	
