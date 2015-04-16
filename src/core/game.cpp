@@ -216,6 +216,7 @@ static void update(struct game* game)
 		} else if (game->timer_racestart == 0)
 			game->player.vehicle->controller = game->controller_main;
 
+
 		// pause button
 		if (game->controller_main->buttons[INPUT_BUTTON_START] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
 		{
@@ -228,7 +229,7 @@ static void update(struct game* game)
 
 		// update computer input processing
 		for(i = 0; i < GAME_AIPLAYER_COUNT; i++)
-			aiplayer_updateinput(&game->aiplayers[i], &game->vehiclemanager);
+			aiplayer_updateinput(&game->aiplayers[i], &game->vehiclemanager, game->difficulty);
 
 		// update the vehicles
 		vehiclemanager_update(&game->vehiclemanager);
@@ -264,7 +265,7 @@ static void update(struct game* game)
 	case GAME_STATE_RACEDONE:
 		// update computer input processing
 		for(i = 0; i < GAME_AIPLAYER_COUNT; i++)
-			aiplayer_updateinput(&game->aiplayers[i], &game->vehiclemanager);
+			aiplayer_updateinput(&game->aiplayers[i], &game->vehiclemanager, game->difficulty);
 
 		// update the vehicles
 		vehiclemanager_update(&game->vehiclemanager);
