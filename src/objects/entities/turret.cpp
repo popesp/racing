@@ -1,7 +1,7 @@
 #include	"turret.h"
 
 
-void turret_init(struct entity* e, struct entitymanager* em, struct vehicle* v, physx::PxTransform pose, int dummy)
+void turret_init(struct entity* e, struct entitymanager* em, struct vehicle* v, physx::PxTransform pose)
 {
 	physx::PxMat44 mat_pose;
 
@@ -9,8 +9,7 @@ void turret_init(struct entity* e, struct entitymanager* em, struct vehicle* v, 
 
 	// initialize the physx actor
 	e->body = physx::PxCreateDynamic(*em->pm->sdk, pose, physx::PxSphereGeometry(TURRET_RADIUS), *em->pm->default_material, TURRET_DENSITY);
-	//e->body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, true);
-	e->body->setActorFlag(physx::PxActorFlag::eDISABLE_SIMULATION, true);
+	e->body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, true);
 	e->body->userData = e;
 
 	// store position
@@ -53,6 +52,6 @@ void turret_update(struct entity* e, struct entitymanager* em)
 		pose_turret = e->body->getGlobalPose();
 		pose_spawn = pose_turret.transform(physx::PxTransform(0.f, 0.f, -(TURRET_RADIUS + TURRET_MISSILE_SPAWNDIST)));
 
-		entitymanager_newentity(em, ENTITY_TYPE_MISSILE, e->owner, pose_spawn, 1);
+		entitymanager_newentity(em, ENTITY_TYPE_MISSILE, e->owner, pose_spawn);
 	}
 }

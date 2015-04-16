@@ -3,7 +3,7 @@
 #include	"../../physics/collision.h"
 
 
-void mine_init(struct entity* e, struct entitymanager* em, struct vehicle* v, physx::PxTransform pose, int dummy)
+void mine_init(struct entity* e, struct entitymanager* em, struct vehicle* v, physx::PxTransform pose)
 {
 	physx::PxMat44 mat_pose;
 
@@ -11,7 +11,7 @@ void mine_init(struct entity* e, struct entitymanager* em, struct vehicle* v, ph
 
 	// initialize the physx actor
 	e->body = physx::PxCreateDynamic(*em->pm->sdk, pose, physx::PxSphereGeometry(MINE_RADIUS), *em->pm->default_material, MINE_DENSITY);
-	collision_setupactor(e->body, COLLISION_FILTER_MINE, COLLISION_FILTER_MISSILE | COLLISION_FILTER_MINE | COLLISION_FILTER_VEHICLE | COLLISION_FILTER_SLOWMINE);
+	collision_setupactor(e->body, COLLISION_FILTER_MINE, COLLISION_FILTER_MISSILE | COLLISION_FILTER_MINE | COLLISION_FILTER_VEHICLE | COLLISION_FILTER_INVINCIBLE);
 	e->body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, true);
 	e->body->userData = e;
 
@@ -25,7 +25,7 @@ void mine_init(struct entity* e, struct entitymanager* em, struct vehicle* v, ph
 	e->owner = v;
 
 	// play sound effect and store the audio channel
-	e->idle_channel = audiomanager_playsfx(em->am, em->sfx_mine_idle, e->pos, -1);
+	e->channel = audiomanager_playsfx(em->am, em->sfx_mine_idle, e->pos, -1, true);
 
 	// set the despawn timer
 	e->timer = MINE_DESPAWNTIME;
@@ -38,7 +38,7 @@ void mine_init(struct entity* e, struct entitymanager* em, struct vehicle* v, ph
 void mine_delete(struct entity* e)
 {
 	e->body->release();
-	soundchannel_stop(e->idle_channel);
+	soundchannel_stop(e->channel);
 	e->flags = ENTITY_FLAG_INIT;
 }
 
@@ -49,7 +49,7 @@ void mine_update(struct entity* e, struct entitymanager* em)
 	// check if the mine has hit anything
 	if (e->flags & ENTITY_FLAG_HIT)
 	{
-		audiomanager_playsfx(em->am, em->sfx_mine_explode, e->pos, 0);
+		audiomanager_playsfx(em->am, em->sfx_mine_explode, e->pos, 0, true);
 		mine_delete(e);
 		return;
 	}
@@ -61,6 +61,4 @@ void mine_update(struct entity* e, struct entitymanager* em)
 		mine_delete(e);
 		return;
 	}
-	
-	soundchannel_setposition(e->idle_channel, e->pos);
 }

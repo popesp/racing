@@ -3,7 +3,7 @@
 #include	"../../physics/collision.h"
 
 
-void missile_init(struct entity* e, struct entitymanager* em, struct vehicle* v, physx::PxTransform pose, int turretmissile)
+void missile_init(struct entity* e, struct entitymanager* em, struct vehicle* v, physx::PxTransform pose)
 {
 	physx::PxMat44 mat_pose;
 	vec3f vel;
@@ -12,20 +12,15 @@ void missile_init(struct entity* e, struct entitymanager* em, struct vehicle* v,
 
 	// initialize the physx actor
 	e->body = physx::PxCreateDynamic(*em->pm->sdk, pose, physx::PxSphereGeometry(MISSILE_RADIUS), *em->pm->default_material, MISSILE_DENSITY);
-	collision_setupactor(e->body, COLLISION_FILTER_MISSILE, COLLISION_FILTER_MISSILE | COLLISION_FILTER_MINE | COLLISION_FILTER_VEHICLE | COLLISION_FILTER_SLOWMINE);
+	collision_setupactor(e->body, COLLISION_FILTER_MISSILE, COLLISION_FILTER_MISSILE | COLLISION_FILTER_MINE | COLLISION_FILTER_VEHICLE | COLLISION_FILTER_INVINCIBLE);
 	e->body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, true);
 	e->body->userData = e;
 
 	// store position
 	vec3f_set(e->pos, pose.p.x, pose.p.y, pose.p.z);
 
-	if(turretmissile == 1){
-		vec3f_set(vel, ENTITY_BACKWARD);
-	}else{
-		vec3f_set(vel, ENTITY_FORWARD);
-	}
-
 	// set the missile velocity
+	vec3f_set(vel, ENTITY_FORWARD);
 	mat4f_transformvec3f(vel, (float*)&mat_pose);
 	vec3f_scale(vel, MISSILE_SPEED);
 	e->body->setLinearVelocity(physx::PxVec3(vel[VX], vel[VY], vel[VZ]));
@@ -35,9 +30,9 @@ void missile_init(struct entity* e, struct entitymanager* em, struct vehicle* v,
 
 	// store pointer to owner
 	e->owner = v;
-	e->launch_channel = audiomanager_playsfx(em->am, em->sfx_missile_launch, e->pos, 1);
+
 	// play sound effect and store the audio channel
-	e->idle_channel = audiomanager_playsfx(em->am, em->sfx_missile_idle, e->pos, -1);
+	e->channel = audiomanager_playsfx(em->am, em->sfx_missile_idle, e->pos, -1, true);
 
 	// set the despawn timer
 	e->timer = MISSILE_DESPAWNTIME;
@@ -50,8 +45,7 @@ void missile_init(struct entity* e, struct entitymanager* em, struct vehicle* v,
 void missile_delete(struct entity* e)
 {
 	e->body->release();
-	soundchannel_stop(e->idle_channel);
-	soundchannel_stop(e->launch_channel);
+	soundchannel_stop(e->channel);
 	e->flags = ENTITY_FLAG_INIT;
 }
 
@@ -62,7 +56,7 @@ void missile_update(struct entity* e, struct entitymanager* em)
 	// check if the missile has hit anything
 	if (e->flags & ENTITY_FLAG_HIT)
 	{
-		audiomanager_playsfx(em->am, em->sfx_missile_explode, e->pos, 0);
+		audiomanager_playsfx(em->am, em->sfx_missile_explode, e->pos, 0, true);
 		missile_delete(e);
 		return;
 	}
@@ -79,6 +73,5 @@ void missile_update(struct entity* e, struct entitymanager* em)
 	pose = e->body->getGlobalPose();
 	vec3f_set(e->pos, pose.p.x, pose.p.y, pose.p.z);
 
-	soundchannel_setposition(e->idle_channel, e->pos);
-	soundchannel_setposition(e->launch_channel, e->pos);
+	soundchannel_setposition(e->channel, e->pos);
 }

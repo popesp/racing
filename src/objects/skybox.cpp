@@ -76,6 +76,14 @@ void skybox_init(struct skybox* sb, struct renderer* r)
 	sb->r_skybox.textures[RENDER_TEXTURE_DIFFUSE] = &sb->diffuse;
 }
 
+void skybox_reset(struct skybox* sb)
+{
+	// get a new random skybox texture
+	texture_loadfile(&sb->diffuse, skybox_texture_filename[random_int(SKYBOX_TEXTURE_COUNT)]);
+	texture_upload(&sb->diffuse, RENDER_TEXTURE_DIFFUSE);
+	sb->r_skybox.textures[RENDER_TEXTURE_DIFFUSE] = &sb->diffuse;
+}
+
 void skybox_delete(struct skybox* sb)
 {
 	renderable_deallocate(&sb->r_skybox);

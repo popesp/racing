@@ -9,16 +9,17 @@
 #include	"../render/texture.h"
 
 
-#define	PICKUP_MESH_FILENAME			"res/models/powerup/powerup.obj"
-#define	PICKUP_MESH_SCALE				0.2f
+#define	PICKUP_MESH_FILENAME_DEFAULT	"res/models/pickup/pickup.obj"
+#define	PICKUP_MESH_FILENAME_EMPTY		"res/models/pickup/pickup_empty.obj"
+#define	PICKUP_MESH_SCALE				1.f
 #define	PICKUP_MESH_YROTATE				-1.57080f
 
-#define	PICKUP_TEXTURE_FILENAME_MISSILE	"res/models/powerup/missile.png"
-#define	PICKUP_TEXTURE_FILENAME_MINE	"res/models/powerup/mine.png"
-#define	PICKUP_TEXTURE_FILENAME_BOOST	"res/models/powerup/boost.png"
+#define	PICKUP_TEXTURE_FILENAME_MISSILE	"res/models/pickup/uv_missile.png"
+#define	PICKUP_TEXTURE_FILENAME_MINE	"res/models/pickup/uv_mine.png"
+#define	PICKUP_TEXTURE_FILENAME_BOOST	"res/models/pickup/uv_boost.png"
 
-#define	PICKUP_SFX_FILENAME_TAKEN		"res/soundfx/power_up.wav"
-#define	PICKUP_SFX_FILENAME_UPGRADE		"res/soundfx/power_up2.wav"
+#define	PICKUP_SFX_FILENAME_COLLECT		"res/soundfx/pickup_collect.wav"
+#define	PICKUP_SFX_FILENAME_UPGRADE		"res/soundfx/pickup_upgrade.wav"
 
 #define	PICKUP_TYPE_COUNT				3
 #define	PICKUP_TYPE_MISSILE				0
@@ -39,38 +40,45 @@ struct pickup
 	physx::PxRigidDynamic* body;
 
 	struct vehicle* collector;
-	vec3f pos;
+
 	unsigned timer;
 
 	unsigned char type;
-	unsigned short flags;
+	unsigned char flags;
 };
 
 struct pickupmanager
 {
+	struct audiomanager* am;
+
 	unsigned num_pickups;
 	struct pickup* pickups;
 
-	struct audiomanager* am;
-	
-	int sfx_pickup_taken;
-	int sfx_pickup_upgrade;
-
-	struct renderable renderable;
+	struct renderable r_default;
+	struct renderable r_empty;
 
 	struct texture diffuse[PICKUP_TYPE_COUNT];
+
+	FMOD_SOUND* sfx_collect;
+	FMOD_SOUND* sfx_upgrade;
 };
 
 
 /*	start up the pickup manager
 	param:	pum				pickup manager
+	param:	am				audio manager
 	param:	pm				physics manager
 	param:	r				renderer
 	param:	t				track object
 	param:	num_pickups		number of pickup objects
 	param:	track_indices	array of track inddices for the powerups
 */
-void pickupmanager_startup(struct pickupmanager* pum,struct audiomanager* am, struct physicsmanager* pm, struct renderer* r, struct track* t, unsigned num_pickups, int* track_indices);
+void pickupmanager_startup(struct pickupmanager* pum, struct audiomanager* am, struct physicsmanager* pm, struct renderer* r, struct track* t, unsigned num_pickups, int* track_indices);
+
+/*	reset the pickup manager
+	param:	pum				pickup manager
+*/
+void pickupmanager_reset(struct pickupmanager* pum);
 
 /*	shut down the pickup manager
 	param:	pum				pickup manager

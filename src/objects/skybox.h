@@ -22,6 +22,7 @@ struct skybox
 
 
 void skybox_init(struct skybox* sb, struct renderer* r);
+void skybox_reset(struct skybox* sb);
 void skybox_delete(struct skybox* sb);
 
 

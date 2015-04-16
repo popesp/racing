@@ -83,7 +83,7 @@ void texture_loadfile(struct texture* t, const char* filename)
 
 	// allocate and fill texture buffer
 	t->data = (pixel*)mem_realloc(t->data, sizeof(pixel) * t->width * t->height);
-	FreeImage_ConvertToRawBits((unsigned char*)t->data, bmp32, (int)t->width * sizeof(pixel), 32, FI_RGBA_RED_MASK, FI_RGBA_GREEN_MASK, FI_RGBA_BLUE_MASK, true);
+	FreeImage_ConvertToRawBits((unsigned char*)t->data, bmp32, (int)(t->width * sizeof(pixel)), 32, FI_RGBA_RED_MASK, FI_RGBA_GREEN_MASK, FI_RGBA_BLUE_MASK, true);
 	FreeImage_Unload(bmp32);
 }
 

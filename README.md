@@ -1,59 +1,44 @@
 # Warped Steel
-Winter 2015, CPSC 585 - Games Programming
+Winter 2015, CPSC 585 - Games Programming<br>
+Playable with a gamepad or keyboard
 
-Requires gamepad to play
 
-
-#Keyboard controls
+Gamepad controls
 ----------------
 
-Q -		Wireframe rendering
+Right Trigger - Accelerate<br>
+Left Trigger -  Brake/Reverse<br>
+Left Stick -    Turn<br>
+A -             Use item, confirm selection<br>
+B -             Back to previous screen<br>
+Start -         Pause game<br>
+Left Bumper -   Previous song<br>
+Right Bumper -  Next song<br>
+DPad -          Navigate menu, change settings<br>
 
-R -		Reset vehicles
+- Debug Controls -
 
-M -		Go to next music track
-
-P -		Pause music track
-
-A -		Add a computer player 
-
-BACKSPACE - Deletes all added computers
-
-SPACE - Activates/Deactivates "win-state"
-
-ESC -	Exit game
-
+Back -          Reset your vehicle<br>
+Y -	            Enter debug camera mode<br>
 
 
+Keyboard controls
+-----------------
 
-#Gamepad controls
-----------------
+W -             Accelerate<br>
+S -             Brake/Reverse<br>
+A/D -           Turn<br>
+Space -         Use item, confirm selection<br>
+Backspace -     Back to previous screen<br>
+ESC -           Pause game<br>
+, -             Previous song<br>
+. -             Next song<br>
+Arrow keys -    Navigate menu, change settings<br>
 
-#Menu
+- Debug Controls -
 
-Dpad Down - Scroll down
+R -             Reset your vehicle<br>
+C -             Enter debug camera mode<br>
 
-Dpad Up - Scroll up
-
-A - Select / Increment number of computers
-
-B - Decrement number of computers
-
-#Gameplay
-
-Right Trigger -		Accelerate
-
-Left Trigger -		Brake/Reverse
-
-Left Stick -		Turn
-
-Back - Respawn all vehicles
-
-Start - Pause game
-
-Y -			Debug camera mode
-
-A -         Use powerup / select
-
-X - Toggle between restart / menu 
-
+Q -	            Wireframe rendering<br>
+P -             Pause music track<br>

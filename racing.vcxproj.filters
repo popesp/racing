@@ -101,9 +101,6 @@
     <ClCompile Include="src\render\primitives.cpp">
       <Filter>src\render</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\win.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
     <ClCompile Include="src\objects\entities\missile.cpp">
       <Filter>src\objects\entities</Filter>
     </ClCompile>
@@ -124,12 +121,6 @@
     </ClCompile>
     <ClCompile Include="src\core\ui.cpp">
       <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\menu.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\objects\entities\slowmine.cpp">
-      <Filter>src\objects\entities</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -196,9 +187,6 @@
     <ClInclude Include="src\render\primitives.h">
       <Filter>headers\render</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\win.h">
-      <Filter>headers\core</Filter>
-    </ClInclude>
     <ClInclude Include="src\objects\entities\missile.h">
       <Filter>headers\objects\entities</Filter>
     </ClInclude>
@@ -222,12 +210,6 @@
     </ClInclude>
     <ClInclude Include="src\core\ui.h">
       <Filter>headers\core</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\menu.h">
-      <Filter>headers\core</Filter>
-    </ClInclude>
-    <ClInclude Include="src\objects\entities\slowmine.h">
-      <Filter>headers\objects\entities</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -9,17 +9,29 @@
 #include	"../physics/collision.h"
 
 
-static vec3f segment_pos[TRACK_SEGMENT_VERTCOUNT] = {
+static vec3f segment_pos[TRACK_SEGMENT_VERTCOUNT] =
+{
 	{ 0.f, 0.f, 0.f },
 	{ 0.5f, 1.f, 0.f },
 	{ 1.f, 1.f, 0.f },
-	{ 1.f, -2.f, 0.f }};
+	{ 1.f, -2.f, 0.f }
+};
 
-static vec3f segment_nor[TRACK_SEGMENT_VERTCOUNT] = {
+static vec3f segment_nor[TRACK_SEGMENT_VERTCOUNT] =
+{
 	{0.f, 1.f, 0.f},
-	{ -0.894427f, 0.447214f, 0.f },
+	{ -0.894427f, 0.447214f, 0.f},
 	{ 0.f, 1.f, 0.f },
-	{ 1.f, 0.f, 0.f }};
+	{ 1.f, 0.f, 0.f }
+};
+
+static float segment_tex[TRACK_SEGMENT_VERTCOUNT] =
+{
+	0.f,
+	1.11803f,
+	0.5f,
+	3.f
+};
 
 
 void track_init(struct track* t, struct physicsmanager* pm, vec3f up)
@@ -37,14 +49,18 @@ void track_init(struct track* t, struct physicsmanager* pm, vec3f up)
 	renderable_init(&t->r_track, RENDER_MODE_TRIANGLESTRIP, RENDER_TYPE_BUMP_L, RENDER_FLAG_NONE);
 
 	// initialize material properties
-	vec3f_set(t->r_track.material.amb, 0.4f, 0.4f, 0.4f);
-	vec3f_set(t->r_track.material.dif, 0.4f, 0.4f, 0.4f);
-	vec3f_set(t->r_track.material.spc, 0.8f, 0.8f, 0.8f);
+	vec3f_set(t->r_track.material.amb, 0.f, 0.f, 0.f);
+	vec3f_set(t->r_track.material.dif, 0.1f, 0.1f, 0.1f);
+	vec3f_set(t->r_track.material.spc, 0.5f, 0.5f, 0.5f);
 	t->r_track.material.shn = 100.f;
 
+	texture_init(&t->diffuse);
 	texture_init(&t->normal);
+	texture_loadfile(&t->diffuse, TRACK_TEXTURE_FILENAME_DIFFUSE);
 	texture_loadfile(&t->normal, TRACK_TEXTURE_FILENAME_NORMAL);
+	texture_upload(&t->diffuse, RENDER_TEXTURE_DIFFUSE);
 	texture_upload(&t->normal, RENDER_TEXTURE_NORMAL);
+	t->r_track.textures[RENDER_TEXTURE_DIFFUSE] = &t->diffuse;
 	t->r_track.textures[RENDER_TEXTURE_NORMAL] = &t->normal;
 
 	t->dist_boundary = TRACK_DEFAULT_DISTBOUND;
@@ -246,12 +262,9 @@ static void curvepoint(struct track* t, unsigned index, float d, struct track_po
 	vec3f_normalize(res->tan);
 }
 
-static inline float* fillbuffer(float* vptr, mat4f basis, vec3f p0, vec3f p1, vec3f n0, vec3f n1)
+static inline float* fillbuffer(float* vptr, mat4f basis, vec3f p0, vec3f p1, vec3f n0, vec3f n1, float v0, float v1, float u)
 {
-	vec3f bitan; // temp
 	vec3f pos;
-
-	vec3f_set(bitan, 1.f, 0.f, 0.f); // temp
 
 	mat4f_fulltransformvec3fn(pos, p0, basis);
 	vec3f_copy(vptr, pos);
@@ -260,13 +273,11 @@ static inline float* fillbuffer(float* vptr, mat4f basis, vec3f p0, vec3f p1, ve
 	mat4f_transformvec3fn(vptr, n0, basis);
 	vptr += RENDER_ATTRIBSIZE_NOR;
 
-	//vec3f_copy(vptr, basis + C2);
-	vec3f_cross(vptr, vptr - RENDER_ATTRIBSIZE_NOR, bitan); // temp
-	vec3f_normalize(vptr); // temp
+	vec3f_copy(vptr, basis + C2);
 	vptr += RENDER_ATTRIBSIZE_TAN;
 
-	vptr[0] = (pos[VX] + pos[VY])/3.f;
-	vptr[1] = (pos[VZ] + pos[VY])/3.f;
+	vptr[0] = u;
+	vptr[1] = v0;
 	vptr += RENDER_ATTRIBSIZE_TEX;
 
 	mat4f_fulltransformvec3fn(pos, p1, basis);
@@ -276,22 +287,21 @@ static inline float* fillbuffer(float* vptr, mat4f basis, vec3f p0, vec3f p1, ve
 	mat4f_transformvec3fn(vptr, n1, basis);
 	vptr += RENDER_ATTRIBSIZE_NOR;
 
-	//vec3f_copy(vptr, basis + C2);
-	vec3f_cross(vptr, vptr - RENDER_ATTRIBSIZE_NOR, bitan); // temp
-	vec3f_normalize(vptr); // temp
+	vec3f_copy(vptr, basis + C2);
 	vptr += RENDER_ATTRIBSIZE_TAN;
 
-	vptr[0] = (pos[VX] + pos[VY])/3.f;
-	vptr[1] = (pos[VZ] + pos[VY])/3.f;
+	vptr[0] = u;
+	vptr[1] = v1;
 	vptr += RENDER_ATTRIBSIZE_TEX;
 
 	return vptr;
 }
 
-static float* addverts(struct track* t, struct track_point* p, float* vptr)
+static float* addverts(struct track* t, struct track_point* p, float* vptr, float u)
 {
 	vec3f nor, bin, p0, p1, n;
 	mat4f basis;
+	float v;
 	int i;
 
 	// find binormal vector for the track
@@ -321,7 +331,9 @@ static float* addverts(struct track* t, struct track_point* p, float* vptr)
 	vec3f_set(n, 0.f, -1.f, 0.f);
 
 	// fill buffer
-	vptr = fillbuffer(vptr, basis, p0, p1, n, n);
+	v = 0.f;
+	vptr = fillbuffer(vptr, basis, p0, p1, n, n, v, v + p->width*0.5f + segment_pos[TRACK_SEGMENT_VERTCOUNT-1][VX], u);
+	v += p->width + segment_pos[TRACK_SEGMENT_VERTCOUNT-1][VX];
 
 	// left segment
 	for (i = TRACK_SEGMENT_VERTCOUNT - 1; i > 0; i--)
@@ -333,7 +345,8 @@ static float* addverts(struct track* t, struct track_point* p, float* vptr)
 		p1[VX] = p1[VX] + p->width*0.5f;
 
 		// fill buffer
-		vptr = fillbuffer(vptr, basis, p0, p1, segment_nor[i], segment_nor[i]);
+		vptr = fillbuffer(vptr, basis, p0, p1, segment_nor[i], segment_nor[i], v, v + segment_tex[i], u);
+		v += segment_tex[i];
 	}
 
 	// left center
@@ -343,7 +356,8 @@ static float* addverts(struct track* t, struct track_point* p, float* vptr)
 	vec3f_set(p1, 0.f, 0.f, 0.f);
 
 	// fill buffer
-	vptr = fillbuffer(vptr, basis, p0, p1, segment_nor[0], segment_nor[0]);
+	vptr = fillbuffer(vptr, basis, p0, p1, segment_nor[0], segment_nor[0], v, v + p->width*0.5f, u);
+	v += p->width*0.5f;
 	/* --- end left side --- */
 
 	/* --- right side --- */
@@ -358,7 +372,8 @@ static float* addverts(struct track* t, struct track_point* p, float* vptr)
 	n[VX] *= -1.f;
 
 	// fill buffer
-	vptr = fillbuffer(vptr, basis, p0, p1, n, n);
+	vptr = fillbuffer(vptr, basis, p0, p1, n, n, v, v + p->width*0.5f, u);
+	v += p->width*0.5f;
 
 	// right segment
 	for (i = 0; i < TRACK_SEGMENT_VERTCOUNT - 1; i++)
@@ -374,7 +389,8 @@ static float* addverts(struct track* t, struct track_point* p, float* vptr)
 		n[VX] *= -1.f;
 
 		// fill buffer
-		vptr = fillbuffer(vptr, basis, p0, p1, n, n);
+		vptr = fillbuffer(vptr, basis, p0, p1, n, n, v, v + segment_tex[i + 1], u);
+		v += segment_tex[i];
 	}
 
 	// far right
@@ -387,7 +403,7 @@ static float* addverts(struct track* t, struct track_point* p, float* vptr)
 	vec3f_set(n, 0.f, -1.f, 0.f);
 
 	// fill buffer
-	vptr = fillbuffer(vptr, basis, p0, p1, n, n);
+	vptr = fillbuffer(vptr, basis, p0, p1, n, n, v, v + p->width*0.5f + segment_pos[TRACK_SEGMENT_VERTCOUNT-1][VX], u);
 
 	return vptr;
 }
@@ -412,8 +428,8 @@ void track_generate(struct track* t, struct renderer* r)
 	unsigned i, j, n, s, ps;
 	float* verts;
 	float* ptr;
+	float d, u;
 	int offs;
-	float d;
 
 	if (t->flags & TRACK_FLAG_LOOPED)
 		n = t->num_points;
@@ -437,6 +453,7 @@ void track_generate(struct track* t, struct renderer* r)
 
 	// place vertex attributes into buffer
 	ptr = verts;
+	u = 0.f;
 	for (i = 0; i < n; i++)
 	{
 		d = 0.f;
@@ -447,7 +464,8 @@ void track_generate(struct track* t, struct renderer* r)
 		{
 			// find point on track curve and add vertices to generate track
 			curvepoint(t, i, d, &p);
-			ptr = addverts(t, &p, ptr);
+			ptr = addverts(t, &p, ptr, u);
+			u += 1.f;
 		}
 
 		// loop for search points
@@ -463,7 +481,7 @@ void track_generate(struct track* t, struct renderer* r)
 
 	// generate the last point on the track
 	curvepoint(t, n - 1, 1.f, &p);
-	ptr = addverts(t, &p, ptr);
+	ptr = addverts(t, &p, ptr, u);
 
 	// copy vector attributes into renderable buffer
 	int temp = 0;

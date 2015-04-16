@@ -4,7 +4,7 @@
 #include	"../objects/entities/entity.h"
 #include	"../objects/pickup.h"
 #include	"../objects/vehicle.h"
-#include	"../objects/entities/slowmine.h"
+
 
 void collision_setupactor(physx::PxRigidActor* actor, unsigned filter_group, unsigned filter_mask)
 {
@@ -40,9 +40,8 @@ physx::PxFilterFlags collision_filter(physx::PxFilterObjectAttributes attributes
 	(void)constantBlockSize;
 
 	pairFlags = physx::PxPairFlag::eCONTACT_DEFAULT;
-	if (filterData0.word0 == COLLISION_FILTER_VEHICLE && filterData1.word0 == COLLISION_FILTER_VEHICLE)
-		pairFlags = physx::PxPairFlag::eCONTACT_DEFAULT |physx::PxPairFlag::eTRIGGER_DEFAULT | physx::PxPairFlag::eNOTIFY_TOUCH_FOUND;
-	else if ((filterData0.word0 & filterData1.word1) && (filterData1.word0 & filterData0.word1))
+
+	if ((filterData0.word0 & filterData1.word1) && (filterData1.word0 & filterData0.word1))
 		pairFlags = physx::PxPairFlag::eTRIGGER_DEFAULT | physx::PxPairFlag::eNOTIFY_TOUCH_FOUND;
 	else if (filterData0.word0 == COLLISION_FILTER_PICKUP || filterData1.word0 == COLLISION_FILTER_PICKUP)
 		return physx::PxFilterFlag::eKILL;
@@ -76,7 +75,8 @@ void CustomCollisions::onContact(const physx::PxContactPairHeader& pairHeader, c
 				{
 					((struct entity*)pairHeader.actors[0]->userData)->flags |= ENTITY_FLAG_HIT;
 					((struct vehicle*)pairHeader.actors[1]->userData)->flags |= VEHICLE_FLAG_MISSILEHIT;
-				}
+				} else if (fd1.word0 == COLLISION_FILTER_INVINCIBLE)
+					((struct entity*)pairHeader.actors[0]->userData)->flags |= ENTITY_FLAG_HIT;
 			} else if (fd0.word0 == COLLISION_FILTER_MINE)
 			{
 				if (fd1.word0 == COLLISION_FILTER_MISSILE || fd1.word0 == COLLISION_FILTER_MINE)
@@ -87,20 +87,8 @@ void CustomCollisions::onContact(const physx::PxContactPairHeader& pairHeader, c
 				{
 					((struct entity*)pairHeader.actors[0]->userData)->flags |= ENTITY_FLAG_HIT;
 					((struct vehicle*)pairHeader.actors[1]->userData)->flags |= VEHICLE_FLAG_MINEHIT;
-				}
-			} else if (fd0.word0 == COLLISION_FILTER_SLOWMINE)
-			{
-				if (fd1.word0 == COLLISION_FILTER_MISSILE || fd1.word0 == COLLISION_FILTER_MINE)
-				{
+				} else if (fd1.word0 == COLLISION_FILTER_INVINCIBLE)
 					((struct entity*)pairHeader.actors[0]->userData)->flags |= ENTITY_FLAG_HIT;
-					((struct entity*)pairHeader.actors[1]->userData)->flags |= ENTITY_FLAG_HIT;
-				} else if (fd1.word0 == COLLISION_FILTER_VEHICLE)
-				{
-					((struct vehicle*)pairHeader.actors[1]->userData)->flags |= VEHICLE_FLAG_SLOWED;
-					((struct vehicle*)pairHeader.actors[1]->userData)->flags |= VEHICLE_FLAG_SLOWEDHIT;
-					((struct vehicle*)pairHeader.actors[1]->userData)->timer_slow = SLOWMINE_TIME;
-					((struct entity*)pairHeader.actors[0]->userData)->flags |= ENTITY_FLAG_HIT;
-				}
 			} else if (fd0.word0 == COLLISION_FILTER_VEHICLE)
 			{
 				if (fd1.word0 == COLLISION_FILTER_MISSILE)
@@ -111,36 +99,29 @@ void CustomCollisions::onContact(const physx::PxContactPairHeader& pairHeader, c
 				{
 					((struct vehicle*)pairHeader.actors[0]->userData)->flags |= VEHICLE_FLAG_MINEHIT;
 					((struct entity*)pairHeader.actors[1]->userData)->flags |= ENTITY_FLAG_HIT;
-				} else if (fd1.word0 == COLLISION_FILTER_SLOWMINE)
-				{
-					((struct vehicle*)pairHeader.actors[0]->userData)->flags |= VEHICLE_FLAG_SLOWED;
-					((struct vehicle*)pairHeader.actors[0]->userData)->flags |= VEHICLE_FLAG_SLOWEDHIT;
-					((struct vehicle*)pairHeader.actors[0]->userData)->timer_slow = SLOWMINE_TIME;
-					((struct entity*)pairHeader.actors[1]->userData)->flags |= ENTITY_FLAG_HIT;
-				}else if (fd1.word0 == COLLISION_FILTER_PICKUP)
+				} else if (fd1.word0 == COLLISION_FILTER_PICKUP)
 				{
 					((struct pickup*)pairHeader.actors[1]->userData)->flags |= PICKUP_FLAG_VEHICLEHIT;
 					((struct pickup*)pairHeader.actors[1]->userData)->collector = ((struct vehicle*)pairHeader.actors[0]->userData);
-				} else if (fd1.word0 == COLLISION_FILTER_VEHICLE) {
-					if (((struct vehicle*)pairHeader.actors[0]->userData)->timer_uber > 0) {
-						if (((struct vehicle*)pairHeader.actors[1]->userData)->timer_uber == 0) {
-							((struct vehicle*)pairHeader.actors[1]->userData)->flags |= VEHICLE_FLAG_MISSILEHIT;
-						}
-					}
-					if (((struct vehicle*)pairHeader.actors[1]->userData)->timer_uber > 0) {
-						if (((struct vehicle*)pairHeader.actors[0]->userData)->timer_uber == 0) {
-							((struct vehicle*)pairHeader.actors[0]->userData)->flags |= VEHICLE_FLAG_MISSILEHIT;
-						}
-					}
-					((struct vehicle*)pairHeader.actors[0]->userData)->flags |= VEHICLE_COLLISION_SOUND;
-				}
+				} else if (fd1.word0 == COLLISION_FILTER_INVINCIBLE)
+					((struct vehicle*)pairHeader.actors[0]->userData)->flags |= VEHICLE_FLAG_MISSILEHIT;
 			} else if (fd0.word0 == COLLISION_FILTER_PICKUP)
 			{
-				if (fd1.word0 == COLLISION_FILTER_VEHICLE)
+				if (fd1.word0 == COLLISION_FILTER_VEHICLE || fd1.word0 == COLLISION_FILTER_INVINCIBLE)
 				{
 					((struct pickup*)pairHeader.actors[0]->userData)->flags |= PICKUP_FLAG_VEHICLEHIT;
 					((struct pickup*)pairHeader.actors[0]->userData)->collector = ((struct vehicle*)pairHeader.actors[1]->userData);
 				}
+			} else if (fd0.word0 == COLLISION_FILTER_INVINCIBLE)
+			{
+				if (fd1.word0 == COLLISION_FILTER_PICKUP)
+				{
+					((struct pickup*)pairHeader.actors[1]->userData)->flags |= PICKUP_FLAG_VEHICLEHIT;
+					((struct pickup*)pairHeader.actors[1]->userData)->collector = ((struct vehicle*)pairHeader.actors[0]->userData);
+				} else if (fd1.word0 == COLLISION_FILTER_VEHICLE)
+					((struct vehicle*)pairHeader.actors[1]->userData)->flags |= VEHICLE_FLAG_MISSILEHIT;
+				else if (fd1.word0 == COLLISION_FILTER_MISSILE || fd1.word0 == COLLISION_FILTER_MINE)
+					((struct entity*)pairHeader.actors[1]->userData)->flags |= ENTITY_FLAG_HIT;
 			}
 		}
 	}

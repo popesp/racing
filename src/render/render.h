@@ -55,7 +55,7 @@
 #define	RENDER_TEXTURE_DIFFUSE		0
 #define	RENDER_TEXTURE_NORMAL		1
 
-#define	RENDER_MAX_LIGHTS			2
+#define	RENDER_MAX_LIGHTS			8
 
 #define	RENDER_DEFAULT_MATERIAL_AMB	0.1f, 0.1f, 0.1f
 #define	RENDER_DEFAULT_MATERIAL_DIF	0.5f, 0.5f, 0.5f
@@ -80,8 +80,6 @@
 #define	RENDER_SHADER_FRAG_BUMP_L	"shaders/bumpl.frag"
 #define	RENDER_SHADER_VERT_TEXT		"shaders/text.vert"
 #define	RENDER_SHADER_FRAG_TEXT		"shaders/text.frag"
-
-
 
 #define	RENDER_FLAG_NONE			0x00
 #define	RENDER_FLAG_DYNAMIC			0x01
@@ -112,7 +110,9 @@ struct renderable
 	unsigned num_verts;
 	float* buf_verts;
 
+	int num_lights;
 	struct light* lights[RENDER_MAX_LIGHTS];
+
 	struct material material;
 	float* ambient;
 
@@ -166,8 +166,10 @@ struct renderer
 	{
 		int transform;
 		int eyepos;
+		int num_lights;
 		int lights[RENDER_MAX_LIGHTS][RENDER_LIGHT_UNIFORMS];
 		int ambient;
+		int tex_diffuse;
 		int tex_normal;
 		int material[RENDER_MATERIAL_UNIFORMS];
 	} uniforms_bump_l;

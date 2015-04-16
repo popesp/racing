@@ -62,6 +62,17 @@ void inputmanager_shutdown(struct inputmanager* im)
 	mem_free(im->keyboard.axes);
 }
 
+static void updatebutton(unsigned char* button, unsigned char input)
+{
+	*button = (unsigned char)
+		(input == GLFW_PRESS
+			? (((*button) & INPUT_STATE_DOWN)
+				? INPUT_STATE_DOWN
+				: (INPUT_STATE_DOWN | INPUT_STATE_CHANGED))
+			: (((*button) & INPUT_STATE_DOWN)
+				? INPUT_STATE_CHANGED
+				: INPUT_STATE_INIT));
+}
 
 void inputmanager_update(struct inputmanager* im)
 {
@@ -95,21 +106,7 @@ void inputmanager_update(struct inputmanager* im)
 			
 			// record button states
 			for (j = 0; j < c->num_buttons; j++)
-			{
-				if (buttons[j])
-				{
-					if (c->buttons[j] & INPUT_STATE_DOWN)
-						c->buttons[j] = INPUT_STATE_DOWN;
-					else
-						c->buttons[j] = INPUT_STATE_DOWN | INPUT_STATE_CHANGED;
-				} else
-				{
-					if (c->buttons[j] & INPUT_STATE_DOWN)
-						c->buttons[j] = INPUT_STATE_CHANGED;
-					else
-						c->buttons[j] = INPUT_STATE_INIT;
-				}
-			}
+				updatebutton(c->buttons + j, buttons[j]);
 
 			// copy over axis values
 			for (j = 0; j < c->num_axes; j++)
@@ -143,8 +140,34 @@ void inputmanager_update(struct inputmanager* im)
 
 	c = &im->keyboard;
 
+	// left stick and trigger emulation
 	c->axes[INPUT_AXIS_LEFT_LR] = (glfwGetKey(im->win->w, GLFW_KEY_A) == GLFW_PRESS ? -1.f : 0.f) + (glfwGetKey(im->win->w, GLFW_KEY_D) == GLFW_PRESS ? 1.f : 0.f);
 	c->axes[INPUT_AXIS_TRIGGERS] = (glfwGetKey(im->win->w, GLFW_KEY_W) == GLFW_PRESS ? -1.f : 0.f) + (glfwGetKey(im->win->w, GLFW_KEY_S) == GLFW_PRESS ? 1.f : 0.f);
+
+	// 'a' button
+	updatebutton(c->buttons + INPUT_BUTTON_A, (unsigned char)glfwGetKey(im->win->w, GLFW_KEY_SPACE));
+
+	// 'b' button
+	updatebutton(c->buttons + INPUT_BUTTON_B, (unsigned char)glfwGetKey(im->win->w, GLFW_KEY_BACKSPACE));
+
+	// 'y' button
+	updatebutton(c->buttons + INPUT_BUTTON_Y, (unsigned char)glfwGetKey(im->win->w, GLFW_KEY_C));
+
+	// 'start' button
+	updatebutton(c->buttons + INPUT_BUTTON_START, (unsigned char)glfwGetKey(im->win->w, GLFW_KEY_ESCAPE));
+
+	// 'back' button
+	updatebutton(c->buttons + INPUT_BUTTON_BACK, (unsigned char)glfwGetKey(im->win->w, GLFW_KEY_R));
+
+	// bumper emulation
+	updatebutton(c->buttons + INPUT_BUTTON_LB, (unsigned char)glfwGetKey(im->win->w, GLFW_KEY_COMMA));
+	updatebutton(c->buttons + INPUT_BUTTON_RB, (unsigned char)glfwGetKey(im->win->w, GLFW_KEY_PERIOD));
+
+	// directional button emulation
+	updatebutton(c->buttons + INPUT_BUTTON_DUP, (unsigned char)glfwGetKey(im->win->w, GLFW_KEY_UP));
+	updatebutton(c->buttons + INPUT_BUTTON_DRIGHT, (unsigned char)glfwGetKey(im->win->w, GLFW_KEY_RIGHT));
+	updatebutton(c->buttons + INPUT_BUTTON_DDOWN, (unsigned char)glfwGetKey(im->win->w, GLFW_KEY_DOWN));
+	updatebutton(c->buttons + INPUT_BUTTON_DLEFT, (unsigned char)glfwGetKey(im->win->w, GLFW_KEY_LEFT));
 }
 
 

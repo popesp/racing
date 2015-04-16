@@ -16,8 +16,9 @@
 
 #define	TRACK_FLAG_INIT					0x00
 #define	TRACK_FLAG_LOOPED				0x01
-//#define TRACK_TEXTURE_FILENAME_NORMAL	"res/images/slate.jpg"
-#define TRACK_TEXTURE_FILENAME_NORMAL	"res/images/track-tex.png"
+
+#define TRACK_TEXTURE_FILENAME_DIFFUSE	"res/images/track.png"
+#define TRACK_TEXTURE_FILENAME_NORMAL	"res/images/track_normal.png"
 
 struct physicsmanager;
 
@@ -56,6 +57,7 @@ struct track
 	physx::PxRigidStatic* p_track;
 
 	struct renderable r_track;
+	struct texture diffuse;
 	struct texture normal;
 
 	float dist_boundary;

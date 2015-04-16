@@ -6,7 +6,7 @@
 #include	"../math/mat4f.h"	// frustum
 
 
-#define	WINDOW_DEFAULT_VIEWANGLE	90.f
+#define	WINDOW_DEFAULT_VIEWANGLE	70.f
 #define	WINDOW_DEFAULT_NEAR			0.01f
 #define	WINDOW_DEFAULT_FAR			1000.f
 

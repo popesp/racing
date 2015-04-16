@@ -8,12 +8,10 @@
 #define	MISSILE_MESH_FILENAME				"res/models/missile/missile.obj"
 #define	MISSILE_MESH_SCALE					0.35f
 #define	MISSILE_MESH_YROTATE				3.14159f
-#define	TURRETMISSILE_MESH_YROTATE			0.0f
 #define	MISSILE_MESH_OFFSET					0.f, 0.f, 0.f
 
 #define	MISSILE_TEXTURE_FILENAME_DIFFUSE	"res/models/missile/missile.png"
 
-#define	MISSILE_SFX_FILENAME_LAUNCH			"res/soundfx/missile_launch.wav"
 #define	MISSILE_SFX_FILENAME_IDLE			"res/soundfx/missile_idle.wav"
 #define	MISSILE_SFX_FILENAME_EXPLODE		"res/soundfx/missile_explode.wav"
 
@@ -30,7 +28,7 @@
 	param:	v			vehicle (owner of the missile)
 	param:	pose		global pose of the missile
 */
-void missile_init(struct entity* e, struct entitymanager* em, struct vehicle* v, physx::PxTransform pose, int turretmissile);
+void missile_init(struct entity* e, struct entitymanager* em, struct vehicle* v, physx::PxTransform pose);
 
 /*	delete a missile entity
 	param:	e			missile entity to delete

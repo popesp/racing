@@ -83,18 +83,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\audio\audio.cpp" />
-    <ClCompile Include="src\core\menu.cpp" />
     <ClCompile Include="src\core\player.cpp" />
     <ClCompile Include="src\core\game.cpp" />
     <ClCompile Include="src\core\input.cpp" />
     <ClCompile Include="src\core\ui.cpp" />
-    <ClCompile Include="src\core\win.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\objects\camera.cpp" />
     <ClCompile Include="src\objects\entities\entity.cpp" />
     <ClCompile Include="src\objects\entities\mine.cpp" />
     <ClCompile Include="src\objects\entities\missile.cpp" />
-    <ClCompile Include="src\objects\entities\slowmine.cpp" />
     <ClCompile Include="src\objects\entities\turret.cpp" />
     <ClCompile Include="src\objects\pickup.cpp" />
     <ClCompile Include="src\objects\vehicle.cpp" />
@@ -110,12 +107,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\audio\audio.h" />
-    <ClInclude Include="src\core\menu.h" />
     <ClInclude Include="src\core\player.h" />
     <ClInclude Include="src\core\game.h" />
     <ClInclude Include="src\core\input.h" />
     <ClInclude Include="src\core\ui.h" />
-    <ClInclude Include="src\core\win.h" />
     <ClInclude Include="src\debug.h" />
     <ClInclude Include="src\error.h" />
     <ClInclude Include="src\math\mat4f.h" />
@@ -128,7 +123,6 @@
     <ClInclude Include="src\objects\entities\entity.h" />
     <ClInclude Include="src\objects\entities\mine.h" />
     <ClInclude Include="src\objects\entities\missile.h" />
-    <ClInclude Include="src\objects\entities\slowmine.h" />
     <ClInclude Include="src\objects\entities\turret.h" />
     <ClInclude Include="src\objects\pickup.h" />
     <ClInclude Include="src\objects\vehicle.h" />
