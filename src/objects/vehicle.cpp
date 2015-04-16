@@ -257,6 +257,14 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 	mat4f_rotateymul(vm->r_powerup.matrix_model, VEHICLE_POWERUP_MESH_YROTATE);
 	mat4f_translatemul(vm->r_powerup.matrix_model, -center[VX], -center[VY], -center[VZ]);
 
+	// initialize invincibility mesh
+	renderable_init(&vm->r_invincibility, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
+	objloader_load(VEHICLE_INVINCIBILITY_MESH_FILENAME, r, &vm->r_invincibility, dim, center);
+	renderable_sendbuffer(r, &vm->r_invincibility);
+	// matrix model transformation
+	mat4f_scalemul(vm->r_invincibility.matrix_model, VEHICLE_INVINCIBILITY_MESH_SCALE, VEHICLE_INVINCIBILITY_MESH_SCALE, VEHICLE_INVINCIBILITY_MESH_SCALE);
+	mat4f_translatemul(vm->r_invincibility.matrix_model, -center[VX], -center[VY], -center[VZ]);
+
 	// initialize vehicle diffuse textures
 	for (i = 0; i < VEHICLE_TEXTURE_DIFFUSE_COUNT; i++)
 	{
@@ -272,6 +280,12 @@ void vehiclemanager_startup(struct vehiclemanager* vm, struct physicsmanager* pm
 		texture_loadfile(vm->diffuse_powerup + i, powerup_texture_filename[i]);
 		texture_upload(vm->diffuse_powerup + i, RENDER_TEXTURE_DIFFUSE);
 	}
+
+	// initialize invincibility diffuse texture
+	texture_init(&vm->diffuse_invincibility);
+	texture_soliddiffuse(&vm->diffuse_invincibility, VEHICLE_INVINCIBILITY_COLOR);
+	texture_upload(&vm->diffuse_invincibility, RENDER_TEXTURE_DIFFUSE);
+	vm->r_invincibility.textures[RENDER_TEXTURE_DIFFUSE] = &vm->diffuse_invincibility;
 
 	// initialize sound effects
 	vm->sfx_engine_start = audiomanager_newsfx(am, VEHICLE_SFX_FILENAME_ENGINESTART, true);
@@ -633,7 +647,6 @@ void vehiclemanager_update(struct vehiclemanager* vm)
 		// check if a vehicle collision occurred
 		if (v->flags & VEHICLE_FLAG_VEHICLEHIT)
 		{
-			printf("test\n");
 			audiomanager_playsfx(vm->am, vm->sfx_collision, v->pos, 0, true);
 			v->flags &= ~VEHICLE_FLAG_VEHICLEHIT;
 		}
@@ -683,6 +696,13 @@ void vehiclemanager_render(struct vehiclemanager* vm, struct renderer* r, mat4f 
 			mat_pose = physx::PxMat44(pose.transform(physx::PxTransform(VEHICLE_POWERUP_ATTACHLOCATION)));
 			vm->r_powerup.textures[RENDER_TEXTURE_DIFFUSE] = vm->diffuse_powerup + v->powerup;
 			renderable_render(r, &vm->r_powerup, (float*)&mat_pose, worldview, 0);
+		}
+
+		if (v->flags & VEHICLE_FLAG_INVINCIBLE)
+		{
+			mat_pose = physx::PxMat44(pose.transform(physx::PxTransform(VEHICLE_INVINCIBILITY_MESH_OFFSET)));
+			mat4f_rotateymul(vm->r_invincibility.matrix_model, (float)random_int(1000) / 300.f);
+			renderable_render(r, &vm->r_invincibility, (float*)&mat_pose, worldview, 0);
 		}
 	}
 }

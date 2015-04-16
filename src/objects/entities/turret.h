@@ -5,17 +5,17 @@
 #include	"entity.h"
 
 
-#define	TURRET_MESH_FILENAME				"res/models/turret/scifiturret.obj"
+#define	TURRET_MESH_FILENAME				"res/models/turret/turret.obj"
 #define	TURRET_MESH_SCALE					0.5f
 #define	TURRET_MESH_YROTATE					1.57080f
 #define	TURRET_MESH_OFFSET					0.f, 1.f, 0.f
 
-#define	TURRET_TEXTURE_FILENAME_DIFFUSE		"res/models/turret/scifiturret.png"
+#define	TURRET_TEXTURE_FILENAME_DIFFUSE		"res/models/turret/turret.png"
 
 #define	TURRET_RADIUS						1.f
 #define	TURRET_DENSITY						1.f
 #define	TURRET_DESPAWNTIME					600
-#define	TURRET_COOLDOWN						60
+#define	TURRET_COOLDOWN						20
 #define	TURRET_MISSILE_SPAWNDIST			0.f
 
 

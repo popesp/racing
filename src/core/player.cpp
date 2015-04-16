@@ -55,7 +55,7 @@ void aiplayer_init(struct aiplayer* p, struct vehicle* v, struct track* track)
 	p->timer_missile = 0;
 
 	p->turn = 50.f/((float)random_int(15) + 7.5f);
-	p->speed = (1.f / ((float)random_int(15) + 2.5f)) - 1.f;
+	p->speed = (1.f / ((float)random_int(15) + 5.f)) - 1.f;
 }
 
 

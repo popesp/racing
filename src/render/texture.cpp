@@ -38,7 +38,7 @@ void texture_allocate(struct texture* t, unsigned width, unsigned height)
 	t->data = (pixel*)mem_realloc(t->data, sizeof(pixel) * width * height);
 }
 
-void texture_soliddiffuse(struct texture* t, unsigned char r, unsigned char g, unsigned char b)
+void texture_soliddiffuse(struct texture* t, unsigned char r, unsigned char g, unsigned char b, unsigned char a)
 {
 	t->width = 1;
 	t->height = 1;
@@ -47,7 +47,7 @@ void texture_soliddiffuse(struct texture* t, unsigned char r, unsigned char g, u
 	t->data[0][TB] = b;
 	t->data[0][TG] = g;
 	t->data[0][TR] = r;
-	t->data[0][TA] = 255;
+	t->data[0][TA] = a;
 }
 
 void texture_defaultnormal(struct texture* t)

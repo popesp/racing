@@ -83,12 +83,17 @@
 #define	VEHICLE_POWERUP_BOOST_DURATION					180
 #define	VEHICLE_POWERUP_BOOST_STRENGTH					20.f
 
-#define	VEHICLE_POWERUP_LONGBOOST_DURATION				360
+#define	VEHICLE_POWERUP_LONGBOOST_DURATION				540
 
 #define	VEHICLE_POWERUP_ROCKETBOOST_DURATION			180
 
 #define	VEHICLE_POWERUP_SLOWMINE_DURATION				300
 #define	VEHICLE_POWERUP_SLOWMINE_STRENGTH				0.6f
+
+#define	VEHICLE_INVINCIBILITY_MESH_FILENAME				"res/models/invincibility/invincibility.obj"
+#define	VEHICLE_INVINCIBILITY_MESH_SCALE				1.5f
+#define	VEHICLE_INVINCIBILITY_COLOR						255, 0, 0, 128
+#define	VEHICLE_INVINCIBILITY_MESH_OFFSET				0.f, -0.5f, 0.f
 
 #define	VEHICLE_DIMENSIONS								0.7254f, 0.3056f, 1.3884f
 #define	VEHICLE_DENSITY									0.8f
@@ -167,9 +172,11 @@ struct vehiclemanager
 
 	struct renderable r_vehicle;
 	struct renderable r_powerup;
+	struct renderable r_invincibility;
 
 	struct texture diffuse_vehicle[VEHICLE_TEXTURE_DIFFUSE_COUNT];
 	struct texture diffuse_powerup[VEHICLE_POWERUP_COUNT];
+	struct texture diffuse_invincibility;
 
 	FMOD_SOUND* sfx_engine_start;
 	FMOD_SOUND* sfx_engine_idle;

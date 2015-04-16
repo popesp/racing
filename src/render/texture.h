@@ -42,11 +42,12 @@ void texture_allocate(struct texture* t, unsigned width, unsigned height);
 
 /*	set a texture to a solid diffuse color
 	param:	t			texture object
-	param:	r			red component (range: 0-1)
-	param:	g			green component (range: 0-1)
-	param:	b			blue component (range: 0-1)
+	param:	r			red component
+	param:	g			green component
+	param:	b			blue component
+	param:	a			alpha component
 */
-void texture_soliddiffuse(struct texture* t, unsigned char r, unsigned char g, unsigned char b);
+void texture_soliddiffuse(struct texture* t, unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 
 /*	set a texture to a flat normal map
 	param:	t			texture object
