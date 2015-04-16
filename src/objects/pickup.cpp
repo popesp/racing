@@ -27,7 +27,7 @@ static void createpickup(struct pickup* p, struct physicsmanager* pm, struct tra
 
 	// initialize physx actor
 	p->body = physx::PxCreateDynamic(*pm->sdk, physx::PxTransform((physx::PxMat44)basis), physx::PxSphereGeometry(PICKUP_RADIUS), *pm->default_material, PICKUP_DENSITY);
-	collision_setupactor(p->body, COLLISION_FILTER_PICKUP, COLLISION_FILTER_VEHICLE);
+	collision_setupactor(p->body, COLLISION_FILTER_PICKUP, COLLISION_FILTER_VEHICLE | COLLISION_FILTER_INVINCIBLE);
 	p->body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, true);
 	p->body->userData = p;
 
@@ -173,6 +173,10 @@ void pickupmanager_update(struct pickupmanager* pum)
 					{
 						v->powerup = VEHICLE_POWERUP_TURRET;
 						audiomanager_playsfx(pum->am, pum->sfx_upgrade, v->pos, 0, true);
+					} else if (p->type == PICKUP_TYPE_BOOST)
+					{
+						v->powerup = VEHICLE_POWERUP_ROCKETBOOST;
+						audiomanager_playsfx(pum->am, pum->sfx_upgrade, v->pos, 0, true);
 					} else
 					{
 						v->powerup = p->type;
@@ -204,11 +208,20 @@ void pickupmanager_update(struct pickupmanager* pum)
 					{
 						v->powerup = VEHICLE_POWERUP_LONGBOOST;
 						audiomanager_playsfx(pum->am, pum->sfx_upgrade, v->pos, 0, true);
+					} else if (p->type == PICKUP_TYPE_MISSILE)
+					{
+						v->powerup = VEHICLE_POWERUP_ROCKETBOOST;
+						audiomanager_playsfx(pum->am, pum->sfx_upgrade, v->pos, 0, true);
 					} else
 					{
 						v->powerup = p->type;
 						audiomanager_playsfx(pum->am, pum->sfx_collect, v->pos, 0, true);
 					}
+					break;
+
+				default:
+					v->powerup = p->type;
+					audiomanager_playsfx(pum->am, pum->sfx_collect, v->pos, 0, true);
 					break;
 				}
 			} else

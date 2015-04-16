@@ -10,6 +10,7 @@
 #define	COLLISION_FILTER_VEHICLE	0x00000004
 #define	COLLISION_FILTER_MISSILE	0x00000008
 #define	COLLISION_FILTER_MINE		0x00000010
+#define	COLLISION_FILTER_INVINCIBLE	0x00000020
 
 
 void collision_setupactor(physx::PxRigidActor* actor, unsigned filter_group, unsigned filter_mask);

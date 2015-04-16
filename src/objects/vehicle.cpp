@@ -41,8 +41,9 @@ static char* powerup_texture_filename[VEHICLE_POWERUP_COUNT] =
 	VEHICLE_POWERUP_TEXTURE_FILENAME_MISSILEX3,
 	VEHICLE_POWERUP_TEXTURE_FILENAME_MINEX2,
 	VEHICLE_POWERUP_TEXTURE_FILENAME_MINEX3,
+	VEHICLE_POWERUP_TEXTURE_FILENAME_LONGBOOST,
 	VEHICLE_POWERUP_TEXTURE_FILENAME_TURRET,
-	VEHICLE_POWERUP_TEXTURE_FILENAME_LONGBOOST
+	VEHICLE_POWERUP_TEXTURE_FILENAME_ROCKETBOOST
 };
 
 
@@ -96,6 +97,14 @@ static void boostfunction(struct vehicle* v)
 	v->flags &= ~VEHICLE_FLAG_HASPOWERUP;
 }
 
+static void longboostfunction(struct vehicle* v)
+{
+	v->timer_boost = VEHICLE_POWERUP_LONGBOOST_DURATION;
+	v->flags |= VEHICLE_FLAG_BOOSTING;
+
+	v->flags &= ~VEHICLE_FLAG_HASPOWERUP;
+}
+
 static void turretfunction(struct vehicle* v)
 {
 	physx::PxTransform pose_vehicle, pose_spawn;
@@ -111,10 +120,13 @@ static void turretfunction(struct vehicle* v)
 	v->flags &= ~VEHICLE_FLAG_HASPOWERUP;
 }
 
-static void longboostfunction(struct vehicle* v)
+static void rocketboostfunction(struct vehicle* v)
 {
-	v->timer_boost = VEHICLE_POWERUP_LONGBOOST_DURATION;
+	v->timer_boost = VEHICLE_POWERUP_ROCKETBOOST_DURATION;
 	v->flags |= VEHICLE_FLAG_BOOSTING;
+
+	v->timer_invincible = VEHICLE_POWERUP_ROCKETBOOST_DURATION;
+	v->flags |= VEHICLE_FLAG_INVINCIBLE;
 
 	v->flags &= ~VEHICLE_FLAG_HASPOWERUP;
 }
@@ -128,8 +140,9 @@ static void (* powerupfunction[VEHICLE_POWERUP_COUNT])(struct vehicle*) =
 	missilefunction,
 	minefunction,
 	minefunction,
+	longboostfunction,
 	turretfunction,
-	longboostfunction
+	rocketboostfunction
 };
 
 
@@ -159,7 +172,7 @@ static void createvehicle(struct vehicle* v, struct vehiclemanager* vm)
 
 	// create a physics object and add it to the scene
 	v->body = physx::PxCreateDynamic(*vm->pm->sdk, physx::PxTransform(physx::PxVec3(0.f, 0.f, 0.f)), physx::PxBoxGeometry(VEHICLE_DIMENSIONS), *vm->pm->default_material, VEHICLE_DENSITY);
-	collision_setupactor(v->body, COLLISION_FILTER_VEHICLE, COLLISION_FILTER_MISSILE | COLLISION_FILTER_MINE | COLLISION_FILTER_PICKUP);
+	collision_setupactor(v->body, COLLISION_FILTER_VEHICLE, COLLISION_FILTER_MISSILE | COLLISION_FILTER_MINE | COLLISION_FILTER_PICKUP | COLLISION_FILTER_INVINCIBLE);
 	v->body->userData = v;
 
 	// add actor to scene
@@ -542,6 +555,22 @@ void vehiclemanager_update(struct vehiclemanager* vm)
 				vec3f_scalen(force, v->ray_dirs[j], -VEHICLE_RAYCAST_MAXFORCE * (d*d/(VEHICLE_RAYCAST_MAXDIST * VEHICLE_RAYCAST_MAXDIST) - 2.f*d/VEHICLE_RAYCAST_MAXDIST + 1.f));
 
 				physx::PxRigidBodyExt::addLocalForceAtLocalPos(*v->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(v->ray_origins[j][VX], v->ray_origins[j][VY], v->ray_origins[j][VZ]));
+			}
+		}
+
+		// check if the vehicle is invincible
+		if (v->flags & VEHICLE_FLAG_INVINCIBLE)
+		{
+			collision_setupactor(v->body, COLLISION_FILTER_INVINCIBLE, COLLISION_FILTER_MISSILE | COLLISION_FILTER_MINE | COLLISION_FILTER_PICKUP | COLLISION_FILTER_VEHICLE);
+
+			printf("test\n");
+
+			v->timer_invincible--;
+
+			if (v->timer_invincible == 0)
+			{
+				v->flags &= ~VEHICLE_FLAG_INVINCIBLE;
+				collision_setupactor(v->body, COLLISION_FILTER_VEHICLE, COLLISION_FILTER_MISSILE | COLLISION_FILTER_MINE | COLLISION_FILTER_PICKUP | COLLISION_FILTER_INVINCIBLE);
 			}
 		}
 

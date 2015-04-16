@@ -124,7 +124,7 @@ static void loadrace(struct game* game)
 	for (i = 0; i < VEHICLE_COUNT; i++)
 		game->track.r_track.lights[i] = &game->vehiclemanager.vehicles[i].light;
 	game->vehiclemanager.r_vehicle.lights[0] = game->track_lights + 0;
-	game->vehiclemanager.r_vehicle.lights[1] = game->track_lights + 1;
+	//game->vehiclemanager.r_vehicle.lights[1] = game->track_lights + 1;
 
 	// add background music
 	game->songs[GAME_MUSIC_1_ID] = audiomanager_newmusic(&game->audiomanager, GAME_MUSIC_3_FILENAME);

@@ -13,13 +13,13 @@ A -             Use item, confirm selection<br>
 B -             Back to previous screen<br>
 Start -         Pause game<br>
 Left Bumper -   Previous song<br>
-RIght Bumper -  Next song<br>
+Right Bumper -  Next song<br>
 DPad -          Navigate menu, change settings<br>
 
-Debug Controls
+- Debug Controls -
 
-Back -              Reset your vehicle<br>
-Y -			        Enter debug camera mode<br>
+Back -          Reset your vehicle<br>
+Y -	            Enter debug camera mode<br>
 
 
 Keyboard controls
@@ -35,10 +35,10 @@ ESC -           Pause game<br>
 . -             Next song<br>
 Arrow keys -    Navigate menu, change settings<br>
 
-Debug Controls
+- Debug Controls -
 
-R -		Reset your vehicle<br>
-C -     Enter debug camera mode<br>
+R -             Reset your vehicle<br>
+C -             Enter debug camera mode<br>
 
-Q -		Wireframe rendering<br>
-P -		Pause music track<br>
+Q -	            Wireframe rendering<br>
+P -             Pause music track<br>
