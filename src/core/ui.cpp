@@ -564,7 +564,7 @@ void uimanager_render(struct uimanager* um, struct game* game)
 		renderguage(um, UI_HALIGN_CENTERLEFT, UI_VALIGN_CENTER, 20, (0 * UI_LIST_STRIDE) - 80, audiomanager_getmastervolume(um->am), 0 == um->index_menuselection);
 		renderguage(um, UI_HALIGN_CENTERLEFT, UI_VALIGN_CENTER, 20, (1 * UI_LIST_STRIDE) - 80, audiomanager_getmusicvolume(um->am), 1 == um->index_menuselection);
 		renderguage(um, UI_HALIGN_CENTERLEFT, UI_VALIGN_CENTER, 20, (2 * UI_LIST_STRIDE) - 80, audiomanager_getsfxvolume(um->am), 2 == um->index_menuselection);
-
+		renderguage(um, UI_HALIGN_CENTERLEFT, UI_VALIGN_CENTER, 20, (3 * UI_LIST_STRIDE) - 80, game->difficulty, 3 == um->index_menuselection);
 		sprintf(text, "%d", (int)game->laps);
 		renderstring(um, UI_HALIGN_CENTERLEFT, UI_VALIGN_CENTER, 20, (4 * UI_LIST_STRIDE) - 80, text, color, 4 == um->index_menuselection);
 
@@ -636,11 +636,12 @@ void uimanager_update(struct uimanager* um, struct game* game)
 			um->index_menuselection = (um->index_menuselection - 1) % UI_SETTINGS_COUNT;
 			audiomanager_playsfx(um->am, um->sfx_move, NULL, 0, false);
 		}
+
 		if (game->controller_main->buttons[INPUT_BUTTON_DLEFT] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
 		{
 			switch (um->index_menuselection){
 				case 4:
-					if(game->laps>0)
+					if(game->laps>1)
 						game->laps--;
 					break;
 			}
@@ -692,6 +693,19 @@ void uimanager_update(struct uimanager* um, struct game* game)
 				setting = 0.f;
 
 			audiomanager_setsfxvolume(um->am, setting);
+			break;
+
+		case 3:
+			setting = game->difficulty + adjust;
+
+			if (setting > 1.f)
+				setting = 1.f;
+			else if (setting < 0.f)
+				setting = 0.f;
+
+			game->difficulty = setting;
+			printf("%f\r",game->difficulty);
+			//audiomanager_setsfxvolume(um->am, setting);
 			break;
 	
 		}

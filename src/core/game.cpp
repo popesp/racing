@@ -469,6 +469,7 @@ int game_startup(struct game* game)
 	game->flags = GAME_FLAG_INIT;
 	game->state = GAME_STATE_MAINMENU;
 	game->laps = GAME_DEFAULT_LAPS;
+	game->difficulty = GAME_DEFAULT_DIFF;
 
 	return 1;
 }
