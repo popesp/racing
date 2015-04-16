@@ -134,7 +134,6 @@ static void loadrace(struct game* game)
 	game->index_currentsong = 0;
 	game->currentchannel = audiomanager_playmusic(&game->audiomanager, game->songs[game->index_currentsong], -1, true);
 
-	game->laps = GAME_DEFAULT_LAPS;
 
 	game->state = GAME_STATE_RACE;
 	game->timer_racestart = GAME_TIMER_RACESTART;
@@ -469,6 +468,7 @@ int game_startup(struct game* game)
 
 	game->flags = GAME_FLAG_INIT;
 	game->state = GAME_STATE_MAINMENU;
+	game->laps = GAME_DEFAULT_LAPS;
 
 	return 1;
 }

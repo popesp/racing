@@ -559,10 +559,14 @@ void uimanager_render(struct uimanager* um, struct game* game)
 		renderstring(um, UI_HALIGN_CENTERRIGHT, UI_VALIGN_CENTER, -20, (1 * UI_LIST_STRIDE) - 80, "Music    Volume:", color, false);
 		renderstring(um, UI_HALIGN_CENTERRIGHT, UI_VALIGN_CENTER, -20, (2 * UI_LIST_STRIDE) - 80, "Sound    Effect    Volume:", color, false);
 		renderstring(um, UI_HALIGN_CENTERRIGHT, UI_VALIGN_CENTER, -20, (3 * UI_LIST_STRIDE) - 80, "Game    Difficulty:", color, false);
+		renderstring(um, UI_HALIGN_CENTERRIGHT, UI_VALIGN_CENTER, -20, (4 * UI_LIST_STRIDE) - 80, "Number    of    laps:", color, false);
 
 		renderguage(um, UI_HALIGN_CENTERLEFT, UI_VALIGN_CENTER, 20, (0 * UI_LIST_STRIDE) - 80, audiomanager_getmastervolume(um->am), 0 == um->index_menuselection);
 		renderguage(um, UI_HALIGN_CENTERLEFT, UI_VALIGN_CENTER, 20, (1 * UI_LIST_STRIDE) - 80, audiomanager_getmusicvolume(um->am), 1 == um->index_menuselection);
 		renderguage(um, UI_HALIGN_CENTERLEFT, UI_VALIGN_CENTER, 20, (2 * UI_LIST_STRIDE) - 80, audiomanager_getsfxvolume(um->am), 2 == um->index_menuselection);
+
+		sprintf(text, "%d", (int)game->laps);
+		renderstring(um, UI_HALIGN_CENTERLEFT, UI_VALIGN_CENTER, 20, (4 * UI_LIST_STRIDE) - 80, text, color, 4 == um->index_menuselection);
 
 		// Press B to return
 		vec3f_set(color, UI_COLOR2);
@@ -632,6 +636,25 @@ void uimanager_update(struct uimanager* um, struct game* game)
 			um->index_menuselection = (um->index_menuselection - 1) % UI_SETTINGS_COUNT;
 			audiomanager_playsfx(um->am, um->sfx_move, NULL, 0, false);
 		}
+		if (game->controller_main->buttons[INPUT_BUTTON_DLEFT] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
+		{
+			switch (um->index_menuselection){
+				case 4:
+					if(game->laps>0)
+						game->laps--;
+					break;
+			}
+		}
+		if (game->controller_main->buttons[INPUT_BUTTON_DRIGHT] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
+		{
+			switch (um->index_menuselection){
+				case 4:
+					if(game->laps<10)
+						game->laps++;
+					break;
+			}
+		}
+
 
 		// change settings
 		adjust = ((game->controller_main->buttons[INPUT_BUTTON_DLEFT] & INPUT_STATE_DOWN) * -1.f) + ((game->controller_main->buttons[INPUT_BUTTON_DRIGHT] & INPUT_STATE_DOWN) * 1.f);
@@ -670,7 +693,9 @@ void uimanager_update(struct uimanager* um, struct game* game)
 
 			audiomanager_setsfxvolume(um->am, setting);
 			break;
+	
 		}
+		
 
 		if (game->controller_main->buttons[INPUT_BUTTON_B] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
 		{
