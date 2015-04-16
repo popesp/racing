@@ -103,6 +103,8 @@ struct game
 
 	unsigned char flags;
 	unsigned char state;
+
+	bool menupauseswitch;
 };
 
 

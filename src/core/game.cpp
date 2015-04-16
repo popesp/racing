@@ -134,7 +134,6 @@ static void loadrace(struct game* game)
 	game->index_currentsong = 0;
 	game->currentchannel = audiomanager_playmusic(&game->audiomanager, game->songs[game->index_currentsong], -1, true);
 
-
 	game->state = GAME_STATE_RACE;
 	game->timer_racestart = GAME_TIMER_RACESTART;
 
@@ -182,6 +181,8 @@ static void update(struct game* game)
 		break;
 
 	case GAME_STATE_RACE:
+		game->menupauseswitch = false;
+
 		if (game->timer_racestart <= 59)
 		{
 			if(game->timer_racestart>0)
@@ -222,6 +223,7 @@ static void update(struct game* game)
 			audiomanager_ingamepausedstate(&game->audiomanager, true);
 
 			game->uimanager.index_menuselection = 0;
+
 			game->state = GAME_STATE_PAUSEMENU;
 		}
 
@@ -470,6 +472,7 @@ int game_startup(struct game* game)
 	game->state = GAME_STATE_MAINMENU;
 	game->laps = GAME_DEFAULT_LAPS;
 	game->difficulty = GAME_DEFAULT_DIFF;
+	game->menupauseswitch = true;
 
 	return 1;
 }

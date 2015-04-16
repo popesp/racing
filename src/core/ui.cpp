@@ -162,6 +162,7 @@ static void pausemenu_option_mainmenu(struct game* game)
 {
 	endrace(game);
 
+	game->menupauseswitch = true;
 	game->state = GAME_STATE_MAINMENU;
 	game->uimanager.index_menuselection = 0;
 }
@@ -189,6 +190,7 @@ static void racedone_option_mainmenu(struct game* game)
 {
 	endrace(game);
 
+	game->menupauseswitch = true;
 	game->state = GAME_STATE_MAINMENU;
 	game->uimanager.index_menuselection = 0;
 }
@@ -559,14 +561,19 @@ void uimanager_render(struct uimanager* um, struct game* game)
 		renderstring(um, UI_HALIGN_CENTERRIGHT, UI_VALIGN_CENTER, -20, (1 * UI_LIST_STRIDE) - 80, "Music    Volume:", color, false);
 		renderstring(um, UI_HALIGN_CENTERRIGHT, UI_VALIGN_CENTER, -20, (2 * UI_LIST_STRIDE) - 80, "Sound    Effect    Volume:", color, false);
 		renderstring(um, UI_HALIGN_CENTERRIGHT, UI_VALIGN_CENTER, -20, (3 * UI_LIST_STRIDE) - 80, "Game    Difficulty:", color, false);
-		renderstring(um, UI_HALIGN_CENTERRIGHT, UI_VALIGN_CENTER, -20, (4 * UI_LIST_STRIDE) - 80, "Number    of    laps:", color, false);
+
+		if(game->menupauseswitch==true)
+			renderstring(um, UI_HALIGN_CENTERRIGHT, UI_VALIGN_CENTER, -20, (4 * UI_LIST_STRIDE) - 80, "Number    of    laps:", color, false);
 
 		renderguage(um, UI_HALIGN_CENTERLEFT, UI_VALIGN_CENTER, 20, (0 * UI_LIST_STRIDE) - 80, audiomanager_getmastervolume(um->am), 0 == um->index_menuselection);
 		renderguage(um, UI_HALIGN_CENTERLEFT, UI_VALIGN_CENTER, 20, (1 * UI_LIST_STRIDE) - 80, audiomanager_getmusicvolume(um->am), 1 == um->index_menuselection);
 		renderguage(um, UI_HALIGN_CENTERLEFT, UI_VALIGN_CENTER, 20, (2 * UI_LIST_STRIDE) - 80, audiomanager_getsfxvolume(um->am), 2 == um->index_menuselection);
 		renderguage(um, UI_HALIGN_CENTERLEFT, UI_VALIGN_CENTER, 20, (3 * UI_LIST_STRIDE) - 80, game->difficulty, 3 == um->index_menuselection);
-		sprintf(text, "%d", (int)game->laps);
-		renderstring(um, UI_HALIGN_CENTERLEFT, UI_VALIGN_CENTER, 20, (4 * UI_LIST_STRIDE) - 80, text, color, 4 == um->index_menuselection);
+
+		if(game->menupauseswitch==true){
+			sprintf(text, "%d", (int)game->laps);
+			renderstring(um, UI_HALIGN_CENTERLEFT, UI_VALIGN_CENTER, 20, (4 * UI_LIST_STRIDE) - 80, text, color, 4 == um->index_menuselection);
+		}
 
 		// Press B to return
 		vec3f_set(color, UI_COLOR2);
@@ -628,13 +635,23 @@ void uimanager_update(struct uimanager* um, struct game* game)
 		// move up and down in the menu
 		if (game->controller_main->buttons[INPUT_BUTTON_DDOWN] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
 		{
-			um->index_menuselection = (um->index_menuselection + 1) % UI_SETTINGS_COUNT;
-			audiomanager_playsfx(um->am, um->sfx_move, NULL, 0, false);
+			if(game->menupauseswitch==true){
+				um->index_menuselection = (um->index_menuselection + 1) % UI_SETTINGS_COUNT;
+				audiomanager_playsfx(um->am, um->sfx_move, NULL, 0, false);
+			}else{
+				um->index_menuselection = (um->index_menuselection + 1) % (UI_SETTINGS_COUNT-1);
+				audiomanager_playsfx(um->am, um->sfx_move, NULL, 0, false);
+			}
 		}
 		if (game->controller_main->buttons[INPUT_BUTTON_DUP] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
 		{
-			um->index_menuselection = (um->index_menuselection - 1) % UI_SETTINGS_COUNT;
-			audiomanager_playsfx(um->am, um->sfx_move, NULL, 0, false);
+			if(game->menupauseswitch==true){
+				um->index_menuselection = (um->index_menuselection - 1) % UI_SETTINGS_COUNT;
+				audiomanager_playsfx(um->am, um->sfx_move, NULL, 0, false);
+			}else{
+				um->index_menuselection = (um->index_menuselection - 1) % (UI_SETTINGS_COUNT-1);
+				audiomanager_playsfx(um->am, um->sfx_move, NULL, 0, false);
+			}
 		}
 
 		if (game->controller_main->buttons[INPUT_BUTTON_DLEFT] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
