@@ -3,6 +3,7 @@
 #include	"mine.h"
 #include	"missile.h"
 #include	"../../render/objloader.h"
+#include	"slowmine.h"
 #include	"turret.h"
 
 
@@ -11,7 +12,8 @@ static void (* initentity[ENTITY_TYPE_COUNT])(struct entity*, struct entitymanag
 {
 	missile_init,
 	mine_init,
-	turret_init
+	turret_init,
+	slowmine_init
 };
 
 // deletion function pointers
@@ -19,7 +21,8 @@ static void (* deleteentity[ENTITY_TYPE_COUNT])(struct entity*) =
 {
 	missile_delete,
 	mine_delete,
-	turret_delete
+	turret_delete,
+	slowmine_delete
 };
 
 // update function pointers
@@ -27,7 +30,8 @@ static void (* updateentity[ENTITY_TYPE_COUNT])(struct entity*, struct entityman
 {
 	missile_update,
 	mine_update,
-	turret_update
+	turret_update,
+	slowmine_update
 };
 
 
@@ -35,28 +39,32 @@ static char* entity_mesh_filename[ENTITY_TYPE_COUNT] =
 {
 	MISSILE_MESH_FILENAME,
 	MINE_MESH_FILENAME,
-	TURRET_MESH_FILENAME
+	TURRET_MESH_FILENAME,
+	SLOWMINE_MESH_FILENAME
 };
 
 static float entity_mesh_scale[ENTITY_TYPE_COUNT] =
 {
 	MISSILE_MESH_SCALE,
 	MINE_MESH_SCALE,
-	TURRET_MESH_SCALE
+	TURRET_MESH_SCALE,
+	SLOWMINE_MESH_SCALE
 };
 
 static float entity_mesh_yrotate[ENTITY_TYPE_COUNT] =
 {
 	MISSILE_MESH_YROTATE,
 	MINE_MESH_YROTATE,
-	TURRET_MESH_YROTATE
+	TURRET_MESH_YROTATE,
+	SLOWMINE_MESH_YROTATE
 };
 
 static vec3f entity_mesh_offset[ENTITY_TYPE_COUNT] =
 {
 	MISSILE_MESH_OFFSET,
 	MINE_MESH_OFFSET,
-	TURRET_MESH_OFFSET
+	TURRET_MESH_OFFSET,
+	SLOWMINE_MESH_OFFSET
 };
 
 
@@ -64,7 +72,8 @@ static char* entity_texture_filename_diffuse[ENTITY_TYPE_COUNT] =
 {
 	MISSILE_TEXTURE_FILENAME_DIFFUSE,
 	MINE_TEXTURE_FILENAME_DIFFUSE,
-	TURRET_TEXTURE_FILENAME_DIFFUSE
+	TURRET_TEXTURE_FILENAME_DIFFUSE,
+	SLOWMINE_TEXTURE_FILENAME_DIFFUSE
 };
 
 

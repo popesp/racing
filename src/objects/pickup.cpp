@@ -195,6 +195,10 @@ void pickupmanager_update(struct pickupmanager* pum)
 					{
 						v->powerup = VEHICLE_POWERUP_TURRET;
 						audiomanager_playsfx(pum->am, pum->sfx_upgrade, v->pos, 0, true);
+					} else if (p->type == PICKUP_TYPE_BOOST)
+					{
+						v->powerup = VEHICLE_POWERUP_SLOWMINE;
+						audiomanager_playsfx(pum->am, pum->sfx_upgrade, v->pos, 0, true);
 					} else
 					{
 						v->powerup = p->type;
@@ -211,6 +215,10 @@ void pickupmanager_update(struct pickupmanager* pum)
 					} else if (p->type == PICKUP_TYPE_MISSILE)
 					{
 						v->powerup = VEHICLE_POWERUP_ROCKETBOOST;
+						audiomanager_playsfx(pum->am, pum->sfx_upgrade, v->pos, 0, true);
+					} else if (p->type == PICKUP_TYPE_MINE)
+					{
+						v->powerup = VEHICLE_POWERUP_SLOWMINE;
 						audiomanager_playsfx(pum->am, pum->sfx_upgrade, v->pos, 0, true);
 					} else
 					{

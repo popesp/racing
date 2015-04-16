@@ -133,24 +133,32 @@ void aiplayer_updateinput(struct aiplayer* p, struct vehiclemanager* vm)
 
 	if (p->vehicle->flags & VEHICLE_FLAG_HASPOWERUP)
 	{
-		if(p->vehicle->powerup == VEHICLE_POWERUP_BOOST || p->vehicle->powerup == VEHICLE_POWERUP_LONGBOOST)
+		switch (p->vehicle->powerup)
 		{
-			if(p->vehicle->index_track==140||p->vehicle->index_track==160||p->vehicle->index_track==729){
+		case VEHICLE_POWERUP_BOOST:
+		case VEHICLE_POWERUP_LONGBOOST:
+			if(p->vehicle->index_track==140||p->vehicle->index_track==160||p->vehicle->index_track==729)
 				p->controller.buttons[INPUT_BUTTON_A] = (INPUT_STATE_CHANGED | INPUT_STATE_DOWN);
-				//printf("he used it\n");
-			}
-		} else if (p->vehicle->powerup == VEHICLE_POWERUP_MINE || p->vehicle->powerup == VEHICLE_POWERUP_MINEX2 || p->vehicle->powerup == VEHICLE_POWERUP_MINEX3)
-		{
-			// use mine (this occurs roughly once per 25 seconds)
+			break;
+
+		case VEHICLE_POWERUP_MINE:
+		case VEHICLE_POWERUP_MINEX2:
+		case VEHICLE_POWERUP_MINEX3:
+		case VEHICLE_POWERUP_TURRET:
+		case VEHICLE_POWERUP_SLOWMINE:
 			if (random_int(1500) == 0)
 				p->controller.buttons[INPUT_BUTTON_A] = (INPUT_STATE_CHANGED | INPUT_STATE_DOWN);
-		} else if (p->vehicle->powerup == VEHICLE_POWERUP_MISSILE || p->vehicle->powerup == VEHICLE_POWERUP_MISSILEX2 || p->vehicle->powerup == VEHICLE_POWERUP_MISSILEX3)
-		{
+			break;
+
+		case VEHICLE_POWERUP_MISSILE:
+		case VEHICLE_POWERUP_MISSILEX2:
+		case VEHICLE_POWERUP_MISSILEX3:
 			if (missiledetection(p, vm) && p->timer_missile == 0)
 			{
 				p->controller.buttons[INPUT_BUTTON_A] = (INPUT_STATE_CHANGED | INPUT_STATE_DOWN);
 				p->timer_missile = AIPLAYER_MISSILE_COOLDOWN;
 			}
+			break;
 		}
 	}
 }

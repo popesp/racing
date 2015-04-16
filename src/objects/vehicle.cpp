@@ -43,7 +43,8 @@ static char* powerup_texture_filename[VEHICLE_POWERUP_COUNT] =
 	VEHICLE_POWERUP_TEXTURE_FILENAME_MINEX3,
 	VEHICLE_POWERUP_TEXTURE_FILENAME_LONGBOOST,
 	VEHICLE_POWERUP_TEXTURE_FILENAME_TURRET,
-	VEHICLE_POWERUP_TEXTURE_FILENAME_ROCKETBOOST
+	VEHICLE_POWERUP_TEXTURE_FILENAME_ROCKETBOOST,
+	VEHICLE_POWERUP_TEXTURE_FILENAME_SLOWMINE
 };
 
 
@@ -131,6 +132,21 @@ static void rocketboostfunction(struct vehicle* v)
 	v->flags &= ~VEHICLE_FLAG_HASPOWERUP;
 }
 
+static void slowminefunction(struct vehicle* v)
+{
+	physx::PxTransform pose_vehicle, pose_spawn;
+	vec3f dim;
+
+	pose_vehicle = v->body->getGlobalPose();
+
+	vec3f_set(dim, VEHICLE_DIMENSIONS);
+	pose_spawn = pose_vehicle.transform(physx::PxTransform(0.f, 0.f, dim[VZ] + VEHICLE_POWERUP_MINE_SPAWNDIST));
+
+	entitymanager_newentity(v->vm->em, ENTITY_TYPE_SLOWMINE, v, pose_spawn);
+
+	v->flags &= ~VEHICLE_FLAG_HASPOWERUP;
+}
+
 static void (* powerupfunction[VEHICLE_POWERUP_COUNT])(struct vehicle*) =
 {
 	missilefunction,
@@ -142,7 +158,8 @@ static void (* powerupfunction[VEHICLE_POWERUP_COUNT])(struct vehicle*) =
 	minefunction,
 	longboostfunction,
 	turretfunction,
-	rocketboostfunction
+	rocketboostfunction,
+	slowminefunction
 };
 
 
@@ -172,7 +189,7 @@ static void createvehicle(struct vehicle* v, struct vehiclemanager* vm)
 
 	// create a physics object and add it to the scene
 	v->body = physx::PxCreateDynamic(*vm->pm->sdk, physx::PxTransform(physx::PxVec3(0.f, 0.f, 0.f)), physx::PxBoxGeometry(VEHICLE_DIMENSIONS), *vm->pm->default_material, VEHICLE_DENSITY);
-	collision_setupactor(v->body, COLLISION_FILTER_VEHICLE, COLLISION_FILTER_MISSILE | COLLISION_FILTER_MINE | COLLISION_FILTER_PICKUP | COLLISION_FILTER_INVINCIBLE);
+	collision_setupactor(v->body, COLLISION_FILTER_VEHICLE, COLLISION_FILTER_MISSILE | COLLISION_FILTER_MINE | COLLISION_FILTER_SLOWMINE | COLLISION_FILTER_PICKUP | COLLISION_FILTER_INVINCIBLE);
 	v->body->userData = v;
 
 	// add actor to scene
@@ -314,8 +331,8 @@ void vehiclemanager_shutdown(struct vehiclemanager* vm)
 
 static void vehicleinput(struct vehicle* v)
 {
-	vec3f force, boost, dim, offs;
-	float freq;
+	vec3f force, dim, offs;
+	float freq, forcemod;
 	unsigned i;
 
 	if (v->controller != NULL && v->controller->flags & INPUT_FLAG_ENABLED)
@@ -324,21 +341,32 @@ static void vehicleinput(struct vehicle* v)
 		for (i = 0; i < VEHICLE_COUNT_RAYCASTS; i++)
 			if (v->ray_touch[i])
 			{
-				vec3f_set(force, VEHICLE_FORWARD);
-				vec3f_scale(force, -VEHICLE_ACCELERATION * v->controller->axes[INPUT_AXIS_TRIGGERS]);
+				forcemod = -VEHICLE_ACCELERATION * v->controller->axes[INPUT_AXIS_TRIGGERS];
 
 				// check if the vehicle is boosting
 				if (v->flags & VEHICLE_FLAG_BOOSTING)
 				{
-					vec3f_set(boost, VEHICLE_FORWARD);
-					vec3f_scale(boost, VEHICLE_POWERUP_BOOST_STRENGTH);
-					vec3f_add(force, boost);
+					forcemod += VEHICLE_POWERUP_BOOST_STRENGTH;
 
 					v->timer_boost--;
 
 					if (v->timer_boost == 0)
 						v->flags &= ~VEHICLE_FLAG_BOOSTING;
 				}
+
+				// check if the vehicle is slowed
+				if (v->flags & VEHICLE_FLAG_SLOWED)
+				{
+					forcemod *= VEHICLE_POWERUP_SLOWMINE_STRENGTH;
+
+					v->timer_slow--;
+
+					if (v->timer_slow == 0)
+						v->flags &= ~VEHICLE_FLAG_SLOWED;
+				}
+
+				vec3f_set(force, VEHICLE_FORWARD);
+				vec3f_scale(force, forcemod);
 
 				// change engine sound frequency
 				freq = vec3f_length2(force) * VEHICLE_FREQSCALE;
@@ -561,7 +589,7 @@ void vehiclemanager_update(struct vehiclemanager* vm)
 		// check if the vehicle is invincible
 		if (v->flags & VEHICLE_FLAG_INVINCIBLE)
 		{
-			collision_setupactor(v->body, COLLISION_FILTER_INVINCIBLE, COLLISION_FILTER_MISSILE | COLLISION_FILTER_MINE | COLLISION_FILTER_PICKUP | COLLISION_FILTER_VEHICLE);
+			collision_setupactor(v->body, COLLISION_FILTER_INVINCIBLE, COLLISION_FILTER_MISSILE | COLLISION_FILTER_MINE | COLLISION_FILTER_SLOWMINE | COLLISION_FILTER_PICKUP | COLLISION_FILTER_VEHICLE);
 
 			printf("test\n");
 
@@ -570,7 +598,7 @@ void vehiclemanager_update(struct vehiclemanager* vm)
 			if (v->timer_invincible == 0)
 			{
 				v->flags &= ~VEHICLE_FLAG_INVINCIBLE;
-				collision_setupactor(v->body, COLLISION_FILTER_VEHICLE, COLLISION_FILTER_MISSILE | COLLISION_FILTER_MINE | COLLISION_FILTER_PICKUP | COLLISION_FILTER_INVINCIBLE);
+				collision_setupactor(v->body, COLLISION_FILTER_VEHICLE, COLLISION_FILTER_MISSILE | COLLISION_FILTER_MINE | COLLISION_FILTER_SLOWMINE | COLLISION_FILTER_PICKUP | COLLISION_FILTER_INVINCIBLE);
 			}
 		}
 
@@ -596,6 +624,16 @@ void vehiclemanager_update(struct vehiclemanager* vm)
 			v->body->setLinearVelocity(physx::PxVec3(0.f));
 			physx::PxRigidBodyExt::addForceAtLocalPos(*v->body, physx::PxVec3(MINE_LOCALFORCE), physx::PxVec3(0.f, 0.f, 0.f));
 			v->flags &= ~VEHICLE_FLAG_MINEHIT;
+		}
+
+		// check if a slow mine hit the vehicle
+		if (v->flags & VEHICLE_FLAG_SLOWMINEHIT)
+		{
+			v->body->clearForce();
+			v->body->setLinearVelocity(physx::PxVec3(0.f));
+			v->flags |= VEHICLE_FLAG_SLOWED;
+			v->timer_slow = VEHICLE_POWERUP_SLOWMINE_DURATION;
+			v->flags &= ~VEHICLE_FLAG_SLOWMINEHIT;
 		}
 	}
 
