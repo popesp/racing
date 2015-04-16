@@ -63,7 +63,7 @@ void physicsmanager_shutdown(struct physicsmanager* pm)
 void physicsmanager_update(struct physicsmanager* pm, float dt, struct game* game)
 {
 	struct vehicle* v;
-	if(game->timer_racestart == 299) {
+	if(game->timer_racestart == GAME_TIMER_RACESTART-1) {
 		for (int i = 0; i < VEHICLE_COUNT; i++) {
 			v = game->vehiclemanager.vehicles + i;
 			v->starting_pos = physx::PxVec3(v->body->getGlobalPose().p.x, v->body->getGlobalPose().p.y, v->body->getGlobalPose().p.z);
