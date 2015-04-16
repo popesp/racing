@@ -183,13 +183,17 @@ static void update(struct game* game)
 		break;
 
 	case GAME_STATE_RACE:
-		if (game->timer_racestart == 0)
+		if (game->timer_racestart <= 59)
 		{
+			if(game->timer_racestart>0)
+				game->timer_racestart--;
+
 			// set vehicle controllers
 			game->player.vehicle->controller = game->controller_main;
 			for (i = 0; i < GAME_AIPLAYER_COUNT; i++)
 				game->aiplayers[i].vehicle->controller = &game->aiplayers[i].controller;
-		} else
+		} 
+		else
 			game->timer_racestart--;
 
 		// update the debug camera TEMP
