@@ -44,7 +44,7 @@
 #define	VEHICLE_TEXTURE_DIFFUSE_FILENAME6				"res/models/car/uv_white.png"
 #define	VEHICLE_TEXTURE_DIFFUSE_FILENAME7				"res/models/car/uv_yellow.png"
 
-#define	VEHICLE_POWERUP_COUNT							10
+#define	VEHICLE_POWERUP_COUNT							11
 #define	VEHICLE_POWERUP_MISSILE							0
 #define	VEHICLE_POWERUP_MINE							1
 #define	VEHICLE_POWERUP_BOOST							2
@@ -55,6 +55,7 @@
 #define	VEHICLE_POWERUP_LONGBOOST						7
 #define	VEHICLE_POWERUP_TURRET							8
 #define	VEHICLE_POWERUP_ROCKETBOOST						9
+#define	VEHICLE_POWERUP_SLOWMINE						10
 
 #define	VEHICLE_POWERUP_TEXTURE_FILENAME_MISSILE		"res/models/powerup/missile.png"
 #define	VEHICLE_POWERUP_TEXTURE_FILENAME_MINE			"res/models/powerup/mine.png"
@@ -66,6 +67,7 @@
 #define	VEHICLE_POWERUP_TEXTURE_FILENAME_LONGBOOST		"res/models/powerup/boost_long.png"
 #define	VEHICLE_POWERUP_TEXTURE_FILENAME_TURRET			"res/models/powerup/turret.png"
 #define	VEHICLE_POWERUP_TEXTURE_FILENAME_ROCKETBOOST	"res/models/powerup/rocketboost.png"
+#define	VEHICLE_POWERUP_TEXTURE_FILENAME_SLOWMINE		"res/models/powerup/slowmine.png"
 
 #define	VEHICLE_POWERUP_MESH_FILENAME					"res/models/powerup/powerup.obj"
 #define	VEHICLE_POWERUP_MESH_SCALE						0.4f
@@ -83,6 +85,9 @@
 #define	VEHICLE_POWERUP_LONGBOOST_DURATION				360
 
 #define	VEHICLE_POWERUP_ROCKETBOOST_DURATION			180
+
+#define	VEHICLE_POWERUP_SLOWMINE_DURATION				300
+#define	VEHICLE_POWERUP_SLOWMINE_STRENGTH				0.6f
 
 #define	VEHICLE_DIMENSIONS								0.7254f, 0.3056f, 1.3884f
 #define	VEHICLE_DENSITY									0.8f
@@ -104,13 +109,15 @@
 #define	VEHICLE_FORWARD									0.f, 0.f, -1.f
 #define	VEHICLE_RIGHT									1.f, 0.f, 0.f
 
-#define	VEHICLE_FLAG_BOOSTING							0x01
-#define	VEHICLE_FLAG_HASPOWERUP							0x02
-#define	VEHICLE_FLAG_MISSILEHIT							0x04
-#define	VEHICLE_FLAG_MINEHIT							0x08
-#define	VEHICLE_FLAG_INVINCIBLE							0x10
-#define	VEHICLE_FLAG_CHECKPOINT1						0x20
-#define	VEHICLE_FLAG_CHECKPOINT2						0x40
+#define	VEHICLE_FLAG_BOOSTING							0x0001
+#define	VEHICLE_FLAG_HASPOWERUP							0x0002
+#define	VEHICLE_FLAG_MISSILEHIT							0x0004
+#define	VEHICLE_FLAG_MINEHIT							0x0008
+#define	VEHICLE_FLAG_SLOWMINEHIT						0x0010
+#define	VEHICLE_FLAG_INVINCIBLE							0x0020
+#define	VEHICLE_FLAG_SLOWED								0x0040
+#define	VEHICLE_FLAG_CHECKPOINT1						0x0080
+#define	VEHICLE_FLAG_CHECKPOINT2						0x0100
 #define	VEHICLE_FLAG_INIT								(VEHICLE_FLAG_CHECKPOINT1 | VEHICLE_FLAG_CHECKPOINT2)
 
 
@@ -137,13 +144,14 @@ struct vehicle
 
 	unsigned timer_boost;
 	unsigned timer_invincible;
+	unsigned timer_slow;
 
 	unsigned powerup;
 
 	unsigned lap;
 	unsigned place;
 
-	unsigned char flags;
+	unsigned short flags;
 };
 
 struct vehiclemanager

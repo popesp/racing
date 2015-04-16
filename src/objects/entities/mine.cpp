@@ -11,7 +11,7 @@ void mine_init(struct entity* e, struct entitymanager* em, struct vehicle* v, ph
 
 	// initialize the physx actor
 	e->body = physx::PxCreateDynamic(*em->pm->sdk, pose, physx::PxSphereGeometry(MINE_RADIUS), *em->pm->default_material, MINE_DENSITY);
-	collision_setupactor(e->body, COLLISION_FILTER_MINE, COLLISION_FILTER_MISSILE | COLLISION_FILTER_MINE | COLLISION_FILTER_VEHICLE | COLLISION_FILTER_INVINCIBLE);
+	collision_setupactor(e->body, COLLISION_FILTER_MINE, COLLISION_FILTER_MISSILE | COLLISION_FILTER_MINE | COLLISION_FILTER_SLOWMINE | COLLISION_FILTER_VEHICLE | COLLISION_FILTER_INVINCIBLE);
 	e->body->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, true);
 	e->body->userData = e;
 

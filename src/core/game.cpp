@@ -192,8 +192,7 @@ static void update(struct game* game)
 			game->player.vehicle->controller = game->controller_main;
 			for (i = 0; i < GAME_AIPLAYER_COUNT; i++)
 				game->aiplayers[i].vehicle->controller = &game->aiplayers[i].controller;
-		} 
-		else
+		}  else
 			game->timer_racestart--;
 
 		// update the debug camera TEMP

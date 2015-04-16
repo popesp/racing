@@ -122,6 +122,9 @@
     <ClCompile Include="src\core\ui.cpp">
       <Filter>src\core</Filter>
     </ClCompile>
+    <ClCompile Include="src\objects\entities\slowmine.cpp">
+      <Filter>src\objects\entities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\debug.h">
@@ -210,6 +213,9 @@
     </ClInclude>
     <ClInclude Include="src\core\ui.h">
       <Filter>headers\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\objects\entities\slowmine.h">
+      <Filter>headers\objects\entities</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

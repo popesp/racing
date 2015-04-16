@@ -92,6 +92,7 @@
     <ClCompile Include="src\objects\entities\entity.cpp" />
     <ClCompile Include="src\objects\entities\mine.cpp" />
     <ClCompile Include="src\objects\entities\missile.cpp" />
+    <ClCompile Include="src\objects\entities\slowmine.cpp" />
     <ClCompile Include="src\objects\entities\turret.cpp" />
     <ClCompile Include="src\objects\pickup.cpp" />
     <ClCompile Include="src\objects\vehicle.cpp" />
@@ -123,6 +124,7 @@
     <ClInclude Include="src\objects\entities\entity.h" />
     <ClInclude Include="src\objects\entities\mine.h" />
     <ClInclude Include="src\objects\entities\missile.h" />
+    <ClInclude Include="src\objects\entities\slowmine.h" />
     <ClInclude Include="src\objects\entities\turret.h" />
     <ClInclude Include="src\objects\pickup.h" />
     <ClInclude Include="src\objects\vehicle.h" />

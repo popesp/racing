@@ -10,7 +10,7 @@
 #define	MINE_MESH_YROTATE				0.f
 #define	MINE_MESH_OFFSET				0.f, 0.f, 0.f
 
-#define	MINE_TEXTURE_FILENAME_DIFFUSE	"res/models/mine/uv.png"
+#define	MINE_TEXTURE_FILENAME_DIFFUSE	"res/models/mine/uv_normal.png"
 
 #define	MINE_SFX_FILENAME_IDLE			"res/soundfx/mine_idle.wav"
 #define	MINE_SFX_FILENAME_EXPLODE		"res/soundfx/mine_explode.wav"
