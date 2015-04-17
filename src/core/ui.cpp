@@ -96,7 +96,7 @@ static void endrace(struct game* game)
 
 static char* menu_option_names[UI_MENU_OPTION_COUNT] =
 {
-	"Start      Game",
+	"Start    Game",
 	"Settings",
 	"Credits",
 	"Exit"
@@ -407,9 +407,7 @@ void uimanager_render(struct uimanager* um, struct game* game)
 {
 	unsigned i, lap;
 	char text[256];
-	
 	physx::PxMat44 transform;
-	
 	float angle;
 	vec3f color;
 	int x;
@@ -465,6 +463,7 @@ void uimanager_render(struct uimanager* um, struct game* game)
 		}
 		/* ------ */
 
+		/* --- Wrong way --- */
 		// transform local vectors
 		transform.operator=(game->player.vehicle->body->getGlobalPose());
 		vec3f forward;
@@ -479,6 +478,7 @@ void uimanager_render(struct uimanager* um, struct game* game)
 			vec3f_set(color, UI_COLOR1);
 			renderstring(um, UI_HALIGN_CENTER,UI_VALIGN_BOTTOM, 0,-50, "Wrong Way", color, false);
 		}
+		/* ------- */
 
 		/* --- Lap number --- */
 		lap = game->player.vehicle->lap;
@@ -706,7 +706,6 @@ void uimanager_update(struct uimanager* um, struct game* game)
 			}
 		}
 
-
 		// change settings
 		adjust = ((game->controller_main->buttons[INPUT_BUTTON_DLEFT] & INPUT_STATE_DOWN) * -1.f) + ((game->controller_main->buttons[INPUT_BUTTON_DRIGHT] & INPUT_STATE_DOWN) * 1.f);
 		adjust *= UI_SETTINGS_ADJUSTSCALE;
@@ -754,8 +753,6 @@ void uimanager_update(struct uimanager* um, struct game* game)
 				setting = 0.f;
 
 			game->difficulty = setting;
-			//printf("%f\r",game->difficulty);
-			//audiomanager_setsfxvolume(um->am, setting);
 			break;
 	
 		}
