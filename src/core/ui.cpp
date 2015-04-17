@@ -549,7 +549,7 @@ void uimanager_render(struct uimanager* um, struct game* game)
 				ptr[VZ] = -1.f;
 
 				// position on screen
-				ptr[VX] += 0.8f;
+				ptr[VX] += 0.85f;
 				ptr[VY] += 0.6f;
 
 				ptr += RENDER_ATTRIBSIZE_POS;
@@ -577,7 +577,7 @@ void uimanager_render(struct uimanager* um, struct game* game)
 				ptr[VZ] = -1.f;
 
 				// position on screen
-				ptr[VX] += 0.8f;
+				ptr[VX] += 0.85f;
 				ptr[VY] += 0.6f;
 
 				ptr += RENDER_ATTRIBSIZE_POS;
