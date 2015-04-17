@@ -16,7 +16,7 @@ Left Bumper -   Toggle minimap
 Right Bumper -  Next song<br>
 DPad -          Navigate menu, change settings<br>
 
-- Debug Controls (currently not in-game) -
+- Debug Controls (currently not in-game) 
 
 Back -          Reset your vehicle<br>
 Y -	            Enter debug camera mode<br>
@@ -35,7 +35,7 @@ ESC -           Pause game<br>
 . -             Next song<br>
 Arrow keys -    Navigate menu, change settings<br>
 
-- Debug Controls -
+- Debug Controls 
 
 R -             Reset your vehicle<br>
 C -             Enter debug camera mode<br>
