@@ -105,6 +105,8 @@ struct uimanager
 	FMOD_SOUND* sfx_select;
 	FMOD_SOUND* sfx_cancel;
 	FMOD_SOUND* menu_music;
+
+	FMOD_BOOL menu_playing;
 };
 
 
