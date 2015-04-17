@@ -153,6 +153,8 @@ struct vehicle
 	unsigned timer_invincible;
 	unsigned timer_slow;
 
+	physx::PxVec3 starting_pos;
+
 	unsigned powerup;
 
 	unsigned lap;

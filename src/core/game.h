@@ -37,7 +37,7 @@
 #define	GAME_DEFAULT_LAPS			2
 #define GAME_DEFAULT_DIFF			.5f
 
-#define	GAME_TIMER_RACESTART		300
+#define	GAME_TIMER_RACESTART		240
 
 #define	GAME_MUSIC_COUNT			4
 #define	GAME_MUSIC_1_ID				0

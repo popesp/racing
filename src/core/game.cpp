@@ -241,7 +241,7 @@ static void update(struct game* game)
 		pickupmanager_update(&game->pickupmanager);
 
 		// update physics simulation
-		physicsmanager_update(&game->physicsmanager, GAME_SPU);
+		physicsmanager_update(&game->physicsmanager, GAME_SPU, game);
 
 		// update player camera
 		player_updatecamera(&game->player);
@@ -277,7 +277,7 @@ static void update(struct game* game)
 		pickupmanager_update(&game->pickupmanager);
 
 		// update physics simulation
-		physicsmanager_update(&game->physicsmanager, GAME_SPU);
+		physicsmanager_update(&game->physicsmanager, GAME_SPU, game);
 
 		// update player camera
 		player_updatewincamera(&game->player, game->winningvehicle);
