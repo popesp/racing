@@ -183,7 +183,7 @@ static void update(struct game* game)
 
 	// update the user interface
 	uimanager_update(&game->uimanager, game);
-
+	
 	// update the audio manager
 	audiomanager_update(&game->audiomanager, game->player.camera.pos, game->player.camera.dir, game->player.camera.up);
 
@@ -238,6 +238,23 @@ static void update(struct game* game)
 
 			game->uimanager.index_menuselection = 0;
 			game->state = GAME_STATE_PAUSEMENU;
+		}
+
+		//Check if the car is going backwards
+		{
+
+			physx::PxMat44 transform(game->player.vehicle->body->getGlobalPose());
+			// transform local vectors
+			vec3f forward;
+			vec3f_set(forward, VEHICLE_FORWARD);
+			mat4f_transformvec3f(forward, (float*)&transform);
+			
+			vec3f tan;
+			vec3f_copy(tan, game->track.pathpoints[game->player.vehicle->index_track].tan);
+			float angle = vec3f_dot(forward, tan);
+			if(angle < 0)
+				printf("Backwards!");
+			
 		}
 
 		// update computer input processing
