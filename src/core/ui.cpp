@@ -46,12 +46,12 @@ static void resetrace(struct game* game)
 	pickupmanager_reset(&game->pickupmanager);
 
 	// reset game music
-	soundchannel_stop(game->currentchannel);
-	game->index_currentsong = 0;
-	game->currentchannel = audiomanager_playmusic(&game->audiomanager, game->songs[game->index_currentsong], -1, true);
+	//soundchannel_stop(game->currentchannel);
+	//game->index_currentsong = 0;
+	//game->currentchannel = audiomanager_playmusic(&game->audiomanager, game->songs[game->index_currentsong], -1, true);
 
-	// unpause in-game music
-	audiomanager_ingamepausedstate(&game->audiomanager, false);
+	//// unpause in-game music
+	//audiomanager_ingamepausedstate(&game->audiomanager, false);
 
 	game->state = GAME_STATE_RACE;
 	game->timer_racestart = GAME_TIMER_RACESTART;
@@ -211,11 +211,11 @@ static void (* racedone_option_function[UI_RACEDONE_OPTION_COUNT])(struct game*)
 
 static char* credits_names[UI_CREDITS_COUNT] =
 {
-	"Kurtis      Danyluk",
-	"Kyle      Kajorinne",
-	"John      Orton",
-	"Samuel      Evans",
-	"Shawn      Sutherland"
+	"Kurtis    Danyluk",
+	"Kyle    Kajorinne",
+	"John    Orton",
+	"Samuel    Evans",
+	"Shawn    Sutherland"
 };
 
 
@@ -532,7 +532,7 @@ void uimanager_render(struct uimanager* um, struct game* game)
 		/* ------ */
 
 		/* --- Minimap --- */
-		glLineWidth(8.f);
+		glLineWidth(7.f);
 		renderable_allocate(&game->renderer, &um->r_track, game->track.num_pathpoints + 1);
 		ptr = um->r_track.buf_verts;
 		for (i = 0; i <= game->track.num_pathpoints; i++)
@@ -580,7 +580,7 @@ void uimanager_render(struct uimanager* um, struct game* game)
 			if ((game->vehiclemanager.vehicles + i) == game->player.vehicle)
 				vec3f_set(ptr, 1.f, 0.f, 0.f);
 			else
-				vec3f_set(ptr, 0.5f, 0.5f, 0.5f);
+				vec3f_set(ptr, 0.f, 0.f, 1.f);
 			ptr += RENDER_ATTRIBSIZE_COL;
 		}
 
@@ -823,7 +823,6 @@ void uimanager_update(struct uimanager* um, struct game* game)
 	
 		}
 		
-
 		if (game->controller_main->buttons[INPUT_BUTTON_B] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
 		{
 			audiomanager_playsfx(um->am, um->sfx_cancel, NULL, 0, false);
@@ -886,12 +885,12 @@ void uimanager_update(struct uimanager* um, struct game* game)
 		}
 	
 	case GAME_STATE_RACE:
-		if (game->controller_main->buttons[INPUT_BUTTON_LB] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
+		/*if (game->controller_main->buttons[INPUT_BUTTON_LB] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
 		{
 			soundchannel_stop(game->currentchannel);
 			game->index_currentsong = (game->index_currentsong - 1) % GAME_MUSIC_COUNT;
 			game->currentchannel = audiomanager_playmusic(&game->audiomanager, game->songs[game->index_currentsong], -1, true);
-		}
+		}*/
 
 		if (game->controller_main->buttons[INPUT_BUTTON_RB] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
 		{
@@ -901,13 +900,13 @@ void uimanager_update(struct uimanager* um, struct game* game)
 		}
 
 		// debug button TEMP
-		if (game->controller_main->buttons[INPUT_BUTTON_Y] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
+		/*if (game->controller_main->buttons[INPUT_BUTTON_Y] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
 		{
 			if (game->flags & GAME_FLAG_DEBUGCAM)
 				game->flags &= ~GAME_FLAG_DEBUGCAM;
 			else
 				game->flags |= GAME_FLAG_DEBUGCAM;
-		}
+		}*/
 		break;
 	}
 }

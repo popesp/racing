@@ -411,11 +411,11 @@ static void vehicleinput(struct vehicle* v)
 		physx::PxRigidBodyExt::addLocalForceAtLocalPos(*v->body, physx::PxVec3(force[VX], force[VY], force[VZ]), physx::PxVec3(0.f, 0.f, -dim[VZ]));
 
 		// reset button
-		if (v->controller->buttons[INPUT_BUTTON_BACK] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
+		/*if (v->controller->buttons[INPUT_BUTTON_BACK] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
 		{
 			vec3f_set(offs, 0.f, 0.f, 0.f);
 			vehiclemanager_setvehicletrackpos(v->vm, v, v->index_track, offs);
-		}
+		}*/
 
 		// using powerups
 		if (v->controller->buttons[INPUT_BUTTON_A] == (INPUT_STATE_DOWN | INPUT_STATE_CHANGED))
