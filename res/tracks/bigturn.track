@@ -1,34 +1,32 @@
-npoints = 20
+npoints = 21
 looped = true
 
-point = pos(-20.0, 0.0, 0.0), tan(0.0, 0.0, -1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
+point = pos(-30.0, 0.0, 0.0), tan(0.0, 0.0, -1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
 point = pos(-40.0, 0.0, -50.0), tan(0.0, 0.0, -1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
 
 point = pos(-40.0, 0.0, -100.0), tan(0.0, 0.0, -1.0), angle(-0.69813), weight(50.0), width(12.0), subdivisions(20)
-point = pos(-60.0, 1.0, -120.0), tan(-1.0, 0.0, 0.0), angle(-0.87266), weight(50.0), width(12.0), subdivisions(20)
-point = pos(-80.0, 0.0, -50.0), tan(0.0, 0.0, 1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
+point = pos(-70.0, 1.0, -130.0), tan(-1.0, 0.0, 0.0), angle(-0.87266), weight(50.0), width(12.0), subdivisions(20)
+point = pos(-100.0, 0.0, -100.0), tan(0.0, 0.0, 1.0), angle(-0.51813), weight(50.0), width(12.0), subdivisions(20)
 
-
-point = pos(-80.0, 1.0, 20.0), tan(1.0, 0.0, 0.0), angle(-0.87266), weight(50.0), width(12.0), subdivisions(20)
+point = pos(-100.0, 0.0, 0.0), tan(0.0, 0.0, 1.0), angle(-0.51813), weight(50.0), width(12.0), subdivisions(20)
+point = pos(-70.0, 1.0, 40.0), tan(1.0, 0.0, 0.0), angle(-0.87266), weight(50.0), width(12.0), subdivisions(20)
 point = pos(-60.0, 0.0, 0.0), tan(0.0, 0.0, -1.0), angle(-0.51813), weight(50.0), width(12.0), subdivisions(20)
-
-
 
 point = pos(-60.0, -20.0, -100.0), tan(0.0, 0.0, -1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
 
 point = pos(-40.0, 0.0, -150.0), tan(0.0, 0.0, -1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
-point = pos(-20.0, 0.0, -200.0), tan(0.0, 0.0, -1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
+point = pos(-30.0, 0.0, -200.0), tan(0.0, 0.0, -1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
 
-point = pos(-20.0, 0.0, -250.0), tan(0.0, 0.0, -1.0), angle(0.69813), weight(50.0), width(12.0), subdivisions(20)
-point = pos(0.0, 1.0, -270.0), tan(1.0, 0.0, 0.0), angle(0.87266), weight(50.0), width(12.0), subdivisions(20)
-point = pos(20.0, 0.0, -250.0), tan(0.0, 0.0, 1.0), angle(0.69813), weight(50.0), width(12.0), subdivisions(20)
+point = pos(-30.0, 0.0, -250.0), tan(0.0, 0.0, -1.0), angle(0.69813), weight(50.0), width(12.0), subdivisions(20)
+point = pos(0.0, 1.0, -280.0), tan(1.0, 0.0, 0.0), angle(0.87266), weight(50.0), width(12.0), subdivisions(20)
+point = pos(30.0, 0.0, -250.0), tan(0.0, 0.0, 1.0), angle(0.69813), weight(50.0), width(12.0), subdivisions(20)
 
-point = pos(20.0, 0.0, -200.0), tan(0.0, 0.0, 1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
-point = pos(20.0, 0.0, -150.0), tan(0.0, 0.0, 1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
-point = pos(20.0, 0.0, -100.0), tan(0.0, 0.0, 1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
-point = pos(20.0, 0.0, -50.0), tan(0.0, 0.0, 1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
+point = pos(30.0, 0.0, -200.0), tan(0.0, 0.0, 1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
+point = pos(30.0, 0.0, -150.0), tan(0.0, 0.0, 1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
+point = pos(30.0, 0.0, -100.0), tan(0.0, 0.0, 1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
+point = pos(30.0, 0.0, -50.0), tan(0.0, 0.0, 1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
 
 
-point = pos(20.0, 0.0, 50.0), tan(0.0, 0.0, 1.0), angle(0.69813), weight(50.0), width(12.0), subdivisions(20)
-point = pos(0.0, 1.0, 70.0), tan(-1.0, 0.0, 0.0), angle(0.87266), weight(50.0), width(12.0), subdivisions(20)
-point = pos(-20.0, 0.0, 50.0), tan(0.0, 0.0, -1.0), angle(0.69813), weight(50.0), width(12.0), subdivisions(20)
+point = pos(30.0, 0.0, 50.0), tan(0.0, 0.0, 1.0), angle(0.69813), weight(50.0), width(12.0), subdivisions(20)
+point = pos(0.0, 1.0, 80.0), tan(-1.0, 0.0, 0.0), angle(0.87266), weight(50.0), width(12.0), subdivisions(20)
+point = pos(-30.0, 0.0, 50.0), tan(0.0, 0.0, -1.0), angle(0.69813), weight(50.0), width(12.0), subdivisions(20)
