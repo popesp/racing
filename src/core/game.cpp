@@ -68,7 +68,7 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 	}
 }
 
-static void menuscreen(struct game* game){
+void menuscreen(struct game* game){
 	vec3f up, pos, dir;
 	// set up vector
 	vec3f_set(up, 0.f, 1.f, 0.f);
@@ -80,7 +80,6 @@ static void menuscreen(struct game* game){
 	vec3f_set(pos, 0.f, 0.f, 0.f);
 	vec3f_set(dir, 0.f, 0.f, -1.f);
 	camera_init(&game->cam_debug, pos, dir, up);
-
 }
 
 static void loadrace(struct game* game)

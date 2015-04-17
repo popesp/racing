@@ -165,6 +165,8 @@ static void pausemenu_option_mainmenu(struct game* game)
 	game->menupauseswitch = true;
 	game->state = GAME_STATE_MAINMENU;
 	game->uimanager.index_menuselection = 0;
+
+	menuscreen(game);
 }
 
 static void (* pausemenu_option_function[UI_PAUSEMENU_OPTION_COUNT])(struct game*) =
@@ -193,6 +195,8 @@ static void racedone_option_mainmenu(struct game* game)
 	game->menupauseswitch = true;
 	game->state = GAME_STATE_MAINMENU;
 	game->uimanager.index_menuselection = 0;
+
+	menuscreen(game);
 }
 
 static void (* racedone_option_function[UI_RACEDONE_OPTION_COUNT])(struct game*) =
@@ -520,7 +524,7 @@ void uimanager_render(struct uimanager* um, struct game* game)
 			sprintf(text, "You lost!");
 
 		um->activefont = um->fonts + UI_FONT_AERO_MASSIVE;
-		vec3f_set(color, UI_COLOR2);
+		vec3f_set(color, UI_COLOR_RED);
 		renderstring(um, UI_HALIGN_CENTER, UI_VALIGN_TOP, 0, 170, text, color, false);
 		/* ------ */
 		break;
@@ -540,7 +544,7 @@ void uimanager_render(struct uimanager* um, struct game* game)
 
 		/* --- Game Paused --- */
 		um->activefont = um->fonts + UI_FONT_AERO_LARGE;
-		vec3f_set(color, UI_COLOR2);
+		vec3f_set(color, UI_COLOR_RED);
 		renderstring(um, UI_HALIGN_CENTER, UI_VALIGN_TOP, 0, 170, "Game Paused", color, false);
 		/* ------ */
 		break;
