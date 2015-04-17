@@ -97,7 +97,6 @@ static void endrace(struct game* game)
 	skybox_delete(&game->skybox);
 }
 
-
 static char* menu_option_names[UI_MENU_OPTION_COUNT] =
 {
 	"Start    Game",
@@ -524,6 +523,7 @@ void uimanager_render(struct uimanager* um, struct game* game)
 		vec3f_set(color, 0.f, 0.f, 1.f);
 		renderstring(um, UI_HALIGN_RIGHT, UI_VALIGN_BOTTOM, -50, -(50 + (int)font_sizes[UI_FONT_BEBAS_HUGE]), "Speed", color, false);
 
+
 		// actual speed value
 		sprintf(text, "%d", (int)game->player.vehicle->speed);
 
@@ -532,60 +532,64 @@ void uimanager_render(struct uimanager* um, struct game* game)
 		/* ------ */
 
 		/* --- Minimap --- */
-		glLineWidth(7.f);
-		renderable_allocate(&game->renderer, &um->r_track, game->track.num_pathpoints + 1);
-		ptr = um->r_track.buf_verts;
-		for (i = 0; i <= game->track.num_pathpoints; i++)
-		{
-			// copy track point over
-			vec3f_copy(ptr, game->track.pathpoints[i % game->track.num_pathpoints].pos);
-			vec3f_scale(ptr, UI_MINIMAP_SCALE);
-			ptr[VY] = -ptr[VZ];
-			ptr[VZ] = -1.f;
+		if(game->minimapenabled==true){
 
-			// position on screen
-			ptr[VX] += 0.6f;
-			ptr[VY] += 0.1f;
+			glLineWidth(7.f);
+			renderable_allocate(&game->renderer, &um->r_track, game->track.num_pathpoints + 1);
+			ptr = um->r_track.buf_verts;
+			for (i = 0; i <= game->track.num_pathpoints; i++)
+			{
+				// copy track point over
+				vec3f_copy(ptr, game->track.pathpoints[i % game->track.num_pathpoints].pos);
+				vec3f_scale(ptr, UI_MINIMAP_SCALE);
+				ptr[VY] = -ptr[VZ];
+				ptr[VZ] = -1.f;
 
-			ptr += RENDER_ATTRIBSIZE_POS;
+				// position on screen
+				ptr[VX] += 0.6f;
+				ptr[VY] += 0.1f;
 
-			vec3f_set(ptr, 1.f, 1.f, 1.f);
-			ptr += RENDER_ATTRIBSIZE_COL;
+				ptr += RENDER_ATTRIBSIZE_POS;
+
+				vec3f_set(ptr, 1.f, 1.f, 1.f);
+				ptr += RENDER_ATTRIBSIZE_COL;
+			}
+
+			renderable_sendbuffer(&game->renderer, &um->r_track);
+
+			mat4f identity;
+			mat4f_identity(identity);
+			renderable_render(&game->renderer, &um->r_track, identity, identity, 0);
+
+			glClear(GL_DEPTH_BUFFER_BIT);
+
+			glPointSize(7.f);
+			renderable_allocate(&game->renderer, &um->r_vehicles, VEHICLE_COUNT);
+			ptr = um->r_vehicles.buf_verts;
+			for (i = 0; i < VEHICLE_COUNT; i++)
+			{
+				vec3f_copy(ptr, game->vehiclemanager.vehicles[i].pos);
+				vec3f_scale(ptr, UI_MINIMAP_SCALE);
+				ptr[VY] = -ptr[VZ];
+				ptr[VZ] = -1.f;
+
+				// position on screen
+				ptr[VX] += 0.6f;
+				ptr[VY] += 0.1f;
+
+				ptr += RENDER_ATTRIBSIZE_POS;
+
+				if ((game->vehiclemanager.vehicles + i) == game->player.vehicle)
+					vec3f_set(ptr, 1.f, 0.f, 0.f);
+				else
+					vec3f_set(ptr, 0.f, 0.f, 1.f);
+				ptr += RENDER_ATTRIBSIZE_COL;
+			}
+
+			renderable_sendbuffer(&game->renderer, &um->r_vehicles);
+			renderable_render(&game->renderer, &um->r_vehicles, identity, identity, 0);
 		}
-
-		renderable_sendbuffer(&game->renderer, &um->r_track);
-
-		mat4f identity;
-		mat4f_identity(identity);
-		renderable_render(&game->renderer, &um->r_track, identity, identity, 0);
-
-		glClear(GL_DEPTH_BUFFER_BIT);
-
-		glPointSize(8.f);
-		renderable_allocate(&game->renderer, &um->r_vehicles, VEHICLE_COUNT);
-		ptr = um->r_vehicles.buf_verts;
-		for (i = 0; i < VEHICLE_COUNT; i++)
-		{
-			vec3f_copy(ptr, game->vehiclemanager.vehicles[i].pos);
-			vec3f_scale(ptr, UI_MINIMAP_SCALE);
-			ptr[VY] = -ptr[VZ];
-			ptr[VZ] = -1.f;
-
-			// position on screen
-			ptr[VX] += 0.6f;
-			ptr[VY] += 0.1f;
-
-			ptr += RENDER_ATTRIBSIZE_POS;
-
-			if ((game->vehiclemanager.vehicles + i) == game->player.vehicle)
-				vec3f_set(ptr, 1.f, 0.f, 0.f);
-			else
-				vec3f_set(ptr, 0.f, 0.f, 1.f);
-			ptr += RENDER_ATTRIBSIZE_COL;
-		}
-
-		renderable_sendbuffer(&game->renderer, &um->r_vehicles);
-		renderable_render(&game->renderer, &um->r_vehicles, identity, identity, 0);
+		
 		/* ------ */
 		break;
 
@@ -612,7 +616,7 @@ void uimanager_render(struct uimanager* um, struct game* game)
 								"HAL-9000","James T. Kirk", "River Tam","Marvin"
 								};
 			int j= 0;
-			for(int i = 0; i < 7; i++){
+			for(int i = 0; i < (VEHICLE_COUNT-1); i++){
 				if( game->aiplayers[i].vehicle == game->winningvehicle)
 					j = i;
 			}
@@ -885,12 +889,17 @@ void uimanager_update(struct uimanager* um, struct game* game)
 		}
 	
 	case GAME_STATE_RACE:
-		/*if (game->controller_main->buttons[INPUT_BUTTON_LB] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
+		if (game->controller_main->buttons[INPUT_BUTTON_LB] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
 		{
-			soundchannel_stop(game->currentchannel);
+			if(game->minimapenabled==true)
+				game->minimapenabled=false;
+			else
+				game->minimapenabled=true;
+
+			/*soundchannel_stop(game->currentchannel);
 			game->index_currentsong = (game->index_currentsong - 1) % GAME_MUSIC_COUNT;
-			game->currentchannel = audiomanager_playmusic(&game->audiomanager, game->songs[game->index_currentsong], -1, true);
-		}*/
+			game->currentchannel = audiomanager_playmusic(&game->audiomanager, game->songs[game->index_currentsong], -1, true);*/
+		}
 
 		if (game->controller_main->buttons[INPUT_BUTTON_RB] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
 		{

@@ -114,6 +114,7 @@ struct game
 	unsigned char state;
 
 	bool menupauseswitch;
+	bool minimapenabled;
 };
 
 

@@ -159,6 +159,7 @@ static void loadrace(struct game* game)
 
 	game->state = GAME_STATE_RACE;
 	game->timer_racestart = GAME_TIMER_RACESTART;
+	game->minimapenabled = true;
 
 	// reset the clock so no update cycles are lost when the race begins
 	glfwSetTime(0.);
