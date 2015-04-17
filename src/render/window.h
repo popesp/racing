@@ -19,7 +19,7 @@ struct GLFWwindow;
 struct window
 {
 	struct GLFWwindow* w;
-
+	
 	int width, height;
 
 	float near, far;

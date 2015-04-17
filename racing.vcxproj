@@ -107,6 +107,7 @@
     <ClCompile Include="src\render\texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="resource.h" />
     <ClInclude Include="src\audio\audio.h" />
     <ClInclude Include="src\core\player.h" />
     <ClInclude Include="src\core\game.h" />
@@ -153,6 +154,14 @@
     <None Include="shaders\txtrs.vert" />
     <None Include="shaders\wires.frag" />
     <None Include="shaders\wires.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="racing.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\images\ICON.bmp" />
+    <Image Include="res\images\ICON.ico" />
+    <Image Include="res\images\toolbar1.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

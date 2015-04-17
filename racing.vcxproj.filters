@@ -217,6 +217,9 @@
     <ClInclude Include="src\objects\entities\slowmine.h">
       <Filter>headers\objects\entities</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\bumpl.frag">
@@ -255,5 +258,13 @@
     <None Include="shaders\text.vert">
       <Filter>shaders</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="racing.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\images\ICON.ico" />
+    <Image Include="res\images\toolbar1.bmp" />
+    <Image Include="res\images\ICON.bmp" />
   </ItemGroup>
 </Project>
