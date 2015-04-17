@@ -516,9 +516,19 @@ void uimanager_render(struct uimanager* um, struct game* game)
 		/* --- You won/lost --- */
 		if (game->winningvehicle == game->player.vehicle)
 			sprintf(text, "You won!");
-		else
-			sprintf(text, "You lost!");
-
+		else{
+			char * names [] = {"Spock", "Shepard", "Darth Vader", "Han Solo",
+								"The Doctor", "Morpheus", "Cthulhu", "Agent Smith",
+								"Bender", "RoboCop", "Mulder","Buck Rogers",
+								"HAL-9000","James T. Kirk", "River Tam","Marvin"
+								};
+			int j= 0;
+			for(int i = 0; i < 7; i++){
+				if( game->aiplayers[i].vehicle == game->winningvehicle)
+					j = i;
+			}
+			sprintf(text, "%s Won!", names[j]);
+		}
 		um->activefont = um->fonts + UI_FONT_AERO_MASSIVE;
 		vec3f_set(color, UI_COLOR2);
 		renderstring(um, UI_HALIGN_CENTER, UI_VALIGN_TOP, 0, 170, text, color, false);

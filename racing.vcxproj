@@ -142,6 +142,7 @@
     <ClInclude Include="src\render\window.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="res\images\cursor1.cur" />
     <None Include="shaders\bumpl.frag" />
     <None Include="shaders\bumpl.vert" />
     <None Include="shaders\matsl.frag" />

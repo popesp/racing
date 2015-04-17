@@ -258,6 +258,7 @@
     <None Include="shaders\text.vert">
       <Filter>shaders</Filter>
     </None>
+    <None Include="res\images\cursor1.cur" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="racing.rc" />
