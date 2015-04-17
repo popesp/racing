@@ -68,6 +68,20 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 	}
 }
 
+static void menuscreen(struct game* game){
+	vec3f up, pos, dir;
+	// set up vector
+	vec3f_set(up, 0.f, 1.f, 0.f);
+
+	// initialize menu skybox
+	menuskybox_init(&game->skybox, &game->renderer);
+
+	// initialize debug camera
+	vec3f_set(pos, 0.f, 0.f, 0.f);
+	vec3f_set(dir, 0.f, 0.f, -1.f);
+	camera_init(&game->cam_debug, pos, dir, up);
+
+}
 
 static void loadrace(struct game* game)
 {
@@ -102,8 +116,8 @@ static void loadrace(struct game* game)
 		aiplayer_init(game->aiplayers + i, game->vehiclemanager.vehicles + i, &game->track);
 
 	// start up the pickup manager for the track
-	int track_indices[] = {50, 100, 150}; // test values
-	pickupmanager_startup(&game->pickupmanager, &game->audiomanager, &game->physicsmanager, &game->renderer, &game->track, 3, track_indices);
+	int track_indices[] = {50, 100, 150, 200}; // test values
+	pickupmanager_startup(&game->pickupmanager, &game->audiomanager, &game->physicsmanager, &game->renderer, &game->track, 4, track_indices);
 
 	// initialize debug camera TEMP
 	vec3f_set(pos, 0.f, 0.f, 0.f);
@@ -343,6 +357,22 @@ static void render(struct game* game)
 
 		// render pickups
 		pickupmanager_render(&game->pickupmanager, &game->renderer, global_wv);
+		break;
+	case GAME_STATE_MAINMENU:
+	case GAME_STATE_SETTINGS:
+	case GAME_STATE_CREDITS:
+		camera_gettransform(&game->cam_debug, global_wv);
+
+		mat4f_copy(skybox_wv, global_wv);
+		vec3f_set(skybox_wv + C3, 0.f, 0.f, 0.f);
+		skybox_wv[R3 + C3] = 1.f;
+
+		// render skybox
+		mat4f_identity(skybox_mw);
+		renderable_render(&game->renderer, &game->skybox.r_skybox, skybox_mw, skybox_wv, 0);
+
+		glClear(GL_DEPTH_BUFFER_BIT);
+		break;
 	}
 
 	// render user interface
@@ -473,6 +503,8 @@ int game_startup(struct game* game)
 	game->laps = GAME_DEFAULT_LAPS;
 	game->difficulty = GAME_DEFAULT_DIFF;
 	game->menupauseswitch = true;
+
+	menuscreen(game);
 
 	return 1;
 }

@@ -423,7 +423,7 @@ void uimanager_render(struct uimanager* um, struct game* game)
 
 		/* --- main menu title --- */
 		um->activefont = um->fonts + UI_FONT_AERO_MASSIVE;
-		vec3f_set(color, UI_COLOR2);
+		vec3f_set(color, UI_COLOR_RED);
 		renderstring(um, UI_HALIGN_CENTER, UI_VALIGN_TOP, 0, 170, GAME_TITLE, color, false);
 		/* ------ */
 		break;
@@ -549,7 +549,7 @@ void uimanager_render(struct uimanager* um, struct game* game)
 	case GAME_STATE_PAUSESETTINGS:
 		/* --- Settings Title --- */
 		um->activefont = um->fonts + UI_FONT_AERO_LARGE;
-		vec3f_set(color, UI_COLOR2);
+		vec3f_set(color, UI_COLOR_RED);
 		renderstring(um, UI_HALIGN_CENTER, UI_VALIGN_TOP, 0, 170, "Settings", color, false);
 		/* ------ */
 
@@ -584,7 +584,7 @@ void uimanager_render(struct uimanager* um, struct game* game)
 	case GAME_STATE_CREDITS:
 		/* --- Credits Title --- */
 		um->activefont = um->fonts + UI_FONT_AERO_LARGE;
-		vec3f_set(color, UI_COLOR2);
+		vec3f_set(color, UI_COLOR_RED);
 		renderstring(um, UI_HALIGN_CENTER, UI_VALIGN_TOP, 0, 170, "Credits", color, false);
 		/* ------ */
 

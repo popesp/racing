@@ -45,6 +45,7 @@
 #define	UI_COLOR1					1.f, 1.f, 1.f
 #define	UI_COLOR2					0.5f, 0.5f, 0.6f
 #define	UI_COLOR3					0.8f, 0.5f, 0.5f
+#define	UI_COLOR_RED				1.0f, 0.f, 0.f
 
 #define	UI_HALIGN_LEFT				0x00
 #define	UI_HALIGN_CENTER			0x01

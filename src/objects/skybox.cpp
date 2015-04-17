@@ -76,6 +76,36 @@ void skybox_init(struct skybox* sb, struct renderer* r)
 	sb->r_skybox.textures[RENDER_TEXTURE_DIFFUSE] = &sb->diffuse;
 }
 
+void menuskybox_init(struct skybox* sb, struct renderer* r)
+{
+	float* ptr;
+	int i;
+
+	renderable_init(&sb->r_skybox, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_S, RENDER_FLAG_NONE);
+	renderable_allocate(r, &sb->r_skybox, 36);
+
+	ptr = sb->r_skybox.buf_verts;
+
+	// generate skybox
+	for (i = 0; i < 36; i++)
+	{
+		vec3f_copy(ptr, skybox_pos[skybox_posindex[i]]);
+		ptr += RENDER_ATTRIBSIZE_POS;
+		
+		ptr[0] = skybox_uv[i][0];
+		ptr[1] = skybox_uv[i][1];
+		ptr += RENDER_ATTRIBSIZE_TEX;
+	}
+
+	renderable_sendbuffer(r, &sb->r_skybox);
+
+	// load texture file for the skybox
+	texture_init(&sb->diffuse);
+	texture_loadfile(&sb->diffuse, MENU_TEXTURE);
+	texture_upload(&sb->diffuse, RENDER_TEXTURE_DIFFUSE);
+	sb->r_skybox.textures[RENDER_TEXTURE_DIFFUSE] = &sb->diffuse;
+}
+
 void skybox_reset(struct skybox* sb)
 {
 	// get a new random skybox texture
