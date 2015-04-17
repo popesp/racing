@@ -407,6 +407,10 @@ void uimanager_render(struct uimanager* um, struct game* game)
 {
 	unsigned i, lap;
 	char text[256];
+	
+	physx::PxMat44 transform;
+	
+	float angle;
 	vec3f color;
 	int x;
 
@@ -460,6 +464,21 @@ void uimanager_render(struct uimanager* um, struct game* game)
 			renderable_allocate(&game->renderer, &um->activefont->renderable, strlen(text) * 6);
 		}
 		/* ------ */
+
+		// transform local vectors
+		transform.operator=(game->player.vehicle->body->getGlobalPose());
+		vec3f forward;
+		vec3f_set(forward, VEHICLE_FORWARD);
+		mat4f_transformvec3f(forward, (float*)&transform);
+			
+		vec3f tan;
+		vec3f_copy(tan, game->track.pathpoints[game->player.vehicle->index_track].tan);
+		angle = vec3f_dot(forward, tan);
+		if(angle < 0){
+			um->activefont = um->fonts + UI_FONT_BEBAS_MEDIUM;
+			vec3f_set(color, UI_COLOR1);
+			renderstring(um, UI_HALIGN_CENTER,UI_VALIGN_BOTTOM, 0,-50, "Wrong Way", color, false);
+		}
 
 		/* --- Lap number --- */
 		lap = game->player.vehicle->lap;
