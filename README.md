@@ -12,11 +12,11 @@ Left Stick -    Turn<br>
 A -             Use item, confirm selection<br>
 B -             Back to previous screen<br>
 Start -         Pause game<br>
-Left Bumper -   Previous song<br>
+Left Bumper -   Toggle minimap
 Right Bumper -  Next song<br>
 DPad -          Navigate menu, change settings<br>
 
-- Debug Controls -
+- Debug Controls (currently not in-game) -
 
 Back -          Reset your vehicle<br>
 Y -	            Enter debug camera mode<br>
