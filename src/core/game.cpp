@@ -101,7 +101,7 @@ static void loadrace(struct game* game)
 
 	// initialize track object
 	track_init(&game->track, &game->physicsmanager, up);
-	track_loadpointsfile(&game->track, "res/tracks/bigturn.track", &game->renderer);
+	track_loadpointsfile(&game->track, "res/tracks/BAMF.track", &game->renderer);
 	
 	// initialize start line sign renderable
 	vec3f dim, center;
@@ -201,6 +201,7 @@ static void update(struct game* game)
 	switch (game->state)
 	{
 	case GAME_STATE_LOADRACE:
+		
 		loadrace(game);
 		break;
 

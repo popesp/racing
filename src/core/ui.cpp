@@ -245,6 +245,8 @@ void uimanager_startup(struct uimanager* um, struct audiomanager* am, struct win
 	um->sfx_move = audiomanager_newsfx(am, UI_SFX_FILENAME_MOVE, false);
 	um->sfx_select = audiomanager_newsfx(am, UI_SFX_FILENAME_SELECT, false);
 	um->sfx_cancel = audiomanager_newsfx(am, UI_SFX_FILENAME_CANCEL, false);
+
+	um->menu_music = audiomanager_newmusic(am,UI_MSC_FILENAME_MENU);
 }
 
 void uimanager_shutdown(struct uimanager* um)
@@ -712,11 +714,18 @@ void uimanager_render(struct uimanager* um, struct game* game)
 void uimanager_update(struct uimanager* um, struct game* game)
 {
 	float adjust, setting;
-
+	FMOD_BOOL menu_playing;
 	switch (game->state)
 	{
 	case GAME_STATE_MAINMENU:
 		// move up and down in the menu
+		
+		FMOD_Channel_IsPlaying(game->currentchannel,&menu_playing);
+		if (!menu_playing){
+			game->currentchannel = audiomanager_playmusic(um->am,um->menu_music,-1,false);
+			menu_playing = true;
+		}
+
 		if (game->controller_main->buttons[INPUT_BUTTON_DDOWN] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
 		{
 			um->index_menuselection = (um->index_menuselection + 1) % UI_MENU_OPTION_COUNT;
@@ -892,6 +901,10 @@ void uimanager_update(struct uimanager* um, struct game* game)
 		}
 	
 	case GAME_STATE_RACE:
+		if (menu_playing){
+			soundchannel_stop(game->currentchannel);
+			menu_playing = false;
+		}
 		if (game->controller_main->buttons[INPUT_BUTTON_LB] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
 		{
 			if(game->minimapenabled==true)

@@ -64,6 +64,9 @@
 #define	UI_SFX_FILENAME_SELECT		"res/soundfx/ui_select.wav"
 #define	UI_SFX_FILENAME_CANCEL		"res/soundfx/ui_cancel.wav"
 
+#define	UI_MSC_FILENAME_MENU		"res/music/menumusic.mp3"
+
+
 
 struct glyph
 {
@@ -101,6 +104,7 @@ struct uimanager
 	FMOD_SOUND* sfx_move;
 	FMOD_SOUND* sfx_select;
 	FMOD_SOUND* sfx_cancel;
+	FMOD_SOUND* menu_music;
 };
 
 
