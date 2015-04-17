@@ -532,6 +532,9 @@ void uimanager_render(struct uimanager* um, struct game* game)
 		/* ------ */
 
 		/* --- Minimap --- */
+		mat4f temp;
+		mat4f_copy(temp, game->window.projection);
+		mat4f_identity(game->window.projection);
 		if(game->minimapenabled==true){
 
 			glLineWidth(7.f);
@@ -546,8 +549,8 @@ void uimanager_render(struct uimanager* um, struct game* game)
 				ptr[VZ] = -1.f;
 
 				// position on screen
-				ptr[VX] += 0.6f;
-				ptr[VY] += 0.1f;
+				ptr[VX] += 0.8f;
+				ptr[VY] += 0.6f;
 
 				ptr += RENDER_ATTRIBSIZE_POS;
 
@@ -574,8 +577,8 @@ void uimanager_render(struct uimanager* um, struct game* game)
 				ptr[VZ] = -1.f;
 
 				// position on screen
-				ptr[VX] += 0.6f;
-				ptr[VY] += 0.1f;
+				ptr[VX] += 0.8f;
+				ptr[VY] += 0.6f;
 
 				ptr += RENDER_ATTRIBSIZE_POS;
 
@@ -589,7 +592,7 @@ void uimanager_render(struct uimanager* um, struct game* game)
 			renderable_sendbuffer(&game->renderer, &um->r_vehicles);
 			renderable_render(&game->renderer, &um->r_vehicles, identity, identity, 0);
 		}
-		
+		mat4f_copy(game->window.projection, temp);
 		/* ------ */
 		break;
 
