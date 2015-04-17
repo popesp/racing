@@ -12,7 +12,7 @@ Left Stick -    Turn<br>
 A -             Use item, confirm selection<br>
 B -             Back to previous screen<br>
 Start -         Pause game<br>
-Left Bumper -   Toggle minimap
+Left Bumper -   Toggle minimap<br>
 Right Bumper -  Next song<br>
 DPad -          Navigate menu, change settings<br>
 
