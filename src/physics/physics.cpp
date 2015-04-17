@@ -3,7 +3,7 @@
 #include	"../mem.h"
 #include	"../objects/vehicle.h"
 #include	"../render/render.h"
-
+#include	"../core/game.h"
 
 using namespace physx;
 
@@ -60,10 +60,24 @@ void physicsmanager_shutdown(struct physicsmanager* pm)
 	param:	pm				physics manager
 	param:	dt				delta time
 */
-void physicsmanager_update(struct physicsmanager* pm, float dt)
+void physicsmanager_update(struct physicsmanager* pm, float dt, struct game* game)
 {
+	struct vehicle* v;
+	if(game->timer_racestart == GAME_TIMER_RACESTART-1) {
+		for (int i = 0; i < VEHICLE_COUNT; i++) {
+			v = game->vehiclemanager.vehicles + i;
+			v->starting_pos = physx::PxVec3(v->body->getGlobalPose().p.x, v->body->getGlobalPose().p.y, v->body->getGlobalPose().p.z);
+		}
+	}
 	pm->scene->simulate(dt);
 	pm->scene->fetchResults(true);
+
+	if (game->timer_racestart > 50) {
+		for (int i = 0; i < VEHICLE_COUNT; i++) {
+			v = game->vehiclemanager.vehicles + i;
+			v->body->setGlobalPose(physx::PxTransform(v->starting_pos.x, v->body->getGlobalPose().p.y, v->starting_pos.z));
+		}
+	}
 }
 
 PxRigidDynamic* physics_adddynamic_box(struct physicsmanager* pm, vec3f pos, vec3f dim)
