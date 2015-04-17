@@ -201,7 +201,9 @@ static void update(struct game* game)
 	switch (game->state)
 	{
 	case GAME_STATE_LOADRACE:
-		
+		soundchannel_stop(game->currentchannel);
+		game->uimanager.menu_playing = false;
+
 		loadrace(game);
 		break;
 
