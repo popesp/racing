@@ -103,6 +103,16 @@ static void loadrace(struct game* game)
 	track_init(&game->track, &game->physicsmanager, up);
 	track_loadpointsfile(&game->track, "res/tracks/bigturn.track", &game->renderer);
 	
+	// initialize start line sign renderable
+	vec3f dim, center;
+	renderable_init(&game->startsign, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
+	objloader_load(GAME_STARTSIGN_MESH_FILENAME, &game->renderer, &game->startsign, dim, center);
+	renderable_sendbuffer(&game->renderer, &game->startsign);
+	texture_init(&game->diffuse_startsign);
+	texture_loadfile(&game->diffuse_startsign, GAME_STARTSIGN_DIFFUSE_FILENAME);
+	texture_upload(&game->diffuse_startsign, RENDER_TEXTURE_DIFFUSE);
+	game->startsign.textures[RENDER_TEXTURE_DIFFUSE] = &game->diffuse_startsign;
+
 	// start up the entity manager for the track
 	entitymanager_startup(&game->entitymanager, &game->physicsmanager, &game->audiomanager, &game->renderer);
 
@@ -318,6 +328,7 @@ static void render(struct game* game)
 	physx::PxMat44 player_mw, aiplayer_mw;
 	mat4f global_wv, skybox_wv;
 	mat4f track_mw, skybox_mw;
+	mat4f sign_mw;
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -350,6 +361,12 @@ static void render(struct game* game)
 
 		// render players
 		vehiclemanager_render(&game->vehiclemanager, &game->renderer, global_wv);
+
+		track_transformindex(&game->track, sign_mw, 0);
+		mat4f_translatemul(sign_mw, 0.f, GAME_STARTSIGN_HEIGHT, 0.f);
+		mat4f_rotateymul(sign_mw, GAME_STARTSIGN_MESH_YROTATE);
+		mat4f_scalemul(sign_mw, GAME_STARTSIGN_MESH_SCALE, GAME_STARTSIGN_MESH_SCALE, GAME_STARTSIGN_MESH_SCALE);
+		renderable_render(&game->renderer, &game->startsign, sign_mw, global_wv, 0);
 
 		// render game entities
 		entitymanager_render(&game->entitymanager, &game->renderer, global_wv);

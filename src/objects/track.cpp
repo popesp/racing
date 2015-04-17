@@ -49,7 +49,7 @@ void track_init(struct track* t, struct physicsmanager* pm, vec3f up)
 	renderable_init(&t->r_track, RENDER_MODE_TRIANGLESTRIP, RENDER_TYPE_BUMP_L, RENDER_FLAG_NONE);
 
 	// initialize material properties
-	vec3f_set(t->r_track.material.amb, 0.f, 0.f, 0.f);
+	vec3f_set(t->r_track.material.amb, 0.3f, 0.3f, 0.3f);
 	vec3f_set(t->r_track.material.dif, 0.1f, 0.1f, 0.1f);
 	vec3f_set(t->r_track.material.spc, 0.5f, 0.5f, 0.5f);
 	t->r_track.material.shn = 100.f;

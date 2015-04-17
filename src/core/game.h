@@ -18,50 +18,56 @@
 #include	"ui.h"
 
 
-#define	GAME_DEFAULT_WIDTH			1280
-#define	GAME_DEFAULT_HEIGHT			800
-#define	GAME_DEFAULT_X				200
-#define	GAME_DEFAULT_Y				200
+#define	GAME_DEFAULT_WIDTH				1280
+#define	GAME_DEFAULT_HEIGHT				800
+#define	GAME_DEFAULT_X					200
+#define	GAME_DEFAULT_Y					200
 
-#define	GAME_TITLE					"Warped Steel"
+#define	GAME_TITLE						"Warped Steel"
 
-#define	GAME_UPS					60.f
-#define	GAME_SPU					1.f/GAME_UPS
+#define	GAME_UPS						60.f
+#define	GAME_SPU						1.f/GAME_UPS
 
-#define	GAME_CLEARCOLOR				0.1f, 0.1f, 0.1f
+#define	GAME_CLEARCOLOR					0.1f, 0.1f, 0.1f
 
-#define	GAME_POINTSIZE				10.f
+#define	GAME_POINTSIZE					10.f
 
-#define	GAME_AIPLAYER_COUNT			7
+#define	GAME_AIPLAYER_COUNT				7
 
-#define	GAME_DEFAULT_LAPS			4
-#define GAME_DEFAULT_DIFF			.5f
+#define	GAME_DEFAULT_LAPS				4
+#define GAME_DEFAULT_DIFF				.5f
 
-#define	GAME_TIMER_RACESTART		240
+#define	GAME_TIMER_RACESTART			240
 
-#define	GAME_MUSIC_COUNT			4
-#define	GAME_MUSIC_1_ID				0
-#define	GAME_MUSIC_2_ID				1
-#define	GAME_MUSIC_3_ID				2
-#define	GAME_MUSIC_4_ID				3
-#define	GAME_MUSIC_1_FILENAME		"res/music/Erasure Always.mp3"
-#define	GAME_MUSIC_2_FILENAME		"res/music/Daft Punk & The Glitch Mob - Derezzed.mp3"
-#define	GAME_MUSIC_3_FILENAME		"res/music/Full Force Forward.mp3"
-#define	GAME_MUSIC_4_FILENAME		"res/music/Daft Punk & Boys Noize - End Of Line.mp3"
+#define	GAME_STARTSIGN_MESH_FILENAME	"res/models/startsign/startsign.obj"
+#define	GAME_STARTSIGN_DIFFUSE_FILENAME	"res/models/startsign/uv.png"
+#define	GAME_STARTSIGN_HEIGHT			5.f
+#define GAME_STARTSIGN_MESH_YROTATE		-1.57080f
+#define	GAME_STARTSIGN_MESH_SCALE		2.f
 
-#define	GAME_FLAG_TERMINATED		0x01
-#define	GAME_FLAG_WIREFRAME			0x02
-#define	GAME_FLAG_DEBUGCAM			0x04
-#define	GAME_FLAG_INIT				0x00
+#define	GAME_MUSIC_COUNT				4
+#define	GAME_MUSIC_1_ID					0
+#define	GAME_MUSIC_2_ID					1
+#define	GAME_MUSIC_3_ID					2
+#define	GAME_MUSIC_4_ID					3
+#define	GAME_MUSIC_1_FILENAME			"res/music/Erasure Always.mp3"
+#define	GAME_MUSIC_2_FILENAME			"res/music/Daft Punk & The Glitch Mob - Derezzed.mp3"
+#define	GAME_MUSIC_3_FILENAME			"res/music/Full Force Forward.mp3"
+#define	GAME_MUSIC_4_FILENAME			"res/music/Daft Punk & Boys Noize - End Of Line.mp3"
 
-#define	GAME_STATE_MAINMENU			0x00
-#define	GAME_STATE_LOADRACE			0x01
-#define	GAME_STATE_RACE				0x03
-#define	GAME_STATE_RACEDONE			0x04
-#define	GAME_STATE_PAUSEMENU		0x05
-#define	GAME_STATE_SETTINGS			0x06
-#define	GAME_STATE_CREDITS			0x07
-#define	GAME_STATE_PAUSESETTINGS	0x08
+#define	GAME_FLAG_TERMINATED			0x01
+#define	GAME_FLAG_WIREFRAME				0x02
+#define	GAME_FLAG_DEBUGCAM				0x04
+#define	GAME_FLAG_INIT					0x00
+
+#define	GAME_STATE_MAINMENU				0x00
+#define	GAME_STATE_LOADRACE				0x01
+#define	GAME_STATE_RACE					0x03
+#define	GAME_STATE_RACEDONE				0x04
+#define	GAME_STATE_PAUSEMENU			0x05
+#define	GAME_STATE_SETTINGS				0x06
+#define	GAME_STATE_CREDITS				0x07
+#define	GAME_STATE_PAUSESETTINGS		0x08
 
 
 struct game
@@ -80,6 +86,9 @@ struct game
 
 	struct skybox skybox;
 	struct track track;
+
+	struct renderable startsign;
+	struct texture diffuse_startsign;
 
 	struct player player;
 	struct aiplayer aiplayers[GAME_AIPLAYER_COUNT];

@@ -86,6 +86,10 @@ static void endrace(struct game* game)
 	vehiclemanager_shutdown(&game->vehiclemanager);
 	entitymanager_shutdown(&game->entitymanager);
 
+	// delete start sign object
+	texture_delete(&game->diffuse_startsign);
+	renderable_deallocate(&game->startsign);
+
 	// delete the track
 	track_delete(&game->track);
 
