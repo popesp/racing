@@ -238,6 +238,10 @@ void uimanager_startup(struct uimanager* um, struct audiomanager* am, struct win
 	for (i = 0; i < UI_FONT_COUNT; i++)
 		font_generate(um->fonts + i, um, font_filenames[i], font_sizes[i]);
 
+	// minimap renderables
+	renderable_init(&um->r_track, RENDER_MODE_LINESTRIP, RENDER_TYPE_WIRE_S, RENDER_FLAG_DYNAMIC);
+	renderable_init(&um->r_vehicles, RENDER_MODE_POINTS, RENDER_TYPE_WIRE_S, RENDER_FLAG_DYNAMIC);
+
 	// create sounds
 	um->sfx_move = audiomanager_newsfx(am, UI_SFX_FILENAME_MOVE, false);
 	um->sfx_select = audiomanager_newsfx(am, UI_SFX_FILENAME_SELECT, false);
@@ -414,6 +418,7 @@ void uimanager_render(struct uimanager* um, struct game* game)
 	physx::PxMat44 transform;
 	float angle;
 	vec3f color;
+	float* ptr;
 	int x;
 
 	switch (game->state)
@@ -524,6 +529,63 @@ void uimanager_render(struct uimanager* um, struct game* game)
 
 		um->activefont = um->fonts + UI_FONT_BEBAS_HUGE;
 		renderstring(um, UI_HALIGN_RIGHT, UI_VALIGN_BOTTOM, -50, -50, text, color, false);
+		/* ------ */
+
+		/* --- Minimap --- */
+		glLineWidth(8.f);
+		renderable_allocate(&game->renderer, &um->r_track, game->track.num_pathpoints + 1);
+		ptr = um->r_track.buf_verts;
+		for (i = 0; i <= game->track.num_pathpoints; i++)
+		{
+			// copy track point over
+			vec3f_copy(ptr, game->track.pathpoints[i % game->track.num_pathpoints].pos);
+			vec3f_scale(ptr, UI_MINIMAP_SCALE);
+			ptr[VY] = -ptr[VZ];
+			ptr[VZ] = -1.f;
+
+			// position on screen
+			ptr[VX] += 0.6f;
+			ptr[VY] += 0.1f;
+
+			ptr += RENDER_ATTRIBSIZE_POS;
+
+			vec3f_set(ptr, 1.f, 1.f, 1.f);
+			ptr += RENDER_ATTRIBSIZE_COL;
+		}
+
+		renderable_sendbuffer(&game->renderer, &um->r_track);
+
+		mat4f identity;
+		mat4f_identity(identity);
+		renderable_render(&game->renderer, &um->r_track, identity, identity, 0);
+
+		glClear(GL_DEPTH_BUFFER_BIT);
+
+		glPointSize(8.f);
+		renderable_allocate(&game->renderer, &um->r_vehicles, VEHICLE_COUNT);
+		ptr = um->r_vehicles.buf_verts;
+		for (i = 0; i < VEHICLE_COUNT; i++)
+		{
+			vec3f_copy(ptr, game->vehiclemanager.vehicles[i].pos);
+			vec3f_scale(ptr, UI_MINIMAP_SCALE);
+			ptr[VY] = -ptr[VZ];
+			ptr[VZ] = -1.f;
+
+			// position on screen
+			ptr[VX] += 0.6f;
+			ptr[VY] += 0.1f;
+
+			ptr += RENDER_ATTRIBSIZE_POS;
+
+			if ((game->vehiclemanager.vehicles + i) == game->player.vehicle)
+				vec3f_set(ptr, 1.f, 0.f, 0.f);
+			else
+				vec3f_set(ptr, 0.5f, 0.5f, 0.5f);
+			ptr += RENDER_ATTRIBSIZE_COL;
+		}
+
+		renderable_sendbuffer(&game->renderer, &um->r_vehicles);
+		renderable_render(&game->renderer, &um->r_vehicles, identity, identity, 0);
 		/* ------ */
 		break;
 

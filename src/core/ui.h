@@ -58,6 +58,8 @@
 #define	UI_VALIGN_CENTER			0x01
 #define	UI_VALIGN_BOTTOM			0x02
 
+#define	UI_MINIMAP_SCALE			0.001f
+
 #define	UI_SFX_FILENAME_MOVE		"res/soundfx/ui_move.wav"
 #define	UI_SFX_FILENAME_SELECT		"res/soundfx/ui_select.wav"
 #define	UI_SFX_FILENAME_CANCEL		"res/soundfx/ui_cancel.wav"
@@ -93,6 +95,8 @@ struct uimanager
 	struct font* activefont;
 
 	struct renderable r_guage;
+	struct renderable r_track;
+	struct renderable r_vehicles;
 
 	FMOD_SOUND* sfx_move;
 	FMOD_SOUND* sfx_select;
