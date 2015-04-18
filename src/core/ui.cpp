@@ -46,12 +46,12 @@ static void resetrace(struct game* game)
 	pickupmanager_reset(&game->pickupmanager);
 
 	// reset game music
-	//soundchannel_stop(game->currentchannel);
-	//game->index_currentsong = 0;
-	//game->currentchannel = audiomanager_playmusic(&game->audiomanager, game->songs[game->index_currentsong], -1, true);
+	soundchannel_stop(game->currentchannel);
+	game->index_currentsong = 0;
+	game->currentchannel = audiomanager_playmusic(&game->audiomanager, game->songs[game->index_currentsong], -1, true);
 
 	//// unpause in-game music
-	//audiomanager_ingamepausedstate(&game->audiomanager, false);
+	audiomanager_ingamepausedstate(&game->audiomanager, false);
 
 	game->state = GAME_STATE_RACE;
 	game->timer_racestart = GAME_TIMER_RACESTART;
@@ -107,6 +107,11 @@ static char* menu_option_names[UI_MENU_OPTION_COUNT] =
 
 static void menu_option_play(struct game* game)
 {
+	if(game->uimanager.menu_playing==true){
+			soundchannel_stop(game->menuchannel);
+		}
+	game->uimanager.menu_playing = false;
+
 	game->state = GAME_STATE_LOADRACE;
 }
 
@@ -719,9 +724,9 @@ void uimanager_update(struct uimanager* um, struct game* game)
 	case GAME_STATE_MAINMENU:
 		// move up and down in the menu
 		
-		FMOD_Channel_IsPlaying(game->currentchannel,&um->menu_playing);
+		FMOD_Channel_IsPlaying(game->menuchannel,&um->menu_playing);
 		if (!um->menu_playing){
-			game->currentchannel = audiomanager_playmusic(um->am,um->menu_music,-1,false);
+			game->menuchannel = audiomanager_playmusic(um->am,um->menu_music,-1,false);
 			um->menu_playing = true;
 		}
 
@@ -900,9 +905,7 @@ void uimanager_update(struct uimanager* um, struct game* game)
 		}
 	
 	case GAME_STATE_RACE:
-		//if (um->menu_playing==true){
-			
-		//}
+		
 		if (game->controller_main->buttons[INPUT_BUTTON_LB] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
 		{
 			if(game->minimapenabled==true)

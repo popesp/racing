@@ -102,6 +102,7 @@ struct game
 	struct light track_lights[2];
 
 	FMOD_CHANNEL* currentchannel;
+	FMOD_CHANNEL* menuchannel;
 	int index_currentsong;
 	FMOD_SOUND* songs[GAME_MUSIC_COUNT];
 
