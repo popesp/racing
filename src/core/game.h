@@ -34,7 +34,7 @@
 
 #define	GAME_AIPLAYER_COUNT				7
 
-#define	GAME_DEFAULT_LAPS				4
+#define	GAME_DEFAULT_LAPS				3
 #define GAME_DEFAULT_DIFF				.5f
 
 #define	GAME_TIMER_RACESTART			240
