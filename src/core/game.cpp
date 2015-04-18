@@ -80,10 +80,6 @@ void menuscreen(struct game* game){
 	vec3f_set(pos, 0.f, 0.f, 0.f);
 	vec3f_set(dir, 0.f, 0.f, -1.f);
 	camera_init(&game->cam_debug, pos, dir, up);
-
-	// initialize track object
-	track_init(&game->track, &game->physicsmanager, up);
-	track_loadpointsfile(&game->track, "res/tracks/BAMF.track", &game->renderer);
 }
 
 static void loadrace(struct game* game)
