@@ -40,9 +40,9 @@ static void keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 	{
 		switch (key)
 		{
-		case GLFW_KEY_ESCAPE:
+		/*case GLFW_KEY_ESCAPE:
 			game->flags |= GAME_FLAG_TERMINATED;
-			break;
+			break;*/
 
 		case GLFW_KEY_P:
 			// pause the music
@@ -129,8 +129,8 @@ static void loadrace(struct game* game)
 		aiplayer_init(game->aiplayers + i, game->vehiclemanager.vehicles + i, &game->track);
 
 	// start up the pickup manager for the track
-	int track_indices[] = {50, 100, 150, 200}; // test values
-	pickupmanager_startup(&game->pickupmanager, &game->audiomanager, &game->physicsmanager, &game->renderer, &game->track, 4, track_indices);
+	int track_indices[] = {15,50, 100, 150, 205, 250, 275, 310}; // test values
+	pickupmanager_startup(&game->pickupmanager, &game->audiomanager, &game->physicsmanager, &game->renderer, &game->track, 8, track_indices);
 
 	// initialize debug camera TEMP
 	vec3f_set(pos, 0.f, 0.f, 0.f);
@@ -138,7 +138,7 @@ static void loadrace(struct game* game)
 	camera_init(&game->cam_debug, pos, dir, up);
 
 	// initialize lights TODO: rethink track lighting
-	vec3f_set(game->track_lights[0].pos, 0.f, 10.f, 0.f);
+	vec3f_set(game->track_lights[0].pos, -20.f, 30.f, -40.f);
 	vec3f_set(game->track_lights[0].dif, 1.f, 1.f, 1.f);
 	vec3f_set(game->track_lights[0].spc, 1.f, 1.f, 1.f);
 

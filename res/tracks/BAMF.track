@@ -1,8 +1,7 @@
 npoints = 31
 looped = true
 
-point = pos(-20.0, 0.0, 0.0), tan(0.0, 0.0, -1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
-point = pos(-20.0, 0.0, -60.0), tan(1.0, 0.0, -1.0), angle(0.1745), weight(50.0), width(12.0), subdivisions(20)
+point = pos(-10.0, 0.0, -60.0), tan(1.0, 0.0, -1.0), angle(0.1745), weight(50.0), width(12.0), subdivisions(20)
 
 point = pos(20.0, 0.0, -120.0), tan(1.0, 0.0, -1.0), angle(0.1745), weight(50.0), width(12.0), subdivisions(20)
 
@@ -47,6 +46,6 @@ point = pos(120.0, -20.0, 110.0), tan(0.0, 0.0, 1.0), angle(0.150), weight(50.0)
 
 point = pos(90.0, -15.0, 140.0), tan(-1.0, 0.0, 0.0), angle(0.150), weight(50.0), width(12.0), subdivisions(20)
 
-point = pos(50.0, -5.0, 80.0), tan(0.0, 0.0, -1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
+point = pos(50.0, -5.0, 80.0), tan(-1.0, 0.0, -1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
 
-
+point = pos(-10.0, -2.0, 40.0), tan(0.0, 0.0, -1.0), angle(0.0), weight(50.0), width(12.0), subdivisions(20)
