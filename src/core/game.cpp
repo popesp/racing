@@ -80,10 +80,6 @@ void menuscreen(struct game* game){
 	vec3f_set(pos, 0.f, 0.f, 0.f);
 	vec3f_set(dir, 0.f, 0.f, -1.f);
 	camera_init(&game->cam_debug, pos, dir, up);
-
-	// initialize track object
-	track_init(&game->track, &game->physicsmanager, up);
-	track_loadpointsfile(&game->track, "res/tracks/BAMF.track", &game->renderer);
 }
 
 static void loadrace(struct game* game)
@@ -105,8 +101,12 @@ static void loadrace(struct game* game)
 
 	// initialize track object
 	track_init(&game->track, &game->physicsmanager, up);
-	track_loadpointsfile(&game->track, "res/tracks/BAMF.track", &game->renderer);
-	
+
+	if(game->mapselected==false)
+		track_loadpointsfile(&game->track, "res/tracks/BAMF.track", &game->renderer);
+	else
+		track_loadpointsfile(&game->track, "res/tracks/bigturn.track", &game->renderer);
+
 	// initialize start line sign renderable
 	vec3f dim, center;
 	renderable_init(&game->startsign, RENDER_MODE_TRIANGLES, RENDER_TYPE_TXTR_L, RENDER_FLAG_NONE);
@@ -383,6 +383,7 @@ static void render(struct game* game)
 	case GAME_STATE_MAINMENU:
 	case GAME_STATE_SETTINGS:
 	case GAME_STATE_CREDITS:
+	case GAME_STATE_CHOOSEMAP:
 		camera_gettransform(&game->cam_debug, global_wv);
 
 		mat4f_copy(skybox_wv, global_wv);

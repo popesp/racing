@@ -10,7 +10,7 @@
 #include	"../render/texture.h"
 
 
-#define	UI_MENU_OPTION_COUNT		4
+#define	UI_MENU_OPTION_COUNT		5
 #define	UI_PAUSEMENU_OPTION_COUNT	4
 #define	UI_RACEDONE_OPTION_COUNT	2
 #define	UI_CREDITS_COUNT			5

@@ -50,7 +50,7 @@ static void resetrace(struct game* game)
 	game->index_currentsong = 0;
 	game->currentchannel = audiomanager_playmusic(&game->audiomanager, game->songs[game->index_currentsong], -1, true);
 
-	//// unpause in-game music
+	// unpause in-game music
 	audiomanager_ingamepausedstate(&game->audiomanager, false);
 
 	game->state = GAME_STATE_RACE;
@@ -101,6 +101,7 @@ static char* menu_option_names[UI_MENU_OPTION_COUNT] =
 {
 	"Start    Game",
 	"Settings",
+	"Select    Map",
 	"Credits",
 	"Exit"
 };
@@ -126,6 +127,12 @@ static void menu_option_credits(struct game* game)
 	game->state = GAME_STATE_CREDITS;
 }
 
+static void menu_option_mapchoose(struct game* game)
+{
+	game->mapselected = true;
+	game->state = GAME_STATE_CHOOSEMAP;
+}
+
 static void menu_option_exit(struct game* game)
 {
 	game->flags |= GAME_FLAG_TERMINATED;
@@ -135,6 +142,7 @@ static void (* menu_option_function[UI_MENU_OPTION_COUNT])(struct game*) =
 {
 	menu_option_play,
 	menu_option_settings,
+	menu_option_mapchoose,
 	menu_option_credits,
 	menu_option_exit
 };
@@ -712,6 +720,130 @@ void uimanager_render(struct uimanager* um, struct game* game)
 		renderstring(um, UI_HALIGN_RIGHT, UI_VALIGN_BOTTOM, -50, -50, UI_BACK_MESSAGE, color, false);
 		/* ------ */
 		break;
+	case GAME_STATE_CHOOSEMAP:
+		/* --- Choose Map Title --- */
+		um->activefont = um->fonts + UI_FONT_AERO_LARGE;
+		vec3f_set(color, UI_COLOR_RED);
+		renderstring(um, UI_HALIGN_CENTER, UI_VALIGN_TOP, 0, 170, "Select Map", color, false);
+		/* ------ */
+
+		/* --- Credits Text --- */
+		um->activefont = um->fonts + UI_FONT_BEBAS_MEDIUM;
+		vec3f_set(color, UI_COLOR1);
+		renderstring(um, UI_HALIGN_CENTER, UI_VALIGN_CENTER, -200, 150, "'Big Turn'", color, false);
+		renderstring(um, UI_HALIGN_CENTER, UI_VALIGN_CENTER, 200, 150, "'The BAMF'", color, false);
+
+		vec3f_set(color, UI_COLOR_BLUE);
+		if(game->mapselected==true)
+			renderstring(um, UI_HALIGN_CENTER, UI_VALIGN_CENTER, -200, 160, "______", color, false);
+		else
+			renderstring(um, UI_HALIGN_CENTER, UI_VALIGN_CENTER, 200, 160, "______", color, false);
+
+		// Press B to return
+		vec3f_set(color, UI_COLOR2);
+		renderstring(um, UI_HALIGN_RIGHT, UI_VALIGN_BOTTOM, -50, -50, UI_BACK_MESSAGE, color, false);
+		/* ------ */
+
+
+		mat4f_copy(temp, game->window.projection);
+		mat4f_identity(game->window.projection);
+
+		// initialize track object
+		vec3f up;
+		vec3f_set(up, 0.f, 1.f, 0.f);
+		track_init(&game->track, &game->physicsmanager, up);
+		track_loadpointsfile(&game->track, "res/tracks/bigturn.track", &game->renderer);
+
+		glLineWidth(7.f);
+		// update the user interface
+		uimanager_update(&game->uimanager, game);
+
+		renderable_allocate(&game->renderer, &um->r_track, game->track.num_pathpoints + 1);
+		ptr = um->r_track.buf_verts;
+		for (i = 0; i <= game->track.num_pathpoints; i++)
+		{
+			// update the user interface
+			uimanager_update(&game->uimanager, game);
+
+			// copy track point over
+			vec3f_copy(ptr, game->track.pathpoints[i % game->track.num_pathpoints].pos);
+			vec3f_scale(ptr, UI_MINIMAP_SCALE);
+			ptr[VY] = -ptr[VZ];
+			ptr[VZ] = -1.f;
+
+			// position on screen
+			ptr[VX] -= .25f;
+			ptr[VY] -= 0.08f;
+
+			ptr += RENDER_ATTRIBSIZE_POS;
+
+			vec3f_set(ptr, 1.f, 1.f, 1.f);
+			ptr += RENDER_ATTRIBSIZE_COL;
+		}
+
+		renderable_sendbuffer(&game->renderer, &um->r_track);
+
+		mat4f identity;
+		mat4f_identity(identity);
+		renderable_render(&game->renderer, &um->r_track, identity, identity, 0);
+
+		glClear(GL_DEPTH_BUFFER_BIT);
+
+		mat4f_copy(game->window.projection, temp);
+
+		// delete the track
+		track_delete(&game->track);
+
+		// update the user interface
+		uimanager_update(&game->uimanager, game);
+
+
+		track_init(&game->track, &game->physicsmanager, up);
+		track_loadpointsfile(&game->track, "res/tracks/BAMF.track", &game->renderer);
+
+		glLineWidth(7.f);
+		// update the user interface
+		uimanager_update(&game->uimanager, game);
+		renderable_allocate(&game->renderer, &um->r_track, game->track.num_pathpoints + 1);
+		ptr = um->r_track.buf_verts;
+		for (i = 0; i <= game->track.num_pathpoints; i++)
+		{
+			// update the user interface
+			uimanager_update(&game->uimanager, game);
+			// copy track point over
+			vec3f_copy(ptr, game->track.pathpoints[i % game->track.num_pathpoints].pos);
+			vec3f_scale(ptr, UI_MINIMAP_SCALE);
+			ptr[VY] = -ptr[VZ];
+			ptr[VZ] = -1.f;
+
+			// position on screen
+			ptr[VX] += 0.25f;
+			ptr[VY] += 0.05f;
+
+			ptr += RENDER_ATTRIBSIZE_POS;
+
+			vec3f_set(ptr, 1.f, 1.f, 1.f);
+			ptr += RENDER_ATTRIBSIZE_COL;
+		}
+
+		renderable_sendbuffer(&game->renderer, &um->r_track);
+
+		mat4f_identity(identity);
+		// update the user interface
+		uimanager_update(&game->uimanager, game);
+		renderable_render(&game->renderer, &um->r_track, identity, identity, 0);
+
+		glClear(GL_DEPTH_BUFFER_BIT);
+
+		mat4f_copy(game->window.projection, temp);
+
+		// delete the track
+		track_delete(&game->track);
+
+		// update the user interface
+		uimanager_update(&game->uimanager, game);
+
+		break;
 	}
 }
 
@@ -861,6 +993,23 @@ void uimanager_update(struct uimanager* um, struct game* game)
 			audiomanager_playsfx(um->am, um->sfx_cancel, NULL, 0, false);
 			game->state = GAME_STATE_MAINMENU;
 		}
+		break;
+
+	case GAME_STATE_CHOOSEMAP:
+		if (game->controller_main->buttons[INPUT_BUTTON_B] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))
+		{
+			audiomanager_playsfx(um->am, um->sfx_cancel, NULL, 0, false);
+			game->state = GAME_STATE_MAINMENU;
+		}
+
+		if ((game->controller_main->buttons[INPUT_BUTTON_DRIGHT] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN))||(game->controller_main->buttons[INPUT_BUTTON_DLEFT] == (INPUT_STATE_CHANGED | INPUT_STATE_DOWN)))
+		{
+			if(game->mapselected==true)
+				game->mapselected=false;
+			else
+				game->mapselected=true;
+		}
+
 		break;
 
 	case GAME_STATE_PAUSEMENU:

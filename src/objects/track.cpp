@@ -74,7 +74,9 @@ void track_delete(struct track* t)
 {
 	mem_free(t->points);
 	mem_free(t->pathpoints);
-
+	
+	texture_delete(&t->diffuse);
+	texture_delete(&t->normal);
 	renderable_deallocate(&t->r_track);
 }
 

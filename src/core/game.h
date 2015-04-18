@@ -68,6 +68,7 @@
 #define	GAME_STATE_SETTINGS				0x06
 #define	GAME_STATE_CREDITS				0x07
 #define	GAME_STATE_PAUSESETTINGS		0x08
+#define	GAME_STATE_CHOOSEMAP			0x64
 
 
 struct game
@@ -116,6 +117,9 @@ struct game
 
 	bool menupauseswitch;
 	bool minimapenabled;
+
+	//FALSE=BAMF TRU=BIGTURN
+	bool mapselected;
 };
 
 
