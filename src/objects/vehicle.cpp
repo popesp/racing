@@ -204,7 +204,7 @@ static void createvehicle(struct vehicle* v, struct vehiclemanager* vm)
 	v->body->setAngularDamping(VEHICLE_DAMP_ANGULAR);
 
 	// initialize the audio channel
-	v->channel = audiomanager_playsfx(vm->am, vm->sfx_engine_start, v->pos, 0, true, 0.2f);
+	v->channel = audiomanager_playsfx(vm->am, vm->sfx_engine_start, v->pos, 0, true, 0.4f);
 	FMOD_Channel_SetCallback(v->channel, enginecallback);
 	FMOD_Channel_SetUserData(v->channel, v);
 
@@ -633,6 +633,7 @@ void vehiclemanager_update(struct vehiclemanager* vm)
 			v->body->setLinearVelocity(physx::PxVec3(0.f));
 			physx::PxRigidBodyExt::addForceAtLocalPos(*v->body, physx::PxVec3(MISSILE_LOCALFORCE), physx::PxVec3(0.f, 0.f, 0.f));
 			v->flags &= ~VEHICLE_FLAG_MISSILEHIT;
+			audiomanager_playsfx(vm->am, vm->em->sfx_missile_explode, v->pos, 0, true);
 		}
 
 		// check if a mine hit the vehicle

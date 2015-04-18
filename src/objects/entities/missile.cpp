@@ -56,7 +56,7 @@ void missile_update(struct entity* e, struct entitymanager* em)
 	// check if the missile has hit anything
 	if (e->flags & ENTITY_FLAG_HIT)
 	{
-		audiomanager_playsfx(em->am, em->sfx_missile_explode, e->pos, 0, true);
+		//audiomanager_playsfx(em->am, em->sfx_missile_explode, e->pos, 0, true);
 		missile_delete(e);
 		return;
 	}

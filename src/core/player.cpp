@@ -148,13 +148,14 @@ void aiplayer_updateinput(struct aiplayer* p, struct vehiclemanager* vm, float d
 		case VEHICLE_POWERUP_MINEX3:
 		case VEHICLE_POWERUP_TURRET:
 		case VEHICLE_POWERUP_SLOWMINE:
-			if (random_int(1500) == 0)
+			if (random_int(1000) == 0)
 				p->controller.buttons[INPUT_BUTTON_A] = (INPUT_STATE_CHANGED | INPUT_STATE_DOWN);
 			break;
 
 		case VEHICLE_POWERUP_MISSILE:
 		case VEHICLE_POWERUP_MISSILEX2:
 		case VEHICLE_POWERUP_MISSILEX3:
+		case VEHICLE_POWERUP_ROCKETBOOST:
 			if (missiledetection(p, vm) && p->timer_missile == 0)
 			{
 				p->controller.buttons[INPUT_BUTTON_A] = (INPUT_STATE_CHANGED | INPUT_STATE_DOWN);
